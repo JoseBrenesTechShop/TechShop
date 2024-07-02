@@ -72,11 +72,28 @@ Login2 As screen:
         HoverColor: =RGBA(255, 255, 255, 1)
         HoverFill: =RGBA(16, 110, 190, 1)
         OnSelect: |-
-            =Set(
-                VarName,
-                IdTextField.Text
+            =/*Set(VarName, IdTextField.Text);
+            UpdateContext({Valida: LookUp(Empleados, Codigo = IdTextField.Text, Contraseña)});
+            If(
+                Valida = contrasenaTxtfield.Text,
+                Navigate(MenuNew),
+                Notify("El usuario y la contraseña no coinciden, por favor verifique los datos", NotificationType.Error)
+            )*/
+            Set(VarName, IdTextField.Text);
+             
+            Set(EmpleadoValida, LookUp(Empleados, Codigo = IdTextField.Text));
+             
+            If(
+                !IsBlank(EmpleadoValida) && EmpleadoValida.Contraseña = contrasenaTxtfield.Text && EmpleadoValida.Acceso,
+                Navigate(MenuNew),
+                If(
+                    !IsBlank(EmpleadoValida) && EmpleadoValida.Contraseña = contrasenaTxtfield.Text,
+                    Navigate(MenuEmpleado),
+                    Notify("El usuario y la contraseña no coinciden, por favor verifique los datos", NotificationType.Error)
+                )
             );
-            UpdateContext({Valida:LookUp(Users,IdTextField.Text=ID_USERS,Contrasena)});If(Valida = contrasenaTxtfield.Text,Navigate(MenuNew),Notify("El usuario y la contrasena no coinciden, por favor de verificar los datos",NotificationType.Error))
+            Reset(IdTextField);
+            Reset(contrasenaTxtfield)
         PressedBorderColor: =RGBA(0, 69, 120, 1)
         PressedColor: =RGBA(255, 255, 255, 1)
         PressedFill: =RGBA(16, 110, 190, 1)
