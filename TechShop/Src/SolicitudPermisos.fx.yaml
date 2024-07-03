@@ -359,9 +359,10 @@ SolicitudPermisos As screen:
                         Update: =txtOtraInstitucion_1.Value
                         Visible: |-
                             = !(
-                                (dropSolicitud_1.SelectedText.Value = "Permiso" || 
-                                dropSolicitud_1.SelectedText.Value = "Vacaciones" || 
-                                dropSolicitud_1.SelectedText.Value = "Otro")  
+                                (dropSolicitud.SelectedText.Value = "Permiso" || 
+                                dropSolicitud.SelectedText.Value = "Vacaciones" || 
+                                dropSolicitud.SelectedText.Value = "Otro") || 
+                                dropInstitucion_1.SelectedText.Value <> "OTRO"
                             )
                         Width: =1300
                         X: =0
@@ -536,7 +537,7 @@ SolicitudPermisos As screen:
                             Y: =DataCardKey40_3.Y
                             ZIndex: =4
 
-                        dropSolicitud_1 As dropdown:
+                        dropSolicitud As dropdown:
                             BorderColor: =RGBA(245, 245, 245, 1)
                             ChevronBackground: =RGBA(245, 245, 245, 1)
                             ChevronDisabledBackground: =RGBA(242, 242, 241, 0)
@@ -579,7 +580,7 @@ SolicitudPermisos As screen:
                         Fill: =RGBA(174, 208, 221, 1)
                         Height: =92
                         Required: =false
-                        Update: =Value(txtDiasSolicitados_1.Value)
+                        Update: =Value(txtDiasSolicitados.Value)
                         Width: =1300
                         X: =0
                         Y: =4
@@ -598,7 +599,7 @@ SolicitudPermisos As screen:
                             Y: =10
                             ZIndex: =1
 
-                        "txtDiasSolicitados_1 As 'Text input'":
+                        "txtDiasSolicitados As 'Text input'":
                             AccessibleLabel: =If(Parent.Required, Substitute("{0}. Obligatorio.", "{0}", Parent.DisplayName), Parent.DisplayName)
                             Align: ='TextInputCanvas.Align'.Center
                             DisplayMode: =Parent.DisplayMode
@@ -619,7 +620,7 @@ SolicitudPermisos As screen:
                             Width: =Parent.Width - 48
                             Wrap: =true
                             X: =24
-                            Y: =txtDiasSolicitados_1.Y + txtDiasSolicitados_1.Height
+                            Y: =txtDiasSolicitados.Y + txtDiasSolicitados.Height
                             ZIndex: =3
 
                         StarVisible2_1 As Text:
@@ -754,7 +755,7 @@ SolicitudPermisos As screen:
                             FontSize: =20
                             Height: =40
                             ValidationState: =If(IsBlank(Parent.Error), "None", "Error")
-                            Value: =dpFechaInicio_1.SelectedDate + (txtDiasSolicitados_1.Value -1)
+                            Value: =dpFechaInicio_1.SelectedDate + (txtDiasSolicitados.Value -1)
                             Width: =Parent.Width - 48
                             X: =30
                             Y: =52
@@ -840,9 +841,9 @@ SolicitudPermisos As screen:
                         Update: =
                         Visible: |-
                             =!(
-                                (dropSolicitud_1.SelectedText.Value = "Permiso" || 
-                                dropSolicitud_1.SelectedText.Value = "Vacaciones" || 
-                                dropSolicitud_1.SelectedText.Value = "Otro")  
+                                (dropSolicitud.SelectedText.Value = "Permiso" || 
+                                dropSolicitud.SelectedText.Value = "Vacaciones" || 
+                                dropSolicitud.SelectedText.Value = "Otro")  
                             )
                         Width: =1300
                         X: =0
@@ -931,10 +932,10 @@ SolicitudPermisos As screen:
                         Update: =txtNumDocumento_1.Value
                         Visible: |-
                             = !(
-                                (dropSolicitud_1.SelectedText.Value = "Permiso" || 
-                                dropSolicitud_1.SelectedText.Value = "Vacaciones" || 
-                                dropSolicitud_1.SelectedText.Value = "Otro") || 
-                                dropInstitucion_1.SelectedText.Value <> "OTRO"
+                                (dropSolicitud.SelectedText.Value = "Permiso" || 
+                                dropSolicitud.SelectedText.Value = "Vacaciones" || 
+                                dropSolicitud.SelectedText.Value = "Otro") 
+                              
                             )
                         Width: =1300
                         X: =0
@@ -1064,7 +1065,7 @@ SolicitudPermisos As screen:
                             Y: =DataCardKey6_1.Y
                             ZIndex: =5
 
-                        penFirmaSolicitante_1 As inkControl:
+                        pnFirmaSolicitante As inkControl:
                             BorderColor: =RGBA(0, 69, 120, 1)
                             BorderStyle: =BorderStyle.Dashed
                             Color: =RGBA(50, 49, 48, 1)
@@ -1082,19 +1083,18 @@ SolicitudPermisos As screen:
                     Layout: ='ButtonCanvas.Layout'.IconBefore
                     LayoutMinHeight: =32
                     LayoutMinWidth: =96
-                    OnSelect: |-
+                    OnSelect: |
                         =If(
                             IsBlank(txtCodigoEmpleado_1.Value),
                             Notify("El código no puede estar en blanco", NotificationType.Error),
                             If(
-                                IsBlank(dropSolicitud_1.SelectedText.Value),
+                                IsBlank(dropSolicitud.SelectedText.Value),
                                 Notify("Debe seleccionar una solicitud", NotificationType.Error),
                                 If(
-                                    ( dropSolicitud_1.SelectedText.Value = "Incapacidad") &&
-                                    (IsBlank(dropInstitucion_1.SelectedText.Value) || IsBlank(txtNumDocumento_1.Value)),
+                                    dropSolicitud.SelectedText.Value = "Incapacidad" && (IsBlank(dropInstitucion_1.SelectedText.Value) || IsBlank(txtNumDocumento_1.Value)),
                                     Notify("Debe seleccionar una institución y proporcionar un No. de Documento", NotificationType.Error),
                                     If(
-                                        IsBlank(txtDiasSolicitados_1.Value)|| !IsNumeric(txtDiasSolicitados_1.Value) ,
+                                        IsBlank(txtDiasSolicitados.Value) || !IsNumeric(txtDiasSolicitados.Value),
                                         Notify("Debe proporcionar un número válido para días solicitados", NotificationType.Error),
                                         If(
                                             IsBlank(dpFechaInicio_1.SelectedDate) || IsBlank(dpFechaFinalizacion_1.Value),
@@ -1106,29 +1106,28 @@ SolicitudPermisos As screen:
                                                     dropInstitucion_1.SelectedText.Value = "OTRO" && IsBlank(txtOtraInstitucion_1.Value),
                                                     Notify("Debe proporcionar una descripción para 'Otro'", NotificationType.Error),
                                                     If(
-                                                        IsBlank(penFirmaSolicitante_1.Image),
-                                                        Notify("Por favor, escriba su firma antes de continuar"; NotificationType.Error),
+                                                        IsBlank(pnFirmaSolicitante.Image),
+                                                        Notify("Por favor, escriba su firma antes de continuar", NotificationType.Error),
                                                         Patch(
                                                             TramitesSolicitudes,
-                                                            Defaults(TramitesSolicitudes);
+                                                            Defaults(TramitesSolicitudes),
                                                             {
                                                                 Nombre: Left(txtNombre_1.Value, 20),
                                                                 Codigo: Left(txtCodigoEmpleado_1.Value, 20),
-                                                                Solicitud:dropSolicitud_1.Selected.ID,
-                                                                Institucion:dropInstitucion_1.SelectedText.Descripcion,
+                                                                Solicitud: dropSolicitud.SelectedText.Value,
+                                                                Institucion: dropInstitucion_1.SelectedText.Value,
                                                                 NumDocumento: Left(txtNumDocumento_1.Value, 20),
-                                                                DiasSolicitados: Value(txtDiasSolicitados_1.Value),
+                                                                DiasSolicitados: Value(txtDiasSolicitados.Value),
                                                                 FechaInicio: dpFechaInicio_1.SelectedDate,
                                                                 FechaFin: dpFechaFinalizacion_1.Value,
                                                                 Motivo: Left(txtMotivo_1.Value, 100),
                                                                 OtraInstitucion: Left(txtOtraInstitucion_1.Value, 20),
                                                                 FechaTramite: txtFechaTramite_1.Value,
-                                                                'Firma Solicitante ': penFirmaSolicitante_1.Image,
-                                                                EstadoDeProceso:"En proceso"
+                                                                'Firma Solicitante ': pnFirmaSolicitante.Image,
+                                                                EstadoDeProceso: "En proceso"
                                                             }
                                                         );
-                                                        Notify("Datos guardados correctamente"; NotificationType.Success);
-                                                        Back()
+                                                        Notify("Datos guardados correctamente", NotificationType.Success)
                                                     )
                                                 )
                                             )

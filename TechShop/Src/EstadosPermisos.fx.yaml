@@ -22,7 +22,7 @@ EstadosPermisos As screen:
 
         HeaderContainer2 As groupContainer.horizontalAutoLayoutContainer:
             DropShadow: =DropShadow.Light
-            Fill: =RGBA(255, 255, 255, 1)
+            Fill: =RGBA(40, 134, 222, 1)
             FillPortions: =0
             Height: =75
             LayoutMinHeight: =100
@@ -34,27 +34,176 @@ EstadosPermisos As screen:
             RadiusTopRight: =8
             ZIndex: =2
 
-            Icon1_2 As icon.Items:
-                AlignInContainer: =AlignInContainer.Stretch
+            Icon1_10 As icon.Person:
+                AlignInContainer: =AlignInContainer.Center
                 BorderColor: =RGBA(0, 18, 107, 1)
-                Color: =RGBA(215, 223, 240, 1)
+                Color: =RGBA(255, 255, 255, 1)
                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                 DisabledColor: =RGBA(244, 244, 244, 1)
-                Icon: =Icon.ArrowRight
+                DisplayMode: =DisplayMode.View
+                Height: =75
+                Icon: =Icon.Person
+                PaddingBottom: =2
+                PaddingLeft: =5
+                PaddingRight: =2
+                PaddingTop: =2
+                Width: =75
                 ZIndex: =1
 
-            Label2_2 As label:
+            txtEmpleadoHorarioView_5 As text:
                 Align: =Align.Center
-                AlignInContainer: =AlignInContainer.Stretch
-                BorderColor: =RGBA(0, 18, 107, 1)
+                AlignInContainer: =AlignInContainer.Center
+                BorderColor: =RGBA(204, 231, 246, 1)
+                BorderThickness: =20
                 Color: =RGBA(0, 0, 0, 1)
+                Default: =LookUp(Empleados, Codigo = VarName, Nombre)
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
                 DisabledColor: =RGBA(166, 166, 166, 1)
-                FontWeight: =FontWeight.Semibold
-                Height: =69
-                Size: =20
-                Text: ="ESTADOS DE PERMISO"
-                Width: =300
+                DisabledFill: =RGBA(244, 244, 244, 1)
+                DisplayMode: =DisplayMode.View
+                FocusedBorderThickness: =4
+                FontWeight: =FontWeight.Bold
+                Height: =60
+                HoverBorderColor: =RGBA(0, 18, 107, 1)
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =RGBA(186, 202, 226, 1)
+                PaddingLeft: =5
+                RadiusBottomLeft: =20
+                RadiusBottomRight: =20
+                RadiusTopLeft: =20
+                RadiusTopRight: =20
+                Size: =18
+                Width: =400
                 ZIndex: =2
+
+            Icon14_22 As icon.VerticalLine:
+                AlignInContainer: =AlignInContainer.Center
+                BorderColor: =App.Theme.Colors.Darker40
+                Color: =RGBA(255, 255, 255, 1)
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                DisabledColor: =RGBA(244, 244, 244, 1)
+                DisplayMode: =DisplayMode.View
+                Height: =60
+                Icon: =Icon.VerticalLine
+                Width: =30
+                X: =820
+                Y: =22
+                ZIndex: =3
+
+            Label1_8 As label:
+                Align: =Align.Center
+                AlignInContainer: =AlignInContainer.Center
+                BorderColor: =RGBA(0, 18, 107, 1)
+                Color: =RGBA(255, 255, 255, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                DisplayMode: =DisplayMode.View
+                FontWeight: =FontWeight.Bold
+                Height: =60
+                Size: =25
+                Text: ="Estado de permisos"
+                Width: =455
+                ZIndex: =4
+
+            Icon14_24 As icon.VerticalLine:
+                AlignInContainer: =AlignInContainer.Center
+                BorderColor: =App.Theme.Colors.Darker40
+                Color: =RGBA(255, 255, 255, 1)
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                DisabledColor: =RGBA(244, 244, 244, 1)
+                DisplayMode: =DisplayMode.View
+                Height: =60
+                Icon: =Icon.VerticalLine
+                Width: =30
+                X: =820
+                Y: =22
+                ZIndex: =5
+
+            Button2_2 As button:
+                AlignInContainer: =AlignInContainer.Center
+                BorderStyle: =BorderStyle.None
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                DisabledFill: =RGBA(244, 244, 244, 1)
+                Fill: =RGBA(153, 201, 238, 1)
+                FontWeight: =FontWeight.Semibold
+                Height: =60
+                HoverColor: =RGBA(255, 255, 255, 1)
+                HoverFill: =App.Theme.Colors.Darker10
+                OnSelect: |-
+                    =If(
+                        IsBlank(penfirmaJefe.Image),
+                        Notify("La firma del jefe no puede estar vacía", NotificationType.Error),
+                        If(
+                            IsBlank(Dropdown1_1.SelectedText.Value),
+                            Notify("Debe seleccionar una solicitud", NotificationType.Error),
+                            If(
+                                Dropdown1_1.SelectedText.Value = "Aprobado" && !Checkbox1.Value && !Checkbox1_1.Value,
+                                Notify("Debe seleccionar al menos una opción de remuneración", NotificationType.Error),
+                                If(
+                                    Dropdown1_1.SelectedText.Value = "Rechazado" && (Checkbox1.Value || Checkbox1_1.Value),
+                                    Notify("No se deben seleccionar opciones de remuneración para 'Rechazado'", NotificationType.Error),
+                                    Patch(
+                                        TramitesSolicitudes,
+                                        GaleriaEstado.Selected,
+                                        {
+                                            EstadoDeProceso: Dropdown1_1.SelectedText.Value,
+                                            Remunerado: If(Checkbox1.Value, "SI", "NO"),
+                                            JefeDirecto: LookUp(Empleados, Codigo = VarName,Nombre),
+                                            FirmaJefes: penfirmaJefe.Image
+                                        }
+                                    );
+                                    Notify("Datos guardados correctamente", NotificationType.Success)
+                                )
+                            )
+                        )
+                    )
+                Size: =15
+                Text: ="REALIZAR CAMBIOS"
+                Width: =232
+                X: =27
+                Y: =36
+                ZIndex: =6
+
+            Icon14_23 As icon.VerticalLine:
+                AlignInContainer: =AlignInContainer.Center
+                BorderColor: =App.Theme.Colors.Darker40
+                Color: =RGBA(255, 255, 255, 1)
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                DisabledColor: =RGBA(244, 244, 244, 1)
+                DisplayMode: =DisplayMode.View
+                Height: =60
+                Icon: =Icon.VerticalLine
+                Width: =30
+                X: =820
+                Y: =22
+                ZIndex: =7
+
+            Icon3_9 As icon.Erase:
+                AlignInContainer: =AlignInContainer.Center
+                BorderColor: =App.Theme.Colors.Primary
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =2
+                Color: =RGBA(255, 255, 255, 1)
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                DisabledColor: =RGBA(244, 244, 244, 1)
+                Fill: =RGBA(153, 201, 238, 1)
+                FocusedBorderThickness: =20
+                Height: =60
+                HoverBorderColor: =App.Theme.Colors.Darker10
+                HoverColor: =RGBA(255, 255, 255, 1)
+                HoverFill: =App.Theme.Colors.Darker10
+                Icon: =Icon.Home
+                OnSelect: |-
+                    =If(LookUp(Empleados, VarName = Codigo, Acceso),
+                        Navigate(MenuNew, ScreenTransition.Cover),
+                        Navigate(MenuEmpleado, ScreenTransition.Cover)   
+                    )
+                PaddingBottom: =5
+                PaddingLeft: =5
+                PaddingRight: =5
+                PaddingTop: =5
+                Width: =65
+                ZIndex: =8
 
         BottomContainer1 As groupContainer.horizontalAutoLayoutContainer:
             Fill: =RGBA(245, 245, 245, 1)
@@ -209,91 +358,12 @@ EstadosPermisos As screen:
                     RadiusTopRight: =4
                     ZIndex: =1
 
-                    Button2 As button:
-                        DisabledBorderColor: =RGBA(166, 166, 166, 1)
-                        DisabledColor: =RGBA(166, 166, 166, 1)
-                        DisabledFill: =RGBA(244, 244, 244, 1)
-                        Fill: =RGBA(56, 96, 178, 1)
-                        FontWeight: =FontWeight.Semibold
-                        Height: =54
-                        HoverColor: =RGBA(255, 255, 255, 1)
-                        HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
-                        OnSelect: |-
-                            =If(
-                                IsBlank(penfirmaJefe.Image),
-                                Notify("La firma del jefe no puede estar vacía", NotificationType.Error),
-                                If(
-                                    IsBlank(Dropdown1_1.SelectedText.Value),
-                                    Notify("Debe seleccionar una solicitud", NotificationType.Error),
-                                    If(
-                                        Dropdown1_1.SelectedText.Value = "Aprobado" && !Checkbox1.Value && !Checkbox1_1.Value,
-                                        Notify("Debe seleccionar al menos una opción de remuneración", NotificationType.Error),
-                                        If(
-                                            Dropdown1_1.SelectedText.Value = "Rechazado" && (Checkbox1.Value || Checkbox1_1.Value),
-                                            Notify("No se deben seleccionar opciones de remuneración para 'Rechazado'", NotificationType.Error),
-                                            Patch(
-                                                TramitesSolicitudes,
-                                                GaleriaEstado.Selected,
-                                                {
-                                                    EstadoDeProceso: Dropdown1_1.SelectedText.Value,
-                                                    Remunerado: If(Checkbox1.Value, "SI", "NO"),
-                                                    // JefeDirecto: LookUp(Empleados; Codigo = VarName; Nombre);
-                                                    FirmaJefes: penfirmaJefe.Image
-                                                }
-                                            );
-                                            Notify("Datos guardados correctamente", NotificationType.Success)
-                                        )
-                                    )
-                                )
-                            )
-                        Size: =15
-                        Text: ="REALIZAR CAMBIOS"
-                        Width: =232
-                        X: =27
-                        Y: =36
-                        ZIndex: =1
-
-                    Icon2_3 As icon.Leave:
-                        BorderColor: =RGBA(0, 18, 107, 1)
-                        Color: =RGBA(204, 208, 225, 1)
-                        DisabledBorderColor: =RGBA(166, 166, 166, 1)
-                        DisabledColor: =RGBA(244, 244, 244, 1)
-                        Icon: =Icon.Leave
-                        OnSelect: =Back()
-                        X: =824
-                        Y: =36
-                        ZIndex: =2
-
-                    Label4 As label:
-                        BorderColor: =RGBA(0, 18, 107, 1)
-                        Color: =RGBA(0, 0, 0, 1)
-                        DisabledColor: =RGBA(166, 166, 166, 1)
-                        Height: =42
-                        Size: =20
-                        Text: ="Salir"
-                        Width: =78
-                        X: =746
-                        Y: =48
-                        ZIndex: =3
-
-                    Icon2_2 As icon.Leave:
-                        BorderColor: =RGBA(0, 18, 107, 1)
-                        Color: =RGBA(50, 86, 160, 1)
-                        DisabledBorderColor: =RGBA(166, 166, 166, 1)
-                        DisabledColor: =RGBA(244, 244, 244, 1)
-                        Height: =54
-                        Icon: =Icon.Check
-                        Width: =52
-                        X: =272
-                        Y: =36
-                        ZIndex: =4
-
                     "GaleriaEstado As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
                         BorderColor: =RGBA(215, 223, 240, 1)
                         BorderThickness: =2
                         DelayItemLoading: =true
                         Fill: =RGBA(204, 231, 246, 1)
-                        Height: =517
+                        Height: =640
                         Items: |-
                             =Sort(
                                 Filter(
@@ -309,7 +379,6 @@ EstadosPermisos As screen:
                         TemplateSize: =111
                         Transition: =Transition.Pop
                         Width: =920
-                        Y: =123
                         ZIndex: =5
 
                         Image1_3 As image:
@@ -633,10 +702,10 @@ EstadosPermisos As screen:
                             BorderColor: =RGBA(0, 18, 107, 1)
                             Color: =RGBA(0, 0, 0, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
-                            Height: =39
+                            Height: =44
                             Size: =15
                             Text: =GaleriaEstado.Selected.OtraInstitucion
-                            Width: =153
+                            Width: =220
                             X: =190
                             Y: =389
                             ZIndex: =15
@@ -645,10 +714,10 @@ EstadosPermisos As screen:
                             BorderColor: =RGBA(0, 18, 107, 1)
                             Color: =RGBA(0, 0, 0, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
-                            Height: =39
+                            Height: =42
                             Size: =15
                             Text: =GaleriaEstado.Selected.NumDocumento
-                            Width: =153
+                            Width: =309
                             X: =178
                             Y: =346
                             ZIndex: =16
