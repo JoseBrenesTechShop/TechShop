@@ -197,6 +197,7 @@ SolicitudPermisos As screen:
                     Text: ="Formulario"
                     Weight: ='TextCanvas.Weight'.Semibold
                     Width: =300
+                    Wrap: =false
                     X: =0
                     Y: =0
                     ZIndex: =6
@@ -1078,14 +1079,15 @@ SolicitudPermisos As screen:
                 SubmitButton1_2 As Button:
                     AccessibleLabel: ="Botón Enviar solicitud de aprobación"
                     AlignInContainer: =AlignInContainer.Stretch
-                    DisplayMode: =DisplayMode.Edit
+                    DisplayMode: =If(!ModeBoton, DisplayMode.Edit, DisplayMode.View)
                     Height: =70
                     Icon: ="ArrowDownload"
                     Layout: ='ButtonCanvas.Layout'.IconBefore
                     LayoutMinHeight: =32
                     LayoutMinWidth: =96
-                    OnSelect: |
-                        =If(
+                    OnSelect: |-
+                        =
+                        If(
                             IsBlank(txtCodigoEmpleado_1.Value),
                             Notify("El código no puede estar en blanco", NotificationType.Error),
                             If(
@@ -1102,34 +1104,39 @@ SolicitudPermisos As screen:
                                             Notify("Debe seleccionar las fechas de inicio y fin", NotificationType.Error),
                                             If(
                                                 IsBlank(txtMotivo_1.Value),
-                                                Notify("El motivo no puede estar en blanco", NotificationType.Error),
+                                               Notify("El motivo no puede estar en blanco", NotificationType.Error),
                                                 If(
                                                     dropInstitucion_1.SelectedText.Value = "OTRO" && IsBlank(txtOtraInstitucion_1.Value),
                                                     Notify("Debe proporcionar una descripción para 'Otro'", NotificationType.Error),
                                                     If(
-                                                        IsBlank(pnFirmaSolicitante.Image),
+                                                        IsBlank(pnFirmaSolicitante.Image) || pnFirmaSolicitante.Image = Blank() || pnFirmaSolicitante.Image = "",
                                                         Notify("Por favor, escriba su firma antes de continuar", NotificationType.Error),
-                                                        Patch(
-                                                            TramitesSolicitudes,
-                                                            Defaults(TramitesSolicitudes),
-                                                            {
-                                                                Nombre: Left(txtNombre_1.Value, 20),
-                                                                Codigo: Left(txtCodigoEmpleado_1.Value, 20),
-                                                                Solicitud: dropSolicitud.SelectedText.Value,
-                                                                Institucion: dropInstitucion_1.SelectedText.Value,
-                                                                NumDocumento: Left(txtNumDocumento_1.Value, 20),
-                                                                DiasSolicitados: Value(txtDiasSolicitados.Value),
-                                                                FechaInicio: dpFechaInicio_1.SelectedDate,
-                                                                FechaFin: dpFechaFinalizacion_1.Value,
-                                                                Motivo: Left(txtMotivo_1.Value, 100),
-                                                                OtraInstitucion: Left(txtOtraInstitucion_1.Value, 20),
-                                                                FechaTramite: txtFechaTramite_1.Value,
-                                                                'Firma Solicitante ': pnFirmaSolicitante.Image,
-                                                                EstadoDeProceso: "En proceso"
-                                                            }
-                                                        );
-                                                        Notify("Datos guardados correctamente", NotificationType.Success);
-                                                        ResetForm(ApprovalForm1_1);
+                                                        UpdateContext({ModeBoton: true});
+                                                        UpdateContext({ConVisible: true});
+                                                        If(Continuar,
+                                                            Patch(
+                                                                TramitesSolicitudes,
+                                                                Defaults(TramitesSolicitudes),
+                                                                {
+                                                                    Nombre: Left(txtNombre_1.Value, 20),
+                                                                    Codigo: Left(txtCodigoEmpleado_1.Value, 20),
+                                                                    Solicitud: dropSolicitud.SelectedText.Value,
+                                                                    Institucion: dropInstitucion_1.SelectedText.Value,
+                                                                    NumDocumento: Left(txtNumDocumento_1.Value, 20),
+                                                                    DiasSolicitados: Value(txtDiasSolicitados.Value),
+                                                                    FechaInicio: dpFechaInicio_1.SelectedDate,
+                                                                    FechaFin: dpFechaFinalizacion_1.Value,
+                                                                    Motivo: Left(txtMotivo_1.Value, 100),
+                                                                    OtraInstitucion: Left(txtOtraInstitucion_1.Value, 20),
+                                                                    FechaTramite: txtFechaTramite_1.Value,
+                                                                    'Firma Solicitante ': pnFirmaSolicitante.Image,
+                                                                    EstadoDeProceso: "En proceso"
+                                                                }
+                                                            );
+                                                            Notify("Datos guardados correctamente", NotificationType.Success);
+                                                            ResetForm(ApprovalForm1_1);
+                                                            UpdateContext({Continuar: false})
+                                                        )
                                                     )
                                                 )
                                             )
@@ -1152,4 +1159,101 @@ SolicitudPermisos As screen:
             Text: ="En proceso"
             Visible: =false
             ZIndex: =5
+
+    Container3 As groupContainer.manualLayoutContainer:
+        DropShadow: =DropShadow.Light
+        Fill: =RGBA(255, 255, 255, 1)
+        RadiusBottomLeft: =4
+        RadiusBottomRight: =4
+        RadiusTopLeft: =4
+        RadiusTopRight: =4
+        Visible: =ConVisible
+        X: =433
+        Y: =284
+        ZIndex: =2
+
+        Label4 As label:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =2
+            Color: =RGBA(255, 191, 0, 1)
+            DisabledBorderColor: =RGBA(0, 0, 0, 0)
+            DisabledColor: =RGBA(161, 159, 157, 1)
+            DisplayMode: =DisplayMode.View
+            FocusedBorderThickness: =4
+            Font: =Font.'Segoe UI'
+            Height: =130
+            Size: =15
+            Text: |-
+                ="      ADVERTENCIA 
+                La solicitud debe ir firmada. En caso de que no lo esté, se rechazará la solicitud.
+                ¿Desea continuar?"
+            Width: =500
+            ZIndex: =1
+
+        Icon6 As icon.Warning:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            Color: =RGBA(255, 191, 0, 1)
+            DisabledBorderColor: =RGBA(245, 245, 245, 1)
+            DisabledColor: =RGBA(225, 223, 221, 1)
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            DisplayMode: =DisplayMode.View
+            FocusedBorderThickness: =4
+            Height: =32
+            HoverBorderColor: =RGBA(0, 0, 0, 0)
+            HoverColor: =RGBA(16, 110, 190, 1)
+            HoverFill: =RGBA(0, 0, 0, 0)
+            Icon: =Icon.Warning
+            PressedBorderColor: =RGBA(0, 0, 0, 0)
+            PressedColor: =RGBA(16, 110, 190, 1)
+            PressedFill: =RGBA(0, 0, 0, 0)
+            Width: =54
+            X: =155
+            Y: =12
+            ZIndex: =2
+
+        Icon8 As icon.CheckBadge:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            Color: =RGBA(0, 120, 212, 1)
+            DisabledBorderColor: =RGBA(245, 245, 245, 1)
+            DisabledColor: =RGBA(225, 223, 221, 1)
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            FocusedBorderThickness: =4
+            HoverBorderColor: =RGBA(0, 0, 0, 0)
+            HoverColor: =RGBA(16, 110, 190, 1)
+            HoverFill: =RGBA(180, 214, 250, 1)
+            Icon: =Icon.CheckBadge
+            OnSelect: |-
+                =UpdateContext({Continuar: true});
+                UpdateContext({ConVisible: false});
+                UpdateContext({ModeBoton: false})
+            PressedBorderColor: =RGBA(0, 0, 0, 0)
+            PressedColor: =RGBA(16, 110, 190, 1)
+            PressedFill: =RGBA(0, 0, 0, 0)
+            X: =155
+            Y: =130
+            ZIndex: =3
+
+        Icon15 As icon.CancelBadge:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            Color: =RGBA(0, 120, 212, 1)
+            DisabledBorderColor: =RGBA(245, 245, 245, 1)
+            DisabledColor: =RGBA(225, 223, 221, 1)
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            FocusedBorderThickness: =4
+            HoverBorderColor: =RGBA(0, 0, 0, 0)
+            HoverColor: =RGBA(16, 110, 190, 1)
+            HoverFill: =RGBA(180, 214, 250, 1)
+            Icon: =Icon.CancelBadge
+            OnSelect: |-
+                =UpdateContext({Continuar: false});
+                UpdateContext({ConVisible: false});
+                UpdateContext({ModeBoton: false})
+            PressedBorderColor: =RGBA(0, 0, 0, 0)
+            PressedColor: =RGBA(16, 110, 190, 1)
+            PressedFill: =RGBA(0, 0, 0, 0)
+            X: =275
+            Y: =130
+            ZIndex: =4
 

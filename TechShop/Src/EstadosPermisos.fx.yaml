@@ -131,29 +131,33 @@ EstadosPermisos As screen:
                 HoverColor: =RGBA(255, 255, 255, 1)
                 HoverFill: =App.Theme.Colors.Darker10
                 OnSelect: |-
-                    =If(
+                    =
+                    If(
                         IsBlank(penfirmaJefe.Image),
                         Notify("La firma del jefe no puede estar vacía", NotificationType.Error),
                         If(
                             IsBlank(Dropdown1_1.SelectedText.Value),
-                            Notify("Debe seleccionar una solicitud", NotificationType.Error),
+                            Notify("Debe seleccionar una solicitud", NotificationType.Error),            
                             If(
                                 Dropdown1_1.SelectedText.Value = "Aprobado" && !Checkbox1.Value && !Checkbox1_1.Value,
                                 Notify("Debe seleccionar al menos una opción de remuneración", NotificationType.Error),
                                 If(
                                     Dropdown1_1.SelectedText.Value = "Rechazado" && (Checkbox1.Value || Checkbox1_1.Value),
-                                    Notify("No se deben seleccionar opciones de remuneración para 'Rechazado'", NotificationType.Error),
-                                    Patch(
-                                        TramitesSolicitudes,
-                                        GaleriaEstado.Selected,
-                                        {
-                                            EstadoDeProceso: Dropdown1_1.SelectedText.Value,
-                                            Remunerado: If(Checkbox1.Value, "SI", "NO"),
-                                            JefeDirecto: LookUp(Empleados, Codigo = VarName,Nombre),
-                                            FirmaJefes: penfirmaJefe.Image
-                                        }
-                                    );
-                                    Notify("Datos guardados correctamente", NotificationType.Success)
+                                    Notify("No se deben seleccionar opciones de remuneración para 'Rechazado'", NotificationType.Error),UpdateContext({ConVisible: true});
+                                    If(Continuar,
+                                        Patch(
+                                            TramitesSolicitudes,
+                                            GaleriaEstado.Selected,
+                                            {
+                                                EstadoDeProceso: Dropdown1_1.SelectedText.Value,
+                                                Remunerado: If(Checkbox1.Value, "SI", "NO"),
+                                                JefeDirecto: LookUp(Empleados, Codigo = VarName,Nombre),
+                                                FirmaJefes: penfirmaJefe.Image
+                                            }
+                                        );
+                                        Notify("Datos guardados correctamente", NotificationType.Success);
+                                        UpdateContext({Continuar: false})
+                                    )
                                 )
                             )
                         )
@@ -777,4 +781,101 @@ EstadosPermisos As screen:
                             X: =112
                             Y: =57
                             ZIndex: =20
+
+    Container3_1 As groupContainer.manualLayoutContainer:
+        DropShadow: =DropShadow.Light
+        Fill: =RGBA(255, 255, 255, 1)
+        RadiusBottomLeft: =4
+        RadiusBottomRight: =4
+        RadiusTopLeft: =4
+        RadiusTopRight: =4
+        Visible: =ConVisible
+        X: =433
+        Y: =284
+        ZIndex: =2
+
+        Label4_1 As label:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =2
+            Color: =RGBA(255, 191, 0, 1)
+            DisabledBorderColor: =RGBA(0, 0, 0, 0)
+            DisabledColor: =RGBA(161, 159, 157, 1)
+            DisplayMode: =DisplayMode.View
+            FocusedBorderThickness: =4
+            Font: =Font.'Segoe UI'
+            Height: =130
+            Size: =15
+            Text: |-
+                ="      ADVERTENCIA 
+                La solicitud debe ir firmada. En caso de que no lo esté, se rechazará la solicitud.
+                ¿Desea continuar?"
+            Width: =500
+            ZIndex: =1
+
+        Icon6_1 As icon.Warning:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            Color: =RGBA(255, 191, 0, 1)
+            DisabledBorderColor: =RGBA(245, 245, 245, 1)
+            DisabledColor: =RGBA(225, 223, 221, 1)
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            DisplayMode: =DisplayMode.View
+            FocusedBorderThickness: =4
+            Height: =32
+            HoverBorderColor: =RGBA(0, 0, 0, 0)
+            HoverColor: =RGBA(16, 110, 190, 1)
+            HoverFill: =RGBA(0, 0, 0, 0)
+            Icon: =Icon.Warning
+            PressedBorderColor: =RGBA(0, 0, 0, 0)
+            PressedColor: =RGBA(16, 110, 190, 1)
+            PressedFill: =RGBA(0, 0, 0, 0)
+            Width: =54
+            X: =155
+            Y: =12
+            ZIndex: =2
+
+        Icon8_1 As icon.CheckBadge:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            Color: =RGBA(0, 120, 212, 1)
+            DisabledBorderColor: =RGBA(245, 245, 245, 1)
+            DisabledColor: =RGBA(225, 223, 221, 1)
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            FocusedBorderThickness: =4
+            HoverBorderColor: =RGBA(0, 0, 0, 0)
+            HoverColor: =RGBA(16, 110, 190, 1)
+            HoverFill: =RGBA(180, 214, 250, 1)
+            Icon: =Icon.CheckBadge
+            OnSelect: |-
+                =UpdateContext({Continuar: true});
+                UpdateContext({ConVisible: false});
+                UpdateContext({ModeBoton: false})
+            PressedBorderColor: =RGBA(0, 0, 0, 0)
+            PressedColor: =RGBA(16, 110, 190, 1)
+            PressedFill: =RGBA(0, 0, 0, 0)
+            X: =155
+            Y: =130
+            ZIndex: =3
+
+        Icon15_2 As icon.CancelBadge:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            Color: =RGBA(0, 120, 212, 1)
+            DisabledBorderColor: =RGBA(245, 245, 245, 1)
+            DisabledColor: =RGBA(225, 223, 221, 1)
+            DisabledFill: =RGBA(0, 0, 0, 0)
+            FocusedBorderThickness: =4
+            HoverBorderColor: =RGBA(0, 0, 0, 0)
+            HoverColor: =RGBA(16, 110, 190, 1)
+            HoverFill: =RGBA(180, 214, 250, 1)
+            Icon: =Icon.CancelBadge
+            OnSelect: |-
+                =UpdateContext({Continuar: false});
+                UpdateContext({ConVisible: false});
+                UpdateContext({ModeBoton: false})
+            PressedBorderColor: =RGBA(0, 0, 0, 0)
+            PressedColor: =RGBA(16, 110, 190, 1)
+            PressedFill: =RGBA(0, 0, 0, 0)
+            X: =275
+            Y: =130
+            ZIndex: =4
 
