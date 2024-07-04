@@ -26,7 +26,6 @@ SolicitudPermisos As screen:
             Fill: =RGBA(15, 108, 189, 1)
             FillPortions: =0
             Height: =75
-            LayoutJustifyContent: =LayoutJustifyContent.End
             LayoutMinHeight: =100
             LayoutMinWidth: =250
             LayoutMode: =LayoutMode.Auto
@@ -107,7 +106,7 @@ SolicitudPermisos As screen:
                 Width: =720
                 ZIndex: =4
 
-            Icon14_21 As icon.VerticalLine:
+            Icon14_27 As icon.VerticalLine:
                 AlignInContainer: =AlignInContainer.Center
                 BorderColor: =App.Theme.Colors.Darker40
                 Color: =RGBA(255, 255, 255, 1)
@@ -119,7 +118,7 @@ SolicitudPermisos As screen:
                 Width: =30
                 X: =820
                 Y: =22
-                ZIndex: =5
+                ZIndex: =8
 
             Icon3_8 As icon.Erase:
                 AlignInContainer: =AlignInContainer.Center
@@ -140,13 +139,14 @@ SolicitudPermisos As screen:
                     =If(LookUp(Empleados, VarName = Codigo, Acceso),
                         Navigate(MenuNew, ScreenTransition.Cover),
                         Navigate(MenuEmpleado, ScreenTransition.Cover)   
-                    )
+                    );
+                    ResetForm(ApprovalForm1_1)
                 PaddingBottom: =5
                 PaddingLeft: =5
                 PaddingRight: =5
                 PaddingTop: =5
                 Width: =65
-                ZIndex: =6
+                ZIndex: =9
 
         MainContainer1_1 As groupContainer.horizontalAutoLayoutContainer:
             Fill: =RGBA(245, 245, 245, 1)
@@ -190,7 +190,7 @@ SolicitudPermisos As screen:
                     AlignInContainer: =AlignInContainer.Stretch
                     DisplayMode: =DisplayMode.Edit
                     FontColor: =RGBA(255, 255, 255, 1)
-                    Height: =32
+                    Height: =40
                     LayoutMinHeight: =32
                     LayoutMinWidth: =96
                     Size: =25
@@ -855,7 +855,7 @@ SolicitudPermisos As screen:
                         DataCardKey8_1 As Text:
                             Align: ='TextCanvas.Align'.Center
                             DisplayMode: =DisplayMode.Edit
-                            Height: =22
+                            Height: =30
                             Size: =20
                             Text: ="INSTITUCIÓN"
                             Weight: ='TextCanvas.Weight'.Semibold
@@ -947,7 +947,7 @@ SolicitudPermisos As screen:
                         DataCardKey12_1 As Text:
                             Align: ='TextCanvas.Align'.Center
                             DisplayMode: =DisplayMode.Edit
-                            Height: =22
+                            Height: =30
                             Size: =20
                             Text: ="NUMERO DE DOCUMENTO"
                             Weight: ='TextCanvas.Weight'.Semibold
@@ -1097,7 +1097,7 @@ SolicitudPermisos As screen:
                                     dropSolicitud.SelectedText.Value = "Incapacidad" && (IsBlank(dropInstitucion_1.SelectedText.Value) || IsBlank(txtNumDocumento_1.Value)),
                                     Notify("Debe seleccionar una institución y proporcionar un No. de Documento", NotificationType.Error),
                                     If(
-                                        IsBlank(txtDiasSolicitados.Value) || !IsNumeric(txtDiasSolicitados.Value),
+                                        IsBlank(txtDiasSolicitados.Value) || !IsNumeric(txtDiasSolicitados.Value) || "." in txtDiasSolicitados.Value || "," in txtDiasSolicitados.Value,
                                         Notify("Debe proporcionar un número válido para días solicitados", NotificationType.Error),
                                         If(
                                             IsBlank(dpFechaInicio_1.SelectedDate) || IsBlank(dpFechaFinalizacion_1.Value),
@@ -1113,30 +1113,6 @@ SolicitudPermisos As screen:
                                                         Notify("Por favor, escriba su firma antes de continuar", NotificationType.Error),
                                                         UpdateContext({ModeBoton: true});
                                                         UpdateContext({ConVisible: true});
-                                                        If(Continuar,
-                                                            Patch(
-                                                                TramitesSolicitudes,
-                                                                Defaults(TramitesSolicitudes),
-                                                                {
-                                                                    Nombre: Left(txtNombre_1.Value, 20),
-                                                                    Codigo: Left(txtCodigoEmpleado_1.Value, 20),
-                                                                    Solicitud: dropSolicitud.SelectedText.Value,
-                                                                    Institucion: dropInstitucion_1.SelectedText.Value,
-                                                                    NumDocumento: Left(txtNumDocumento_1.Value, 20),
-                                                                    DiasSolicitados: Value(txtDiasSolicitados.Value),
-                                                                    FechaInicio: dpFechaInicio_1.SelectedDate,
-                                                                    FechaFin: dpFechaFinalizacion_1.Value,
-                                                                    Motivo: Left(txtMotivo_1.Value, 100),
-                                                                    OtraInstitucion: Left(txtOtraInstitucion_1.Value, 20),
-                                                                    FechaTramite: txtFechaTramite_1.Value,
-                                                                    'Firma Solicitante ': pnFirmaSolicitante.Image,
-                                                                    EstadoDeProceso: "En proceso"
-                                                                }
-                                                            );
-                                                            Notify("Datos guardados correctamente", NotificationType.Success);
-                                                            ResetForm(ApprovalForm1_1);
-                                                            UpdateContext({Continuar: false})
-                                                        )
                                                     )
                                                 )
                                             )
@@ -1225,9 +1201,30 @@ SolicitudPermisos As screen:
             HoverFill: =RGBA(180, 214, 250, 1)
             Icon: =Icon.CheckBadge
             OnSelect: |-
-                =UpdateContext({Continuar: true});
-                UpdateContext({ConVisible: false});
-                UpdateContext({ModeBoton: false})
+                =UpdateContext({ConVisible: false});
+                UpdateContext({ModeBoton: false});
+                Patch(
+                    TramitesSolicitudes,
+                    Defaults(TramitesSolicitudes),
+                    {
+                        Nombre: Left(txtNombre_1.Value, 20),
+                        Codigo: Left(txtCodigoEmpleado_1.Value, 20),
+                        Solicitud: dropSolicitud.SelectedText.Value,
+                        Institucion: dropInstitucion_1.SelectedText.Value,
+                        NumDocumento: Left(txtNumDocumento_1.Value, 20),
+                        DiasSolicitados: Value(txtDiasSolicitados.Value),
+                        FechaInicio: dpFechaInicio_1.SelectedDate,
+                        FechaFin: dpFechaFinalizacion_1.Value,
+                        Motivo: Left(txtMotivo_1.Value, 100),
+                        OtraInstitucion: Left(txtOtraInstitucion_1.Value, 20),
+                        FechaTramite: txtFechaTramite_1.Value,
+                        'Firma Solicitante ': pnFirmaSolicitante.Image,
+                        EstadoDeProceso: "En proceso"
+                    }
+                );
+                Notify("Datos guardados correctamente", NotificationType.Success);
+                ResetForm(ApprovalForm1_1);
+                UpdateContext({Continuar: false})
             PressedBorderColor: =RGBA(0, 0, 0, 0)
             PressedColor: =RGBA(16, 110, 190, 1)
             PressedFill: =RGBA(0, 0, 0, 0)
@@ -1247,8 +1244,7 @@ SolicitudPermisos As screen:
             HoverFill: =RGBA(180, 214, 250, 1)
             Icon: =Icon.CancelBadge
             OnSelect: |-
-                =UpdateContext({Continuar: false});
-                UpdateContext({ConVisible: false});
+                =UpdateContext({ConVisible: false});
                 UpdateContext({ModeBoton: false})
             PressedBorderColor: =RGBA(0, 0, 0, 0)
             PressedColor: =RGBA(16, 110, 190, 1)
