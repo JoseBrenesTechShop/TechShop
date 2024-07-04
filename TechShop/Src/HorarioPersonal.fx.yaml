@@ -68,7 +68,9 @@ HorarioPersonal As screen:
                 HoverFill: =RGBA(204, 228, 246, 1)
                 Items: |-
                     =//Empleados
-                    If(IsBlank(txtIDEmpleadoHorario.Text), Empleados, Filter(Empleados, Codigo = txtIDEmpleadoHorario.Text))
+                    If(IsBlank(txtIDEmpleadoHorario.Text),
+                    Sort(Empleados, Codigo, SortOrder.Ascending), 
+                    Filter(Empleados, Codigo = txtIDEmpleadoHorario.Text))
                 PressedColor: =RGBA(255, 255, 255, 1)
                 PressedFill: =App.Theme.Colors.Darker30
                 SelectionFill: =App.Theme.Colors.Primary
@@ -159,32 +161,37 @@ HorarioPersonal As screen:
                 HoverColor: =RGBA(255, 255, 255, 1)
                 HoverFill: =App.Theme.Colors.Darker10
                 OnSelect: |-
-                    =If(
-                        IsBlank(dpFechaInicio.SelectedDate), Notify("Debe indicar la Fecha de Inicio", NotificationType.Error),
+                    =If(drpEmpleadoHorario.Selected.Contraseña = "0",
+                        Notify("Debe seleccionar a un Empleado", NotificationType.Error),
                         If(
-                            Weekday(dpFechaInicio.SelectedDate) <> 2, Notify("La Fecha Inicio debe ser un Lunes",NotificationType.Error),
+                            IsBlank(dpFechaInicio.SelectedDate), Notify("Debe indicar la Fecha de Inicio", NotificationType.Error),
                             If(
-                                Weekday(dpFechaFin.SelectedDate) <> 1, Notify("La Fecha Fin debe ser un Domingo",NotificationType.Error),
+                                Weekday(dpFechaInicio.SelectedDate) <> 2, Notify("La Fecha Inicio debe ser un Lunes",NotificationType.Error),
                                 If(
-                                    IsBlank(dpFechaFin.SelectedDate), Notify("Debe indicar la Fecha de Fin", NotificationType.Error),
+                                    dpFechaInicio.SelectedDate > Today()+7 , Notify("No se permite asignar un horaro tan a futuro como ese, maximo el de la proxima semana",NotificationType.Error),
                                     If(
-                                        dpFechaInicio.SelectedDate+6 <> dpFechaFin.SelectedDate, Notify("Fechas Ingresadas invalidas, de be ser una semana completa(Lunes a Domingo)",NotificationType.Error),
-                                        If(Value(txtHorasTrabajadas.Text) < 48, Notify("Debe de cumplir con minimo 48 horas trabajadas",NotificationType.Error),
-                                            If(!Mostrar, SubmitForm(Form18_3); Notify("Se Guardo Correctamente",NotificationType.Success); ResetForm(Form18_3),
-                                                Patch(HorarioSemanals, InfoHorarios.Selected, {
-                                                    Lunes: drpTurno_L.Selected.Turno_Op & " - " & lblHorario_L.Text,
-                                                    Martes: drpTurno_K.Selected.Turno_Op & " - " & lblHorario_K.Text,
-                                                    Miercoles: drpTurno__M.Selected.Turno_Op & " - " & lblHorario_M.Text,
-                                                    Jueves: drpTurno_J.Selected.Turno_Op & " - " & lblHorario_J.Text,
-                                                    Viernes: drpTurno_V.Selected.Turno_Op & " - " & lblHorario_V.Text,
-                                                    Sabado: drpTurno_S.Selected.Turno_Op & " - " & lblHorario_S.Text,
-                                                    Domingo: drpTurno_D.Selected.Turno_Op & " - " & lblHorario_D.Text,
-                                                    Total_Horas: txtHorasTrabajadas.Text,
-                                                    Total_Horas_Pagadas: txtHorasPagadas.Text,
-                                                    Fecha_Inicio: Date(Year(dpFechaInicio.SelectedDate), Month(dpFechaInicio.SelectedDate), Day(dpFechaInicio.SelectedDate)),
-                                                    Fecha_Fin: Date(Year(dpFechaFin.SelectedDate), Month(dpFechaFin.SelectedDate), Day(dpFechaFin.SelectedDate))
-                                                    }
-                                                ); Notify("Se Edito Correctamente",NotificationType.Success); UpdateContext({Mostrar: false}); ResetForm(Form18_3)
+                                        !IsBlank(LookUp(Filter(HorarioSemanals, Empleado = drpEmpleadoHorario.Selected.Nombre), Fecha_Inicio = dpFechaInicio.SelectedDate)) &&
+                                        !(InfoHorarios.Selected.Fecha_Inicio = dpFechaInicio.SelectedDate && Mostrar), Notify("Ya exite un Horario para esa fecha", NotificationType.Error),
+                                        If(
+                                            dpFechaInicio.SelectedDate+6 <> dpFechaFin.SelectedDate, Notify("Fechas Ingresadas invalidas, de be ser una semana completa(Lunes a Domingo)",NotificationType.Error),
+                                            If(Value(txtHorasTrabajadas.Text) < 48, Notify("Debe de cumplir con minimo 48 horas trabajadas",NotificationType.Error),
+                                                If(!Mostrar, 
+                                                    SubmitForm(Form18_3); Notify("Se Guardo Correctamente",NotificationType.Success); ResetForm(Form18_3),
+                                                    Patch(HorarioSemanals, InfoHorarios.Selected, {
+                                                        Lunes: drpTurno_L.Selected.Turno_Op & " - " & lblHorario_L.Text,
+                                                        Martes: drpTurno_K.Selected.Turno_Op & " - " & lblHorario_K.Text,
+                                                        Miercoles: drpTurno__M.Selected.Turno_Op & " - " & lblHorario_M.Text,
+                                                        Jueves: drpTurno_J.Selected.Turno_Op & " - " & lblHorario_J.Text,
+                                                        Viernes: drpTurno_V.Selected.Turno_Op & " - " & lblHorario_V.Text,
+                                                        Sabado: drpTurno_S.Selected.Turno_Op & " - " & lblHorario_S.Text,
+                                                        Domingo: drpTurno_D.Selected.Turno_Op & " - " & lblHorario_D.Text,
+                                                        Total_Horas: txtHorasTrabajadas.Text,
+                                                        Total_Horas_Pagadas: txtHorasPagadas.Text,
+                                                        Fecha_Inicio: Date(Year(dpFechaInicio.SelectedDate), Month(dpFechaInicio.SelectedDate), Day(dpFechaInicio.SelectedDate)),
+                                                        Fecha_Fin: Date(Year(dpFechaFin.SelectedDate), Month(dpFechaFin.SelectedDate), Day(dpFechaFin.SelectedDate))
+                                                        }
+                                                    ); Notify("Se Edito Correctamente",NotificationType.Success); UpdateContext({Mostrar: false}); ResetForm(Form18_3)
+                                                )
                                             )
                                         )
                                     )
@@ -229,8 +236,7 @@ HorarioPersonal As screen:
                 Icon: =Icon.Erase
                 OnSelect: |-
                     =UpdateContext({Mostrar: false});
-                    ResetForm(Form18_3);
-                    Reset(txtIDEmpleadoHorario)
+                    ResetForm(Form18_3)
                 PaddingBottom: =5
                 PaddingLeft: =5
                 PaddingRight: =5
@@ -1438,7 +1444,8 @@ HorarioPersonal As screen:
                                 IconBackground: =App.Theme.Colors.Primary
                                 IsEditable: =true
                                 PaddingBottom: =0
-                                PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                                PaddingLeft: =40
+                                PaddingRight: =0
                                 SelectedDateFill: =App.Theme.Colors.Primary
                                 Size: =18
                                 StartYear: =1899
@@ -1484,11 +1491,11 @@ HorarioPersonal As screen:
                                 BorderStyle: =BorderStyle.None
                                 CalendarHeaderFill: =App.Theme.Colors.Primary
                                 Color: =RGBA(0, 0, 0, 1)
-                                DefaultDate: =If(Mostrar,InfoHorarios.Selected.Fecha_Fin ,Parent.Default)
+                                DefaultDate: =dpFechaInicio.SelectedDate+6
                                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 DisabledFill: =RGBA(244, 244, 244, 1)
-                                DisplayMode: =Parent.DisplayMode
+                                DisplayMode: =DisplayMode.View
                                 EndYear: =Year(Today())+100
                                 Font: =App.Theme.Font
                                 FontWeight: =If(!IsBlank(dpFechaFin.SelectedDate),FontWeight.Bold, FontWeight.Normal)
@@ -1497,7 +1504,7 @@ HorarioPersonal As screen:
                                 IconBackground: =App.Theme.Colors.Primary
                                 IsEditable: =true
                                 PaddingBottom: =0
-                                PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                                PaddingLeft: =50
                                 SelectedDateFill: =App.Theme.Colors.Primary
                                 Size: =18
                                 StartYear: =1899
@@ -2186,6 +2193,7 @@ HorarioPersonal As screen:
                             Color: =RGBA(0, 0, 0, 0)
                             DisabledBorderColor: =RGBA(166, 166, 166, 1)
                             DisabledColor: =RGBA(0, 94, 146, 1)
+                            Fill: =If(ThisItem.IsSelected && Mostrar, RGBA(0, 134, 208, 0.24),RGBA(0, 0, 0, 0))
                             Height: =287
                             HoverBorderColor: =
                             HoverColor: =RGBA(0, 134, 208, 1)
