@@ -174,30 +174,33 @@ HorarioPersonal As screen:
                                         !IsBlank(LookUp(Filter(HorarioSemanals, Empleado = drpEmpleadoHorario.Selected.Nombre), Fecha_Inicio = dpFechaInicio.SelectedDate)) &&
                                         !(InfoHorarios.Selected.Fecha_Inicio = dpFechaInicio.SelectedDate && Mostrar), Notify("Ya exite un Horario para esa fecha", NotificationType.Error),
                                         If(
-                                            !IsBlank((Filter(TramitesSolicitudes, Codigo = drpEmpleadoHorario.Selected.Codigo && Fecha_Inicio <= dpFechaFin.SelectedDate && Fecha_Fin >= dpFechadeInicio.SelectedDate))),
+                                            !IsBlank(Filter(TramitesSolicitudes, Codigo = drpEmpleadoHorario.Selected.Codigo && Fecha_Inicio <= dpFechaFin.SelectedDate && Fecha_Fin >= dpFechadeInicio.SelectedDate && EstadoDeProceso = "Aprobado")),
                                             Notify("El Trabajador tiene Permiso de faltar para la semana selecionada.", NotificationType.Error),
                                             If(
                                                 dpFechaInicio.SelectedDate+6 <> dpFechaFin.SelectedDate, Notify("Fechas Ingresadas invalidas, de be ser una semana completa(Lunes a Domingo)",NotificationType.Error),
-                                                If(Value(txtHorasTrabajadas.Text) < 48, Notify("Debe de cumplir con minimo 48 horas trabajadas",NotificationType.Error),
-                                                    If(!Mostrar, 
-                                                        SubmitForm(Form18_3); Notify("Se Guardo Correctamente",NotificationType.Success); ResetForm(Form18_3),
-                                                        Patch(HorarioSemanals, InfoHorarios.Selected, {
-                                                            Lunes: drpTurno_L.Selected.Turno_Op & " - " & lblHorario_L.Text,
-                                                            Martes: drpTurno_K.Selected.Turno_Op & " - " & lblHorario_K.Text,
-                                                            Miercoles: drpTurno__M.Selected.Turno_Op & " - " & lblHorario_M.Text,
-                                                            Jueves: drpTurno_J.Selected.Turno_Op & " - " & lblHorario_J.Text,
-                                                            Viernes: drpTurno_V.Selected.Turno_Op & " - " & lblHorario_V.Text,
-                                                            Sabado: drpTurno_S.Selected.Turno_Op & " - " & lblHorario_S.Text,
-                                                            Domingo: drpTurno_D.Selected.Turno_Op & " - " & lblHorario_D.Text,
-                                                            Total_Horas: txtHorasTrabajadas.Text,
-                                                            Total_Horas_Pagadas: txtHorasPagadas.Text,
-                                                            Fecha_Inicio: Date(Year(dpFechaInicio.SelectedDate), Month(dpFechaInicio.SelectedDate), Day(dpFechaInicio.SelectedDate)),
-                                                            Fecha_Fin: Date(Year(dpFechaFin.SelectedDate), Month(dpFechaFin.SelectedDate), Day(dpFechaFin.SelectedDate)),
-                                                            Maquina: drpMaquina.SelectedText.Value,
-                                                            'Maquina 2': drpMaquina2.SelectedText.Value,
-                                                            'Maquina 3': drpMaquina3.SelectedText.Value
-                                                            }
-                                                        ); Notify("Se Edito Correctamente",NotificationType.Success); UpdateContext({Mostrar: false}); ResetForm(Form18_3)
+                                                If(LookUp(Empleados, Codigo = drpEmpleadoHorario.Selected.Codigo, Area) = "OPERARIOS" && IsBlank(drpMaquina.SelectedText.Value) && IsBlank(drpMaquina2.SelectedText.Value) && IsBlank(drpMaquina3.SelectedText.Value),
+                                                    Notify("Debe seleccionar al menos una maquina para el Operario", NotificationType.Error),
+                                                    If(Value(txtHorasTrabajadas.Text) < 48, Notify("Debe de cumplir con minimo 48 horas trabajadas",NotificationType.Error),
+                                                        If(!Mostrar, 
+                                                            SubmitForm(Form18_3); Notify("Se Guardo Correctamente",NotificationType.Success); ResetForm(Form18_3),
+                                                            Patch(HorarioSemanals, InfoHorarios.Selected, {
+                                                                Lunes: drpTurno_L.Selected.Turno_Op & " - " & lblHorario_L.Text,
+                                                                Martes: drpTurno_K.Selected.Turno_Op & " - " & lblHorario_K.Text,
+                                                                Miercoles: drpTurno__M.Selected.Turno_Op & " - " & lblHorario_M.Text,
+                                                                Jueves: drpTurno_J.Selected.Turno_Op & " - " & lblHorario_J.Text,
+                                                                Viernes: drpTurno_V.Selected.Turno_Op & " - " & lblHorario_V.Text,
+                                                                Sabado: drpTurno_S.Selected.Turno_Op & " - " & lblHorario_S.Text,
+                                                                Domingo: drpTurno_D.Selected.Turno_Op & " - " & lblHorario_D.Text,
+                                                                Total_Horas: txtHorasTrabajadas.Text,
+                                                                Total_Horas_Pagadas: txtHorasPagadas.Text,
+                                                                Fecha_Inicio: Date(Year(dpFechaInicio.SelectedDate), Month(dpFechaInicio.SelectedDate), Day(dpFechaInicio.SelectedDate)),
+                                                                Fecha_Fin: Date(Year(dpFechaFin.SelectedDate), Month(dpFechaFin.SelectedDate), Day(dpFechaFin.SelectedDate)),
+                                                                Maquina: drpMaquina.SelectedText.Value,
+                                                                'Maquina 2': drpMaquina2.SelectedText.Value,
+                                                                'Maquina 3': drpMaquina3.SelectedText.Value
+                                                                }
+                                                            ); Notify("Se Edito Correctamente",NotificationType.Success); UpdateContext({Mostrar: false}); ResetForm(Form18_3)
+                                                        )
                                                     )
                                                 )
                                             )
@@ -2478,28 +2481,6 @@ HorarioPersonal As screen:
                             Y: =75
                             ZIndex: =23
 
-                        Icon4 As icon.Edit:
-                            BorderColor: =App.Theme.Colors.Darker40
-                            BorderStyle: =BorderStyle.None
-                            Color: =RGBA(0, 0, 0, 0)
-                            DisabledBorderColor: =RGBA(166, 166, 166, 1)
-                            DisabledColor: =RGBA(0, 94, 146, 1)
-                            Fill: =If(ThisItem.IsSelected && Mostrar, RGBA(0, 134, 208, 0.24),RGBA(0, 0, 0, 0))
-                            Height: =213
-                            HoverBorderColor: =
-                            HoverColor: =RGBA(0, 134, 208, 1)
-                            HoverFill: =RGBA(0, 134, 208, 0.24)
-                            Icon: =Icon.Edit
-                            OnSelect: |-
-                                =UpdateContext({Mostrar: true});
-                                Select(Parent)
-                            PaddingBottom: =60
-                            PaddingLeft: =60
-                            PaddingRight: =60
-                            PaddingTop: =60
-                            Width: =520
-                            ZIndex: =24
-
                         TextInput1_47 As text:
                             Align: =Align.Center
                             BorderColor: =App.Theme.Colors.Darker40
@@ -2528,14 +2509,14 @@ HorarioPersonal As screen:
                             Width: =130
                             X: =53
                             Y: =294
-                            ZIndex: =25
+                            ZIndex: =24
 
                         TextInput1_48 As text:
                             Align: =Align.Center
                             BorderColor: =App.Theme.Colors.Darker40
                             BorderThickness: =2
                             Color: =RGBA(0, 0, 0, 1)
-                            Default: =ThisItem.Domingo
+                            Default: =ThisItem.Maquina
                             DisabledBorderColor: =RGBA(166, 166, 166, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             DisabledFill: =RGBA(244, 244, 244, 1)
@@ -2555,8 +2536,8 @@ HorarioPersonal As screen:
                             Visible: =If(LookUp(Empleados, Nombre = drpEmpleadoHorario.SelectedText.Value, Area) = "OPERARIOS", true, false)
                             Width: =135
                             X: =51
-                            Y: =334
-                            ZIndex: =26
+                            Y: =333
+                            ZIndex: =25
 
                         TextInput1_49 As text:
                             Align: =Align.Center
@@ -2586,14 +2567,14 @@ HorarioPersonal As screen:
                             Width: =130
                             X: =195
                             Y: =294
-                            ZIndex: =27
+                            ZIndex: =26
 
                         TextInput1_50 As text:
                             Align: =Align.Center
                             BorderColor: =App.Theme.Colors.Darker40
                             BorderThickness: =2
                             Color: =RGBA(0, 0, 0, 1)
-                            Default: =ThisItem.Domingo
+                            Default: =ThisItem.'Maquina 2'
                             DisabledBorderColor: =RGBA(166, 166, 166, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             DisabledFill: =RGBA(244, 244, 244, 1)
@@ -2614,7 +2595,7 @@ HorarioPersonal As screen:
                             Width: =135
                             X: =193
                             Y: =334
-                            ZIndex: =28
+                            ZIndex: =27
 
                         TextInput1_51 As text:
                             Align: =Align.Center
@@ -2644,14 +2625,14 @@ HorarioPersonal As screen:
                             Width: =130
                             X: =336
                             Y: =294
-                            ZIndex: =29
+                            ZIndex: =28
 
                         TextInput1_52 As text:
                             Align: =Align.Center
                             BorderColor: =App.Theme.Colors.Darker40
                             BorderThickness: =2
                             Color: =RGBA(0, 0, 0, 1)
-                            Default: =ThisItem.Domingo
+                            Default: =ThisItem.'Maquina 3'
                             DisabledBorderColor: =RGBA(166, 166, 166, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             DisabledFill: =RGBA(244, 244, 244, 1)
@@ -2672,6 +2653,28 @@ HorarioPersonal As screen:
                             Width: =135
                             X: =334
                             Y: =334
+                            ZIndex: =29
+
+                        Icon4 As icon.Edit:
+                            BorderColor: =App.Theme.Colors.Darker40
+                            BorderStyle: =BorderStyle.None
+                            Color: =RGBA(0, 0, 0, 0)
+                            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                            DisabledColor: =RGBA(0, 94, 146, 1)
+                            Fill: =If(ThisItem.IsSelected && Mostrar, RGBA(0, 134, 208, 0.24),RGBA(0, 0, 0, 0))
+                            Height: =InfoHorarios.TemplateHeight
+                            HoverBorderColor: =
+                            HoverColor: =RGBA(0, 134, 208, 1)
+                            HoverFill: =RGBA(0, 134, 208, 0.24)
+                            Icon: =Icon.Edit
+                            OnSelect: |-
+                                =UpdateContext({Mostrar: true});
+                                Select(Parent)
+                            PaddingBottom: =60
+                            PaddingLeft: =60
+                            PaddingRight: =60
+                            PaddingTop: =60
+                            Width: =520
                             ZIndex: =30
 
                     Label27_5 As label:
