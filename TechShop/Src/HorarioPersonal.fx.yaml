@@ -162,28 +162,79 @@ HorarioPersonal As screen:
                 HoverColor: =RGBA(255, 255, 255, 1)
                 HoverFill: =App.Theme.Colors.Darker10
                 OnSelect: |-
-                    =If(drpEmpleadoHorario.Selected.Contraseña = "0",
-                        Notify("Debe seleccionar a un Empleado", NotificationType.Error),
+                    =
+                    If(
+                        drpEmpleadoHorario.Selected.Contraseña = "0",
+                        Notify(
+                            "Debe seleccionar a un Empleado",
+                            NotificationType.Error
+                        ),
                         If(
-                            IsBlank(dpFechaInicio.SelectedDate), Notify("Debe indicar la Fecha de Inicio", NotificationType.Error),
+                            IsBlank(dpFechaInicio.SelectedDate),
+                            Notify(
+                                "Debe indicar la Fecha de Inicio",
+                                NotificationType.Error
+                            ),
                             If(
-                                Weekday(dpFechaInicio.SelectedDate) <> 2, Notify("La Fecha Inicio debe ser un Lunes",NotificationType.Error),
+                                Weekday(dpFechaInicio.SelectedDate) <> 2,
+                                Notify(
+                                    "La Fecha Inicio debe ser un Lunes",
+                                    NotificationType.Error
+                                ),
                                 If(
-                                    dpFechaInicio.SelectedDate > Today()+7 , Notify("No se permite asignar un horaro tan a futuro como ese, maximo el de la proxima semana",NotificationType.Error),
+                                    dpFechaInicio.SelectedDate > Today() + 7,
+                                    Notify(
+                                        "No se permite asignar un horaro tan a futuro como ese, maximo el de la proxima semana",
+                                        NotificationType.Error
+                                    ),
                                     If(
-                                        !IsBlank(LookUp(Filter(HorarioSemanals, Empleado = drpEmpleadoHorario.Selected.Nombre), Fecha_Inicio = dpFechaInicio.SelectedDate)) &&
-                                        !(InfoHorarios.Selected.Fecha_Inicio = dpFechaInicio.SelectedDate && Mostrar), Notify("Ya exite un Horario para esa fecha", NotificationType.Error),
+                                        !IsBlank(
+                                            LookUp(
+                                                Filter(
+                                                    HorarioSemanals,
+                                                    Empleado = drpEmpleadoHorario.Selected.Nombre
+                                                ),
+                                                Fecha_Inicio = dpFechaInicio.SelectedDate
+                                            )
+                                        ) && !(InfoHorarios.Selected.Fecha_Inicio = dpFechaInicio.SelectedDate && Mostrar),
+                                        Notify(
+                                            "Ya exite un Horario para esa fecha",
+                                            NotificationType.Error
+                                        ),
                                         If(
-                                            !IsBlank(Filter(TramitesSolicitudes, Codigo = drpEmpleadoHorario.Selected.Codigo && Fecha_Inicio <= dpFechaFin.SelectedDate && Fecha_Fin >= dpFechadeInicio.SelectedDate && EstadoDeProceso = "Aprobado")),
-                                            Notify("El Trabajador tiene Permiso de faltar para la semana selecionada.", NotificationType.Error),
+                                            dpFechaInicio.SelectedDate + 6 <> dpFechaFin.SelectedDate,
+                                            Notify(
+                                                "Fechas Ingresadas invalidas, de be ser una semana completa(Lunes a Domingo)",
+                                                NotificationType.Error
+                                            ),
                                             If(
-                                                dpFechaInicio.SelectedDate+6 <> dpFechaFin.SelectedDate, Notify("Fechas Ingresadas invalidas, de be ser una semana completa(Lunes a Domingo)",NotificationType.Error),
-                                                If(LookUp(Empleados, Codigo = drpEmpleadoHorario.Selected.Codigo, Area) = "OPERARIOS" && IsBlank(drpMaquina.SelectedText.Value) && IsBlank(drpMaquina2.SelectedText.Value) && IsBlank(drpMaquina3.SelectedText.Value),
-                                                    Notify("Debe seleccionar al menos una maquina para el Operario", NotificationType.Error),
-                                                    If(Value(txtHorasTrabajadas.Text) < 48, Notify("Debe de cumplir con minimo 48 horas trabajadas",NotificationType.Error),
-                                                        If(!Mostrar, 
-                                                            SubmitForm(Form18_3); Notify("Se Guardo Correctamente",NotificationType.Success); ResetForm(Form18_3),
-                                                            Patch(HorarioSemanals, InfoHorarios.Selected, {
+                                                LookUp(
+                                                    Empleados,
+                                                    Codigo = drpEmpleadoHorario.Selected.Codigo,
+                                                    Area
+                                                ) = "OPERARIOS" && IsBlank(drpMaquina.SelectedText.Value) && IsBlank(drpMaquina2.SelectedText.Value) && IsBlank(drpMaquina3.SelectedText.Value),
+                                                Notify(
+                                                    "Debe seleccionar al menos una maquina para el Operario",
+                                                    NotificationType.Error
+                                                ),
+                                                If(
+                                                    Value(txtHorasTrabajadas.Text) < 48,
+                                                    Notify(
+                                                        "Debe de cumplir con minimo 48 horas trabajadas",
+                                                        NotificationType.Error
+                                                    ),
+                                                    If(
+                                                        !Mostrar,
+                                                        SubmitForm(Form18_3);
+                                                        Notify(
+                                                            "Se Guardo Correctamente",
+                                                            NotificationType.Success
+                                                        );
+                                                        ResetForm(Form18_3),
+                                                        Patch(
+                                                            HorarioSemanals,
+                                                            InfoHorarios.Selected,
+                                                            {
                                                                 Lunes: drpTurno_L.Selected.Turno_Op & " - " & lblHorario_L.Text,
                                                                 Martes: drpTurno_K.Selected.Turno_Op & " - " & lblHorario_K.Text,
                                                                 Miercoles: drpTurno__M.Selected.Turno_Op & " - " & lblHorario_M.Text,
@@ -193,14 +244,27 @@ HorarioPersonal As screen:
                                                                 Domingo: drpTurno_D.Selected.Turno_Op & " - " & lblHorario_D.Text,
                                                                 Total_Horas: txtHorasTrabajadas.Text,
                                                                 Total_Horas_Pagadas: txtHorasPagadas.Text,
-                                                                Fecha_Inicio: Date(Year(dpFechaInicio.SelectedDate), Month(dpFechaInicio.SelectedDate), Day(dpFechaInicio.SelectedDate)),
-                                                                Fecha_Fin: Date(Year(dpFechaFin.SelectedDate), Month(dpFechaFin.SelectedDate), Day(dpFechaFin.SelectedDate)),
+                                                                Fecha_Inicio: Date(
+                                                                    Year(dpFechaInicio.SelectedDate),
+                                                                    Month(dpFechaInicio.SelectedDate),
+                                                                    Day(dpFechaInicio.SelectedDate)
+                                                                ),
+                                                                Fecha_Fin: Date(
+                                                                    Year(dpFechaFin.SelectedDate),
+                                                                    Month(dpFechaFin.SelectedDate),
+                                                                    Day(dpFechaFin.SelectedDate)
+                                                                ),
                                                                 Maquina: drpMaquina.SelectedText.Value,
                                                                 'Maquina 2': drpMaquina2.SelectedText.Value,
                                                                 'Maquina 3': drpMaquina3.SelectedText.Value
-                                                                }
-                                                            ); Notify("Se Edito Correctamente",NotificationType.Success); UpdateContext({Mostrar: false}); ResetForm(Form18_3)
-                                                        )
+                                                            }
+                                                        );
+                                                        Notify(
+                                                            "Se Edito Correctamente",
+                                                            NotificationType.Success
+                                                        );
+                                                        UpdateContext({Mostrar: false});
+                                                        ResetForm(Form18_3)
                                                     )
                                                 )
                                             )
@@ -1714,6 +1778,17 @@ HorarioPersonal As screen:
                                 HoverDateFill: =App.Theme.Colors.Lighter70
                                 IconBackground: =App.Theme.Colors.Primary
                                 IsEditable: =true
+                                OnChange: |-
+                                    =If(
+                                        !IsEmpty(
+                                            Filter(
+                                                TramitesSolicitudes,
+                                                Codigo = drpEmpleadoHorario.Selected.Codigo && Fecha_Inicio <= dpFechaFin.SelectedDate && Fecha_Fin >= dpFechaInicio.SelectedDate && EstadoDeProceso = "Aprobado"
+                                            )
+                                        ),
+                                        UpdateContext({Advertencia: true}),
+                                        false
+                                    );
                                 PaddingBottom: =0
                                 PaddingLeft: =40
                                 PaddingRight: =0
@@ -2762,4 +2837,48 @@ HorarioPersonal As screen:
                         Width: =4
                         X: =797
                         ZIndex: =13
+
+    Container11 As groupContainer.manualLayoutContainer:
+        BorderColor: =RGBA(247, 116, 38, 1)
+        BorderThickness: =4
+        DropShadow: =DropShadow.Light
+        Fill: =RGBA(255, 255, 255, 1)
+        RadiusBottomLeft: =20
+        RadiusBottomRight: =20
+        RadiusTopLeft: =20
+        RadiusTopRight: =20
+        Visible: =Advertencia
+        X: =433
+        Y: =211
+        ZIndex: =2
+
+        Label15 As label:
+            Align: =Align.Center
+            BorderColor: =App.Theme.Colors.Darker40
+            Color: =RGBA(0, 0, 0, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            Font: =App.Theme.Font
+            Height: =115
+            Size: =15
+            Text: |-
+                =Text("El Empleado tiene un permiso para faltar en las fechas seleccionadas. Las fechas del permiso son: " & Text(LookUp(Filter(TramitesSolicitudes, Codigo = drpEmpleadoHorario.Selected.Codigo && EstadoDeProceso = "Aprobado"), Fecha_Inicio <= dpFechaFin.SelectedDate && Fecha_Fin >= dpFechaInicio.SelectedDate, Fecha_Inicio), "dd/mm/yyyy")
+                & " al " &
+                Text(LookUp(Filter(TramitesSolicitudes, Codigo = drpEmpleadoHorario.Selected.Codigo && EstadoDeProceso = "Aprobado"), Fecha_Inicio <= dpFechaFin.SelectedDate && Fecha_Fin >= dpFechaInicio.SelectedDate, Fecha_Fin), "dd/mm/yyyy"))
+            Width: =462
+            X: =16
+            Y: =12
+            ZIndex: =1
+
+        ButtonCanvas4 As Button:
+            DisplayMode: =DisplayMode.Edit
+            FontSize: =24
+            Height: =40
+            OnSelect: |-
+                =UpdateContext({Advertencia: false})
+            Text: ="Continuar"
+            Visible: =true
+            Width: =151
+            X: =171
+            Y: =141
+            ZIndex: =2
 

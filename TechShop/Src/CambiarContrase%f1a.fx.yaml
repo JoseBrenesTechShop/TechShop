@@ -43,11 +43,11 @@ CambiarContraseña As screen:
             RadiusTopRight: =8
             Size: =18
             Width: =262
-            X: =440
-            Y: =84
+            X: =437
+            Y: =140
             ZIndex: =1
 
-        TextInput1_60 As text:
+        txtNuevaContra As text:
             Align: =Align.Center
             BorderColor: =RGBA(0, 18, 107, 1)
             BorderThickness: =2
@@ -56,7 +56,6 @@ CambiarContraseña As screen:
             DisabledBorderColor: =RGBA(166, 166, 166, 1)
             DisabledColor: =RGBA(166, 166, 166, 1)
             DisabledFill: =RGBA(244, 244, 244, 1)
-            DisplayMode: =DisplayMode.View
             FocusedBorderThickness: =4
             Height: =42
             HoverBorderColor: =RGBA(0, 18, 107, 1)
@@ -71,8 +70,8 @@ CambiarContraseña As screen:
             RadiusTopRight: =8
             Size: =12
             Width: =529
-            X: =307
-            Y: =138
+            X: =304
+            Y: =194
             ZIndex: =2
 
         TextInput1_61 As text:
@@ -101,11 +100,11 @@ CambiarContraseña As screen:
             RadiusTopRight: =8
             Size: =18
             Width: =324
-            X: =410
-            Y: =198
+            X: =407
+            Y: =254
             ZIndex: =3
 
-        TextInput1_62 As text:
+        txtContraConfirmacion As text:
             Align: =Align.Center
             BorderColor: =RGBA(0, 18, 107, 1)
             BorderThickness: =2
@@ -114,7 +113,6 @@ CambiarContraseña As screen:
             DisabledBorderColor: =RGBA(166, 166, 166, 1)
             DisabledColor: =RGBA(166, 166, 166, 1)
             DisabledFill: =RGBA(244, 244, 244, 1)
-            DisplayMode: =DisplayMode.View
             FocusedBorderThickness: =4
             Height: =42
             HoverBorderColor: =RGBA(0, 18, 107, 1)
@@ -129,18 +127,45 @@ CambiarContraseña As screen:
             RadiusTopRight: =8
             Size: =12
             Width: =529
-            X: =307
-            Y: =258
+            X: =304
+            Y: =314
             ZIndex: =4
 
-        ButtonCanvas4 As Button:
+        ButtonCanvas5 As Button:
             DisplayMode: =DisplayMode.Edit
-            Height: =44
-            Text: ="ACEPTAR"
-            Width: =193
-            X: =474
-            Y: =341
-            ZIndex: =7
+            FontSize: =30
+            Height: =50
+            OnSelect: |-
+                =If(
+                    txtNuevaContra.Text = txtContraConfirmacion.Text,
+                    Patch(
+                        Empleados,
+                        LookUp(
+                            Empleados,
+                            VarName = Codigo
+                        ),
+                        {Contraseña: txtNuevaContra.Text}
+                    );
+                    Reset(txtNuevaContra); Reset(txtContraConfirmacion);
+                    If(LookUp(Empleados, Codigo = VarName, Acceso), Navigate(MenuNew), Navigate(MenuEmpleado))
+                )
+            Text: ="Aceptar"
+            Width: =141
+            X: =497
+            Y: =380
+            ZIndex: =5
+
+        ButtonCanvas5_1 As Button:
+            DisplayMode: =DisplayMode.Edit
+            FontSize: =30
+            Height: =50
+            Icon: ="ArrowLeft"
+            OnSelect: =Back()
+            Text: ="Atras"
+            Width: =141
+            X: =32
+            Y: =544
+            ZIndex: =6
 
     cnToken As groupContainer.manualLayoutContainer:
         DropShadow: =DropShadow.Light
@@ -150,6 +175,7 @@ CambiarContraseña As screen:
         RadiusBottomRight: =4
         RadiusTopLeft: =4
         RadiusTopRight: =4
+        Visible: =CambiarContra
         Width: =1149
         X: =107
         Y: =76
@@ -185,7 +211,7 @@ CambiarContraseña As screen:
             Y: =130
             ZIndex: =1
 
-        TextInput1_64 As text:
+        txtToken As text:
             Align: =Align.Center
             BorderColor: =RGBA(0, 18, 107, 1)
             BorderThickness: =2
@@ -194,7 +220,6 @@ CambiarContraseña As screen:
             DisabledBorderColor: =RGBA(166, 166, 166, 1)
             DisabledColor: =RGBA(166, 166, 166, 1)
             DisabledFill: =RGBA(244, 244, 244, 1)
-            DisplayMode: =DisplayMode.View
             FocusedBorderThickness: =4
             Height: =42
             HoverBorderColor: =RGBA(0, 18, 107, 1)
@@ -216,6 +241,16 @@ CambiarContraseña As screen:
         ButtonCanvas4_1 As Button:
             DisplayMode: =DisplayMode.Edit
             Height: =44
+            OnSelect: |-
+                =
+                
+                If(
+                    txtToken.Text = Text(randomToken),
+                    Set(CambiarContra, false);
+                    Set(randomToken, Blank());
+                    Notify("Código correcto.", NotificationType.Success),
+                    Notify("Código incorrecto.", NotificationType.Error)
+                )
             Text: ="ACEPTAR"
             Width: =193
             X: =473
@@ -261,4 +296,12 @@ CambiarContraseña As screen:
             X: =20
             Y: =552
             ZIndex: =9
+
+        ButtonCanvas2 As Button:
+            DisplayMode: =DisplayMode.Edit
+            Height: =32
+            Width: =96
+            X: =567
+            Y: =399
+            ZIndex: =10
 

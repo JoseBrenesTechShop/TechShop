@@ -77,14 +77,50 @@ Login2 As screen:
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =App.Theme.Colors.Darker10
             OnSelect: |-
-                =
-                UpdateContext({Valida:LookUp(Empleados,IdTextField.Text = Codigo,Contraseña)});
-                If(Valida = contrasenaTxtfield.Text,
-                    If(LookUp(Empleados, IdTextField.Text = Codigo, Acceso),
-                        Navigate(MenuNew, ScreenTransition.Fade),
-                        Navigate(MenuEmpleado, ScreenTransition.Fade)
-                    );Set(VarName, IdTextField.Text); Reset(IdTextField); Reset(contrasenaTxtfield); UpdateContext({Varpw_visible: false}),
-                    Notify("El usuario y la contrasena no coinciden, por favor verificar los datos",NotificationType.Error)
+                =UpdateContext(
+                    {
+                        Valida: LookUp(
+                            Empleados,
+                            IdTextField.Text = Codigo,
+                            Contraseña
+                        )
+                    }
+                );
+                If(
+                   IsNumeric(IdTextField.Text),
+                    If(
+                        Valida = contrasenaTxtfield.Text,
+                        If(
+                            LookUp(
+                                Empleados,
+                                IdTextField.Text = Codigo,
+                                Acceso
+                            ),
+                            Navigate(
+                                MenuNew,
+                                ScreenTransition.Fade
+                            ),
+                            Navigate(
+                                MenuEmpleado,
+                                ScreenTransition.Fade
+                            )
+                        );
+                        Set(
+                            VarName,
+                            IdTextField.Text
+                        );
+                        Reset(IdTextField);
+                        Reset(contrasenaTxtfield);
+                        UpdateContext({Varpw_visible: false}),
+                        Notify(
+                            "El usuario y la contrasena no coinciden, por favor verificar los datos",
+                            NotificationType.Error
+                        )
+                    ),
+                    Notify(
+                        "El usuario y la contrasena no coinciden, por favor verificar los datos",
+                        NotificationType.Error
+                    )
                 )
             PressedBorderColor: =App.Theme.Colors.Darker40
             PressedColor: =Self.Color
@@ -135,16 +171,20 @@ Login2 As screen:
             HoverColor: =RGBA(233, 79, 76, 1)
             OnSelect: |-
                 =Set(CambiarContra, true);
-                Set(randomToken, RoundDown(Rand() * 9000 + 1000, 0));
+                Set(randomToken, RoundDown(Rand() * 99999 + 10000, 0));
+                Set(tokenExpirationTime, DateAdd(Now(),10,TimeUnit.Minutes));
                 Set(correoEmpleado, LookUp(Empleados, Codigo = IdTextField.Text, Correo));
                 Set(Asunto, "CAMBIO DE CONTRASEÑA");
                 Set(Texto, "Tu token para cambiar la contraseña es: " & randomToken & ". Si no solicitaste este cambio, por favor contacta a soporte.");
+                
                 
                 If(
                     !IsBlank(IdTextField.Text) && !IsBlank(LookUp(Empleados, Codigo = IdTextField.Text, Codigo)),
                     
                         EnviarCorreo.Run(correoEmpleado, Asunto, Texto);
+                        Set(VarName, IdTextField.Text);
                         Notify("Correo enviado con éxito.", NotificationType.Success);
+                      
                         Navigate(CambiarContraseña, ScreenTransition.Fade);
                     ,
                     Notify("Tiene que digitar su código de empleado primero.", NotificationType.Warning)
