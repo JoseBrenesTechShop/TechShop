@@ -131,13 +131,13 @@ CambiarContraseña As screen:
             Y: =314
             ZIndex: =4
 
-        ButtonCanvas5 As Button:
+        ButtonCanvas5 As Botón:
             DisplayMode: =DisplayMode.Edit
             FontSize: =30
             Height: =50
             OnSelect: |-
                 =If(
-                    txtNuevaContra.Text = txtContraConfirmacion.Text,
+                    !IsBlank(txtNuevaContra.Text) && !IsBlank(txtContraConfirmacion.Text) && txtNuevaContra.Text = txtContraConfirmacion.Text,
                     Patch(
                         Empleados,
                         LookUp(
@@ -147,7 +147,14 @@ CambiarContraseña As screen:
                         {Contraseña: txtNuevaContra.Text}
                     );
                     Reset(txtNuevaContra); Reset(txtContraConfirmacion);
-                    If(LookUp(Empleados, Codigo = VarName, Acceso), Navigate(MenuNew), Navigate(MenuEmpleado))
+                    If(LookUp(Empleados, Codigo = VarName, Acceso), Navigate(MenuNew), Navigate(MenuEmpleado)),
+                    Notify("Contraseña actualizada con éxito.", NotificationType.Success)
+                ,
+                    If(
+                        IsBlank(txtNuevaContra.Text),
+                        Notify("La nueva contraseña no puede estar vacía.", NotificationType.Error),
+                        Notify("Las contraseñas no coinciden.", NotificationType.Error)
+                    )
                 )
             Text: ="Aceptar"
             Width: =141
@@ -155,7 +162,7 @@ CambiarContraseña As screen:
             Y: =380
             ZIndex: =5
 
-        ButtonCanvas5_1 As Button:
+        ButtonCanvas5_1 As Botón:
             DisplayMode: =DisplayMode.Edit
             FontSize: =30
             Height: =50
@@ -238,7 +245,7 @@ CambiarContraseña As screen:
             Y: =205
             ZIndex: =2
 
-        ButtonCanvas4_1 As Button:
+        ButtonCanvas4_1 As Botón:
             DisplayMode: =DisplayMode.Edit
             Height: =44
             OnSelect: |-
@@ -248,6 +255,7 @@ CambiarContraseña As screen:
                     txtToken.Text = Text(randomToken),
                     Set(CambiarContra, false);
                     Set(randomToken, Blank());
+                    Reset(txtToken);
                     Notify("Código correcto.", NotificationType.Success),
                     Notify("Código incorrecto.", NotificationType.Error)
                 )
@@ -284,7 +292,7 @@ CambiarContraseña As screen:
             Width: =1149
             ZIndex: =8
 
-        ButtonCanvas4_2 As Button:
+        ButtonCanvas4_2 As Botón:
             DisplayMode: =DisplayMode.Edit
             Height: =44
             Icon: ="ArrowLeft"
