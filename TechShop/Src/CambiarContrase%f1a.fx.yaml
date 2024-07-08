@@ -47,7 +47,7 @@ CambiarContraseña As screen:
             Y: =84
             ZIndex: =1
 
-        TextInput1_60 As text:
+        txtNuevaContra As text:
             Align: =Align.Center
             BorderColor: =RGBA(0, 18, 107, 1)
             BorderThickness: =2
@@ -56,7 +56,6 @@ CambiarContraseña As screen:
             DisabledBorderColor: =RGBA(166, 166, 166, 1)
             DisabledColor: =RGBA(166, 166, 166, 1)
             DisabledFill: =RGBA(244, 244, 244, 1)
-            DisplayMode: =DisplayMode.View
             FocusedBorderThickness: =4
             Height: =42
             HoverBorderColor: =RGBA(0, 18, 107, 1)
@@ -105,7 +104,7 @@ CambiarContraseña As screen:
             Y: =198
             ZIndex: =3
 
-        TextInput1_62 As text:
+        txtContraConfirmacion As text:
             Align: =Align.Center
             BorderColor: =RGBA(0, 18, 107, 1)
             BorderThickness: =2
@@ -114,7 +113,6 @@ CambiarContraseña As screen:
             DisabledBorderColor: =RGBA(166, 166, 166, 1)
             DisabledColor: =RGBA(166, 166, 166, 1)
             DisabledFill: =RGBA(244, 244, 244, 1)
-            DisplayMode: =DisplayMode.View
             FocusedBorderThickness: =4
             Height: =42
             HoverBorderColor: =RGBA(0, 18, 107, 1)
@@ -133,9 +131,29 @@ CambiarContraseña As screen:
             Y: =258
             ZIndex: =4
 
-        ButtonCanvas4 As Button:
+        ButtonCanvas4 As Botón:
             DisplayMode: =DisplayMode.Edit
             Height: =44
+            OnSelect: |-
+                =If(
+                    txtNuevaContra.Text = txtContraConfirmacion.Text,
+                    If(
+                        !IsBlank(txtNuevaContra.Text),
+                        
+                            Patch(
+                                Empleados,
+                                LookUp(Empleados, Codigo = VarName),
+                                {Contraseña: txtNuevaContra.Text}
+                            );
+                            Reset(txtNuevaContra);
+                            Reset(txtContraConfirmacion);
+                            Notify("Contraseña actualizada con éxito.", NotificationType.Success);
+                            Navigate(Login2,ScreenTransition.Fade);
+                        ,
+                        Notify("La nueva contraseña no puede estar vacía.", NotificationType.Error)
+                    ),
+                    Notify("Las contraseñas no coinciden.", NotificationType.Error)
+                )
             Text: ="ACEPTAR"
             Width: =193
             X: =474
@@ -150,6 +168,7 @@ CambiarContraseña As screen:
         RadiusBottomRight: =4
         RadiusTopLeft: =4
         RadiusTopRight: =4
+        Visible: =CambiarContra
         Width: =1149
         X: =107
         Y: =76
@@ -185,7 +204,7 @@ CambiarContraseña As screen:
             Y: =130
             ZIndex: =1
 
-        TextInput1_64 As text:
+        txtToken As text:
             Align: =Align.Center
             BorderColor: =RGBA(0, 18, 107, 1)
             BorderThickness: =2
@@ -194,7 +213,6 @@ CambiarContraseña As screen:
             DisabledBorderColor: =RGBA(166, 166, 166, 1)
             DisabledColor: =RGBA(166, 166, 166, 1)
             DisabledFill: =RGBA(244, 244, 244, 1)
-            DisplayMode: =DisplayMode.View
             FocusedBorderThickness: =4
             Height: =42
             HoverBorderColor: =RGBA(0, 18, 107, 1)
@@ -213,9 +231,19 @@ CambiarContraseña As screen:
             Y: =205
             ZIndex: =2
 
-        ButtonCanvas4_1 As Button:
+        ButtonCanvas4_1 As Botón:
             DisplayMode: =DisplayMode.Edit
             Height: =44
+            OnSelect: |-
+                =
+                
+                If(
+                    txtToken.Text = Text(randomToken),
+                    Set(CambiarContra, false);
+                    Set(randomToken, Blank());
+                    Notify("Código correcto.", NotificationType.Success),
+                    Notify("Código incorrecto.", NotificationType.Error)
+                )
             Text: ="ACEPTAR"
             Width: =193
             X: =473
@@ -249,7 +277,7 @@ CambiarContraseña As screen:
             Width: =1149
             ZIndex: =8
 
-        ButtonCanvas4_2 As Button:
+        ButtonCanvas4_2 As Botón:
             DisplayMode: =DisplayMode.Edit
             Height: =44
             Icon: ="ArrowLeft"
