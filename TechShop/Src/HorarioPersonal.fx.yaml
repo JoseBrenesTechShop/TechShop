@@ -52,6 +52,7 @@ HorarioPersonal As screen:
 
             drpEmpleadoHorario As dropdown:
                 AlignInContainer: =AlignInContainer.Center
+                AllowEmptySelection: =true
                 BorderColor: =App.Theme.Colors.Darker40
                 BorderStyle: =BorderStyle.None
                 ChevronBackground: =RGBA(153, 201, 238, 1)
@@ -162,9 +163,8 @@ HorarioPersonal As screen:
                 HoverColor: =RGBA(255, 255, 255, 1)
                 HoverFill: =App.Theme.Colors.Darker10
                 OnSelect: |-
-                    =
-                    If(
-                        drpEmpleadoHorario.Selected.Contraseña = "0",
+                    =If(
+                        IsBlank(drpEmpleadoHorario.SelectedText.Value),
                         Notify(
                             "Debe seleccionar a un Empleado",
                             NotificationType.Error
@@ -225,11 +225,24 @@ HorarioPersonal As screen:
                                                     ),
                                                     If(
                                                         !Mostrar,
-                                                        SubmitForm(Form18_3);
                                                         Notify(
                                                             "Se Guardo Correctamente",
                                                             NotificationType.Success
                                                         );
+                                                        If(
+                                                            dpFechaInicio.SelectedDate > Today(),
+                                                            CorreoConPDF.Run(
+                                                                HtmlPDF.HtmlText,
+                                                                LookUp(
+                                                                    Empleados,
+                                                                    Nombre = drpEmpleadoHorario.SelectedText.Value,
+                                                                    Correo
+                                                                ),
+                                                                "Horario Proxima Semana",
+                                                                HtmlCuerpo.HtmlText
+                                                            );Notify("Si paso")
+                                                        );
+                                                        SubmitForm(Form18_3);
                                                         ResetForm(Form18_3),
                                                         Patch(
                                                             HorarioSemanals,
@@ -262,6 +275,19 @@ HorarioPersonal As screen:
                                                         Notify(
                                                             "Se Edito Correctamente",
                                                             NotificationType.Success
+                                                        );
+                                                        If(
+                                                            dpFechaInicio.SelectedDate > Today(),
+                                                            CorreoConPDF.Run(
+                                                                HtmlPDF.HtmlText,
+                                                                LookUp(
+                                                                    Empleados,
+                                                                    Nombre = drpEmpleadoHorario.SelectedText.Value,
+                                                                    Correo
+                                                                ),
+                                                                "Horario Proxima Semana",
+                                                                HtmlCuerpo.HtmlText
+                                                            );Notify("Si paso")
                                                         );
                                                         UpdateContext({Mostrar: false});
                                                         ResetForm(Form18_3)
@@ -361,7 +387,6 @@ HorarioPersonal As screen:
 
         BottomContainer1_1 As groupContainer.horizontalAutoLayoutContainer:
             DropShadow: =DropShadow.Light
-            Fill: =RGBA(245, 245, 245, 1)
             LayoutAlignItems: =LayoutAlignItems.Stretch
             LayoutGap: =16
             LayoutMinHeight: =100
@@ -380,7 +405,6 @@ HorarioPersonal As screen:
 
             MainContainer1 As groupContainer.verticalAutoLayoutContainer:
                 DropShadow: =DropShadow.Light
-                Fill: =RGBA(255, 255, 255, 1)
                 FillPortions: =7
                 LayoutDirection: =LayoutDirection.Vertical
                 LayoutMinHeight: =100
@@ -487,7 +511,7 @@ HorarioPersonal As screen:
                         BorderColor: =App.Theme.Colors.Darker40
                         DataSource: =HorarioSemanals
                         DefaultMode: =FormMode.New
-                        Fill: =RGBA(0, 120, 212, 1)
+                        Fill: =RGBA(140, 217, 255, 0.34)
                         Height: =588
                         Y: =53
                         ZIndex: =6
@@ -539,7 +563,7 @@ HorarioPersonal As screen:
                                 DisabledColor: =RGBA(0, 0, 0, 1)
                                 DisabledFill: =RGBA(204, 228, 246, 1)
                                 Font: =App.Theme.Font
-                                FontWeight: =If(drpTurno_K.SelectedText.Value <> "Libre", FontWeight.Bold, FontWeight.Normal)
+                                FontWeight: =If(drpTurno_K.SelectedText.Value <> LookUp(Tipo_Turnos, Id_Turno = "6", Turno_Op), FontWeight.Bold, FontWeight.Normal)
                                 Height: =50
                                 HoverBorderColor: =RGBA(153, 201, 238, 1)
                                 HoverColor: =RGBA(0, 0, 0, 1)
@@ -562,7 +586,7 @@ HorarioPersonal As screen:
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 Fill: =RGBA(255, 255, 255, 1)
                                 Font: =App.Theme.Font
-                                FontWeight: =If(drpTurno_K.SelectedText.Value <> "Libre", FontWeight.Bold, FontWeight.Normal)
+                                FontWeight: =If(drpTurno_K.SelectedText.Value <> LookUp(Tipo_Turnos, Id_Turno = "6", Turno_Op), FontWeight.Bold, FontWeight.Normal)
                                 Height: =50
                                 Size: =15
                                 Text: =drpTurno_K.Selected.Turno_Horas
@@ -578,10 +602,10 @@ HorarioPersonal As screen:
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 Fill: =RGBA(255, 255, 255, 1)
                                 Font: =App.Theme.Font
-                                FontWeight: =If(drpTurno_K.SelectedText.Value <> "Libre", FontWeight.Bold, FontWeight.Normal)
+                                FontWeight: =If(drpTurno_K.SelectedText.Value <> LookUp(Tipo_Turnos, Id_Turno = "6", Turno_Op), FontWeight.Bold, FontWeight.Normal)
                                 Height: =50
                                 Size: =15
-                                Text: =drpTurno_K.Selected.crfb9_horas_trabajadas
+                                Text: =drpTurno_K.Selected.Horas_Trabajadas
                                 Width: =165
                                 X: =461
                                 Y: =5
@@ -594,7 +618,7 @@ HorarioPersonal As screen:
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 Fill: =RGBA(255, 255, 255, 1)
                                 Font: =App.Theme.Font
-                                FontWeight: =If(drpTurno_K.SelectedText.Value <> "Libre", FontWeight.Bold, FontWeight.Normal)
+                                FontWeight: =If(drpTurno_K.SelectedText.Value <> LookUp(Tipo_Turnos, Id_Turno = "6", Turno_Op), FontWeight.Bold, FontWeight.Normal)
                                 Height: =50
                                 Size: =15
                                 Text: =drpTurno_K.Selected.Horas_Pagadas
@@ -650,7 +674,7 @@ HorarioPersonal As screen:
                                 DisabledColor: =RGBA(0, 0, 0, 1)
                                 DisabledFill: =RGBA(204, 228, 246, 1)
                                 Font: =App.Theme.Font
-                                FontWeight: =If(drpTurno__M.SelectedText.Value <> "Libre", FontWeight.Bold, FontWeight.Normal)
+                                FontWeight: =If(drpTurno__M.SelectedText.Value <> LookUp(Tipo_Turnos, Id_Turno = "6", Turno_Op), FontWeight.Bold, FontWeight.Normal)
                                 Height: =50
                                 HoverBorderColor: =RGBA(153, 201, 238, 1)
                                 HoverColor: =RGBA(0, 0, 0, 1)
@@ -673,7 +697,7 @@ HorarioPersonal As screen:
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 Fill: =RGBA(255, 255, 255, 1)
                                 Font: =App.Theme.Font
-                                FontWeight: =If(drpTurno__M.SelectedText.Value <> "Libre", FontWeight.Bold, FontWeight.Normal)
+                                FontWeight: =If(drpTurno__M.SelectedText.Value <> LookUp(Tipo_Turnos, Id_Turno = "6", Turno_Op), FontWeight.Bold, FontWeight.Normal)
                                 Height: =50
                                 Size: =15
                                 Text: =drpTurno__M.Selected.Turno_Horas
@@ -689,10 +713,10 @@ HorarioPersonal As screen:
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 Fill: =RGBA(255, 255, 255, 1)
                                 Font: =App.Theme.Font
-                                FontWeight: =If(drpTurno__M.SelectedText.Value <> "Libre", FontWeight.Bold, FontWeight.Normal)
+                                FontWeight: =If(drpTurno__M.SelectedText.Value <> LookUp(Tipo_Turnos, Id_Turno = "6", Turno_Op), FontWeight.Bold, FontWeight.Normal)
                                 Height: =50
                                 Size: =15
-                                Text: =drpTurno__M.Selected.crfb9_horas_trabajadas
+                                Text: =drpTurno__M.Selected.Horas_Trabajadas
                                 Width: =165
                                 X: =461
                                 Y: =5
@@ -705,7 +729,7 @@ HorarioPersonal As screen:
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 Fill: =RGBA(255, 255, 255, 1)
                                 Font: =App.Theme.Font
-                                FontWeight: =If(drpTurno__M.SelectedText.Value <> "Libre", FontWeight.Bold, FontWeight.Normal)
+                                FontWeight: =If(drpTurno__M.SelectedText.Value <> LookUp(Tipo_Turnos, Id_Turno = "6", Turno_Op), FontWeight.Bold, FontWeight.Normal)
                                 Height: =50
                                 Size: =15
                                 Text: =drpTurno__M.Selected.Horas_Pagadas
@@ -761,7 +785,7 @@ HorarioPersonal As screen:
                                 DisabledColor: =RGBA(0, 0, 0, 1)
                                 DisabledFill: =RGBA(204, 228, 246, 1)
                                 Font: =App.Theme.Font
-                                FontWeight: =If(drpTurno_J.SelectedText.Value <> "Libre", FontWeight.Bold, FontWeight.Normal)
+                                FontWeight: =If(drpTurno_J.SelectedText.Value <> LookUp(Tipo_Turnos, Id_Turno = "6", Turno_Op), FontWeight.Bold, FontWeight.Normal)
                                 Height: =50
                                 HoverBorderColor: =RGBA(153, 201, 238, 1)
                                 HoverColor: =RGBA(0, 0, 0, 1)
@@ -784,7 +808,7 @@ HorarioPersonal As screen:
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 Fill: =RGBA(255, 255, 255, 1)
                                 Font: =App.Theme.Font
-                                FontWeight: =If(drpTurno_J.SelectedText.Value <> "Libre", FontWeight.Bold, FontWeight.Normal)
+                                FontWeight: =If(drpTurno_J.SelectedText.Value <> LookUp(Tipo_Turnos, Id_Turno = "6", Turno_Op), FontWeight.Bold, FontWeight.Normal)
                                 Height: =50
                                 Size: =15
                                 Text: =drpTurno_J.Selected.Turno_Horas
@@ -800,10 +824,10 @@ HorarioPersonal As screen:
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 Fill: =RGBA(255, 255, 255, 1)
                                 Font: =App.Theme.Font
-                                FontWeight: =If(drpTurno_J.SelectedText.Value <> "Libre", FontWeight.Bold, FontWeight.Normal)
+                                FontWeight: =If(drpTurno_J.SelectedText.Value <> LookUp(Tipo_Turnos, Id_Turno = "6", Turno_Op), FontWeight.Bold, FontWeight.Normal)
                                 Height: =50
                                 Size: =15
-                                Text: =drpTurno_J.Selected.crfb9_horas_trabajadas
+                                Text: =drpTurno_J.Selected.Horas_Trabajadas
                                 Width: =165
                                 X: =461
                                 Y: =5
@@ -816,7 +840,7 @@ HorarioPersonal As screen:
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 Fill: =RGBA(255, 255, 255, 1)
                                 Font: =App.Theme.Font
-                                FontWeight: =If(drpTurno_J.SelectedText.Value <> "Libre", FontWeight.Bold, FontWeight.Normal)
+                                FontWeight: =If(drpTurno_J.SelectedText.Value <> LookUp(Tipo_Turnos, Id_Turno = "6", Turno_Op), FontWeight.Bold, FontWeight.Normal)
                                 Height: =50
                                 Size: =15
                                 Text: =drpTurno_J.Selected.Horas_Pagadas
@@ -872,7 +896,7 @@ HorarioPersonal As screen:
                                 DisabledColor: =RGBA(0, 0, 0, 1)
                                 DisabledFill: =RGBA(204, 228, 246, 1)
                                 Font: =App.Theme.Font
-                                FontWeight: =If(drpTurno_V.SelectedText.Value <> "Libre", FontWeight.Bold, FontWeight.Normal)
+                                FontWeight: =If(drpTurno_V.SelectedText.Value <>LookUp(Tipo_Turnos, Id_Turno = "6", Turno_Op), FontWeight.Bold, FontWeight.Normal)
                                 Height: =50
                                 HoverBorderColor: =RGBA(153, 201, 238, 1)
                                 HoverColor: =RGBA(0, 0, 0, 1)
@@ -895,7 +919,7 @@ HorarioPersonal As screen:
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 Fill: =RGBA(255, 255, 255, 1)
                                 Font: =App.Theme.Font
-                                FontWeight: =If(drpTurno_V.SelectedText.Value <> "Libre", FontWeight.Bold, FontWeight.Normal)
+                                FontWeight: =If(drpTurno_V.SelectedText.Value <>LookUp(Tipo_Turnos, Id_Turno = "6", Turno_Op), FontWeight.Bold, FontWeight.Normal)
                                 Height: =50
                                 Size: =15
                                 Text: =drpTurno_V.Selected.Turno_Horas
@@ -911,10 +935,10 @@ HorarioPersonal As screen:
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 Fill: =RGBA(255, 255, 255, 1)
                                 Font: =App.Theme.Font
-                                FontWeight: =If(drpTurno_V.SelectedText.Value <> "Libre", FontWeight.Bold, FontWeight.Normal)
+                                FontWeight: =If(drpTurno_V.SelectedText.Value <>LookUp(Tipo_Turnos, Id_Turno = "6", Turno_Op), FontWeight.Bold, FontWeight.Normal)
                                 Height: =50
                                 Size: =15
-                                Text: =drpTurno_V.Selected.crfb9_horas_trabajadas
+                                Text: =drpTurno_V.Selected.Horas_Trabajadas
                                 Width: =165
                                 X: =461
                                 Y: =5
@@ -927,7 +951,7 @@ HorarioPersonal As screen:
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 Fill: =RGBA(255, 255, 255, 1)
                                 Font: =App.Theme.Font
-                                FontWeight: =If(drpTurno_V.SelectedText.Value <> "Libre", FontWeight.Bold, FontWeight.Normal)
+                                FontWeight: =If(drpTurno_V.SelectedText.Value <>LookUp(Tipo_Turnos, Id_Turno = "6", Turno_Op), FontWeight.Bold, FontWeight.Normal)
                                 Height: =50
                                 Size: =15
                                 Text: =drpTurno_V.Selected.Horas_Pagadas
@@ -983,7 +1007,7 @@ HorarioPersonal As screen:
                                 DisabledColor: =RGBA(0, 0, 0, 1)
                                 DisabledFill: =RGBA(204, 228, 246, 1)
                                 Font: =App.Theme.Font
-                                FontWeight: =If(drpTurno_S.SelectedText.Value <> "Libre", FontWeight.Bold, FontWeight.Normal)
+                                FontWeight: =If(drpTurno_S.SelectedText.Value <> LookUp(Tipo_Turnos, Id_Turno = "6", Turno_Op), FontWeight.Bold, FontWeight.Normal)
                                 Height: =50
                                 HoverBorderColor: =RGBA(153, 201, 238, 1)
                                 HoverColor: =RGBA(0, 0, 0, 1)
@@ -1006,7 +1030,7 @@ HorarioPersonal As screen:
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 Fill: =RGBA(255, 255, 255, 1)
                                 Font: =App.Theme.Font
-                                FontWeight: =If(drpTurno_S.SelectedText.Value <> "Libre", FontWeight.Bold, FontWeight.Normal)
+                                FontWeight: =If(drpTurno_S.SelectedText.Value <> LookUp(Tipo_Turnos, Id_Turno = "6", Turno_Op), FontWeight.Bold, FontWeight.Normal)
                                 Height: =50
                                 Size: =15
                                 Text: =drpTurno_S.Selected.Turno_Horas
@@ -1022,10 +1046,10 @@ HorarioPersonal As screen:
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 Fill: =RGBA(255, 255, 255, 1)
                                 Font: =App.Theme.Font
-                                FontWeight: =If(drpTurno_S.SelectedText.Value <> "Libre", FontWeight.Bold, FontWeight.Normal)
+                                FontWeight: =If(drpTurno_S.SelectedText.Value <> LookUp(Tipo_Turnos, Id_Turno = "6", Turno_Op), FontWeight.Bold, FontWeight.Normal)
                                 Height: =50
                                 Size: =15
-                                Text: =drpTurno_S.Selected.crfb9_horas_trabajadas
+                                Text: =drpTurno_S.Selected.Horas_Trabajadas
                                 Width: =165
                                 X: =461
                                 Y: =5
@@ -1038,7 +1062,7 @@ HorarioPersonal As screen:
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 Fill: =RGBA(255, 255, 255, 1)
                                 Font: =App.Theme.Font
-                                FontWeight: =If(drpTurno_S.SelectedText.Value <> "Libre", FontWeight.Bold, FontWeight.Normal)
+                                FontWeight: =If(drpTurno_S.SelectedText.Value <> LookUp(Tipo_Turnos, Id_Turno = "6", Turno_Op), FontWeight.Bold, FontWeight.Normal)
                                 Height: =50
                                 Size: =15
                                 Text: =drpTurno_S.Selected.Horas_Pagadas
@@ -1049,7 +1073,7 @@ HorarioPersonal As screen:
 
                         Maquina_DataCard1 As typedDataCard.textualEditCard:
                             BorderColor: =RGBA(40, 134, 222, 1)
-                            BorderStyle: =BorderStyle.Solid
+                            BorderStyle: =BorderStyle.None
                             BorderThickness: =1
                             DataField: ="crfb9_maquina"
                             Default: =ThisItem.Maquina
@@ -1128,7 +1152,7 @@ HorarioPersonal As screen:
 
                         "'Maquina 2_DataCard1' As typedDataCard.textualEditCard":
                             BorderColor: =RGBA(40, 134, 222, 1)
-                            BorderStyle: =BorderStyle.Solid
+                            BorderStyle: =BorderStyle.None
                             BorderThickness: =1
                             DataField: ="crfb9_maquina2"
                             Default: =ThisItem.'Maquina 2'
@@ -1366,7 +1390,7 @@ HorarioPersonal As screen:
                                 DisabledColor: =RGBA(0, 0, 0, 1)
                                 DisabledFill: =RGBA(204, 228, 246, 1)
                                 Font: =App.Theme.Font
-                                FontWeight: =If(drpTurno_L.SelectedText.Value <> "Libre", FontWeight.Bold, FontWeight.Normal)
+                                FontWeight: =If(drpTurno_L.SelectedText.Value <> LookUp(Tipo_Turnos, Id_Turno = "6", Turno_Op), FontWeight.Bold, FontWeight.Normal)
                                 Height: =50
                                 HoverBorderColor: =RGBA(102, 182, 227, 1)
                                 HoverColor: =RGBA(0, 0, 0, 1)
@@ -1389,7 +1413,7 @@ HorarioPersonal As screen:
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 Fill: =RGBA(255, 255, 255, 1)
                                 Font: =App.Theme.Font
-                                FontWeight: =If(drpTurno_L.SelectedText.Value <> "Libre", FontWeight.Bold, FontWeight.Normal)
+                                FontWeight: =If(drpTurno_L.SelectedText.Value <> LookUp(Tipo_Turnos, Id_Turno = "6", Turno_Op), FontWeight.Bold, FontWeight.Normal)
                                 Height: =50
                                 Size: =15
                                 Text: =drpTurno_L.Selected.Turno_Horas
@@ -1405,10 +1429,10 @@ HorarioPersonal As screen:
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 Fill: =RGBA(255, 255, 255, 1)
                                 Font: =App.Theme.Font
-                                FontWeight: =If(drpTurno_L.SelectedText.Value <> "Libre", FontWeight.Bold, FontWeight.Normal)
+                                FontWeight: =If(drpTurno_L.SelectedText.Value <> LookUp(Tipo_Turnos, Id_Turno = "6", Turno_Op), FontWeight.Bold, FontWeight.Normal)
                                 Height: =50
                                 Size: =15
-                                Text: =drpTurno_L.Selected.crfb9_horas_trabajadas
+                                Text: =drpTurno_L.Selected.Horas_Trabajadas
                                 Width: =165
                                 X: =461
                                 Y: =5
@@ -1421,7 +1445,7 @@ HorarioPersonal As screen:
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 Fill: =RGBA(255, 255, 255, 1)
                                 Font: =App.Theme.Font
-                                FontWeight: =If(drpTurno_L.SelectedText.Value <> "Libre", FontWeight.Bold, FontWeight.Normal)
+                                FontWeight: =If(drpTurno_L.SelectedText.Value <> LookUp(Tipo_Turnos, Id_Turno = "6", Turno_Op), FontWeight.Bold, FontWeight.Normal)
                                 Height: =50
                                 Size: =15
                                 Text: =drpTurno_L.Selected.Horas_Pagadas
@@ -1477,7 +1501,7 @@ HorarioPersonal As screen:
                                 DisabledColor: =RGBA(0, 0, 0, 1)
                                 DisabledFill: =RGBA(204, 228, 246, 1)
                                 Font: =App.Theme.Font
-                                FontWeight: =If(drpTurno_D.SelectedText.Value <> "Libre", FontWeight.Bold, FontWeight.Normal)
+                                FontWeight: =If(drpTurno_D.SelectedText.Value <> LookUp(Tipo_Turnos, Id_Turno = "6", Turno_Op), FontWeight.Bold, FontWeight.Normal)
                                 Height: =50
                                 HoverBorderColor: =RGBA(153, 201, 238, 1)
                                 HoverColor: =RGBA(0, 0, 0, 1)
@@ -1500,7 +1524,7 @@ HorarioPersonal As screen:
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 Fill: =RGBA(255, 255, 255, 1)
                                 Font: =App.Theme.Font
-                                FontWeight: =If(drpTurno_D.SelectedText.Value <> "Libre", FontWeight.Bold, FontWeight.Normal)
+                                FontWeight: =If(drpTurno_D.SelectedText.Value <> LookUp(Tipo_Turnos, Id_Turno = "6", Turno_Op), FontWeight.Bold, FontWeight.Normal)
                                 Height: =50
                                 Size: =15
                                 Text: =drpTurno_D.Selected.Turno_Horas
@@ -1516,10 +1540,10 @@ HorarioPersonal As screen:
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 Fill: =RGBA(255, 255, 255, 1)
                                 Font: =App.Theme.Font
-                                FontWeight: =If(drpTurno_D.SelectedText.Value <> "Libre", FontWeight.Bold, FontWeight.Normal)
+                                FontWeight: =If(drpTurno_D.SelectedText.Value <> LookUp(Tipo_Turnos, Id_Turno = "6", Turno_Op), FontWeight.Bold, FontWeight.Normal)
                                 Height: =50
                                 Size: =15
-                                Text: =drpTurno_D.Selected.crfb9_horas_trabajadas
+                                Text: =drpTurno_D.Selected.Horas_Trabajadas
                                 Width: =165
                                 X: =461
                                 Y: =5
@@ -1532,7 +1556,7 @@ HorarioPersonal As screen:
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 Fill: =RGBA(255, 255, 255, 1)
                                 Font: =App.Theme.Font
-                                FontWeight: =If(drpTurno_D.SelectedText.Value <> "Libre", FontWeight.Bold, FontWeight.Normal)
+                                FontWeight: =If(drpTurno_D.SelectedText.Value <> LookUp(Tipo_Turnos, Id_Turno = "6", Turno_Op), FontWeight.Bold, FontWeight.Normal)
                                 Height: =50
                                 Size: =15
                                 Text: =drpTurno_D.Selected.Horas_Pagadas
@@ -1879,9 +1903,10 @@ HorarioPersonal As screen:
 
                     InfoHorarios As gallery.galleryVertical:
                         BorderColor: =RGBA(0, 134, 208, 1)
+                        BorderStyle: =BorderStyle.None
                         BorderThickness: =2
                         DelayItemLoading: =true
-                        Fill: =RGBA(204, 231, 246, 1)
+                        Fill: =RGBA(140, 217, 255, 0.34)
                         Height: =588
                         Items: =FirstN(Sort(Filter(HorarioSemanals, Empleado = drpEmpleadoHorario.Selected.Nombre),'Fecha de creación', SortOrder.Descending), 4)
                         Layout: =Layout.Vertical
@@ -2297,7 +2322,7 @@ HorarioPersonal As screen:
                             Y: =201
                             ZIndex: =14
 
-                        TextInput1_23 As text:
+                        TextInput1_51 As text:
                             Align: =Align.Center
                             BorderColor: =App.Theme.Colors.Darker40
                             BorderThickness: =2
@@ -2583,7 +2608,7 @@ HorarioPersonal As screen:
                             Visible: =If(LookUp(Empleados, Nombre = drpEmpleadoHorario.SelectedText.Value, Area) = "OPERARIOS", true, false)
                             Width: =130
                             X: =53
-                            Y: =294
+                            Y: =247
                             ZIndex: =24
 
                         TextInput1_48 As text:
@@ -2611,7 +2636,7 @@ HorarioPersonal As screen:
                             Visible: =If(LookUp(Empleados, Nombre = drpEmpleadoHorario.SelectedText.Value, Area) = "OPERARIOS", true, false)
                             Width: =135
                             X: =51
-                            Y: =333
+                            Y: =247
                             ZIndex: =25
 
                         TextInput1_49 As text:
@@ -2641,7 +2666,7 @@ HorarioPersonal As screen:
                             Visible: =If(LookUp(Empleados, Nombre = drpEmpleadoHorario.SelectedText.Value, Area) = "OPERARIOS", true, false)
                             Width: =130
                             X: =195
-                            Y: =294
+                            Y: =247
                             ZIndex: =26
 
                         TextInput1_50 As text:
@@ -2669,10 +2694,10 @@ HorarioPersonal As screen:
                             Visible: =If(LookUp(Empleados, Nombre = drpEmpleadoHorario.SelectedText.Value, Area) = "OPERARIOS", true, false)
                             Width: =135
                             X: =193
-                            Y: =334
+                            Y: =247
                             ZIndex: =27
 
-                        TextInput1_51 As text:
+                        TextInput1_56 As text:
                             Align: =Align.Center
                             BorderColor: =App.Theme.Colors.Darker40
                             BorderThickness: =2
@@ -2699,7 +2724,7 @@ HorarioPersonal As screen:
                             Visible: =If(LookUp(Empleados, Nombre = drpEmpleadoHorario.SelectedText.Value, Area) = "OPERARIOS", true, false)
                             Width: =130
                             X: =336
-                            Y: =294
+                            Y: =247
                             ZIndex: =28
 
                         TextInput1_52 As text:
@@ -2727,7 +2752,7 @@ HorarioPersonal As screen:
                             Visible: =If(LookUp(Empleados, Nombre = drpEmpleadoHorario.SelectedText.Value, Area) = "OPERARIOS", true, false)
                             Width: =135
                             X: =334
-                            Y: =334
+                            Y: =247
                             ZIndex: =29
 
                         Icon4 As icon.Edit:
@@ -2737,7 +2762,7 @@ HorarioPersonal As screen:
                             DisabledBorderColor: =RGBA(166, 166, 166, 1)
                             DisabledColor: =RGBA(0, 94, 146, 1)
                             Fill: =If(ThisItem.IsSelected && Mostrar, RGBA(0, 134, 208, 0.24),RGBA(0, 0, 0, 0))
-                            Height: =InfoHorarios.TemplateHeight
+                            Height: =287
                             HoverBorderColor: =
                             HoverColor: =RGBA(0, 134, 208, 1)
                             HoverFill: =RGBA(0, 134, 208, 0.24)
@@ -2881,4 +2906,135 @@ HorarioPersonal As screen:
             X: =171
             Y: =141
             ZIndex: =2
+
+    HtmlPDF As htmlViewer:
+        Height: =648
+        HtmlText: |-
+            ="<!DOCTYPE html>
+            <html>
+            <head>
+            	<title>Horarios</title>
+            	<style>
+            		table {
+            			border-collapse: collapse;
+            			margin: 0 auto; /* Centra la tabla */
+            		}
+            		th, td {
+            			border: 1px solid #ddd;
+            			padding: 8px;
+            			text-align: center;
+            		}
+            		.title {
+            			color: #FFFFFF;
+            			font-weight: bold;
+            			background-color: rgba(0, 120, 212, 1);
+            			padding: 10px;
+            			border-radius: 30px; /* Redondea los títulos */
+            			text-align: center;
+            			margin: 20px; /* Agrega un margen para separar los títulos */
+            		}
+            		.header {
+            			color: #FFFFFF;
+            			font-weight: bold;
+            			background-color: rgba(153, 201, 238, 1);
+            		}
+            		.subheader {
+            			color: #FFFFFF;
+            			font-weight: bold;
+            			background-color: rgba(204, 228, 246, 1);
+            			font-size: 16px; /* Reduce el tamaño de los títulos de las tablas horizontales */
+            			padding: 5px; /* Reduce el padding de los títulos de las tablas horizontales */
+            		}
+            		.smalltitle {
+            			color: #FFFFFF;
+            			font-weight: bold;
+            			background-color: rgba(153, 201, 238, 1);
+            			font-size: 18px; /* Reduce el tamaño de los títulos */
+            			padding: 10px;
+            			border-radius: 20px; /* Redondea los títulos */
+            			text-align: center;
+            			margin: 20px; /* Agrega un margen para separar los títulos */
+            		}
+            	</style>
+            </head>
+            <body>
+            	<h1 class=""title"" style=""border-radius: 30px; padding: 20px;"">Proximo Horario</h1>
+            	<table>
+            		<tr>
+            			<th class=""header"">Lunes</th>
+            			<td>"& drpTurno_L.SelectedText.Value & " - " & lblHorario_L.Text &"</td>
+            		</tr>
+            		<tr>
+            			<th class=""header"">Martes</th>
+            			<td>"& drpTurno_K.SelectedText.Value & " - " & lblHorario_K.Text &"</td>
+            		</tr>
+            		<tr>
+            			<th class=""header"">Miercoles</th>
+            			<td>"& drpTurno__M.SelectedText.Value & " - " & lblHorario_M.Text &"</td>
+            		</tr>
+            		<tr>
+            			<th class=""header"">Jueves</th>
+            			<td>"& drpTurno_J.SelectedText.Value & " - " & lblHorario_J.Text &"</td>
+            		</tr>
+            		<tr>
+            			<th class=""header"">Viernes</th>
+            			<td>"& drpTurno_V.SelectedText.Value & " - " & lblHorario_V.Text &"</td>
+            		</tr>
+            		<tr>
+            			<th class=""header"">Sabado</th>
+            			<td>"& drpTurno_S.SelectedText.Value & " - " & lblHorario_S.Text &"</td>
+            		</tr>
+            		<tr>
+            			<th class=""header"">Domingo</th>
+            			<td>"& drpTurno_D.SelectedText.Value & " - " & lblHorario_D.Text &"</td>
+            		</tr>
+            	</table>
+            	
+            	<h1 class=""smalltitle"" style=""border-radius: 20px; padding: 10px;"">Maquinas asignadas</h1>
+            	<table>
+            		<tr>
+            			<th class=""subheader"">Maquina 1</th>
+            			<th class=""subheader"">Maquina 2</th>
+            			<th class=""subheader"">Maquina 3</th>
+            		</tr>
+            		<tr>
+            			<td>"& drpMaquina.SelectedText.Value &"</td>
+            			<td>"& drpMaquina2.SelectedText.Value &"</td>
+            			<td>"& drpMaquina3.SelectedText.Value &"</td>
+            		</tr>
+            	</table>
+            	
+            	<h1 class=""smalltitle"" style=""border-radius: 20px; padding: 10px;"">Informacion adicional</h1>
+            	<table>
+            		<tr>
+            			<th class=""subheader"">Empleado</th>
+            			<th class=""subheader"">Fecha Inicio</th>
+            			<th class=""subheader"">Fecha Fin</th>
+            			<th class=""subheader"">Horas Trabajadas</th>
+            			<th class=""subheader"">Horas Pagadas</th>
+            		</tr>
+            		<tr>
+            			<td>"& drpEmpleadoHorario.SelectedText.Value &"</td>
+            			<td>"& dpFechaInicio.SelectedDate &"</td>
+            			<td>"& dpFechaFin.SelectedDate &"</td>
+            			<td>"& txtHorasTrabajadas.Text &"</td>
+            			<td>"& txtHorasPagadas.Text &"</td>
+            		</tr>
+            	</table>
+            	
+            </"
+        Visible: =false
+        Width: =503
+        X: =40
+        Y: =40
+        ZIndex: =3
+
+    HtmlCuerpo As htmlViewer:
+        Height: =648
+        HtmlText: ="Estimado/a,<br><br>" & "Le informamos que se ha asignado su próximo horario. Para obtener más información, por favor revise el archivo PDF adjunto..<br><br>" & "Si tiene alguna duda, queja o sugerencia hablar con el encargado de asiganar los horarios.<br><br>" & "Gracias,<br>"
+        Visible: =false
+        Width: =503
+        X: =60
+        Y: =60
+        ZIndex: =4
 
