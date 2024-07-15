@@ -1180,20 +1180,43 @@ EstadosPermisos As screen:
                 DisabledColor: =RGBA(244, 244, 244, 1)
                 HoverFill: =RGBA(180, 214, 250, 1)
                 Icon: =Icon.CheckBadge
-                OnSelect: |
+                OnSelect: |-
                     =UpdateContext({ConVisible: false});
+                    EnviarCorreo.Run(
+                        LookUp(
+                            Empleados,
+                            Codigo = GaleriaEstado.Selected.Codigo,
+                            Correo
+                        ),
+                        "Revision de Permisos",
+                        "Estimado/a,<br><br>" & "Su solicitud por " & GaleriaEstado.Selected.Solicitud & " ha sido " & Dropdown1_1.SelectedText.Value & ".<br><br>" & "Si desea saber mas detalles puede revisar sus solicitudes o contactar con Recurso Humanos<br><br>" & "Gracias<br>"
+                    );
                     Patch(
                         TramitesSolicitudes,
                         GaleriaEstado.Selected,
                         {
                             EstadoDeProceso: Dropdown1_1.SelectedText.Value,
-                            Remunerado: If(Checkbox1.Value, "SI", "NO"),
-                            JefeDirecto: LookUp(Empleados, Codigo = VarName,Nombre),
+                            Remunerado: If(
+                                Checkbox1.Value,
+                                "SI",
+                                "NO"
+                            ),
+                            JefeDirecto: LookUp(
+                                Empleados,
+                                Codigo = VarName,
+                                Nombre
+                            ),
                             FirmaJefes: penfirmaJefe.Image,
-                            MotivoRechazo: Left(TextInput2.Text, 100)
+                            MotivoRechazo: Left(
+                                TextInput2.Text,
+                                100
+                            )
                         }
                     );
-                    Notify("Datos guardados correctamente", NotificationType.Success);
+                    Notify(
+                        "Datos guardados correctamente",
+                        NotificationType.Success
+                    );
                     Reset(TextInput2);
                     Reset(Dropdown1_1);
                     Reset(Checkbox1);
