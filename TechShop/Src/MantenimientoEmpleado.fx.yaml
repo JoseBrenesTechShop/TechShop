@@ -912,33 +912,46 @@ MantenimientoEmpleado As screen:
                         HoverColor: =RGBA(255, 255, 255, 1)
                         HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
                         OnSelect: |-
-                            =// Validar que los campos Nombre y Codigo no estén vacíos
-                            If(
-                                IsBlank(txtNombr.Text) || IsBlank(txtCodig.Text) || IsBlank(txtContrasena.Text),
-                                Notify("El nombre la contraseña y el codigo son obligatorios", NotificationType.Error),
+                            =If(
+                                IsBlank(txtNombr.Text) || 
+                                IsBlank(txtCodig.Text) || 
+                                IsBlank(txtContrasena.Text) || 
+                                IsBlank(dropPuestoo.Selected.Descripcion) || 
+                                IsBlank(comboContrato.Selected.Value),
+                                
+                                Notify("Todos los campos (Nombre, Código, Contraseña, Puesto y Contrato) son obligatorios", NotificationType.Error),
                             
                                 // Validar que no haya duplicados en la base de datos
                                 If(
                                     !IsBlank(LookUp(Empleados, Codigo = txtCodig.Text)),
+                                    
                                     Notify("Ya existe un empleado con este código", NotificationType.Error),
                                 
-                                    // Si pasa ambas validaciones, proceder con el Patch
-                                    Patch(
-                                        Empleados,
-                                        Defaults(Empleados),
-                                        {
-                                            Nombre: txtNombr.Text,
-                                            Codigo: txtCodig.Text,
-                                            Contraseña: txtContrasena.Text,
-                                            Area: dropAreaa.Selected.Descripcion,
-                                            Puesto: dropPuestoo.Selected.Descripcion,
-                                            Rol: dropRoll.Selected.Descripcion,
-                                            Acceso: toggleAcesso.Value,
-                                            Contrato: comboContrato.Selected.Value
-                                        }
-                                    );
-                                    ResetForm(Form1), // Opcional, para limpiar el formulario
-                                    Notify("Empleado agregado exitosamente", NotificationType.Success)
+                                    // Validar que el Puesto y el Contrato sean válidos
+                                    If(
+                                        IsBlank(dropPuestoo.Selected.Descripcion) || 
+                                        IsBlank(comboContrato.Selected.Value),
+                            
+                                        Notify("El Puesto y el Contrato deben ser seleccionados", NotificationType.Error),
+                            
+                                        // Si pasa todas las validaciones, proceder con el Patch
+                                        Patch(
+                                            Empleados,
+                                            Defaults(Empleados),
+                                            {
+                                                Nombre: txtNombr.Text,
+                                                Codigo: txtCodig.Text,
+                                                Contraseña: txtContrasena.Text,
+                                                Area: dropAreaa.Selected.Descripcion,
+                                                Puesto: dropPuestoo.Selected.Descripcion,
+                                                Rol: dropRoll.Selected.Descripcion,
+                                                Acceso: toggleAcesso.Value,
+                                                Contrato: comboContrato.Selected.Value
+                                            }
+                                        );
+                                        ResetForm(Form1), // Opcional, para limpiar el formulario
+                                        Notify("Empleado agregado exitosamente", NotificationType.Success)
+                                    )
                                 )
                             )
                         Size: =15
@@ -982,9 +995,10 @@ MantenimientoEmpleado As screen:
                         ZIndex: =1
 
                         Title2_2 As label:
-                            Color: =RGBA(0, 0, 0, 1)
+                            BorderThickness: =2
+                            Color: =RGBA(255, 255, 255, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
-                            Fill: =RGBA(255, 255, 255, 1)
+                            Fill: =RGBA(40, 134, 222, 1)
                             FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
                             Height: =44
                             OnSelect: =Select(Parent)
@@ -1000,10 +1014,12 @@ MantenimientoEmpleado As screen:
                             ZIndex: =1
 
                         Body1_1 As label:
-                            Color: =RGBA(0, 0, 0, 1)
+                            BorderThickness: =2
+                            Color: =RGBA(255, 255, 255, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
-                            Fill: =RGBA(255, 255, 255, 1)
+                            Fill: =RGBA(40, 134, 222, 1)
                             FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                            Height: =46
                             OnSelect: =Select(Parent)
                             PaddingBottom: =0
                             PaddingLeft: =0
@@ -1013,8 +1029,8 @@ MantenimientoEmpleado As screen:
                             Text: =ThisItem.Codigo
                             Width: =80
                             X: =358
-                            Y: =13
-                            ZIndex: =3
+                            Y: =7
+                            ZIndex: =2
 
                         Separator1_1 As rectangle:
                             BorderColor: =RGBA(0, 18, 107, 1)
@@ -1023,7 +1039,7 @@ MantenimientoEmpleado As screen:
                             OnSelect: =Select(Parent)
                             Width: =Parent.TemplateWidth
                             Y: =Parent.TemplateHeight - Self.Height
-                            ZIndex: =5
+                            ZIndex: =3
 
                         Rectangle1_1 As rectangle:
                             BorderColor: =RGBA(0, 18, 107, 1)
@@ -1032,10 +1048,11 @@ MantenimientoEmpleado As screen:
                             OnSelect: =Select(Parent)
                             Visible: =ThisItem.IsSelected
                             Width: =4
-                            ZIndex: =6
+                            ZIndex: =4
 
                         Label1_17 As label:
                             BorderColor: =RGBA(0, 18, 107, 1)
+                            BorderThickness: =2
                             Color: =RGBA(0, 0, 0, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             Fill: =RGBA(241, 244, 249, 1)
@@ -1047,24 +1064,27 @@ MantenimientoEmpleado As screen:
                             Width: =90
                             X: =12
                             Y: =7
-                            ZIndex: =7
+                            ZIndex: =5
 
                         Label1_18 As label:
                             BorderColor: =RGBA(0, 18, 107, 1)
+                            BorderThickness: =2
                             Color: =RGBA(0, 0, 0, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             Fill: =RGBA(241, 244, 249, 1)
+                            Height: =44
                             OnSelect: =Select(Parent)
                             Size: =13
                             Text: |-
                                 ="CODIGO:"
                             Width: =90
                             X: =268
-                            Y: =11
-                            ZIndex: =8
+                            Y: =7
+                            ZIndex: =6
 
                         Label1_21 As label:
                             BorderColor: =RGBA(0, 18, 107, 1)
+                            BorderThickness: =2
                             Color: =RGBA(0, 0, 0, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             Fill: =RGBA(241, 244, 249, 1)
@@ -1076,12 +1096,13 @@ MantenimientoEmpleado As screen:
                             Width: =89
                             X: =12
                             Y: =51
-                            ZIndex: =9
+                            ZIndex: =7
 
                         Title2_3 As label:
-                            Color: =RGBA(0, 0, 0, 1)
+                            BorderThickness: =2
+                            Color: =RGBA(255, 255, 255, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
-                            Fill: =RGBA(255, 255, 255, 1)
+                            Fill: =RGBA(40, 134, 222, 1)
                             FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
                             Height: =44
                             OnSelect: =Select(Parent)
@@ -1094,10 +1115,170 @@ MantenimientoEmpleado As screen:
                             Width: =167
                             X: =101
                             Y: =51
+                            ZIndex: =8
+
+                        Title2_4 As label:
+                            BorderThickness: =2
+                            Color: =RGBA(255, 255, 255, 1)
+                            DisabledColor: =RGBA(166, 166, 166, 1)
+                            Fill: =RGBA(40, 134, 222, 1)
+                            FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                            Height: =44
+                            OnSelect: =Select(Parent)
+                            PaddingBottom: =0
+                            PaddingLeft: =0
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            Size: =13
+                            Text: =ThisItem.Puesto
+                            Width: =157
+                            X: =358
+                            Y: =51
+                            ZIndex: =9
+
+                        Label1_19 As label:
+                            BorderColor: =RGBA(0, 18, 107, 1)
+                            BorderThickness: =2
+                            Color: =RGBA(0, 0, 0, 1)
+                            DisabledColor: =RGBA(166, 166, 166, 1)
+                            Fill: =RGBA(241, 244, 249, 1)
+                            Height: =44
+                            OnSelect: =Select(Parent)
+                            Size: =13
+                            Text: |-
+                                ="ACCESO:"
+                            Width: =90
+                            X: =639
+                            Y: =7
                             ZIndex: =10
+
+                        Body1_2 As label:
+                            BorderThickness: =2
+                            Color: =RGBA(255, 255, 255, 1)
+                            DisabledColor: =RGBA(166, 166, 166, 1)
+                            Fill: =RGBA(40, 134, 222, 1)
+                            FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                            Height: =46
+                            OnSelect: =Select(Parent)
+                            PaddingBottom: =0
+                            PaddingLeft: =0
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            Size: =13
+                            Text: =ThisItem.Acceso
+                            Width: =42
+                            X: =729
+                            Y: =7
+                            ZIndex: =11
+
+                        Label1_23 As label:
+                            BorderColor: =RGBA(0, 18, 107, 1)
+                            BorderThickness: =2
+                            Color: =RGBA(0, 0, 0, 1)
+                            DisabledColor: =RGBA(166, 166, 166, 1)
+                            Fill: =RGBA(241, 244, 249, 1)
+                            Height: =44
+                            OnSelect: =Select(Parent)
+                            Size: =13
+                            Text: |-
+                                ="ROL:"
+                            Width: =55
+                            X: =771
+                            Y: =6
+                            ZIndex: =12
+
+                        Body1_4 As label:
+                            BorderThickness: =2
+                            Color: =RGBA(255, 255, 255, 1)
+                            DisabledColor: =RGBA(166, 166, 166, 1)
+                            Fill: =RGBA(40, 134, 222, 1)
+                            FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                            Height: =47
+                            OnSelect: =Select(Parent)
+                            PaddingBottom: =0
+                            PaddingLeft: =0
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            Size: =13
+                            Text: =ThisItem.Rol
+                            Width: =60
+                            X: =826
+                            Y: =6
+                            ZIndex: =13
+
+                        Label1_20 As label:
+                            BorderColor: =RGBA(0, 18, 107, 1)
+                            BorderThickness: =2
+                            Color: =RGBA(0, 0, 0, 1)
+                            DisabledColor: =RGBA(166, 166, 166, 1)
+                            Fill: =RGBA(241, 244, 249, 1)
+                            Height: =44
+                            OnSelect: =Select(Parent)
+                            Size: =13
+                            Text: |-
+                                ="CONTRATO:"
+                            Width: =115
+                            X: =438
+                            Y: =7
+                            ZIndex: =14
+
+                        Body1_3 As label:
+                            BorderThickness: =2
+                            Color: =RGBA(255, 255, 255, 1)
+                            DisabledColor: =RGBA(166, 166, 166, 1)
+                            Fill: =RGBA(40, 134, 222, 1)
+                            FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                            Height: =44
+                            OnSelect: =Select(Parent)
+                            PaddingBottom: =0
+                            PaddingLeft: =0
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            Size: =13
+                            Text: =ThisItem.Contrato
+                            Width: =85
+                            X: =553
+                            Y: =7
+                            ZIndex: =15
+
+                        Label1_24 As label:
+                            BorderColor: =RGBA(0, 18, 107, 1)
+                            BorderThickness: =2
+                            Color: =RGBA(0, 0, 0, 1)
+                            DisabledColor: =RGBA(166, 166, 166, 1)
+                            Fill: =RGBA(241, 244, 249, 1)
+                            Height: =43
+                            OnSelect: =Select(Parent)
+                            Size: =13
+                            Text: |-
+                                ="CORREO:"
+                            Width: =90
+                            X: =516
+                            Y: =52
+                            ZIndex: =16
+
+                        Title2_5 As label:
+                            BorderThickness: =2
+                            Color: =RGBA(255, 255, 255, 1)
+                            DisabledColor: =RGBA(166, 166, 166, 1)
+                            Fill: =RGBA(40, 134, 222, 1)
+                            FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                            Height: =44
+                            OnSelect: =Select(Parent)
+                            PaddingBottom: =0
+                            PaddingLeft: =0
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            Size: =13
+                            Text: =ThisItem.Correo
+                            Width: =280
+                            X: =606
+                            Y: =51
+                            ZIndex: =17
 
                         Label1_22 As label:
                             BorderColor: =RGBA(0, 18, 107, 1)
+                            BorderThickness: =2
                             Color: =RGBA(0, 0, 0, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             Fill: =RGBA(241, 244, 249, 1)
@@ -1109,149 +1290,7 @@ MantenimientoEmpleado As screen:
                             Width: =90
                             X: =268
                             Y: =51
-                            ZIndex: =11
-
-                        Title2_4 As label:
-                            Color: =RGBA(0, 0, 0, 1)
-                            DisabledColor: =RGBA(166, 166, 166, 1)
-                            Fill: =RGBA(255, 255, 255, 1)
-                            FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
-                            Height: =44
-                            OnSelect: =Select(Parent)
-                            PaddingBottom: =0
-                            PaddingLeft: =0
-                            PaddingRight: =0
-                            PaddingTop: =0
-                            Size: =13
-                            Text: =ThisItem.Puesto
-                            Width: =158
-                            X: =358
-                            Y: =51
-                            ZIndex: =12
-
-                        Label1_19 As label:
-                            BorderColor: =RGBA(0, 18, 107, 1)
-                            Color: =RGBA(0, 0, 0, 1)
-                            DisabledColor: =RGBA(166, 166, 166, 1)
-                            Fill: =RGBA(241, 244, 249, 1)
-                            OnSelect: =Select(Parent)
-                            Size: =13
-                            Text: |-
-                                ="ACCESO:"
-                            Width: =90
-                            X: =627
-                            Y: =11
-                            ZIndex: =13
-
-                        Body1_2 As label:
-                            Color: =RGBA(0, 0, 0, 1)
-                            DisabledColor: =RGBA(166, 166, 166, 1)
-                            Fill: =RGBA(255, 255, 255, 1)
-                            FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
-                            OnSelect: =Select(Parent)
-                            PaddingBottom: =0
-                            PaddingLeft: =0
-                            PaddingRight: =0
-                            PaddingTop: =0
-                            Size: =13
-                            Text: =ThisItem.Acceso
-                            Width: =39
-                            X: =717
-                            Y: =13
-                            ZIndex: =14
-
-                        Label1_23 As label:
-                            BorderColor: =RGBA(0, 18, 107, 1)
-                            Color: =RGBA(0, 0, 0, 1)
-                            DisabledColor: =RGBA(166, 166, 166, 1)
-                            Fill: =RGBA(241, 244, 249, 1)
-                            Height: =44
-                            OnSelect: =Select(Parent)
-                            Size: =13
-                            Text: |-
-                                ="ROL:"
-                            Width: =55
-                            X: =756
-                            Y: =7
-                            ZIndex: =15
-
-                        Body1_4 As label:
-                            Color: =RGBA(0, 0, 0, 1)
-                            DisabledColor: =RGBA(166, 166, 166, 1)
-                            FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
-                            Height: =42
-                            OnSelect: =Select(Parent)
-                            PaddingBottom: =0
-                            PaddingLeft: =0
-                            PaddingRight: =0
-                            PaddingTop: =0
-                            Size: =13
-                            Text: =ThisItem.Rol
-                            Width: =60
-                            X: =811
-                            Y: =7
-                            ZIndex: =16
-
-                        Label1_20 As label:
-                            BorderColor: =RGBA(0, 18, 107, 1)
-                            Color: =RGBA(0, 0, 0, 1)
-                            DisabledColor: =RGBA(166, 166, 166, 1)
-                            Fill: =RGBA(241, 244, 249, 1)
-                            OnSelect: =Select(Parent)
-                            Size: =13
-                            Text: |-
-                                ="CONTRATO:"
-                            Width: =115
-                            X: =438
-                            Y: =11
-                            ZIndex: =17
-
-                        Body1_3 As label:
-                            Color: =RGBA(0, 0, 0, 1)
-                            DisabledColor: =RGBA(166, 166, 166, 1)
-                            FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
-                            OnSelect: =Select(Parent)
-                            PaddingBottom: =0
-                            PaddingLeft: =0
-                            PaddingRight: =0
-                            PaddingTop: =0
-                            Size: =13
-                            Text: =ThisItem.Contrato
-                            Width: =86
-                            X: =553
-                            Y: =13
                             ZIndex: =18
-
-                        Label1_24 As label:
-                            BorderColor: =RGBA(0, 18, 107, 1)
-                            Color: =RGBA(0, 0, 0, 1)
-                            DisabledColor: =RGBA(166, 166, 166, 1)
-                            Fill: =RGBA(241, 244, 249, 1)
-                            OnSelect: =Select(Parent)
-                            Size: =13
-                            Text: |-
-                                ="CORREO:"
-                            Width: =90
-                            X: =516
-                            Y: =55
-                            ZIndex: =19
-
-                        Title2_5 As label:
-                            Color: =RGBA(0, 0, 0, 1)
-                            DisabledColor: =RGBA(166, 166, 166, 1)
-                            Fill: =RGBA(255, 255, 255, 1)
-                            FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
-                            OnSelect: =Select(Parent)
-                            PaddingBottom: =0
-                            PaddingLeft: =0
-                            PaddingRight: =0
-                            PaddingTop: =0
-                            Size: =13
-                            Text: =ThisItem.Correo
-                            Width: =303
-                            X: =606
-                            Y: =55
-                            ZIndex: =20
 
                     Button3_2 As button:
                         DisabledBorderColor: =RGBA(166, 166, 166, 1)
@@ -1263,21 +1302,41 @@ MantenimientoEmpleado As screen:
                         HoverColor: =RGBA(255, 255, 255, 1)
                         HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
                         OnSelect: |-
-                            =Patch(
-                                Empleados,
-                                LookUp(Empleados, Codigo = txtCodig.Text),
-                                {
-                                    Nombre: txtNombr.Text,
-                                    Contraseña: txtContrasena.Text,
-                                    Area:dropAreaa.Selected.Descripcion,
-                                    Puesto: dropPuestoo.Selected.Descripcion,
-                                    Rol: dropRoll.Selected.Descripcion,
-                                    Acceso: toggleAcesso.Value,
-                                    Contrato: comboContrato.Selected.Value
-                                }
-                            );
-                            ResetForm(Form1);
-                            Notify("Empleado modificado exitosamente", NotificationType.Success)
+                            =If(
+                                IsBlank(txtNombr.Text) || 
+                                IsBlank(txtCodig.Text) || 
+                                IsBlank(txtContrasena.Text) || 
+                                IsBlank(dropPuestoo.Selected.Descripcion) || 
+                                IsBlank(dropAreaa.Selected.Descripcion) ||
+                                IsBlank(comboContrato.Selected.Value),
+                                
+                                Notify("Todos los campos (Nombre, Código, Contraseña, Puesto y Contrato) son obligatorios", NotificationType.Error),
+                            
+                                // Validar que el código existe en la base de datos antes de modificar
+                                If(
+                                    IsBlank(LookUp(Empleados, Codigo = txtCodig.Text)),
+                                    
+                                    Notify("No existe un empleado con este código", NotificationType.Error),
+                                
+                                    // Si pasa todas las validaciones, proceder con el Patch para modificar
+                                    Patch(
+                                        Empleados,
+                                        LookUp(Empleados, Codigo = txtCodig.Text),
+                                        {
+                                            Nombre: txtNombr.Text,
+                                            Contraseña: txtContrasena.Text,
+                                            Area: dropAreaa.Selected.Descripcion,
+                                            Puesto: dropPuestoo.Selected.Descripcion,
+                                            Rol: dropRoll.Selected.Descripcion,
+                                            Acceso: toggleAcesso.Value,
+                                            Contrato: comboContrato.Selected.Value
+                                        }
+                                    );
+                            
+                                    ResetForm(Form1), // Opcional, para limpiar el formulario
+                                    Notify("Empleado modificado exitosamente", NotificationType.Success)
+                                )
+                            )
                         Size: =15
                         Text: ="MODIFICAR"
                         Width: =171
