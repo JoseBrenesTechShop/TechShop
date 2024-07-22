@@ -209,7 +209,7 @@ Scrap As screen:
             Height: =50
             MaxLength: =DataSourceInfo([@Scrap_1], DataSourceInfo.MaxLength, crfb9_pn)
             Required: =false
-            Update: =DataCardValue224.Text
+            Update: =Dropdown10.Selected.'P/N'
             Width: =349
             X: =2
             Y: =0
@@ -226,37 +226,8 @@ Scrap As screen:
                 Width: =(Parent.Width - 60) * 0.4
                 Wrap: =false
                 X: =15
-                Y: =10 + (DataCardValue224.Height / 2) - (Self.Height / 2)
+                Y: =
                 ZIndex: =1
-
-            DataCardValue224 As text:
-                BorderColor: =RGBA(9, 33, 98, 1)
-                BorderThickness: =0
-                Color: =RGBA(0, 0, 0, 1)
-                Default: =Parent.Default
-                DelayOutput: =true
-                DisabledBorderColor: =RGBA(166, 166, 166, 1)
-                DisabledColor: =RGBA(166, 166, 166, 1)
-                DisabledFill: =RGBA(244, 244, 244, 1)
-                DisplayMode: =Parent.DisplayMode
-                FocusedBorderThickness: =4
-                Font: =App.Theme.Font
-                HoverBorderColor: =App.Theme.Colors.Darker40
-                HoverColor: =RGBA(0, 0, 0, 1)
-                HoverFill: =App.Theme.Colors.Lighter70
-                MaxLength: =Parent.MaxLength
-                OnSelect: =
-                PaddingLeft: =5
-                RadiusBottomLeft: =0
-                RadiusBottomRight: =0
-                RadiusTopLeft: =0
-                RadiusTopRight: =0
-                Size: =13
-                Tooltip: =Parent.DisplayName
-                Width: =(Parent.Width - 60) * 0.6
-                X: =DataCardKey225.X + DataCardKey225.Width
-                Y: =10
-                ZIndex: =2
 
             ErrorMessage223 As label:
                 AutoHeight: =true
@@ -274,7 +245,7 @@ Scrap As screen:
                 Visible: =Parent.DisplayMode=DisplayMode.Edit
                 Width: =Parent.Width - 60
                 X: =30
-                Y: =DataCardValue224.Y + DataCardValue224.Height
+                Y: =
                 ZIndex: =3
 
             StarVisible223 As label:
@@ -290,6 +261,48 @@ Scrap As screen:
                 Wrap: =false
                 Y: =DataCardKey225.Y
                 ZIndex: =4
+
+            Dropdown10 As dropdown:
+                AllowEmptySelection: =true
+                BorderColor: =RGBA(245, 245, 245, 1)
+                ChevronBackground: =RGBA(15, 108, 189, 1)
+                ChevronDisabledBackground: =RGBA(15, 108, 189, 1)
+                ChevronDisabledFill: =RGBA(161, 159, 157, 1)
+                ChevronHoverBackground: =RGBA(15, 84, 140, 1)
+                ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                Color: =RGBA(50, 49, 48, 1)
+                Default: =
+                DisabledBorderColor: =RGBA(15, 108, 189, 1)
+                DisabledColor: =RGBA(161, 159, 157, 1)
+                DisabledFill: =RGBA(242, 242, 241, 0)
+                Font: =Font.'Segoe UI'
+                HoverBorderColor: =RGBA(16, 110, 190, 1)
+                HoverColor: =RGBA(50, 49, 48, 1)
+                HoverFill: =RGBA(255, 255, 255, 1)
+                Items: |-
+                    =If(
+                        IsBlank(txtScrapPN.Value),
+                        Sort('Tipo_P/N', 'P/N', SortOrder.Ascending),
+                        Sort(
+                            Filter('Tipo_P/N', txtScrapPN.Value in 'P/N'),
+                            'P/N',
+                            SortOrder.Ascending
+                        )
+                    )
+                PaddingBottom: =5
+                PaddingLeft: =12
+                PaddingRight: =5
+                PaddingTop: =5
+                PressedBorderColor: =RGBA(16, 110, 190, 1)
+                PressedColor: =RGBA(255, 255, 255, 1)
+                PressedFill: =RGBA(0, 120, 212, 1)
+                SelectionColor: =RGBA(50, 49, 48, 1)
+                SelectionFill: =RGBA(0, 120, 212, 1)
+                Size: =13
+                Width: =173.4
+                X: =130.6
+                Y: =10
+                ZIndex: =5
 
         Maquina_DataCard30 As typedDataCard.allowedValuesStringEditCard:
             AllowedValues: =DataSourceInfo([@Scrap_1], DataSourceInfo.AllowedValues, crfb9_maquina)
@@ -403,7 +416,7 @@ Scrap As screen:
             Height: =50
             MaxLength: =DataSourceInfo([@Scrap_1], DataSourceInfo.MaxLength, crfb9_operario)
             Required: =false
-            Update: =DataCardValue212.Text
+            Update: =Dropdown9.Selected.Nombre
             Width: =349
             X: =1
             Y: =1
@@ -483,7 +496,7 @@ Scrap As screen:
                         Sort(
                             Filter(
                                 Empleados, 
-                                Area = "OPERARIOS" && StartsWith(Nombre, txtOperarioScrap.Value)
+                                Area = "OPERARIOS" && (txtOperarioScrap.Value in Nombre)
                             ),
                             Nombre,
                             SortOrder.Ascending
@@ -1007,7 +1020,21 @@ Scrap As screen:
                 FontWeight: =FontWeight.Semibold
                 HoverColor: =RGBA(0, 0, 0, 1)
                 HoverFill: =App.Theme.Colors.Lighter70
-                Items: =Distinct(Filter(ScrapAssistant, Not(IsBlank(NoConformidad))), NoConformidad)
+                Items: |-
+                    =If(
+                        IsBlank(txtInconforrmidad.Value),
+                        Distinct(
+                            Filter(ScrapAssistant, Not(IsBlank(NoConformidad))),
+                            NoConformidad
+                        ),
+                        Distinct(
+                            Filter(
+                                ScrapAssistant,
+                                Not(IsBlank(NoConformidad)) && (txtInconforrmidad.Value in NoConformidad)
+                            ),
+                            NoConformidad
+                        )
+                    )
                 PressedColor: =RGBA(255, 255, 255, 1)
                 PressedFill: =App.Theme.Colors.Darker30
                 SelectionFill: =App.Theme.Colors.Primary
@@ -2221,7 +2248,7 @@ Scrap As screen:
         Size: =13
         Visible: =HideEditOpScrap
         Width: =345
-        X: =386
+        X: =392
         Y: =564
         ZIndex: =22
 
@@ -2431,7 +2458,7 @@ Scrap As screen:
             Width: =65
             ZIndex: =9
 
-    "txtORDER_1 As 'Text input'":
+    "txtInconforrmidad As 'Text input'":
         Appearance: ='TextInputCanvas.Appearance'.FilledLighter
         BasePaletteColor: =RGBA(16, 120, 199, 1)
         BorderColor: =RGBA(15, 84, 140, 1)
@@ -2440,14 +2467,14 @@ Scrap As screen:
         DisplayMode: =DisplayMode.Edit
         Font: =Font.'Segoe UI'
         FontColor: =RGBA(0, 0, 0, 1)
-        Height: =56
+        Height: =40
         Mode: ='TextInputCanvas.Mode'.SingleLine
-        Placeholder: ="Ingrese la orden a buscar"
+        Placeholder: ="Ingrese la Inconformidad a buscar"
         TriggerOutput: ='TextInputCanvas.TriggerOutput'.Keypress
         Type: ='TextInputCanvas.Type'.Search
         Width: =316
         X: =0
-        Y: =179
+        Y: =155
         ZIndex: =31
 
     TableScrap As Table.pcfdataset:
@@ -2462,8 +2489,8 @@ Scrap As screen:
         HeaderFontColor: =
         HeaderFontSize: =0
         HeaderFontWeight: =FontWeight.Lighter
-        Height: =209
-        Items: =Search(Orden_Ejecucion, txtORDER_1.Value, Orden) 
+        Height: =155
+        Items: =Search(Orden_Ejecucion, txtOrdenScrap.Value, Orden) 
         onCellValueChange: =false
         onFilter: =false
         onNavigate: =false
@@ -2473,7 +2500,7 @@ Scrap As screen:
         ReflowBehavior: ='PowerAppsOneGrid.ReflowBehavior'.Reflow
         Width: =316
         X: =0
-        Y: =235
+        Y: =288
         ZIndex: =32
 
         Cantidad2 As PowerAppsOneGridTemplate_dataField.textualColumn:
@@ -2581,7 +2608,7 @@ Scrap As screen:
         DisplayMode: =DisplayMode.Edit
         Font: =Font.'Segoe UI'
         FontColor: =RGBA(0, 0, 0, 1)
-        Height: =55
+        Height: =40
         Mode: ='TextInputCanvas.Mode'.SingleLine
         Placeholder: ="Ingrese la Maquina a buscar"
         TriggerOutput: ='TextInputCanvas.TriggerOutput'.Keypress
@@ -2600,14 +2627,14 @@ Scrap As screen:
         DisplayMode: =DisplayMode.Edit
         Font: =Font.'Segoe UI'
         FontColor: =RGBA(0, 0, 0, 1)
-        Height: =56
+        Height: =40
         Mode: ='TextInputCanvas.Mode'.SingleLine
         Placeholder: ="Ingrese el Operario a buscar"
         TriggerOutput: ='TextInputCanvas.TriggerOutput'.Keypress
         Type: ='TextInputCanvas.Type'.Search
         Width: =316
         X: =0
-        Y: =125
+        Y: =119
         ZIndex: =34
 
     TextInput8 As text:
@@ -2640,21 +2667,61 @@ Scrap As screen:
         ZIndex: =35
 
     ButtonCanvas12 As Button:
+        BasePaletteColor: =
         DisplayMode: =DisplayMode.Edit
         Height: =40
         Icon: ="Add"
         OnSelect: |-
             =If(
-                IsBlank(DataCardValue222.SelectedText) || IsBlank(DataCardValue206.SelectedText) || IsBlank(DataCardValue184.SelectedText) || IsBlank(DataCardValue224.Text) || IsBlank(DataCardValue207.Text) || IsBlank(Dropdown9.Selected.Nombre) || IsBlank(DataCardValue225.Text) || IsBlank(DataCardValue208.Text) || IsBlank(DataCardValue217.SelectedText) || IsBlank(DataCardValue223.Text) ||  IsBlank(DataCardValue216.SelectedText) || IsBlank(DataCardValue223.Text) || IsBlank(DataCardValue211.Text)|| IsBlank(DataCardValue223.Text)||  IsBlank(Dropdown7.SelectedText),
+                IsBlank(DataCardValue222.SelectedText) || IsBlank(DataCardValue206.SelectedText) || IsBlank(DataCardValue184.SelectedText) || IsBlank(Dropdown10.Selected) || IsBlank(DataCardValue207.Text) || IsBlank(Dropdown9.Selected.Nombre) || IsBlank(DataCardValue225.Text) || IsBlank(DataCardValue208.Text) || IsBlank(DataCardValue217.SelectedText) || IsBlank(DataCardValue223.Text) ||  IsBlank(DataCardValue216.SelectedText) || IsBlank(DataCardValue223.Text) || IsBlank(DataCardValue211.Text)|| IsBlank(DataCardValue223.Text)||  IsBlank(Dropdown7.SelectedText),
                 Notify(
                     "Debe completar todos los campos del formulario",
                     NotificationType.Error
                 ),
                 SubmitForm(Form14);
+                ResetForm(Form14);
             );
         Text: ="Guardar"
         Width: =173.4
         X: =1145
         Y: =366
         ZIndex: =36
+
+    "txtOrdenScrap As 'Text input'":
+        Appearance: ='TextInputCanvas.Appearance'.FilledLighter
+        BasePaletteColor: =RGBA(16, 120, 199, 1)
+        BorderColor: =RGBA(15, 84, 140, 1)
+        BorderStyle: =BorderStyle.Solid
+        BorderThickness: =4
+        DisplayMode: =DisplayMode.View
+        Font: =Font.'Segoe UI'
+        FontColor: =RGBA(0, 0, 0, 1)
+        Height: =208
+        Mode: ='TextInputCanvas.Mode'.SingleLine
+        Placeholder: ="Ingrese la Orden a buscar"
+        TriggerOutput: ='TextInputCanvas.TriggerOutput'.Keypress
+        Type: ='TextInputCanvas.Type'.Search
+        Width: =316
+        X: =0
+        Y: =235
+        ZIndex: =37
+
+    "txtScrapPN As 'Text input'":
+        Appearance: ='TextInputCanvas.Appearance'.FilledLighter
+        BasePaletteColor: =RGBA(16, 120, 199, 1)
+        BorderColor: =RGBA(15, 84, 140, 1)
+        BorderStyle: =BorderStyle.Solid
+        BorderThickness: =4
+        DisplayMode: =DisplayMode.Edit
+        Font: =Font.'Segoe UI'
+        FontColor: =RGBA(0, 0, 0, 1)
+        Height: =40
+        Mode: ='TextInputCanvas.Mode'.SingleLine
+        Placeholder: ="Ingrese el P/N a buscar"
+        TriggerOutput: ='TextInputCanvas.TriggerOutput'.Keypress
+        Type: ='TextInputCanvas.Type'.Search
+        Width: =316
+        X: =0
+        Y: =195
+        ZIndex: =38
 
