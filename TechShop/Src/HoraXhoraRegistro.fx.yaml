@@ -1498,10 +1498,13 @@ HoraXhoraRegistro As screen:
                                 NotificationType.Error
                             ),
                             If(
-                                TarimaTotal + Value(txtCant.Text) > 50,
+                                LookUp(
+                                    Maquinas,
+                                    Maquina = TablaInfoHxH.Selected.Maquina
+                                ).Guns = "SI" && TarimaTotal + Value(txtCant.Text) > 50,
                                 UpdateContext({Aviso: true}),
                                 If(
-                                    ProTotal + Value(txtCant.Text) >= (OrdenEjecucion.Cantidad * 0.015),
+                                    ProTotal + Value(txtCant.Text) >= OrdenEjecucion.Cantidad + (OrdenEjecucion.Cantidad * 0.015),
                                     UpdateContext({Bloqueo: true}),
                                     If(
                                         ((Value(txtCant.Text) / Value(txtMeta.Text)) * 100) < 85,
@@ -1525,7 +1528,8 @@ HoraXhoraRegistro As screen:
                                                 Comentario: "Ejecucion",
                                                 Causa: "Bien"
                                             }
-                                        )
+                                        );
+                                        UpdateContext({Mostra: false})
                                     )
                                 )
                             )
@@ -1672,7 +1676,7 @@ HoraXhoraRegistro As screen:
                         }
                     );
                     UpdateContext({Bloqueo: false});
-                    
+                    UpdateContext({Mostra: true})
                 )
             Size: =18
             Text: ="Continuar"
@@ -1740,11 +1744,12 @@ HoraXhoraRegistro As screen:
                     {
                         Cantidad: Value(txtCant.Text),
                         Cantidad_Por_Hora: Value(txtMeta.Text),
-                        Comentario: Dropdown11_3.SelectedText.Value,
-                        Causa: Dropdown11_2.SelectedText.Value
+                        Comentario: Dropdown11_2.SelectedText.Value,
+                        Causa: Dropdown11_3.SelectedText.Value
                     }
                 );
-                UpdateContext({AvisoCausa: false})
+                UpdateContext({AvisoCausa: false});
+                UpdateContext({Mostra: false})
             Size: =15
             Text: ="Guardar"
             X: =336
@@ -1765,7 +1770,7 @@ HoraXhoraRegistro As screen:
             Height: =47
             HoverColor: =RGBA(0, 0, 0, 1)
             HoverFill: =App.Theme.Colors.Lighter70
-            Items: =If(txtCantProducidaHxH.Text <> "0", Distinct(Filter(Causas, Comentario = "EJECUCION"), Comentario), Distinct(Filter(Causas, Comentario <> "EJECUCION"), Comentario))
+            Items: =If(txtCant.Text <> "0", Distinct(Filter(Causas, Comentario = "EJECUCION"), Comentario), Distinct(Filter(Causas, Comentario <> "EJECUCION"), Comentario))
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =App.Theme.Colors.Darker30
             SelectionFill: =App.Theme.Colors.Primary
