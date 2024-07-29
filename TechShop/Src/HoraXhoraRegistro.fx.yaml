@@ -1491,26 +1491,44 @@ HoraXhoraRegistro As screen:
                         );
                         UpdateContext({ProTotal: OrdenEjecucion.CantidadTotalProducida - TablaInfoHxH.Selected.Cantidad});
                         UpdateContext({TarimaTotal: OrdenTarima.CantidadTotalProducida - TablaInfoHxH.Selected.Cantidad});
-                        
-                        Patch(
-                            Orden_Ejecucion,
-                            OrdenEjecucion,
-                            {CantidadTotalProducida: ProTotal + Value(txtCant.Text)}
-                        );
-                        Patch(
-                            Orden_Tarimas,
-                            OrdenTarima,
-                            {CantidadTotalProducida: TarimaTotal + Value(txtCant.Text)}
-                        );
-                        Patch(
-                            'Hora X Hora',
-                            TablaInfoHxH.Selected,
-                            {
-                                Cantidad: Value(txtCant.Text),
-                                Cantidad_Por_Hora: Value(txtMeta.Text),
-                                Comentario: "Ejecucion",
-                                Causa: "Bien"
-                            }
+                        If(
+                            IsBlank(txtCant.Text),
+                            Notify(
+                                "La cantidad no puede estar vacia",
+                                NotificationType.Error
+                            ),
+                            If(
+                                TarimaTotal + Value(txtCant.Text) > 50,
+                                UpdateContext({Aviso: true}),
+                                If(
+                                    ProTotal + Value(txtCant.Text) >= (OrdenEjecucion.Cantidad * 0.015),
+                                    UpdateContext({Bloqueo: true}),
+                                    If(
+                                        ((Value(txtCant.Text) / Value(txtMeta.Text)) * 100) < 85,
+                                        UpdateContext({AvisoCausa: true}),
+                                        Patch(
+                                            Orden_Ejecucion,
+                                            OrdenEjecucion,
+                                            {CantidadTotalProducida: ProTotal + Value(txtCant.Text)}
+                                        );
+                                        Patch(
+                                            Orden_Tarimas,
+                                            OrdenTarima,
+                                            {CantidadTotalProducida: TarimaTotal + Value(txtCant.Text)}
+                                        );
+                                        Patch(
+                                            'Hora X Hora',
+                                            TablaInfoHxH.Selected,
+                                            {
+                                                Cantidad: Value(txtCant.Text),
+                                                Cantidad_Por_Hora: Value(txtMeta.Text),
+                                                Comentario: "Ejecucion",
+                                                Causa: "Bien"
+                                            }
+                                        )
+                                    )
+                                )
+                            )
                         )
                     PressedBorderColor: =App.Theme.Colors.Darker40
                     PressedColor: =Self.Color
