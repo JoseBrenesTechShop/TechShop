@@ -1274,7 +1274,7 @@ HoraXhora As screen:
                                             "Debe indicar la Maquina",
                                             NotificationType.Error
                                         ),
-                                        If(
+                                        /*If(
                                             LookUp(
                                                 Maquinas,
                                                 Maquina = Upper(txtMaquinaHxH.Text)
@@ -1282,124 +1282,123 @@ HoraXhora As screen:
                                             Notify(
                                                 "La maquina seleccionada esta en Paro",
                                                 NotificationType.Error
+                                            ),*/
+                                        If(
+                                            IsBlank(
+                                                LookUp(
+                                                    Maquinas,
+                                                    Maquina = Upper(txtMaquinaHxH.Text)
+                                                )
+                                            ),
+                                            Notify(
+                                                "La maquina seleccionada NO existe",
+                                                NotificationType.Error
                                             ),
                                             If(
-                                                IsBlank(
-                                                    LookUp(
-                                                        Maquinas,
-                                                        Maquina = Upper(txtMaquinaHxH.Text)
-                                                    )
-                                                ),
+                                                IsBlank(drpOperarioHxH.SelectedText.Value),
                                                 Notify(
-                                                    "La maquina seleccionada NO existe",
+                                                    "Debe indicar al Operario",
                                                     NotificationType.Error
                                                 ),
                                                 If(
-                                                    IsBlank(drpOperarioHxH.SelectedText.Value),
+                                                    IsBlank(txtCantProducidaHxH.Text),
                                                     Notify(
-                                                        "Debe indicar al Operario",
+                                                        "Debe indicar la Cantidad Producida por el operario",
                                                         NotificationType.Error
                                                     ),
                                                     If(
-                                                        IsBlank(txtCantProducidaHxH.Text),
+                                                        IsBlank(drpHoraSupervisorHxH.SelectedText.Value) || drpHoraSupervisorHxH.SelectedText.Value = "Mañana" || drpHoraSupervisorHxH.SelectedText.Value = "Tarde" || drpHoraSupervisorHxH.SelectedText.Value = "Ayer",
                                                         Notify(
-                                                            "Debe indicar la Cantidad Producida por el operario",
+                                                            "Debe seleccionar una fecha de registro",
                                                             NotificationType.Error
                                                         ),
                                                         If(
-                                                            IsBlank(drpHoraSupervisorHxH.SelectedText.Value) || drpHoraSupervisorHxH.SelectedText.Value = "Mañana" || drpHoraSupervisorHxH.SelectedText.Value = "Tarde" || drpHoraSupervisorHxH.SelectedText.Value = "Ayer",
+                                                            txtTurnoHxH.Text = "LIBRE",
                                                             Notify(
-                                                                "Debe seleccionar una fecha de registro",
+                                                                "No se puede crear un registro si el Turno del operario es LIBRE",
                                                                 NotificationType.Error
                                                             ),
                                                             If(
-                                                                txtTurnoHxH.Text = "LIBRE",
-                                                                Notify(
-                                                                    "No se puede crear un registro si el Turno del operario es LIBRE",
-                                                                    NotificationType.Error
-                                                                ),
+                                                                (txtCantProducidaHxH.Text + txtCantTotalHxH.Text) = Value(txtCantMaxHxH.Text),
+                                                                UpdateContext({TextoAdvertencia: "La cantidad total de la Orden junto a la operación seleccionada ha cumplido con la cantidad maxima deseada."});
+                                                                UpdateContext({Mostra: true})
+                                                            );
+                                                            If(
+                                                                LookUp(
+                                                                    Maquinas,
+                                                                    Maquina = Upper(txtMaquinaHxH.Text)
+                                                                ).Guns = "SI" && (txtCantProducidaHxH.Text + txtCantTarimaHxH.Text) > 50,
+                                                                UpdateContext({TextoAdvertencia: "La cantidad digitada supera la cantidad maxima (50) permitida por tarima. Por favor revisar la informacion digitada."});
+                                                                UpdateContext({Mostra: true}),
                                                                 If(
-                                                                    (txtCantProducidaHxH.Text + txtCantTotalHxH.Text) = Value(txtCantMaxHxH.Text),
-                                                                    UpdateContext({TextoAdvertencia: "La cantidad total de la Orden junto a la operación seleccionada ha cumplido con la cantidad maxima deseada."});
-                                                                    UpdateContext({Mostra: true})
-                                                                );
-                                                                If(
-                                                                    LookUp(
-                                                                        Maquinas,
-                                                                        Maquina = Upper(txtMaquinaHxH.Text)
-                                                                    ).Guns = "SI" && (txtCantProducidaHxH.Text + txtCantTarimaHxH.Text) > 50,
-                                                                    UpdateContext({TextoAdvertencia: "La cantidad digitada supera la cantidad maxima (50) permitida por tarima. Por favor revisar la informacion digitada."});
-                                                                    UpdateContext({Mostra: true}),
+                                                                    (txtCantProducidaHxH.Text + txtCantTotalHxH.Text) > (txtCantMaxHxH.Text + (txtCantMaxHxH.Text * 0.015)),
+                                                                    UpdateContext({MostraBloqueo: true}),
                                                                     If(
-                                                                        (txtCantProducidaHxH.Text + txtCantTotalHxH.Text) > (txtCantMaxHxH.Text + (txtCantMaxHxH.Text * 0.015)),
-                                                                        UpdateContext({MostraBloqueo: true}),
+                                                                        (txtCantProducidaHxH.Text + txtCantTotalHxH.Text) > Value(txtCantMaxHxH.Text),
+                                                                        UpdateContext({TextoAdvertencia: "La cantidad total producida ha superado la cantidad maxima de la orden."});
+                                                                        UpdateContext({Mostra: true}),
                                                                         If(
-                                                                            (txtCantProducidaHxH.Text + txtCantTotalHxH.Text) > Value(txtCantMaxHxH.Text),
-                                                                            UpdateContext({TextoAdvertencia: "La cantidad total producida ha superado la cantidad maxima de la orden."});
-                                                                            UpdateContext({Mostra: true}),
-                                                                            If(
-                                                                                Efi < 80,
-                                                                                UpdateContext({MostraCausa: true}),
-                                                                                Collect(
-                                                                                    'Hora X Hora',
-                                                                                    {
-                                                                                        CodigoEmpleado: LookUp(
-                                                                                            Empleados,
-                                                                                            Nombre = drpOperarioHxH.Selected.Empleado,
-                                                                                            Codigo
-                                                                                        ),
-                                                                                        Operario: drpOperarioHxH.Selected.Empleado,
-                                                                                        Maquina: txtMaquinaHxH_2.Text,
-                                                                                        Orden: infoOrden.Selected.Orden,
-                                                                                        Operacion: infoOrden.Selected.Operacion,
-                                                                                        'P/N': infoOrden.Selected.'P/N',
-                                                                                        Cantidad_Por_Hora: infoOrden.Selected.Meta,
-                                                                                        Cantidad: Value(txtCantProducidaHxH.Text),
-                                                                                        Semana: Value(txtSemanaHxH.Text),
-                                                                                        Turno: txtTurnoHxH.Text,
-                                                                                        User: txtEmpleadoEnUso.Text,
-                                                                                        'Fecha_Registro_Supervisor ': drpHoraSupervisorHxH.SelectedText.Value,
-                                                                                        FechaRegistro: FechaSup,
-                                                                                        Tarima: txtTarimaHxH_2.Text,
-                                                                                        Comentario: "EJECUCION",
-                                                                                        Causa: "BIEN",
-                                                                                        Descripcion: txtDescripcionHxH.Text
-                                                                                    }
-                                                                                );
-                                                                                Patch(
-                                                                                    Orden_Ejecucion,
-                                                                                    infoOrden.Selected,
-                                                                                    {CantidadTotalProducida: txtCantTotalHxH.Text + txtCantProducidaHxH.Text}
-                                                                                );
-                                                                                If(
-                                                                                    IsBlank(txtCantTarimaHxH.Text),
-                                                                                    Collect(
-                                                                                        Orden_Tarimas,
-                                                                                        {
-                                                                                            Orden: txtOrdenHxH.Text,
-                                                                                            Operacion: txtOperacionHxH.Text,
-                                                                                            Tarima: txtTarimaHxH_2.Text,
-                                                                                            CantidadTotalProducida: Value(txtCantProducidaHxH.Text)
-                                                                                        }
+                                                                            Efi < 80,
+                                                                            UpdateContext({MostraCausa: true}),
+                                                                            Collect(
+                                                                                'Hora X Hora',
+                                                                                {
+                                                                                    CodigoEmpleado: LookUp(
+                                                                                        Empleados,
+                                                                                        Nombre = drpOperarioHxH.Selected.Empleado,
+                                                                                        Codigo
                                                                                     ),
-                                                                                    Patch(
+                                                                                    Operario: drpOperarioHxH.Selected.Empleado,
+                                                                                    Maquina: txtMaquinaHxH_2.Text,
+                                                                                    Orden: infoOrden.Selected.Orden,
+                                                                                    Operacion: infoOrden.Selected.Operacion,
+                                                                                    'P/N': infoOrden.Selected.'P/N',
+                                                                                    Cantidad_Por_Hora: infoOrden.Selected.Meta,
+                                                                                    Cantidad: Value(txtCantProducidaHxH.Text),
+                                                                                    Semana: Value(txtSemanaHxH.Text),
+                                                                                    Turno: txtTurnoHxH.Text,
+                                                                                    User: txtEmpleadoEnUso.Text,
+                                                                                    'Fecha_Registro_Supervisor ': drpHoraSupervisorHxH.SelectedText.Value,
+                                                                                    FechaRegistro: FechaSup,
+                                                                                    Tarima: txtTarimaHxH_2.Text,
+                                                                                    Comentario: "EJECUCION",
+                                                                                    Causa: "BIEN",
+                                                                                    Descripcion: txtDescripcionHxH.Text
+                                                                                }
+                                                                            );
+                                                                            Patch(
+                                                                                Orden_Ejecucion,
+                                                                                infoOrden.Selected,
+                                                                                {CantidadTotalProducida: txtCantTotalHxH.Text + txtCantProducidaHxH.Text}
+                                                                            );
+                                                                            If(
+                                                                                IsBlank(txtCantTarimaHxH.Text),
+                                                                                Collect(
+                                                                                    Orden_Tarimas,
+                                                                                    {
+                                                                                        Orden: txtOrdenHxH.Text,
+                                                                                        Operacion: txtOperacionHxH.Text,
+                                                                                        Tarima: txtTarimaHxH_2.Text,
+                                                                                        CantidadTotalProducida: Value(txtCantProducidaHxH.Text)
+                                                                                    }
+                                                                                ),
+                                                                                Patch(
+                                                                                    Orden_Tarimas,
+                                                                                    LookUp(
                                                                                         Orden_Tarimas,
-                                                                                        LookUp(
-                                                                                            Orden_Tarimas,
-                                                                                            Orden = infoOrden.Selected.Orden && Operacion = infoOrden.Selected.Operacion && Tarima = txtTarimaHxH.Text
-                                                                                        ),
-                                                                                        {CantidadTotalProducida: txtCantTarimaHxH.Text + txtCantProducidaHxH.Text}
-                                                                                    )
-                                                                                );
-                                                                                Reset(txtOrdenHxH);
-                                                                                Reset(txtMaquinaHxH);
-                                                                                Reset(txtTarimaHxH);
-                                                                                Reset(txtCantProducidaHxH);
-                                                                                SetFocus(txtOrdenHxH);
-                                                                                Notify(
-                                                                                    "Se ha Guardado exitosamente",
-                                                                                    NotificationType.Success
+                                                                                        Orden = infoOrden.Selected.Orden && Operacion = infoOrden.Selected.Operacion && Tarima = txtTarimaHxH.Text
+                                                                                    ),
+                                                                                    {CantidadTotalProducida: txtCantTarimaHxH.Text + txtCantProducidaHxH.Text}
                                                                                 )
+                                                                            );
+                                                                            Reset(txtOrdenHxH);
+                                                                            Reset(txtMaquinaHxH);
+                                                                            Reset(txtTarimaHxH);
+                                                                            Reset(txtCantProducidaHxH);
+                                                                            SetFocus(txtOrdenHxH);
+                                                                            Notify(
+                                                                                "Se ha Guardado exitosamente",
+                                                                                NotificationType.Success
                                                                             )
                                                                         )
                                                                     )
@@ -1413,6 +1412,7 @@ HoraXhora As screen:
                                     )
                                 )
                             )
+                            //)
                         Size: =15
                         Text: ="Guardar Cambios"
                         Width: =201
@@ -1439,9 +1439,276 @@ HoraXhora As screen:
                         HoverColor: =RGBA(0, 0, 0, 1)
                         HoverFill: =App.Theme.Colors.Lighter70
                         Items: |-
-                            =["Mañana",Text(Today(),"mm/dd/yyyy")& " 12:00 AM",Text(Today(),"mm/dd/yyyy")& " 1:00 AM",Text(Today(),"mm/dd/yyyy")& " 2:00 AM",Text(Today(),"mm/dd/yyyy")& " 3:00 AM",Text(Today(),"mm/dd/yyyy")& " 4:00 AM",Text(Today(),"mm/dd/yyyy")& " 5:00 AM",Text(Today(),"mm/dd/yyyy")& " 6:00 AM",Text(Today(),"mm/dd/yyyy")& " 7:00 AM",Text(Today(),"mm/dd/yyyy")& " 8:00 AM",Text(Today(),"mm/dd/yyyy")& " 9:00 AM",Text(Today(),"mm/dd/yyyy")& " 10:00 AM",Text(Today(),"mm/dd/yyyy")& " 11:00 AM","Tarde",Text(Today(),"mm/dd/yyyy")& " 12:00 PM",Text(Today(),"mm/dd/yyyy")& " 1:00 PM",Text(Today(),"mm/dd/yyyy")& " 2:00 PM",Text(Today(),"mm/dd/yyyy")& " 3:00 PM",Text(Today(),"mm/dd/yyyy")& " 4:00 PM",Text(Today(),"mm/dd/yyyy")& " 5:00 PM",Text(Today(),"mm/dd/yyyy")& " 6:00 PM",Text(Today(),"mm/dd/yyyy")& " 7:00 PM",Text(Today(),"mm/dd/yyyy")& " 8:00 PM",Text(Today(),"mm/dd/yyyy")& " 9:00 PM",Text(Today(),"mm/dd/yyyy")& " 10:00 PM",Text(Today(),"mm/dd/yyyy")& " 11:00 PM","Ayer",Text(DateAdd(Today(), -1), "mm/dd/yyyy")& " 7:00 AM",Text(DateAdd(Today(), -1), "mm/dd/yyyy")& " 8:00 AM",Text(DateAdd(Today(), -1), "mm/dd/yyyy")& " 9:00 AM",Text(DateAdd(Today(), -1), "mm/dd/yyyy")& " 10:00 AM",Text(DateAdd(Today(), -1), "mm/dd/yyyy")& " 11:00 AM",Text(DateAdd(Today(), -1), "mm/dd/yyyy")& " 12:00 PM",Text(DateAdd(Today(), -1), "mm/dd/yyyy")& " 1:00 PM",Text(DateAdd(Today(), -1), "mm/dd/yyyy")& " 2:00 PM",Text(DateAdd(Today(), -1), "mm/dd/yyyy")& " 3:00 PM",Text(DateAdd(Today(), -1), "mm/dd/yyyy")& " 4:00 PM",Text(DateAdd(Today(), -1), "mm/dd/yyyy")& " 5:00 PM",Text(DateAdd(Today(), -1), "mm/dd/yyyy")& " 6:00 PM",Text(DateAdd(Today(), -1), "mm/dd/yyyy")& " 7:00 PM",Text(DateAdd(Today(), -1), "mm/dd/yyyy")& " 8:00 PM",Text(DateAdd(Today(), -1), "mm/dd/yyyy")& " 9:00 PM",Text(DateAdd(Today(), -1), "mm/dd/yyyy")& " 10:00 PM",Text(DateAdd(Today(), -1), "mm/dd/yyyy")& " 11:00 PM",]
-                            
-                               
+                            =[
+                                "",
+                                "Mañana",
+                                Text(
+                                    Today(),
+                                    "mm/dd/yyyy"
+                                ) & " 00:00",
+                                Text(
+                                    Today(),
+                                    "mm/dd/yyyy"
+                                ) & " 01:00",
+                                Text(
+                                    Today(),
+                                    "mm/dd/yyyy"
+                                ) & " 02:00",
+                                Text(
+                                    Today(),
+                                    "mm/dd/yyyy"
+                                ) & " 03:00",
+                                Text(
+                                    Today(),
+                                    "mm/dd/yyyy"
+                                ) & " 04:00",
+                                Text(
+                                    Today(),
+                                    "mm/dd/yyyy"
+                                ) & " 05:00",
+                                Text(
+                                    Today(),
+                                    "mm/dd/yyyy"
+                                ) & " 06:00",
+                                Text(
+                                    Today(),
+                                    "mm/dd/yyyy"
+                                ) & " 07:00",
+                                Text(
+                                    Today(),
+                                    "mm/dd/yyyy"
+                                ) & " 08:00",
+                                Text(
+                                    Today(),
+                                    "mm/dd/yyyy"
+                                ) & " 09:00",
+                                Text(
+                                    Today(),
+                                    "mm/dd/yyyy"
+                                ) & " 10:00",
+                                Text(
+                                    Today(),
+                                    "mm/dd/yyyy"
+                                ) & " 11:00",
+                                "Tarde",
+                                Text(
+                                    Today(),
+                                    "mm/dd/yyyy"
+                                ) & " 12:00",
+                                Text(
+                                    Today(),
+                                    "mm/dd/yyyy"
+                                ) & " 13:00",
+                                Text(
+                                    Today(),
+                                    "mm/dd/yyyy"
+                                ) & " 14:00",
+                                Text(
+                                    Today(),
+                                    "mm/dd/yyyy"
+                                ) & " 15:00",
+                                Text(
+                                    Today(),
+                                    "mm/dd/yyyy"
+                                ) & " 16:00",
+                                Text(
+                                    Today(),
+                                    "mm/dd/yyyy"
+                                ) & " 17:00",
+                                Text(
+                                    Today(),
+                                    "mm/dd/yyyy"
+                                ) & " 18:00",
+                                Text(
+                                    Today(),
+                                    "mm/dd/yyyy"
+                                ) & " 19:00",
+                                Text(
+                                    Today(),
+                                    "mm/dd/yyyy"
+                                ) & " 20:00",
+                                Text(
+                                    Today(),
+                                    "mm/dd/yyyy"
+                                ) & " 21:00",
+                                Text(
+                                    Today(),
+                                    "mm/dd/yyyy"
+                                ) & " 22:00",
+                                Text(
+                                    Today(),
+                                    "mm/dd/yyyy"
+                                ) & " 23:00",
+                                "Ayer",
+                                Text(
+                                    DateAdd(
+                                        Today(),
+                                        -1
+                                    ),
+                                    "mm/dd/yyyy"
+                                ) & " 00:00",
+                                Text(
+                                    DateAdd(
+                                        Today(),
+                                        -1
+                                    ),
+                                    "mm/dd/yyyy"
+                                ) & " 01:00",
+                                Text(
+                                    DateAdd(
+                                        Today(),
+                                        -1
+                                    ),
+                                    "mm/dd/yyyy"
+                                ) & " 02:00",
+                                Text(
+                                    DateAdd(
+                                        Today(),
+                                        -1
+                                    ),
+                                    "mm/dd/yyyy"
+                                ) & " 03:00",
+                                Text(
+                                    DateAdd(
+                                        Today(),
+                                        -1
+                                    ),
+                                    "mm/dd/yyyy"
+                                ) & " 04:00",
+                                Text(
+                                    DateAdd(
+                                        Today(),
+                                        -1
+                                    ),
+                                    "mm/dd/yyyy"
+                                ) & " 05:00",
+                                Text(
+                                    DateAdd(
+                                        Today(),
+                                        -1
+                                    ),
+                                    "mm/dd/yyyy"
+                                ) & " 06:00",
+                                Text(
+                                    DateAdd(
+                                        Today(),
+                                        -1
+                                    ),
+                                    "mm/dd/yyyy"
+                                ) & " 07:00",
+                                Text(
+                                    DateAdd(
+                                        Today(),
+                                        -1
+                                    ),
+                                    "mm/dd/yyyy"
+                                ) & " 08:00",
+                                Text(
+                                    DateAdd(
+                                        Today(),
+                                        -1
+                                    ),
+                                    "mm/dd/yyyy"
+                                ) & " 09:00",
+                                Text(
+                                    DateAdd(
+                                        Today(),
+                                        -1
+                                    ),
+                                    "mm/dd/yyyy"
+                                ) & " 10:00",
+                                Text(
+                                    DateAdd(
+                                        Today(),
+                                        -1
+                                    ),
+                                    "mm/dd/yyyy"
+                                ) & " 11:00",
+                                Text(
+                                    DateAdd(
+                                        Today(),
+                                        -1
+                                    ),
+                                    "mm/dd/yyyy"
+                                ) & " 12:00",
+                                Text(
+                                    DateAdd(
+                                        Today(),
+                                        -1
+                                    ),
+                                    "mm/dd/yyyy"
+                                ) & " 13:00",
+                                Text(
+                                    DateAdd(
+                                        Today(),
+                                        -1
+                                    ),
+                                    "mm/dd/yyyy"
+                                ) & " 14:00",
+                                Text(
+                                    DateAdd(
+                                        Today(),
+                                        -1
+                                    ),
+                                    "mm/dd/yyyy"
+                                ) & " 15:00",
+                                Text(
+                                    DateAdd(
+                                        Today(),
+                                        -1
+                                    ),
+                                    "mm/dd/yyyy"
+                                ) & " 16:00",
+                                Text(
+                                    DateAdd(
+                                        Today(),
+                                        -1
+                                    ),
+                                    "mm/dd/yyyy"
+                                ) & " 17:00",
+                                Text(
+                                    DateAdd(
+                                        Today(),
+                                        -1
+                                    ),
+                                    "mm/dd/yyyy"
+                                ) & " 18:00",
+                                Text(
+                                    DateAdd(
+                                        Today(),
+                                        -1
+                                    ),
+                                    "mm/dd/yyyy"
+                                ) & " 19:00",
+                                Text(
+                                    DateAdd(
+                                        Today(),
+                                        -1
+                                    ),
+                                    "mm/dd/yyyy"
+                                ) & " 20:00",
+                                Text(
+                                    DateAdd(
+                                        Today(),
+                                        -1
+                                    ),
+                                    "mm/dd/yyyy"
+                                ) & " 21:00",
+                                Text(
+                                    DateAdd(
+                                        Today(),
+                                        -1
+                                    ),
+                                    "mm/dd/yyyy"
+                                ) & " 22:00",
+                                Text(
+                                    DateAdd(
+                                        Today(),
+                                        -1
+                                    ),
+                                    "mm/dd/yyyy"
+                                ) & " 23:00"
+                            ]
                         OnChange: |-
                             =UpdateContext({FechaSup: DateValue(drpHoraSupervisorHxH.SelectedText.Value)});
                             UpdateContext({Semana: Weekday(FechaSup)});
@@ -1874,67 +2141,74 @@ HoraXhora As screen:
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
             OnSelect: |-
-                =Collect(
-                    'Hora X Hora',
-                    {
-                        CodigoEmpleado: LookUp(
-                            Empleados,
-                            Nombre = drpOperarioHxH.Selected.Empleado,
-                            Codigo
-                        ),
-                        Operario: drpOperarioHxH.Selected.Empleado,
-                        Maquina: txtMaquinaHxH_2.Text,
-                        Orden: infoOrden.Selected.Orden,
-                        Operacion: infoOrden.Selected.Operacion,
-                        'P/N': infoOrden.Selected.'P/N',
-                        Cantidad_Por_Hora: infoOrden.Selected.Meta,
-                        Cantidad: Value(txtCantProducidaHxH.Text),
-                        Semana: Value(txtSemanaHxH.Text),
-                        Turno: txtTurnoHxH.Text,
-                        User: txtEmpleadoEnUso.Text,
-                        'Fecha_Registro_Supervisor ': drpHoraSupervisorHxH.SelectedText.Value,
-                        FechaRegistro: FechaSup,
-                        Tarima: txtTarimaHxH_2.Text,
-                        Comentario: Dropdown11.SelectedText.Value,
-                        Causa: Dropdown11_1.SelectedText.Value,
-                        Descripcion: txtDescripcionHxH.Text
-                    }
-                );
-                Patch(
-                    Orden_Ejecucion,
-                    infoOrden.Selected,
-                    {CantidadTotalProducida: txtCantTotalHxH.Text + txtCantProducidaHxH.Text}
-                );
-                Patch(
-                    Orden_Tarimas,
-                    LookUp(
-                        Orden_Tarimas,
-                        Orden = infoOrden.Selected.Orden && Operacion = infoOrden.Selected.Operacion && Tarima = txtTarimaHxH.Text
+                =If(
+                    IsBlank(Dropdown11.SelectedText.Value),
+                    Notify(
+                        "El comentario no puede estar vacío.",
+                        NotificationType.Error
                     ),
-                    {CantidadTotalProducida: txtCantTarimaHxH.Text + txtCantProducidaHxH.Text}
-                );
-                If(
-                    IsBlank(txtCantTarimaHxH.Text),
                     Collect(
-                        Orden_Tarimas,
+                        'Hora X Hora',
                         {
-                            Orden: txtOrdenHxH.Text,
-                            Operacion: txtOperacionHxH.Text,
+                            CodigoEmpleado: LookUp(
+                                Empleados,
+                                Nombre = drpOperarioHxH.Selected.Empleado,
+                                Codigo
+                            ),
+                            Operario: drpOperarioHxH.Selected.Empleado,
+                            Maquina: txtMaquinaHxH_2.Text,
+                            Orden: infoOrden.Selected.Orden,
+                            Operacion: infoOrden.Selected.Operacion,
+                            'P/N': infoOrden.Selected.'P/N',
+                            Cantidad_Por_Hora: infoOrden.Selected.Meta,
+                            Cantidad: Value(txtCantProducidaHxH.Text),
+                            Semana: Value(txtSemanaHxH.Text),
+                            Turno: txtTurnoHxH.Text,
+                            User: txtEmpleadoEnUso.Text,
+                            'Fecha_Registro_Supervisor ': drpHoraSupervisorHxH.SelectedText.Value,
+                            FechaRegistro: FechaSup,
                             Tarima: txtTarimaHxH_2.Text,
-                            CantidadTotalProducida: Value(txtCantProducidaHxH.Text)
+                            Comentario: Dropdown11.SelectedText.Value,
+                            Causa: Dropdown11_1.SelectedText.Value,
+                            Descripcion: txtDescripcionHxH.Text
                         }
-                    )
-                );
-                Reset(txtOrdenHxH);
-                Reset(txtMaquinaHxH);
-                Reset(txtTarimaHxH);
-                Reset(txtCantProducidaHxH);
-                SetFocus(txtOrdenHxH);
-                Notify(
-                    "Se ha Guardado exitosamente",
-                    NotificationType.Success
-                );
-                UpdateContext({MostraCausa: false})
+                    );
+                    Patch(
+                        Orden_Ejecucion,
+                        infoOrden.Selected,
+                        {CantidadTotalProducida: txtCantTotalHxH.Text + txtCantProducidaHxH.Text}
+                    );
+                    Patch(
+                        Orden_Tarimas,
+                        LookUp(
+                            Orden_Tarimas,
+                            Orden = infoOrden.Selected.Orden && Operacion = infoOrden.Selected.Operacion && Tarima = txtTarimaHxH.Text
+                        ),
+                        {CantidadTotalProducida: txtCantTarimaHxH.Text + txtCantProducidaHxH.Text}
+                    );
+                    If(
+                        IsBlank(txtCantTarimaHxH.Text),
+                        Collect(
+                            Orden_Tarimas,
+                            {
+                                Orden: txtOrdenHxH.Text,
+                                Operacion: txtOperacionHxH.Text,
+                                Tarima: txtTarimaHxH_2.Text,
+                                CantidadTotalProducida: Value(txtCantProducidaHxH.Text)
+                            }
+                        )
+                    );
+                    Reset(txtOrdenHxH);
+                    Reset(txtMaquinaHxH);
+                    Reset(txtTarimaHxH);
+                    Reset(txtCantProducidaHxH);
+                    SetFocus(txtOrdenHxH);
+                    Notify(
+                        "Se ha Guardado exitosamente",
+                        NotificationType.Success
+                    );
+                    UpdateContext({MostraCausa: false})
+                )
             Size: =15
             Text: ="Guardar"
             X: =336
@@ -1942,6 +2216,7 @@ HoraXhora As screen:
             ZIndex: =2
 
         Dropdown11 As dropdown:
+            AllowEmptySelection: =true
             BorderColor: =App.Theme.Colors.Darker40
             ChevronBackground: =App.Theme.Colors.Primary
             ChevronDisabledBackground: =RGBA(166, 166, 166, 1)
@@ -1955,7 +2230,7 @@ HoraXhora As screen:
             Height: =47
             HoverColor: =RGBA(0, 0, 0, 1)
             HoverFill: =App.Theme.Colors.Lighter70
-            Items: =If(txtCantProducidaHxH.Text <> "0", Distinct(Filter(Causas, Comentario = "EJECUCION"), Comentario), Distinct(Filter(Causas, Comentario <> "EJECUCION"), Comentario))
+            Items: =Distinct(Causas,Comentario)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =App.Theme.Colors.Darker30
             SelectionFill: =App.Theme.Colors.Primary
@@ -2021,7 +2296,7 @@ HoraXhora As screen:
             Font: =App.Theme.Font
             Height: =76
             Size: =18
-            Text: ="La eficiencia del Operario esta por debajo del 85%. Indique un comentario y una causa del Motivo"
+            Text: ="La eficiencia del Operario esta por debajo del 80%. Indique un comentario y una causa del Motivo"
             Width: =631
             ZIndex: =7
 
