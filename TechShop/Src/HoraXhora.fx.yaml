@@ -3,6 +3,9 @@ HoraXhora As screen:
     Fill: =Color.White
     ImagePosition: =ImagePosition.Fill
     LoadingSpinnerColor: =App.Theme.Colors.Primary
+    OnVisible: |-
+        =UpdateContext({FechaSup: Today()});
+        UpdateContext({Dia: Weekday(FechaSup)});
 
     ScreenContainer3_3 As groupContainer.verticalAutoLayoutContainer:
         DropShadow: =DropShadow.Light
@@ -618,6 +621,7 @@ HoraXhora As screen:
                         Fill: =RGBA(40, 134, 222, 1)
                         FontWeight: =FontWeight.Bold
                         Height: =52
+                        PaddingRight: =100
                         Size: =18
                         Text: ="Informacion de la Orden"
                         Width: =1000
@@ -851,17 +855,11 @@ HoraXhora As screen:
                         HoverColor: =RGBA(0, 0, 0, 1)
                         HoverFill: =RGBA(153, 207, 236, 1)
                         Items: |-
-                            =If(
-                                FechaSup = Today() - 1 && Weekday(Today()) = 2,
+                            =
                                 Filter(
                                     HorarioSemanals,
-                                    (Fecha_Fin = Today()- 1) && (Maquina = txtMaquinaHxH_2.Text || 'Maquina 2' = txtMaquinaHxH_2.Text || 'Maquina 3' = txtMaquinaHxH_2.Text)
-                                ),
-                                Filter(
-                                    HorarioSemanals,
-                                    (Fecha_Inicio <= Today() && Fecha_Fin >= Today()) && (Maquina = txtMaquinaHxH.Text || 'Maquina 2' = txtMaquinaHxH.Text || 'Maquina 3' = txtMaquinaHxH.Text)
+                                    (Fecha_Inicio <= FechaSup && Fecha_Fin >= FechaSup) && (Maquina = txtMaquinaHxH.Text || 'Maquina 2' = txtMaquinaHxH.Text || 'Maquina 3' = txtMaquinaHxH.Text)
                                 )
-                            )
                         OnChange: =
                         OnSelect: =
                         PressedColor: =RGBA(255, 255, 255, 1)
@@ -892,94 +890,76 @@ HoraXhora As screen:
                         Color: =RGBA(0, 0, 0, 1)
                         Default: |-
                             =If(
-                                FechaSup = Today()-1 && Weekday(Today()) = 2,
+                                Dia = 1,
                                 Mid(
-                                    LookUp(
-                                        HorarioSemanals,
-                                        Empleado = drpOperarioHxH.SelectedText.Value && Fecha_Fin = Today() - 1,
-                                        Domingo
-                                    ),
+                                    drpOperarioHxH.Selected.Domingo,
                                     1,
                                     Find(
                                         "-",
-                                        LookUp(
-                                            HorarioSemanals,
-                                            Empleado = drpOperarioHxH.SelectedText.Value && Fecha_Fin = Today() - 1
-                                        ).Domingo
+                                        drpOperarioHxH.Selected.Domingo
                                     ) - 2
                                 ),
                                 If(
-                                    Semana = 1,
+                                    Dia = 2,
                                     Mid(
-                                        drpOperarioHxH.SelectedText.Domingo,
+                                        drpOperarioHxH.Selected.Lunes,
                                         1,
                                         Find(
                                             "-",
-                                            drpOperarioHxH.SelectedText.Domingo
+                                            drpOperarioHxH.Selected.Lunes
                                         ) - 2
                                     ),
                                     If(
-                                        Semana = 2,
+                                        Dia = 3,
                                         Mid(
-                                            drpOperarioHxH.SelectedText.Lunes,
+                                            drpOperarioHxH.Selected.Martes,
                                             1,
                                             Find(
                                                 "-",
-                                                drpOperarioHxH.SelectedText.Lunes
+                                                drpOperarioHxH.Selected.Martes
                                             ) - 2
                                         ),
                                         If(
-                                            Semana = 3,
+                                            Dia = 4,
                                             Mid(
-                                                drpOperarioHxH.SelectedText.Martes,
+                                                drpOperarioHxH.Selected.Miercoles,
                                                 1,
                                                 Find(
                                                     "-",
-                                                    drpOperarioHxH.SelectedText.Martes
+                                                    drpOperarioHxH.Selected.Miercoles
                                                 ) - 2
                                             ),
                                             If(
-                                                Semana = 4,
+                                                Dia = 5,
                                                 Mid(
-                                                    drpOperarioHxH.SelectedText.Miercoles,
+                                                    drpOperarioHxH.Selected.Jueves,
                                                     1,
                                                     Find(
                                                         "-",
-                                                        drpOperarioHxH.SelectedText.Miercoles
+                                                        drpOperarioHxH.Selected.Jueves
                                                     ) - 2
                                                 ),
                                                 If(
-                                                    Semana = 5,
+                                                    Dia = 6,
                                                     Mid(
-                                                        drpOperarioHxH.SelectedText.Jueves,
+                                                        drpOperarioHxH.Selected.Viernes,
                                                         1,
                                                         Find(
                                                             "-",
-                                                            drpOperarioHxH.SelectedText.Jueves
+                                                            drpOperarioHxH.Selected.Viernes
                                                         ) - 2
                                                     ),
                                                     If(
-                                                        Semana = 6,
+                                                        Dia = 7,
                                                         Mid(
-                                                            drpOperarioHxH.SelectedText.Viernes,
+                                                            drpOperarioHxH.Selected.Sabado,
                                                             1,
                                                             Find(
                                                                 "-",
-                                                                drpOperarioHxH.SelectedText.Viernes
+                                                                drpOperarioHxH.Selected.Sabado
                                                             ) - 2
                                                         ),
-                                                        If(
-                                                            Semana = 2,
-                                                            Mid(
-                                                                drpOperarioHxH.SelectedText.Sabado,
-                                                                1,
-                                                                Find(
-                                                                    "-",
-                                                                    drpOperarioHxH.SelectedText.Sabado
-                                                                ) - 2
-                                                            ),
-                                                            ""
-                                                        )
+                                                        "qy"
                                                     )
                                                 )
                                             )
@@ -1426,7 +1406,6 @@ HoraXhora As screen:
                         ZIndex: =35
 
                     drpHoraSupervisorHxH As dropdown:
-                        AllowEmptySelection: =true
                         BorderColor: =
                         BorderStyle: =BorderStyle.None
                         ChevronBackground: =App.Theme.Colors.Primary
@@ -1445,285 +1424,39 @@ HoraXhora As screen:
                         HoverFill: =App.Theme.Colors.Lighter70
                         Items: |-
                             =[
-                                "",
-                                "Mañana",
-                                Text(
-                                    Today(),
-                                    "mm/dd/yyyy"
-                                ) & " 00:00",
-                                Text(
-                                    Today(),
-                                    "mm/dd/yyyy"
-                                ) & " 01:00",
-                                Text(
-                                    Today(),
-                                    "mm/dd/yyyy"
-                                ) & " 02:00",
-                                Text(
-                                    Today(),
-                                    "mm/dd/yyyy"
-                                ) & " 03:00",
-                                Text(
-                                    Today(),
-                                    "mm/dd/yyyy"
-                                ) & " 04:00",
-                                Text(
-                                    Today(),
-                                    "mm/dd/yyyy"
-                                ) & " 05:00",
-                                Text(
-                                    Today(),
-                                    "mm/dd/yyyy"
-                                ) & " 06:00",
-                                Text(
-                                    Today(),
-                                    "mm/dd/yyyy"
-                                ) & " 07:00",
-                                Text(
-                                    Today(),
-                                    "mm/dd/yyyy"
-                                ) & " 08:00",
-                                Text(
-                                    Today(),
-                                    "mm/dd/yyyy"
-                                ) & " 09:00",
-                                Text(
-                                    Today(),
-                                    "mm/dd/yyyy"
-                                ) & " 10:00",
-                                Text(
-                                    Today(),
-                                    "mm/dd/yyyy"
-                                ) & " 11:00",
-                                "Tarde",
-                                Text(
-                                    Today(),
-                                    "mm/dd/yyyy"
-                                ) & " 12:00",
-                                Text(
-                                    Today(),
-                                    "mm/dd/yyyy"
-                                ) & " 13:00",
-                                Text(
-                                    Today(),
-                                    "mm/dd/yyyy"
-                                ) & " 14:00",
-                                Text(
-                                    Today(),
-                                    "mm/dd/yyyy"
-                                ) & " 15:00",
-                                Text(
-                                    Today(),
-                                    "mm/dd/yyyy"
-                                ) & " 16:00",
-                                Text(
-                                    Today(),
-                                    "mm/dd/yyyy"
-                                ) & " 17:00",
-                                Text(
-                                    Today(),
-                                    "mm/dd/yyyy"
-                                ) & " 18:00",
-                                Text(
-                                    Today(),
-                                    "mm/dd/yyyy"
-                                ) & " 19:00",
-                                Text(
-                                    Today(),
-                                    "mm/dd/yyyy"
-                                ) & " 20:00",
-                                Text(
-                                    Today(),
-                                    "mm/dd/yyyy"
-                                ) & " 21:00",
-                                Text(
-                                    Today(),
-                                    "mm/dd/yyyy"
-                                ) & " 22:00",
-                                Text(
-                                    Today(),
-                                    "mm/dd/yyyy"
-                                ) & " 23:00",
-                                "Ayer",
-                                Text(
-                                    DateAdd(
-                                        Today(),
-                                        -1
-                                    ),
-                                    "mm/dd/yyyy"
-                                ) & " 00:00",
-                                Text(
-                                    DateAdd(
-                                        Today(),
-                                        -1
-                                    ),
-                                    "mm/dd/yyyy"
-                                ) & " 01:00",
-                                Text(
-                                    DateAdd(
-                                        Today(),
-                                        -1
-                                    ),
-                                    "mm/dd/yyyy"
-                                ) & " 02:00",
-                                Text(
-                                    DateAdd(
-                                        Today(),
-                                        -1
-                                    ),
-                                    "mm/dd/yyyy"
-                                ) & " 03:00",
-                                Text(
-                                    DateAdd(
-                                        Today(),
-                                        -1
-                                    ),
-                                    "mm/dd/yyyy"
-                                ) & " 04:00",
-                                Text(
-                                    DateAdd(
-                                        Today(),
-                                        -1
-                                    ),
-                                    "mm/dd/yyyy"
-                                ) & " 05:00",
-                                Text(
-                                    DateAdd(
-                                        Today(),
-                                        -1
-                                    ),
-                                    "mm/dd/yyyy"
-                                ) & " 06:00",
-                                Text(
-                                    DateAdd(
-                                        Today(),
-                                        -1
-                                    ),
-                                    "mm/dd/yyyy"
-                                ) & " 07:00",
-                                Text(
-                                    DateAdd(
-                                        Today(),
-                                        -1
-                                    ),
-                                    "mm/dd/yyyy"
-                                ) & " 08:00",
-                                Text(
-                                    DateAdd(
-                                        Today(),
-                                        -1
-                                    ),
-                                    "mm/dd/yyyy"
-                                ) & " 09:00",
-                                Text(
-                                    DateAdd(
-                                        Today(),
-                                        -1
-                                    ),
-                                    "mm/dd/yyyy"
-                                ) & " 10:00",
-                                Text(
-                                    DateAdd(
-                                        Today(),
-                                        -1
-                                    ),
-                                    "mm/dd/yyyy"
-                                ) & " 11:00",
-                                Text(
-                                    DateAdd(
-                                        Today(),
-                                        -1
-                                    ),
-                                    "mm/dd/yyyy"
-                                ) & " 12:00",
-                                Text(
-                                    DateAdd(
-                                        Today(),
-                                        -1
-                                    ),
-                                    "mm/dd/yyyy"
-                                ) & " 13:00",
-                                Text(
-                                    DateAdd(
-                                        Today(),
-                                        -1
-                                    ),
-                                    "mm/dd/yyyy"
-                                ) & " 14:00",
-                                Text(
-                                    DateAdd(
-                                        Today(),
-                                        -1
-                                    ),
-                                    "mm/dd/yyyy"
-                                ) & " 15:00",
-                                Text(
-                                    DateAdd(
-                                        Today(),
-                                        -1
-                                    ),
-                                    "mm/dd/yyyy"
-                                ) & " 16:00",
-                                Text(
-                                    DateAdd(
-                                        Today(),
-                                        -1
-                                    ),
-                                    "mm/dd/yyyy"
-                                ) & " 17:00",
-                                Text(
-                                    DateAdd(
-                                        Today(),
-                                        -1
-                                    ),
-                                    "mm/dd/yyyy"
-                                ) & " 18:00",
-                                Text(
-                                    DateAdd(
-                                        Today(),
-                                        -1
-                                    ),
-                                    "mm/dd/yyyy"
-                                ) & " 19:00",
-                                Text(
-                                    DateAdd(
-                                        Today(),
-                                        -1
-                                    ),
-                                    "mm/dd/yyyy"
-                                ) & " 20:00",
-                                Text(
-                                    DateAdd(
-                                        Today(),
-                                        -1
-                                    ),
-                                    "mm/dd/yyyy"
-                                ) & " 21:00",
-                                Text(
-                                    DateAdd(
-                                        Today(),
-                                        -1
-                                    ),
-                                    "mm/dd/yyyy"
-                                ) & " 22:00",
-                                Text(
-                                    DateAdd(
-                                        Today(),
-                                        -1
-                                    ),
-                                    "mm/dd/yyyy"
-                                ) & " 23:00"
+                                "0:00 AM",
+                                "1:00 AM",
+                                "2:00 AM",
+                                "3:00 AM",
+                                "4:00 AM",
+                                "5:00 AM",
+                                "6:00 AM",
+                                "7:00 AM",
+                                "8:00 AM",
+                                "9:00 AM",
+                                "10:00 AM",
+                                "11:00 AM",
+                                "12:00 MD",
+                                "1:00 PM",
+                                "2:00 PM",
+                                "3:00 PM",
+                                "4:00 PM",
+                                "5:00 PM",
+                                "6:00 PM",
+                                "7:00 PM",
+                                "8:00 PM",
+                                "9:00 PM",
+                                "10:00 PM",
+                                "11:00 PM",
                             ]
-                        OnChange: |-
-                            =UpdateContext({FechaSup: DateValue(drpHoraSupervisorHxH.SelectedText.Value)});
-                            UpdateContext({Semana: Weekday(FechaSup)});
+                        OnChange: =
                         PressedColor: =RGBA(255, 255, 255, 1)
                         PressedFill: =App.Theme.Colors.Darker30
                         SelectionFill: =App.Theme.Colors.Primary
                         Size: =13
                         Tooltip: =
-                        Width: =237
-                        X: =763
+                        Width: =133
+                        X: =866
                         ZIndex: =36
 
                     Button3_7 As button:
@@ -1793,6 +1526,58 @@ HoraXhora As screen:
                         X: =102
                         Y: =382
                         ZIndex: =40
+
+                    drpFechaSupervisorHxH As dropdown:
+                        BorderColor: =
+                        BorderStyle: =BorderStyle.None
+                        ChevronBackground: =App.Theme.Colors.Primary
+                        ChevronDisabledBackground: =RGBA(166, 166, 166, 1)
+                        ChevronDisabledFill: =RGBA(244, 244, 244, 1)
+                        ChevronHoverBackground: =App.Theme.Colors.Darker10
+                        ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                        Default: =
+                        DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                        DisabledColor: =RGBA(166, 166, 166, 1)
+                        DisabledFill: =RGBA(244, 244, 244, 1)
+                        DisplayMode: =Parent.DisplayMode
+                        Font: =App.Theme.Font
+                        Height: =52
+                        HoverColor: =RGBA(0, 0, 0, 1)
+                        HoverFill: =App.Theme.Colors.Lighter70
+                        Items: |-
+                            =[
+                                Text(
+                                    Today(),
+                                    "mm/dd/yyyy"
+                                ),
+                                Text(
+                                    Today()-1,
+                                    "mm/dd/yyyy"
+                                ),
+                                Text(
+                                    Today()-2,
+                                    "mm/dd/yyyy"
+                                ),
+                                Text(
+                                    Today()-3,
+                                    "mm/dd/yyyy"
+                                ),
+                                Text(
+                                    Today()-4,
+                                    "mm/dd/yyyy"
+                                )
+                            ]
+                        OnChange: |-
+                            =UpdateContext({FechaSup: DateValue(drpFechaSupervisorHxH.SelectedText.Value)});
+                            UpdateContext({Dia: Weekday(FechaSup)});
+                        PressedColor: =RGBA(255, 255, 255, 1)
+                        PressedFill: =App.Theme.Colors.Darker30
+                        SelectionFill: =App.Theme.Colors.Primary
+                        Size: =13
+                        Tooltip: =
+                        Width: =159
+                        X: =707
+                        ZIndex: =41
 
     Container18 As groupContainer.manualLayoutContainer:
         BorderColor: =RGBA(255, 191, 0, 1)
