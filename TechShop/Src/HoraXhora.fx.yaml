@@ -6,6 +6,7 @@ HoraXhora As screen:
     OnVisible: |-
         =UpdateContext({FechaSup: Today()});
         UpdateContext({Dia: Weekday(FechaSup)});
+        UpdateContext({Hora: "0:00 AM"});
 
     ScreenContainer3_3 As groupContainer.verticalAutoLayoutContainer:
         DropShadow: =DropShadow.Light
@@ -313,11 +314,12 @@ HoraXhora As screen:
                         DisabledColor: =RGBA(244, 244, 244, 1)
                         Height: =80
                         Icon: =Icon.NextArrow
-                        OnSelect: |-
+                        OnSelect: |
                             =Select(Parent);
                             Reset(txtTarimaHxH);
                             Reset(txtMaquinaHxH);
-                            SetFocus(txtTarimaHxH)
+                            SetFocus(txtTarimaHxH);
+                            UpdateContext({XMeta: infoOrden.Selected.Meta})
                         Width: =320
                         ZIndex: =7
 
@@ -673,7 +675,14 @@ HoraXhora As screen:
                         BorderStyle: =BorderStyle.None
                         BorderThickness: =2
                         Color: =RGBA(0, 0, 0, 1)
-                        Default: =infoOrden.Selected.Meta
+                        Default: |-
+                            =If(
+                                (Hora = "9:00 AM" && txtTurnoHxH.Text = "TD") || (Hora = "9:00 PM" && txtTurnoHxH.Text = "TN"),
+                                XMeta * 0.75,
+                                (Hora = "12:00 MD" && txtTurnoHxH.Text = "TD") || (Hora = "0:00 AM" && txtTurnoHxH.Text = "TN"),
+                                XMeta * 0.50,
+                                XMeta
+                            )
                         DisabledBorderColor: =RGBA(166, 166, 166, 1)
                         DisabledColor: =RGBA(166, 166, 166, 1)
                         DisabledFill: =RGBA(244, 244, 244, 1)
@@ -858,7 +867,7 @@ HoraXhora As screen:
                             =
                                 Filter(
                                     HorarioSemanals,
-                                    (Fecha_Inicio <= FechaSup && Fecha_Fin >= FechaSup) && (Maquina = txtMaquinaHxH.Text || 'Maquina 2' = txtMaquinaHxH.Text || 'Maquina 3' = txtMaquinaHxH.Text)
+                                    (Fecha_Inicio <= FechaSup && Fecha_Fin >= FechaSup) && (Maquina = txtMaquinaHxH.Text || 'Maquina 2' = txtMaquinaHxH.Text || 'Maquina 3' = txtMaquinaHxH.Text) && !IsBlank(txtMaquinaHxH.Text)
                                 )
                         OnChange: =
                         OnSelect: =
@@ -1304,86 +1313,91 @@ HoraXhora As screen:
                                                                 UpdateContext({Mostra: true})
                                                             );
                                                             If(
-                                                                LookUp(
-                                                                    Maquinas,
-                                                                    Maquina = Upper(txtMaquinaHxH.Text)
-                                                                ).Guns = "SI" && (txtCantProducidaHxH.Text + txtCantTarimaHxH.Text) > 50,
-                                                                UpdateContext({TextoAdvertencia: "La cantidad digitada supera la cantidad maxima (50) permitida por tarima. Por favor revisar la informacion digitada."});
+                                                                (txtMaquinaHxH_2.Text = "SIERRABHERINGER1" || txtMaquinaHxH_2.Text = "SIERRABHERINGER2") && txtOperacionHxH.Text <> "10",
+                                                                UpdateContext({TextoAdvertencia: "Para la maquina seleccionada la operacion debe ser la 10"});
                                                                 UpdateContext({Mostra: true}),
                                                                 If(
-                                                                    (txtCantProducidaHxH.Text + txtCantTotalHxH.Text) > (txtCantMaxHxH.Text + (txtCantMaxHxH.Text * 0.015)),
-                                                                    UpdateContext({MostraBloqueo: true}),
+                                                                    LookUp(
+                                                                        Maquinas,
+                                                                        Maquina = Upper(txtMaquinaHxH.Text)
+                                                                    ).Guns = "SI" && (txtCantProducidaHxH.Text + txtCantTarimaHxH.Text) > 50,
+                                                                    UpdateContext({TextoAdvertencia: "La cantidad digitada supera la cantidad maxima (50) permitida por tarima. Por favor revisar la informacion digitada."});
+                                                                    UpdateContext({Mostra: true}),
                                                                     If(
-                                                                        (txtCantProducidaHxH.Text + txtCantTotalHxH.Text) > Value(txtCantMaxHxH.Text),
-                                                                        UpdateContext({TextoAdvertencia: "La cantidad total producida ha superado la cantidad maxima de la orden."});
-                                                                        UpdateContext({Mostra: true}),
+                                                                        (txtCantProducidaHxH.Text + txtCantTotalHxH.Text) > (txtCantMaxHxH.Text + (txtCantMaxHxH.Text * 0.015)),
+                                                                        UpdateContext({MostraBloqueo: true}),
                                                                         If(
-                                                                            Efi < 80,
-                                                                            UpdateContext({MostraCausa: true}),
-                                                                            Collect(
-                                                                                'Hora X Hora',
-                                                                                {
-                                                                                    CodigoEmpleado: LookUp(
-                                                                                        Empleados,
-                                                                                        Nombre = drpOperarioHxH.Selected.Empleado,
-                                                                                        Codigo
-                                                                                    ),
-                                                                                    Operario: drpOperarioHxH.Selected.Empleado,
-                                                                                    Maquina: txtMaquinaHxH_2.Text,
-                                                                                    Orden: infoOrden.Selected.Orden,
-                                                                                    Operacion: infoOrden.Selected.Operacion,
-                                                                                    'P/N': infoOrden.Selected.'P/N',
-                                                                                    Cantidad_Por_Hora: infoOrden.Selected.Meta,
-                                                                                    Cantidad: Value(txtCantProducidaHxH.Text),
-                                                                                    Semana: Value(txtSemanaHxH.Text),
-                                                                                    Turno: txtTurnoHxH.Text,
-                                                                                    User: txtEmpleadoEnUso.Text,
-                                                                                    'Fecha_Registro_Supervisor ': drpHoraSupervisorHxH.SelectedText.Value,
-                                                                                    FechaRegistro: FechaSup,
-                                                                                    Tarima: txtTarimaHxH_2.Text,
-                                                                                    Comentario: "EJECUCION",
-                                                                                    Causa: "BIEN",
-                                                                                    Descripcion: txtDescripcionHxH.Text,
-                                                                                    Ubicacion_Bono: LookUp(
-                                                                                        Maquinas,
-                                                                                        Maquina = txtMaquinaHxH_2.Text,
-                                                                                        Ubicacion_Bono
-                                                                                    )
-                                                                                }
-                                                                            );
-                                                                            Patch(
-                                                                                Orden_Ejecucion,
-                                                                                infoOrden.Selected,
-                                                                                {CantidadTotalProducida: txtCantTotalHxH.Text + txtCantProducidaHxH.Text}
-                                                                            );
+                                                                            (txtCantProducidaHxH.Text + txtCantTotalHxH.Text) > Value(txtCantMaxHxH.Text),
+                                                                            UpdateContext({TextoAdvertencia: "La cantidad total producida ha superado la cantidad maxima de la orden."});
+                                                                            UpdateContext({Mostra: true}),
                                                                             If(
-                                                                                IsBlank(txtCantTarimaHxH.Text),
+                                                                                Efi < 80,
+                                                                                UpdateContext({MostraCausa: true}),
                                                                                 Collect(
-                                                                                    Orden_Tarimas,
+                                                                                    'Hora X Hora',
                                                                                     {
-                                                                                        Orden: txtOrdenHxH.Text,
-                                                                                        Operacion: txtOperacionHxH.Text,
+                                                                                        CodigoEmpleado: LookUp(
+                                                                                            Empleados,
+                                                                                            Nombre = drpOperarioHxH.Selected.Empleado,
+                                                                                            Codigo
+                                                                                        ),
+                                                                                        Operario: drpOperarioHxH.Selected.Empleado,
+                                                                                        Maquina: txtMaquinaHxH_2.Text,
+                                                                                        Orden: infoOrden.Selected.Orden,
+                                                                                        Operacion: infoOrden.Selected.Operacion,
+                                                                                        'P/N': infoOrden.Selected.'P/N',
+                                                                                        Cantidad_Por_Hora: infoOrden.Selected.Meta,
+                                                                                        Cantidad: Value(txtCantProducidaHxH.Text),
+                                                                                        Semana: Value(txtSemanaHxH.Text),
+                                                                                        Turno: txtTurnoHxH.Text,
+                                                                                        User: txtEmpleadoEnUso.Text,
+                                                                                        'Fecha_Registro_Supervisor ': drpHoraSupervisorHxH.SelectedText.Value,
+                                                                                        FechaRegistro: FechaSup,
                                                                                         Tarima: txtTarimaHxH_2.Text,
-                                                                                        CantidadTotalProducida: Value(txtCantProducidaHxH.Text)
+                                                                                        Comentario: "EJECUCION",
+                                                                                        Causa: "BIEN",
+                                                                                        Descripcion: txtDescripcionHxH.Text,
+                                                                                        Ubicacion_Bono: LookUp(
+                                                                                            Maquinas,
+                                                                                            Maquina = txtMaquinaHxH_2.Text,
+                                                                                            Ubicacion_Bono
+                                                                                        )
                                                                                     }
-                                                                                ),
+                                                                                );
                                                                                 Patch(
-                                                                                    Orden_Tarimas,
-                                                                                    LookUp(
+                                                                                    Orden_Ejecucion,
+                                                                                    infoOrden.Selected,
+                                                                                    {CantidadTotalProducida: txtCantTotalHxH.Text + txtCantProducidaHxH.Text}
+                                                                                );
+                                                                                If(
+                                                                                    IsBlank(txtCantTarimaHxH.Text),
+                                                                                    Collect(
                                                                                         Orden_Tarimas,
-                                                                                        Orden = infoOrden.Selected.Orden && Operacion = infoOrden.Selected.Operacion && Tarima = txtTarimaHxH.Text
+                                                                                        {
+                                                                                            Orden: txtOrdenHxH.Text,
+                                                                                            Operacion: txtOperacionHxH.Text,
+                                                                                            Tarima: txtTarimaHxH_2.Text,
+                                                                                            CantidadTotalProducida: Value(txtCantProducidaHxH.Text)
+                                                                                        }
                                                                                     ),
-                                                                                    {CantidadTotalProducida: txtCantTarimaHxH.Text + txtCantProducidaHxH.Text}
+                                                                                    Patch(
+                                                                                        Orden_Tarimas,
+                                                                                        LookUp(
+                                                                                            Orden_Tarimas,
+                                                                                            Orden = infoOrden.Selected.Orden && Operacion = infoOrden.Selected.Operacion && Tarima = txtTarimaHxH.Text
+                                                                                        ),
+                                                                                        {CantidadTotalProducida: txtCantTarimaHxH.Text + txtCantProducidaHxH.Text}
+                                                                                    )
+                                                                                );
+                                                                                Reset(txtOrdenHxH);
+                                                                                Reset(txtMaquinaHxH);
+                                                                                Reset(txtTarimaHxH);
+                                                                                Reset(txtCantProducidaHxH);
+                                                                                SetFocus(txtOrdenHxH);
+                                                                                Notify(
+                                                                                    "Se ha Guardado exitosamente",
+                                                                                    NotificationType.Success
                                                                                 )
-                                                                            );
-                                                                            Reset(txtOrdenHxH);
-                                                                            Reset(txtMaquinaHxH);
-                                                                            Reset(txtTarimaHxH);
-                                                                            Reset(txtCantProducidaHxH);
-                                                                            SetFocus(txtOrdenHxH);
-                                                                            Notify(
-                                                                                "Se ha Guardado exitosamente",
-                                                                                NotificationType.Success
                                                                             )
                                                                         )
                                                                     )
@@ -1397,7 +1411,6 @@ HoraXhora As screen:
                                     )
                                 )
                             )
-                            //)
                         Size: =15
                         Text: ="Guardar Cambios"
                         Width: =201
@@ -1449,7 +1462,8 @@ HoraXhora As screen:
                                 "10:00 PM",
                                 "11:00 PM",
                             ]
-                        OnChange: =
+                        OnChange: |-
+                            =UpdateContext({Hora: drpHoraSupervisorHxH.SelectedText.Value})
                         PressedColor: =RGBA(255, 255, 255, 1)
                         PressedFill: =App.Theme.Colors.Darker30
                         SelectionFill: =App.Theme.Colors.Primary
