@@ -264,6 +264,7 @@ Ejecucion_Orden As screen:
     Form3 As form.PowerApps_CoreControls_Form:
         BorderColor: =App.Theme.Colors.Darker40
         DataSource: =Orden_Ejecucion
+        DefaultMode: =FormMode.New
         Fill: =RGBA(15, 108, 189, 0.59)
         Height: =636
         Item: =Table1.Items_FieldProperties
@@ -623,7 +624,7 @@ Ejecucion_Orden As screen:
                 AccessibleLabel: =If(Parent.Required, Substitute("{0}. Required.", "{0}", Parent.DisplayName), Parent.DisplayName)
                 BasePaletteColor: =RGBA(5, 102, 178, 1)
                 BorderColor: =
-                DisplayMode: =DisplayMode.Edit
+                DisplayMode: =DisplayMode.View
                 Fill: =
                 FontColor: =
                 FontItalic: =true
@@ -700,7 +701,7 @@ Ejecucion_Orden As screen:
                 AccessibleLabel: =If(Parent.Required, Substitute("{0}. Required.", "{0}", Parent.DisplayName), Parent.DisplayName)
                 BasePaletteColor: =
                 BorderColor: =
-                DisplayMode: =Parent.DisplayMode
+                DisplayMode: =DisplayMode.View
                 Fill: =
                 FontColor: =
                 Height: =45
@@ -774,7 +775,7 @@ Ejecucion_Orden As screen:
                 AccessibleLabel: =If(Parent.Required, Substitute("{0}. Required.", "{0}", Parent.DisplayName), Parent.DisplayName)
                 BasePaletteColor: =
                 BorderColor: =
-                DisplayMode: =Parent.DisplayMode
+                DisplayMode: =DisplayMode.View
                 Fill: =
                 FontColor: =
                 Height: =45
@@ -981,19 +982,12 @@ Ejecucion_Orden As screen:
         OnSelect: |-
             =If(
                 // Validar que todos los campos del formulario estén completos
-                IsBlank(DataCardValue153.Value) || 
-                IsBlank(DataCardValue154.Value) || 
-                IsBlank(DataCardValue152.Value) || 
-                IsBlank(DataCardValue149.Value) || 
-                IsBlank(DataCardValue148.Value) || 
-                IsBlank(DataCardValue155.Value) || 
-                IsBlank(DataCardValue151.Value) ||
-                IsBlank(DataCardValue156.Value) || 
-                IsBlank(DataCardValue39.Value),
-                
+                IsBlank(DataCardValue153.Value) || IsBlank(DataCardValue154.Value) || IsBlank(DataCardValue152.Value) || IsBlank(DataCardValue149.Value) || IsBlank(DataCardValue148.Value) || IsBlank(DataCardValue155.Value) || IsBlank(DataCardValue151.Value) || IsBlank(DataCardValue156.Value) || IsBlank(DataCardValue39.Value),
                 // Mostrar una notificación de error si algún campo está vacío
-                Notify("Debe completar todos los campos del formulario", NotificationType.Error),
-            
+                Notify(
+                    "Debe completar todos los campos del formulario",
+                    NotificationType.Error
+                ),
                 // Verificar si ya existe una orden con el mismo número y operación
                 If(
                     CountRows(
@@ -1002,16 +996,16 @@ Ejecucion_Orden As screen:
                             Orden = DataCardValue153.Value && Operacion = DataCardValue152.Value
                         )
                     ) > 0,
-                    
                     // Mostrar una notificación de error si la orden y operación ya existen
-                    Notify("Ya existe una orden con este número y operación", NotificationType.Error),
-                    
+                    Notify(
+                        "Ya existe una orden con este número y operación",
+                        NotificationType.Error
+                    ),
                     // Si todo está correcto, enviar el formulario, resetearlo y actualizar la fuente de datos
                     SubmitForm(Form3);
                     ResetForm(Form3);
                     Refresh(Orden_Ejecucion);
                     Refresh(CorPJobOper_1)
-                    
                 )
             )
         Text: ="Ingresar Orden"
@@ -1043,7 +1037,12 @@ Ejecucion_Orden As screen:
         FontColor: =
         Height: =46
         Icon: ="Eye"
-        OnSelect: =Navigate(Ordenes_en_Ejecucion)
+        OnSelect: |-
+            =If(
+                VarName = "2328" || LookUp(Empleados, VarName = Codigo).Rol = "ADMIN"|| VarName = "2154" || VarName = "9",
+                Navigate(Ordenes_en_Ejecucion, ScreenTransition.Fade),
+                Notify("No tienes acceso a este módulo", NotificationType.Information)
+            )
         Text: ="Vizualizar Ordenes Cargadas"
         Width: =260
         X: =748
