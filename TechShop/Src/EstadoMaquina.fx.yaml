@@ -3,6 +3,8 @@ EstadoMaquina As screen:
     Fill: =Color.White
     ImagePosition: =ImagePosition.Fill
     LoadingSpinnerColor: =App.Theme.Colors.Primary
+    OnVisible: |-
+        =UpdateContext({texto: "Notificación de Cambio de Estado de la Máquina"})
 
     ScreenContainer6 As groupContainer.verticalAutoLayoutContainer:
         DropShadow: =DropShadow.Light
@@ -708,9 +710,7 @@ EstadoMaquina As screen:
                         HoverColor: =RGBA(255, 255, 255, 1)
                         HoverFill: =RGBA(102, 182, 227, 1)
                         OnSelect: |-
-                            =UpdateContext({texto: "Estimado/a,<br><br>" & 
-                                "La maquina " & InfoEstadoMaquinas.Selected.Maquina & " entro en paro por mantenimiento"});
-                            If(
+                            =If(
                                 IsBlank(drpEstadoMaquinaEdit.SelectedText.Value),
                                 Notify(
                                     "Debe seleccionar el estado de la maquina",
@@ -728,7 +728,15 @@ EstadoMaquina As screen:
                                             "Debe indiacar un comentario y una causa para realizar el cambio de estado",
                                             NotificationType.Error
                                         ),
-                                        If(drpComentarioMaquina.SelectedText.Value = "MANTENIMIENTO ", EnviarCorreo.Run("jbrenes@tsicr.com", "Maquina en mantenimiento", texto));
+                                        If(drpComentarioMaquina.SelectedText.Value = "MANTENIMIENTO ", 
+                                                EnviarCorreo.Run("raraya@tsicr.com", texto, HtmlBody.HtmlText); EnviarCorreo.Run("rpereira@tsicr.com", texto, HtmlBody.HtmlText),
+                                            drpComentarioMaquina.SelectedText.Value = "PROGRAMACION",
+                                                EnviarCorreo.Run("raraya@tsicr.com", texto, HtmlBody.HtmlText);EnviarCorreo.Run("wsequeira@tsicr.com", texto, HtmlBody.HtmlText),
+                                            drpComentarioMaquina.SelectedText.Value = "PRODUCCION",
+                                                EnviarCorreo.Run("supervisoresTSI@tsicr.com", texto, HtmlBody.HtmlText); EnviarCorreo.Run("lfernandez@tsicr.com", texto, HtmlBody.HtmlText),
+                                            drpComentarioMaquina.SelectedText.Value = "CALIDAD ",
+                                                EnviarCorreo.Run("vguerrero@tsicr.com", texto, HtmlBody.HtmlText);EnviarCorreo.Run("icespedes@tsicr.com", texto, HtmlBody.HtmlText)
+                                            );
                                         Patch(
                                             Historial_Maquinas,
                                             Defaults(Historial_Maquinas),
@@ -1795,4 +1803,33 @@ EstadoMaquina As screen:
                             X: =869
                             Y: =30
                             ZIndex: =14
+
+        HtmlBody As htmlViewer:
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            Font: =App.Theme.Font
+            HtmlText: |-
+                ="<html>
+                  <head>
+                    <style>
+                      body {
+                        font-family: Arial, sans-serif;
+                        font-size: 14px;
+                      }
+                     .machine-state {
+                        font-weight: bold;
+                      }
+                    </style>
+                  </head>
+                  <body>
+                    <p>Estimado/a,</p>
+                    <p>Le informamos que la máquina <span class=""machine-state"">" & txtEstadoMaquina_1.Text & "</span> ha cambiado su estado a <span class=""machine-state"">" & drpEstadoMaquinaEdit.SelectedText.Value & "</span>.</p>
+                    <p>Comentario del Cambio: " & drpComentarioMaquina.SelectedText.Value & "</p>
+                    <p>Causa del Cambio: " & drpCausaMaquina.SelectedText.Value & "</p>
+                    <p>Descripcion del Cambio: " & txtMaquinaDescripcion.Text & "</p>
+                  </body>
+                </html>
+                "
+            Size: =13
+            Visible: =false
+            ZIndex: =4
 
