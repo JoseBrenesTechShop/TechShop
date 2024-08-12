@@ -679,12 +679,12 @@ HoraXhora As screen:
                         Color: =RGBA(0, 0, 0, 1)
                         Default: |-
                             =If(
-                                (Hora = "10:00 AM" && (txtTurnoHxH.Text = "TD" || txtTurnoHxH.Text = "T1")) || (Hora = "4:00 PM" && (txtTurnoHxH.Text = "TD" || txtTurnoHxH.Text = "T2")) || 
-                                (Hora = "4:00 AM" && (txtTurnoHxH.Text = "TN" || txtTurnoHxH.Text = "T3")) || (Hora = "10:00 PM" && txtTurnoHxH.Text = "TN"),
+                                (Hora = "10:00 AM" && (txtTurnoHxH.Text = "TD" || txtTurnoHxH.Text = "T1")) || (Hora = "4:00 PM" && (txtTurnoHxH.Text = "TD" || txtTurnoHxH.Text = "T2")) || (Hora = "4:00 AM" && (txtTurnoHxH.Text = "TN" || txtTurnoHxH.Text = "T3")) || (Hora = "10:00 PM" && txtTurnoHxH.Text = "TN"),
                                 XMeta * 0.75,
-                                (Hora = "1:00 PM" && (txtTurnoHxH.Text = "TD" || txtTurnoHxH.Text = "T1")) || (Hora = "1:00 AM" && (txtTurnoHxH.Text = "TN" || txtTurnoHxH.Text = "T3")) || 
-                                (Hora = "8:00 PM" && txtTurnoHxH.Text = "T2"),
+                                (Hora = "1:00 PM" && (txtTurnoHxH.Text = "TD" || txtTurnoHxH.Text = "T1")) || (Hora = "1:00 AM" && (txtTurnoHxH.Text = "TN" || txtTurnoHxH.Text = "T3")) || (Hora = "8:00 PM" && txtTurnoHxH.Text = "T2"),
                                 XMeta * 0.50,
+                                XMeta = 0,
+                                4,
                                 XMeta
                             )
                         DisabledBorderColor: =RGBA(166, 166, 166, 1)
@@ -1597,6 +1597,33 @@ HoraXhora As screen:
                         X: =707
                         ZIndex: =41
 
+        HtmlBody_1 As htmlViewer:
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            Font: =App.Theme.Font
+            HtmlText: |-
+                ="<html>
+                  <head>
+                    <style>
+                      body {
+                        font-family: Arial, sans-serif;
+                        font-size: 14px;
+                      }
+                     .machine-state {
+                        font-weight: bold;
+                      }
+                    </style>
+                  </head>
+                  <body>
+                    <p>Estimado/a,</p>
+                    <p>Le informamos que la Orden <span class=""machine-state"">" & txtOrdenHxH.Text & "</span> con la Operacion <span class=""machine-state"">" & txtOperacionHxH.Text & "</span>,</p>
+                    <p>ah superado el 1.5% de su cantidad maxima ("&txtCantMaxHxH.Text&")</p>
+                  </body>
+                </html>
+                "
+            Size: =13
+            Visible: =false
+            ZIndex: =3
+
     Container18 As groupContainer.manualLayoutContainer:
         BorderColor: =RGBA(255, 191, 0, 1)
         BorderThickness: =5
@@ -1845,6 +1872,7 @@ HoraXhora As screen:
                     );
                     If(
                         Sup.Contraseña = txtContraSupervisor.Text && (Sup.Rol = "SUP" || Sup.Rol = "ADM" || Sup.Rol = "ADMIN"),
+                        EnviarCorreo.Run("supervisoresTSI@tsicr.com", "Superacion del 1.5%", HtmlBody_1.HtmlText); EnviarCorreo.Run("lfernandez@tsicr.com", "Superacion del 1.5%", HtmlBody_1.HtmlText);
                         If(
                             Efi < 85,
                             UpdateContext({MostraCausa: true}),
