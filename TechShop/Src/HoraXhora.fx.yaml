@@ -1506,7 +1506,7 @@ HoraXhora As screen:
                                                                                     "Se ha Guardado exitosamente",
                                                                                     NotificationType.Success
                                                                                 )
-                                                                            )
+                                                                            );
                                                                         )
                                                                     )
                                                                 )
@@ -2024,6 +2024,75 @@ HoraXhora As screen:
                                     }
                                 )
                             );
+                            If(
+                                IsBlank(
+                                    LookUp(
+                                        HoraxHoraFinals,
+                                        Codigo_Empleado = drpOperarioHxH.SelectedText.Codigo && Fecha_Registro = FechaSup && Hora = drpHoraSupervisorHxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                                    )
+                                ),
+                                Collect(
+                                    HoraxHoraFinals,
+                                    {
+                                        Codigo_Empleado: drpOperarioHxH.Selected.Codigo,
+                                        Cantidad_Producida: Sum(
+                                            Filter(
+                                                'Hora X Hora',
+                                                CodigoEmpleado = drpOperarioHxH.Selected.Codigo,
+                                                FechaRegistro = FechaSup,
+                                                Hora = drpHoraSupervisorHxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                                            ),
+                                            Cantidad
+                                        ),
+                                        Meta: Average(
+                                            Filter(
+                                                'Hora X Hora',
+                                                CodigoEmpleado = drpOperarioHxH.Selected.Codigo,
+                                                FechaRegistro = FechaSup,
+                                                Hora = drpHoraSupervisorHxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                                            ),
+                                            Cantidad_Por_Hora
+                                        ),
+                                        Fecha_Registro: FechaSup,
+                                        Turno: txtTurnoHxH.Text,
+                                        Hora: drpHoraSupervisorHxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor',
+                                        Ubicacion_Bono: LookUp(
+                                            Maquinas,
+                                            Maquina = txtMaquinaHxH_2.Text,
+                                            Ubicacion_Bono
+                                        ),
+                                        Semana: Value(txtSemanaHxH.Text)
+                                    }
+                                ),
+                                Patch(
+                                    HoraxHoraFinals,
+                                    LookUp(
+                                        HoraxHoraFinals,
+                                        Codigo_Empleado = drpOperarioHxH.SelectedText.Codigo && Fecha_Registro = FechaSup && Hora = drpHoraSupervisorHxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                                    ),
+                                    {
+                                        Cantidad_Producida: Sum(
+                                            Filter(
+                                                'Hora X Hora',
+                                                CodigoEmpleado = drpOperarioHxH.Selected.Codigo,
+                                                FechaRegistro = FechaSup,
+                                                Hora = drpHoraSupervisorHxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                                            ),
+                                            Cantidad
+                                        ),
+                                        Meta: Average(
+                                            Filter(
+                                                'Hora X Hora',
+                                                CodigoEmpleado = drpOperarioHxH.Selected.Codigo,
+                                                FechaRegistro = FechaSup,
+                                                Hora = drpHoraSupervisorHxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                                            ),
+                                            Cantidad_Por_Hora
+                                        ),
+                                        Fecha_Registro: FechaSup
+                                    }
+                                )
+                            );
                             Reset(txtOrdenHxH);
                             Reset(txtMaquinaHxH);
                             Reset(txtTarimaHxH);
@@ -2141,17 +2210,95 @@ HoraXhora As screen:
                             }
                         )
                     );
-                    Reset(txtOrdenHxH);
-                    Reset(txtMaquinaHxH);
-                    Reset(txtTarimaHxH);
-                    Reset(txtCantProducidaHxH);
-                    SetFocus(txtOrdenHxH);
-                    Notify(
-                        "Se ha Guardado exitosamente",
-                        NotificationType.Success
+                    ClearCollect(
+                        colExistingRecord,
+                        LookUp(
+                            HoraxHoraFinals,
+                            Codigo_Empleado = drpOperarioHxH.Selected.Codigo && Hora = drpHoraSupervisorHxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor' && Fecha = drpFechaSupervisorHxH.SelectedText.Value
+                        )
                     );
-                    UpdateContext({MostraCausa: false})
-                )
+                    If(
+                        !IsEmpty(colExistingRecord),
+                        Patch(
+                            HoraxHoraFinals,
+                            First(colExistingRecord),
+                            {
+                                Cantidad_Producida: Sum(
+                                    Filter(
+                                        'Hora X Hora',
+                                        CodigoEmpleado = drpOperarioHxH.Selected.Codigo,
+                                        FechaRegistro = FechaSup,
+                                        Hora = drpHoraSupervisorHxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                                    ),
+                                    Cantidad
+                                ),
+                                Meta: Average(
+                                    Filter(
+                                        'Hora X Hora',
+                                        CodigoEmpleado = drpOperarioHxH.Selected.Codigo,
+                                        FechaRegistro = FechaSup,
+                                        Hora = drpHoraSupervisorHxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                                    ),
+                                    Cantidad_Por_Hora
+                                ),
+                                Turno: txtTurnoHxH.Text,
+                                Ubicacion_Bono: LookUp(
+                                    Maquinas,
+                                    Maquina = txtMaquinaHxH_2.Text,
+                                    Ubicacion_Bono
+                                ),
+                                Semana: Value(txtSemanaHxH.Text)
+                            }
+                        ),
+                    // Si no existe, se crea un nuevo registro
+                        Collect(
+                            HoraxHoraFinals,
+                            {
+                                Codigo_Empleado: drpOperarioHxH.Selected.Codigo,
+                                Cantidad_Producida: Sum(
+                                    Filter(
+                                        'Hora X Hora',
+                                        CodigoEmpleado = drpOperarioHxH.Selected.Codigo,
+                                        FechaRegistro = FechaSup,
+                                        Hora = drpHoraSupervisorHxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                                    ),
+                                    Cantidad
+                                ),
+                                Meta: Average(
+                                    Filter(
+                                        'Hora X Hora',
+                                        CodigoEmpleado = drpOperarioHxH.Selected.Codigo,
+                                        FechaRegistro = FechaSup,
+                                        Hora = drpHoraSupervisorHxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                                    ),
+                                    Cantidad_Por_Hora
+                                ),
+                                Fecha_Registro: FechaSup,
+                                Turno: txtTurnoHxH.Text,
+                                Hora: drpHoraSupervisorHxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor',
+                                Ubicacion_Bono: LookUp(
+                                    Maquinas,
+                                    Maquina = txtMaquinaHxH_2.Text,
+                                    Ubicacion_Bono
+                                ),
+                                Semana: Value(txtSemanaHxH.Text),Fecha: drpFechaSupervisorHxH.SelectedText.Value
+                            }
+                        )
+                    // Si existe, se actualiza
+                    );
+                    
+                );
+                Refresh(HoraxHoraFinals);
+                Reset(txtOrdenHxH);
+                Reset(txtMaquinaHxH);
+                Reset(txtTarimaHxH);
+                Reset(txtCantProducidaHxH);
+                SetFocus(txtOrdenHxH);
+                Notify(
+                    "Se ha Guardado exitosamente",
+                    NotificationType.Success
+                );
+                UpdateContext({MostraCausa: false})
             Size: =15
             Text: ="Guardar"
             X: =336
