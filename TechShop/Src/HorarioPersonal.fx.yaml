@@ -50,7 +50,7 @@ HorarioPersonal As screen:
                 Width: =200
                 ZIndex: =1
 
-            drpEmpleadoHorario As dropdown:
+            Drp_Empleado_HP As dropdown:
                 AlignInContainer: =AlignInContainer.Center
                 AllowEmptySelection: =true
                 BorderColor: =RGBA(40, 134, 222, 1)
@@ -69,12 +69,12 @@ HorarioPersonal As screen:
                 HoverFill: =RGBA(71, 158, 245, 1)
                 Items: |-
                     =//Empleados
-                    If(IsBlank(txtIDEmpleadoHorario.Text),
+                    If(IsBlank(Txt_Codigo_HP.Text),
                     Sort(Empleados, Codigo, SortOrder.Ascending), 
-                    Filter(Empleados, Codigo = txtIDEmpleadoHorario.Text))
+                    Filter(Empleados, Codigo = Txt_Codigo_HP.Text))
                 OnChange: |-
                     =UpdateContext({Mostrar: false});
-                    ResetForm(Form18_3)
+                    ResetForm(Frm_HP)
                 PressedColor: =RGBA(255, 255, 255, 1)
                 PressedFill: =App.Theme.Colors.Darker30
                 SelectionFill: =App.Theme.Colors.Primary
@@ -110,7 +110,7 @@ HorarioPersonal As screen:
                 Width: =140
                 ZIndex: =4
 
-            txtIDEmpleadoHorario As text:
+            Txt_Codigo_HP As text:
                 Align: =Align.Center
                 AlignInContainer: =AlignInContainer.Center
                 BorderColor: =RGBA(153, 207, 236, 1)
@@ -128,7 +128,7 @@ HorarioPersonal As screen:
                 HoverBorderColor: =App.Theme.Colors.Darker40
                 HoverColor: =RGBA(0, 0, 0, 1)
                 HoverFill: =App.Theme.Colors.Lighter70
-                OnSelect: =Reset(txtIDEmpleadoHorario)
+                OnSelect: =Reset(Txt_Codigo_HP)
                 PaddingLeft: =5
                 RadiusBottomLeft: =10
                 RadiusBottomRight: =10
@@ -152,7 +152,7 @@ HorarioPersonal As screen:
                 Y: =22
                 ZIndex: =6
 
-            btnHorario As button:
+            Btn_HP As button:
                 AlignInContainer: =AlignInContainer.Center
                 BorderColor: =App.Theme.Colors.Primary
                 DisabledBorderColor: =RGBA(244, 244, 244, 1)
@@ -168,7 +168,7 @@ HorarioPersonal As screen:
                 HoverFill: =RGBA(40, 134, 222, 1)
                 OnSelect: |-
                     =If(
-                        IsBlank(drpEmpleadoHorario.SelectedText.Value),
+                        IsBlank(Drp_Empleado_HP.SelectedText.Value),
                         Notify(
                             "Debe seleccionar a un Empleado",
                             NotificationType.Error
@@ -196,11 +196,11 @@ HorarioPersonal As screen:
                                             LookUp(
                                                 Filter(
                                                     HorarioSemanals,
-                                                    Empleado = drpEmpleadoHorario.Selected.Nombre
+                                                    Empleado = Drp_Empleado_HP.Selected.Nombre
                                                 ),
                                                 Fecha_Inicio = dpFechaInicio.SelectedDate
                                             )
-                                        ) && !(InfoHorarios.Selected.Fecha_Inicio = dpFechaInicio.SelectedDate && Mostrar),
+                                        ) && !(Glr_Info_HP.Selected.Fecha_Inicio = dpFechaInicio.SelectedDate && Mostrar),
                                         Notify(
                                             "Ya exite un Horario para esa fecha",
                                             NotificationType.Error
@@ -214,7 +214,7 @@ HorarioPersonal As screen:
                                             If(
                                                 LookUp(
                                                     Empleados,
-                                                    Codigo = drpEmpleadoHorario.Selected.Codigo,
+                                                    Codigo = Drp_Empleado_HP.Selected.Codigo,
                                                     Area
                                                 ) = "OPERARIOS" && IsBlank(drpMaquina.SelectedText.Value) && IsBlank(drpMaquina2.SelectedText.Value) && IsBlank(drpMaquina3.SelectedText.Value),
                                                 Notify(
@@ -236,21 +236,21 @@ HorarioPersonal As screen:
                                                         If(
                                                             dpFechaInicio.SelectedDate > Today() || (dpFechaInicio.SelectedDate <= Today() && dpFechaFin.SelectedDate >= Today()),
                                                             CorreoConPDF.Run(
-                                                                HtmlPDF.HtmlText,
+                                                                HtmlPDF_HP.HtmlText,
                                                                 LookUp(
                                                                     Empleados,
-                                                                    Nombre = drpEmpleadoHorario.SelectedText.Value,
+                                                                    Nombre = Drp_Empleado_HP.SelectedText.Value,
                                                                     Correo
                                                                 ),
                                                                 "Horario Semanal",
-                                                                HtmlCuerpo.HtmlText
+                                                                HtmlCuerpo_HP.HtmlText
                                                             );
                                                         );
-                                                        SubmitForm(Form18_3);
-                                                        ResetForm(Form18_3),
+                                                        SubmitForm(Frm_HP);
+                                                        ResetForm(Frm_HP),
                                                         Patch(
                                                             HorarioSemanals,
-                                                            InfoHorarios.Selected,
+                                                            Glr_Info_HP.Selected,
                                                             {
                                                                 Lunes: drpTurno_L.Selected.Turno_Op & " - " & lblHorario_L.Text,
                                                                 Martes: drpTurno_K.Selected.Turno_Op & " - " & lblHorario_K.Text,
@@ -284,18 +284,18 @@ HorarioPersonal As screen:
                                                         If(
                                                             dpFechaInicio.SelectedDate > Today() || (dpFechaInicio.SelectedDate <= Today() && dpFechaFin.SelectedDate >= Today()),
                                                             CorreoConPDF.Run(
-                                                                HtmlPDF.HtmlText,
+                                                                HtmlPDF_HP.HtmlText,
                                                                 LookUp(
                                                                     Empleados,
-                                                                    Nombre = drpEmpleadoHorario.SelectedText.Value,
+                                                                    Nombre = Drp_Empleado_HP.SelectedText.Value,
                                                                     Correo
                                                                 ),
                                                                 "Horario Proxima Semana",
-                                                                HtmlCuerpo.HtmlText
+                                                                HtmlCuerpo_HP.HtmlText
                                                             )
                                                         );
                                                         UpdateContext({Mostrar: false});
-                                                        ResetForm(Form18_3)
+                                                        ResetForm(Frm_HP)
                                                     )
                                                 )
                                             )
@@ -326,7 +326,7 @@ HorarioPersonal As screen:
                 Y: =22
                 ZIndex: =8
 
-            Icon3_2 As icon.Erase:
+            Icn_Limpiar_HP As icon.Erase:
                 AlignInContainer: =AlignInContainer.Center
                 BorderColor: =App.Theme.Colors.Primary
                 BorderThickness: =2
@@ -343,7 +343,7 @@ HorarioPersonal As screen:
                 OnSelect: |-
                     =UpdateContext({Mostrar: false});
                     UpdateContext({FechaHorario: Blank()});
-                    ResetForm(Form18_3)
+                    ResetForm(Frm_HP)
                 PaddingBottom: =5
                 PaddingLeft: =5
                 PaddingRight: =5
@@ -365,7 +365,7 @@ HorarioPersonal As screen:
                 Y: =22
                 ZIndex: =10
 
-            Icon3_3 As icon.Erase:
+            Icn_Hogar_HP As icon.Erase:
                 AlignInContainer: =AlignInContainer.Center
                 BorderColor: =App.Theme.Colors.Primary
                 BorderThickness: =2
@@ -380,8 +380,8 @@ HorarioPersonal As screen:
                 HoverFill: =RGBA(40, 134, 222, 1)
                 Icon: =Icon.Home
                 OnSelect: |-
-                    =ResetForm(Form18_3);
-                    Reset(txtIDEmpleadoHorario);
+                    =ResetForm(Frm_HP);
+                    Reset(Txt_Codigo_HP);
                     UpdateContext({Mostrar: false});
                     Navigate(MenuNew, ScreenTransition.Cover)
                 PaddingBottom: =5
@@ -513,7 +513,7 @@ HorarioPersonal As screen:
                         X: =629
                         ZIndex: =5
 
-                    Form18_3 As form:
+                    Frm_HP As form:
                         BorderColor: =App.Theme.Colors.Darker40
                         DataSource: =HorarioSemanals
                         DefaultMode: =FormMode.New
@@ -564,7 +564,7 @@ HorarioPersonal As screen:
                                 ChevronDisabledFill: =RGBA(204, 228, 246, 1)
                                 ChevronHoverBackground: =RGBA(153, 201, 238, 1)
                                 ChevronHoverFill: =RGBA(255, 255, 255, 1)
-                                Default: =If(Mostrar, Mid(InfoHorarios.Selected.Martes, 1, Find("-", InfoHorarios.Selected.Martes) - 2), "1")
+                                Default: =If(Mostrar, Mid(Glr_Info_HP.Selected.Martes, 1, Find("-", Glr_Info_HP.Selected.Martes) - 2), "1")
                                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                                 DisabledColor: =RGBA(0, 0, 0, 1)
                                 DisabledFill: =RGBA(204, 228, 246, 1)
@@ -675,7 +675,7 @@ HorarioPersonal As screen:
                                 ChevronDisabledFill: =RGBA(204, 228, 246, 1)
                                 ChevronHoverBackground: =RGBA(153, 201, 238, 1)
                                 ChevronHoverFill: =RGBA(255, 255, 255, 1)
-                                Default: =If(Mostrar, Mid(InfoHorarios.Selected.Miercoles, 1, Find("-", InfoHorarios.Selected.Miercoles) - 2), "1")
+                                Default: =If(Mostrar, Mid(Glr_Info_HP.Selected.Miercoles, 1, Find("-", Glr_Info_HP.Selected.Miercoles) - 2), "1")
                                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                                 DisabledColor: =RGBA(0, 0, 0, 1)
                                 DisabledFill: =RGBA(204, 228, 246, 1)
@@ -786,7 +786,7 @@ HorarioPersonal As screen:
                                 ChevronDisabledFill: =RGBA(204, 228, 246, 1)
                                 ChevronHoverBackground: =RGBA(153, 201, 238, 1)
                                 ChevronHoverFill: =RGBA(255, 255, 255, 1)
-                                Default: =If(Mostrar, Mid(InfoHorarios.Selected.Jueves, 1, Find("-", InfoHorarios.Selected.Jueves) - 2), "1")
+                                Default: =If(Mostrar, Mid(Glr_Info_HP.Selected.Jueves, 1, Find("-", Glr_Info_HP.Selected.Jueves) - 2), "1")
                                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                                 DisabledColor: =RGBA(0, 0, 0, 1)
                                 DisabledFill: =RGBA(204, 228, 246, 1)
@@ -897,7 +897,7 @@ HorarioPersonal As screen:
                                 ChevronDisabledFill: =RGBA(204, 228, 246, 1)
                                 ChevronHoverBackground: =RGBA(153, 201, 238, 1)
                                 ChevronHoverFill: =RGBA(255, 255, 255, 1)
-                                Default: =If(Mostrar, Mid(InfoHorarios.Selected.Viernes, 1, Find("-", InfoHorarios.Selected.Viernes) - 2), "1")
+                                Default: =If(Mostrar, Mid(Glr_Info_HP.Selected.Viernes, 1, Find("-", Glr_Info_HP.Selected.Viernes) - 2), "1")
                                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                                 DisabledColor: =RGBA(0, 0, 0, 1)
                                 DisabledFill: =RGBA(204, 228, 246, 1)
@@ -1008,7 +1008,7 @@ HorarioPersonal As screen:
                                 ChevronDisabledFill: =RGBA(204, 228, 246, 1)
                                 ChevronHoverBackground: =RGBA(153, 201, 238, 1)
                                 ChevronHoverFill: =RGBA(255, 255, 255, 1)
-                                Default: =If(Mostrar, Mid(InfoHorarios.Selected.Sabado, 1, Find("-", InfoHorarios.Selected.Sabado) - 2), "1")
+                                Default: =If(Mostrar, Mid(Glr_Info_HP.Selected.Sabado, 1, Find("-", Glr_Info_HP.Selected.Sabado) - 2), "1")
                                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                                 DisabledColor: =RGBA(0, 0, 0, 1)
                                 DisabledFill: =RGBA(204, 228, 246, 1)
@@ -1121,7 +1121,7 @@ HorarioPersonal As screen:
                                 Height: =50
                                 Size: =18
                                 Text: ="Maquinas"
-                                Visible: =If(LookUp(Empleados, Nombre = drpEmpleadoHorario.SelectedText.Value, Area) = "OPERARIOS", true, false)
+                                Visible: =If(LookUp(Empleados, Nombre = Drp_Empleado_HP.SelectedText.Value, Area) = "OPERARIOS", true, false)
                                 Width: =130
                                 Wrap: =false
                                 ZIndex: =5
@@ -1139,7 +1139,7 @@ HorarioPersonal As screen:
                                     =
                                     RGBA(153, 201, 238, 1)
                                 ChevronHoverFill: =RGBA(255, 255, 255, 1)
-                                Default: =If(Mostrar,InfoHorarios.Selected.Maquina,"1")
+                                Default: =If(Mostrar,Glr_Info_HP.Selected.Maquina,"1")
                                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 DisabledFill: =RGBA(244, 244, 244, 1)
@@ -1152,7 +1152,7 @@ HorarioPersonal As screen:
                                 PressedFill: =App.Theme.Colors.Darker30
                                 SelectionFill: =App.Theme.Colors.Primary
                                 Size: =13
-                                Visible: =If(LookUp(Empleados, Nombre = drpEmpleadoHorario.SelectedText.Value, Area) = "OPERARIOS", true, false)
+                                Visible: =If(LookUp(Empleados, Nombre = Drp_Empleado_HP.SelectedText.Value, Area) = "OPERARIOS", true, false)
                                 Width: =167
                                 X: =130
                                 ZIndex: =6
@@ -1222,7 +1222,7 @@ HorarioPersonal As screen:
                                     =
                                     RGBA(153, 201, 238, 1)
                                 ChevronHoverFill: =RGBA(255, 255, 255, 1)
-                                Default: =If(Mostrar,InfoHorarios.Selected.'Maquina 2',"1")
+                                Default: =If(Mostrar,Glr_Info_HP.Selected.'Maquina 2',"1")
                                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 DisabledFill: =RGBA(244, 244, 244, 1)
@@ -1235,7 +1235,7 @@ HorarioPersonal As screen:
                                 PressedFill: =App.Theme.Colors.Darker30
                                 SelectionFill: =App.Theme.Colors.Primary
                                 Size: =13
-                                Visible: =If(LookUp(Empleados, Nombre = drpEmpleadoHorario.SelectedText.Value, Area) = "OPERARIOS", true, false)
+                                Visible: =If(LookUp(Empleados, Nombre = Drp_Empleado_HP.SelectedText.Value, Area) = "OPERARIOS", true, false)
                                 Width: =167
                                 ZIndex: =6
 
@@ -1253,7 +1253,7 @@ HorarioPersonal As screen:
                             Required: =false
                             Update: |
                                 =drpMaquina3.SelectedText.Value
-                            Visible: =If(LookUp(Empleados, Nombre = drpEmpleadoHorario.SelectedText.Value, Area) = "OPERARIOS", true, false)
+                            Visible: =If(LookUp(Empleados, Nombre = Drp_Empleado_HP.SelectedText.Value, Area) = "OPERARIOS", true, false)
                             Width: =167
                             X: =2
                             Y: =9
@@ -1305,7 +1305,7 @@ HorarioPersonal As screen:
                                     =
                                     RGBA(153, 201, 238, 1)
                                 ChevronHoverFill: =RGBA(255, 255, 255, 1)
-                                Default: =If(Mostrar,InfoHorarios.Selected.'Maquina 3',"1")
+                                Default: =If(Mostrar,Glr_Info_HP.Selected.'Maquina 3',"1")
                                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 DisabledFill: =RGBA(244, 244, 244, 1)
@@ -1318,7 +1318,7 @@ HorarioPersonal As screen:
                                 PressedFill: =App.Theme.Colors.Darker30
                                 SelectionFill: =App.Theme.Colors.Primary
                                 Size: =13
-                                Visible: =If(LookUp(Empleados, Nombre = drpEmpleadoHorario.SelectedText.Value, Area) = "OPERARIOS", true, false)
+                                Visible: =If(LookUp(Empleados, Nombre = Drp_Empleado_HP.SelectedText.Value, Area) = "OPERARIOS", true, false)
                                 Width: =167
                                 ZIndex: =6
 
@@ -1334,7 +1334,7 @@ HorarioPersonal As screen:
                             MaxLength: =DataSourceInfo([@HorarioSemanals], DataSourceInfo.MaxLength, crfb9_maquina4)
                             Required: =false
                             Update: =drpMaquina4.SelectedText.Value
-                            Visible: =If(LookUp(Empleados, Nombre = drpEmpleadoHorario.SelectedText.Value, Area) = "OPERARIOS", true, false)
+                            Visible: =If(LookUp(Empleados, Nombre = Drp_Empleado_HP.SelectedText.Value, Area) = "OPERARIOS", true, false)
                             Width: =167
                             X: =2
                             Y: =9
@@ -1386,7 +1386,7 @@ HorarioPersonal As screen:
                                     =
                                     RGBA(153, 201, 238, 1)
                                 ChevronHoverFill: =RGBA(255, 255, 255, 1)
-                                Default: =If(Mostrar,InfoHorarios.Selected.'Maquina 4',"1")
+                                Default: =If(Mostrar,Glr_Info_HP.Selected.'Maquina 4',"1")
                                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 DisabledFill: =RGBA(244, 244, 244, 1)
@@ -1413,7 +1413,7 @@ HorarioPersonal As screen:
                             Height: =0
                             MaxLength: =DataSourceInfo([@HorarioSemanals], DataSourceInfo.MaxLength, crfb9_codigo)
                             Required: =false
-                            Update: =LookUp(Empleados, Nombre = drpEmpleadoHorario.SelectedText.Value, Codigo)
+                            Update: =LookUp(Empleados, Nombre = Drp_Empleado_HP.SelectedText.Value, Codigo)
                             Width: =266
                             X: =1
                             Y: =10
@@ -1461,7 +1461,7 @@ HorarioPersonal As screen:
                                 ChevronDisabledFill: =RGBA(204, 228, 246, 1)
                                 ChevronHoverBackground: =RGBA(153, 201, 238, 1)
                                 ChevronHoverFill: =RGBA(255, 255, 255, 1)
-                                Default: =If(Mostrar, Mid(InfoHorarios.Selected.Lunes, 1, Find("-", InfoHorarios.Selected.Lunes) - 2), "1")
+                                Default: =If(Mostrar, Mid(Glr_Info_HP.Selected.Lunes, 1, Find("-", Glr_Info_HP.Selected.Lunes) - 2), "1")
                                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                                 DisabledColor: =RGBA(0, 0, 0, 1)
                                 DisabledFill: =RGBA(204, 228, 246, 1)
@@ -1572,7 +1572,7 @@ HorarioPersonal As screen:
                                 ChevronDisabledFill: =RGBA(204, 228, 246, 1)
                                 ChevronHoverBackground: =RGBA(153, 201, 238, 1)
                                 ChevronHoverFill: =RGBA(255, 255, 255, 1)
-                                Default: =If(Mostrar, Mid(InfoHorarios.Selected.Domingo, 1, Find("-", InfoHorarios.Selected.Domingo) - 2), "1")
+                                Default: =If(Mostrar, Mid(Glr_Info_HP.Selected.Domingo, 1, Find("-", Glr_Info_HP.Selected.Domingo) - 2), "1")
                                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                                 DisabledColor: =RGBA(0, 0, 0, 1)
                                 DisabledFill: =RGBA(204, 228, 246, 1)
@@ -1866,7 +1866,7 @@ HorarioPersonal As screen:
                                 BorderStyle: =BorderStyle.None
                                 CalendarHeaderFill: =App.Theme.Colors.Primary
                                 Color: =RGBA(0, 0, 0, 1)
-                                DefaultDate: = If(Mostrar,InfoHorarios.Selected.Fecha_Inicio ,FechaHorario)
+                                DefaultDate: = If(Mostrar,Glr_Info_HP.Selected.Fecha_Inicio ,FechaHorario)
                                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 DisabledFill: =RGBA(244, 244, 244, 1)
@@ -1883,7 +1883,7 @@ HorarioPersonal As screen:
                                         !IsEmpty(
                                             Filter(
                                                 TramitesSolicitudes,
-                                                Codigo = drpEmpleadoHorario.Selected.Codigo && Fecha_Inicio <= dpFechaFin.SelectedDate && Fecha_Fin >= dpFechaInicio.SelectedDate && EstadoDeProceso = "Aprobado"
+                                                Codigo = Drp_Empleado_HP.Selected.Codigo && Fecha_Inicio <= dpFechaFin.SelectedDate && Fecha_Fin >= dpFechaInicio.SelectedDate && EstadoDeProceso = "Aprobado"
                                             )
                                         ),
                                         UpdateContext({Advertencia: true}),
@@ -1972,25 +1972,25 @@ HorarioPersonal As screen:
                             Height: =5
                             MaxLength: =DataSourceInfo([@HorarioSemanals], DataSourceInfo.MaxLength, crfb9_operador)
                             Required: =false
-                            Update: =drpEmpleadoHorario.Selected.Nombre
+                            Update: =Drp_Empleado_HP.Selected.Nombre
                             Width: =266
                             X: =0
                             Y: =10
                             ZIndex: =2
 
-                    InfoHorarios As gallery.galleryVertical:
+                    Glr_Info_HP As gallery.galleryVertical:
                         BorderColor: =RGBA(0, 134, 208, 1)
                         BorderStyle: =BorderStyle.None
                         BorderThickness: =2
                         DelayItemLoading: =true
                         Fill: =RGBA(140, 217, 255, 0.34)
                         Height: =588
-                        Items: =FirstN(Sort(Filter(HorarioSemanals, Empleado = drpEmpleadoHorario.Selected.Nombre),Fecha_Inicio, SortOrder.Descending), 4)
+                        Items: =FirstN(Sort(Filter(HorarioSemanals, Empleado = Drp_Empleado_HP.Selected.Nombre),Fecha_Inicio, SortOrder.Descending), 4)
                         Layout: =Layout.Vertical
                         LoadingSpinner: =LoadingSpinner.Data
                         NavigationStep: =2
                         OnSelect: =Set(Mostrar, true)
-                        TemplateSize: =If(LookUp(Empleados, Nombre = drpEmpleadoHorario.SelectedText.Value, Area) = "OPERARIOS", 380, 287)
+                        TemplateSize: =If(LookUp(Empleados, Nombre = Drp_Empleado_HP.SelectedText.Value, Area) = "OPERARIOS", 380, 287)
                         Transition: =Transition.Push
                         Width: =530
                         X: =800
@@ -2684,7 +2684,7 @@ HorarioPersonal As screen:
                             RadiusTopLeft: =15
                             RadiusTopRight: =15
                             Size: =15
-                            Visible: =If(LookUp(Empleados, Nombre = drpEmpleadoHorario.SelectedText.Value, Area) = "OPERARIOS", true, false)
+                            Visible: =If(LookUp(Empleados, Nombre = Drp_Empleado_HP.SelectedText.Value, Area) = "OPERARIOS", true, false)
                             Width: =477
                             X: =21
                             Y: =292
@@ -2712,7 +2712,7 @@ HorarioPersonal As screen:
                             RadiusTopLeft: =8
                             RadiusTopRight: =8
                             Size: =10
-                            Visible: =If(LookUp(Empleados, Nombre = drpEmpleadoHorario.SelectedText.Value, Area) = "OPERARIOS", true, false)
+                            Visible: =If(LookUp(Empleados, Nombre = Drp_Empleado_HP.SelectedText.Value, Area) = "OPERARIOS", true, false)
                             Width: =160
                             X: =159
                             Y: =292
@@ -2740,7 +2740,7 @@ HorarioPersonal As screen:
                             RadiusTopLeft: =8
                             RadiusTopRight: =8
                             Size: =10
-                            Visible: =If(LookUp(Empleados, Nombre = drpEmpleadoHorario.SelectedText.Value, Area) = "OPERARIOS", true, false)
+                            Visible: =If(LookUp(Empleados, Nombre = Drp_Empleado_HP.SelectedText.Value, Area) = "OPERARIOS", true, false)
                             Width: =160
                             X: =327
                             Y: =292
@@ -2768,7 +2768,7 @@ HorarioPersonal As screen:
                             RadiusTopLeft: =8
                             RadiusTopRight: =8
                             Size: =10
-                            Visible: =If(LookUp(Empleados, Nombre = drpEmpleadoHorario.SelectedText.Value, Area) = "OPERARIOS", true, false)
+                            Visible: =If(LookUp(Empleados, Nombre = Drp_Empleado_HP.SelectedText.Value, Area) = "OPERARIOS", true, false)
                             Width: =160
                             X: =159
                             Y: =337
@@ -2796,13 +2796,13 @@ HorarioPersonal As screen:
                             RadiusTopLeft: =8
                             RadiusTopRight: =8
                             Size: =10
-                            Visible: =If(LookUp(Empleados, Nombre = drpEmpleadoHorario.SelectedText.Value, Area) = "OPERARIOS", true, false)
+                            Visible: =If(LookUp(Empleados, Nombre = Drp_Empleado_HP.SelectedText.Value, Area) = "OPERARIOS", true, false)
                             Width: =160
                             X: =327
                             Y: =337
                             ZIndex: =28
 
-                        Icon4 As icon.Edit:
+                        Icn_SelectInfo_HP As icon.Edit:
                             BorderColor: =App.Theme.Colors.Darker40
                             BorderStyle: =BorderStyle.None
                             Color: =RGBA(0, 0, 0, 0)
@@ -2910,7 +2910,7 @@ HorarioPersonal As screen:
                         X: =797
                         ZIndex: =13
 
-                    Icon18 As icon.DocumentwithContent:
+                    Icn_ViewHorarios_HP As icon.DocumentwithContent:
                         BorderColor: =App.Theme.Colors.Darker40
                         Color: =App.Theme.Colors.Darker30
                         DisabledBorderColor: =RGBA(166, 166, 166, 1)
@@ -2923,7 +2923,7 @@ HorarioPersonal As screen:
                         Y: =10
                         ZIndex: =14
 
-    Container11 As groupContainer.manualLayoutContainer:
+    Ctn_AvisoPermiso_HP As groupContainer.manualLayoutContainer:
         BorderColor: =RGBA(247, 116, 38, 1)
         BorderThickness: =4
         DropShadow: =DropShadow.Light
@@ -2946,9 +2946,9 @@ HorarioPersonal As screen:
             Height: =115
             Size: =15
             Text: |-
-                =Text("El Empleado tiene un permiso para faltar en las fechas seleccionadas. Las fechas del permiso son: " & Text(LookUp(Filter(TramitesSolicitudes, Codigo = drpEmpleadoHorario.Selected.Codigo && EstadoDeProceso = "Aprobado"), Fecha_Inicio <= dpFechaFin.SelectedDate && Fecha_Fin >= dpFechaInicio.SelectedDate, Fecha_Inicio), "dd/mm/yyyy")
+                =Text("El Empleado tiene un permiso para faltar en las fechas seleccionadas. Las fechas del permiso son: " & Text(LookUp(Filter(TramitesSolicitudes, Codigo = Drp_Empleado_HP.Selected.Codigo && EstadoDeProceso = "Aprobado"), Fecha_Inicio <= dpFechaFin.SelectedDate && Fecha_Fin >= dpFechaInicio.SelectedDate, Fecha_Inicio), "dd/mm/yyyy")
                 & " al " &
-                Text(LookUp(Filter(TramitesSolicitudes, Codigo = drpEmpleadoHorario.Selected.Codigo && EstadoDeProceso = "Aprobado"), Fecha_Inicio <= dpFechaFin.SelectedDate && Fecha_Fin >= dpFechaInicio.SelectedDate, Fecha_Fin), "dd/mm/yyyy"))
+                Text(LookUp(Filter(TramitesSolicitudes, Codigo = Drp_Empleado_HP.Selected.Codigo && EstadoDeProceso = "Aprobado"), Fecha_Inicio <= dpFechaFin.SelectedDate && Fecha_Fin >= dpFechaInicio.SelectedDate, Fecha_Fin), "dd/mm/yyyy"))
             Width: =462
             X: =16
             Y: =12
@@ -2970,7 +2970,7 @@ HorarioPersonal As screen:
             Y: =141
             ZIndex: =2
 
-    HtmlPDF As htmlViewer:
+    HtmlPDF_HP As htmlViewer:
         Height: =14
         HtmlText: |-
             =Concatenate(
@@ -3059,7 +3059,7 @@ HorarioPersonal As screen:
                     "<th>Horas Pagadas</th>",
                   "</tr>",
                   "<tr>",
-                    "<td class='cell'>", drpEmpleadoHorario.SelectedText.Value, "</td>",
+                    "<td class='cell'>", Drp_Empleado_HP.SelectedText.Value, "</td>",
                     "<td class='cell'>", Text(dpFechaInicio.SelectedDate, "[$-en-US]yyyy-mm-dd"), "</td>",
                     "<td class='cell'>", Text(dpFechaFin.SelectedDate, "[$-en-US]yyyy-mm-dd"), "</td>",
                     "<td class='cell'>", Text(WeekNum(dpFechaInicio.SelectedDate)), "</td>",
@@ -3074,7 +3074,7 @@ HorarioPersonal As screen:
         Width: =143
         ZIndex: =3
 
-    HtmlCuerpo As htmlViewer:
+    HtmlCuerpo_HP As htmlViewer:
         Height: =14
         HtmlText: ="Estimado/a,<br><br>" & "Le informamos que se ha asignado o actualizado su horario. Para obtener más información, por favor revise el archivo PDF adjunto..<br><br>" & "Si tiene alguna duda, queja o sugerencia hablar con el encargado de asiganar los horarios.<br><br>" & "Gracias<br>"
         Visible: =false
