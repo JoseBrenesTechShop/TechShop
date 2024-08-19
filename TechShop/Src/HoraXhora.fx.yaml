@@ -6,7 +6,12 @@ HoraXhora As screen:
     OnVisible: |-
         =UpdateContext({FechaSup: Today()});
         UpdateContext({Dia: Weekday(FechaSup)});
-        UpdateContext({Hora: "0:00 AM"});
+        UpdateContext({Hora: Blank()});
+        UpdateContext({turnoFinal: Blank()});
+        UpdateContext({turnoSeleccionado: Blank()});
+        UpdateContext({HoraValor: Blank()});
+        
+        
         ClearCollect(
             Horas,
             {
@@ -966,13 +971,54 @@ HoraXhora As screen:
                         HoverColor: =RGBA(0, 0, 0, 1)
                         HoverFill: =RGBA(153, 207, 236, 1)
                         Items: |-
-                            =Filter(
-                                HorarioSemanals,
-                                (Fecha_Inicio <= FechaSup && Fecha_Fin >= FechaSup),
-                                (Maquina = txtMaquinaHxH.Text || 'Maquina 2' = txtMaquinaHxH.Text || 'Maquina 3' = txtMaquinaHxH.Text || 'Maquina 4' = txtMaquinaHxH.Text),
-                                !IsBlank(txtMaquinaHxH.Text)
+                            =If(
+                                HoraValor >= 0 && HoraValor <= 6 && Dia = 2,
+                                Filter(
+                                    HorarioSemanals,
+                                    (Fecha_Fin = DateAdd(FechaSup, -1, TimeUnit.Days)),
+                                    (Maquina = txtMaquinaHxH.Text || 'Maquina 2' = txtMaquinaHxH.Text || 'Maquina 3' = txtMaquinaHxH.Text || 'Maquina 4' = txtMaquinaHxH.Text),
+                                    !IsBlank(txtMaquinaHxH.Text)
+                                ),
+                                Filter(
+                                    HorarioSemanals,
+                                    (Fecha_Inicio <= FechaSup && Fecha_Fin >= FechaSup),
+                                    (Maquina = txtMaquinaHxH.Text || 'Maquina 2' = txtMaquinaHxH.Text || 'Maquina 3' = txtMaquinaHxH.Text || 'Maquina 4' = txtMaquinaHxH.Text),
+                                    !IsBlank(txtMaquinaHxH.Text)
+                                )
                             )
-                        OnChange: =
+                        OnChange: |
+                            =
+                            UpdateContext({
+                                turnoSeleccionado:
+                                drpOperarioHxH.Selected
+                            });
+                            
+                            UpdateContext({
+                                turnoFinal:
+                                If(
+                                    HoraValor >= 0 && HoraValor <= 6,
+                                    Switch(
+                                        Dia,
+                                        1, turnoSeleccionado.Sabado,
+                                        2, turnoSeleccionado.Domingo,
+                                        3, turnoSeleccionado.Lunes,
+                                        4, turnoSeleccionado.Martes,
+                                        5, turnoSeleccionado.Miercoles,
+                                        6, turnoSeleccionado.Jueves,
+                                        7, turnoSeleccionado.Viernes
+                                    ),
+                                    Switch(
+                                        Dia,
+                                        1, turnoSeleccionado.Domingo,
+                                        2, turnoSeleccionado.Lunes,
+                                        3, turnoSeleccionado.Martes,
+                                        4, turnoSeleccionado.Miercoles,
+                                        5, turnoSeleccionado.Jueves,
+                                        6, turnoSeleccionado.Viernes,
+                                        7, turnoSeleccionado.Sabado
+                                    )
+                                )
+                            });
                         OnSelect: =
                         PressedColor: =RGBA(255, 255, 255, 1)
                         PressedFill: =RGBA(0, 94, 146, 1)
@@ -1001,83 +1047,13 @@ HoraXhora As screen:
                         BorderThickness: =2
                         Color: =RGBA(0, 0, 0, 1)
                         Default: |-
-                            =If(
-                                Dia = 1,
-                                Mid(
-                                    drpOperarioHxH.Selected.Domingo,
-                                    1,
-                                    Find(
-                                        "-",
-                                        drpOperarioHxH.Selected.Domingo
-                                    ) - 2
-                                ),
-                                If(
-                                    Dia = 2,
-                                    Mid(
-                                        drpOperarioHxH.Selected.Lunes,
-                                        1,
-                                        Find(
-                                            "-",
-                                            drpOperarioHxH.Selected.Lunes
-                                        ) - 2
-                                    ),
-                                    If(
-                                        Dia = 3,
-                                        Mid(
-                                            drpOperarioHxH.Selected.Martes,
-                                            1,
-                                            Find(
-                                                "-",
-                                                drpOperarioHxH.Selected.Martes
-                                            ) - 2
-                                        ),
-                                        If(
-                                            Dia = 4,
-                                            Mid(
-                                                drpOperarioHxH.Selected.Miercoles,
-                                                1,
-                                                Find(
-                                                    "-",
-                                                    drpOperarioHxH.Selected.Miercoles
-                                                ) - 2
-                                            ),
-                                            If(
-                                                Dia = 5,
-                                                Mid(
-                                                    drpOperarioHxH.Selected.Jueves,
-                                                    1,
-                                                    Find(
-                                                        "-",
-                                                        drpOperarioHxH.Selected.Jueves
-                                                    ) - 2
-                                                ),
-                                                If(
-                                                    Dia = 6,
-                                                    Mid(
-                                                        drpOperarioHxH.Selected.Viernes,
-                                                        1,
-                                                        Find(
-                                                            "-",
-                                                            drpOperarioHxH.Selected.Viernes
-                                                        ) - 2
-                                                    ),
-                                                    If(
-                                                        Dia = 7,
-                                                        Mid(
-                                                            drpOperarioHxH.Selected.Sabado,
-                                                            1,
-                                                            Find(
-                                                                "-",
-                                                                drpOperarioHxH.Selected.Sabado
-                                                            ) - 2
-                                                        ),
-                                                        "qy"
-                                                    )
-                                                )
-                                            )
-                                        )
-                                    )
-                                )
+                            =Mid(
+                                turnoFinal,
+                                1,
+                                Find(
+                                    "-",
+                                    turnoFinal
+                                ) - 2
                             )
                         DisabledBorderColor: =RGBA(166, 166, 166, 1)
                         DisabledColor: =RGBA(166, 166, 166, 1)
@@ -1358,6 +1334,15 @@ HoraXhora As screen:
                                     IsBlank(txtTarimaHxH.Text),
                                     Notify(
                                         "Debe indicar la Tarima",
+                                        NotificationType.Error
+                                    ),
+                                    Mid(
+                                        txtTarimaHxH_2.Text,
+                                        1,
+                                        1
+                                    ) <> "T",
+                                    Notify(
+                                        "La tarima es incorrecta",
                                         NotificationType.Error
                                     ),
                                     If(
@@ -1653,7 +1638,10 @@ HoraXhora As screen:
                         HoverFill: =App.Theme.Colors.Lighter70
                         Items: =Horas
                         OnChange: |-
-                            =UpdateContext({Hora: drpHoraSupervisorHxH.SelectedText.Value})
+                            =UpdateContext({Hora: drpHoraSupervisorHxH.SelectedText.Value});
+                            UpdateContext({HoraValor: drpHoraSupervisorHxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'});
+                            UpdateContext({turnoFinal: Blank()});
+                            Reset(drpOperarioHxH);
                         PressedColor: =RGBA(255, 255, 255, 1)
                         PressedFill: =App.Theme.Colors.Darker30
                         SelectionFill: =App.Theme.Colors.Primary
@@ -1774,6 +1762,8 @@ HoraXhora As screen:
                         OnChange: |-
                             =UpdateContext({FechaSup: DateValue(drpFechaSupervisorHxH.SelectedText.Value)});
                             UpdateContext({Dia: Weekday(FechaSup)});
+                            UpdateContext({turnoFinal: Blank()});
+                            Reset(drpOperarioHxH);
                         PressedColor: =RGBA(255, 255, 255, 1)
                         PressedFill: =App.Theme.Colors.Darker30
                         SelectionFill: =App.Theme.Colors.Primary
