@@ -520,8 +520,10 @@ HoraXhoraRegistro As screen:
                             =UpdateContext({Mostra: true});
                             UpdateContext({FechaSup: DateValue(TablaInfoHxH.Selected.FechaRegistro)});
                             UpdateContext({Dia: Weekday(FechaSup)});
-                            UpdateContext({xMeta: TablaInfoHxH.Selected.Cantidad_Por_Hora});
-                            UpdateContext({xTurno: TablaInfoHxH.Selected.Turno})
+                            UpdateContext({Hora: Mid(TablaInfoHxH.Selected.'Fecha_Registro_Supervisor ', 12, 5)});
+                            UpdateContext({xMeta: LookUp(Orden_Ejecucion, Orden = TablaInfoHxH.Selected.Orden && Operacion = TablaInfoHxH.Selected.Operacion, Meta)});
+                            UpdateContext({xTurno: TablaInfoHxH.Selected.Turno});
+                            UpdateContext({EditarMeta: (VarName = "2388")})
                         ReflowBehavior: ='PowerAppsOneGrid.ReflowBehavior'.GridOnly
                         Width: =1346
                         X: =0
@@ -965,12 +967,21 @@ HoraXhoraRegistro As screen:
                             BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
                             BorderThickness: =2
                             Color: =RGBA(0, 0, 0, 1)
-                            Default: =TablaInfoHxH.Selected.Cantidad_Por_Hora
+                            Default: |-
+                                =If(
+                                    (Hora = "10:00" && (xTurno = "TD" || xTurno = "T1")) || (Hora = "16:00" && (xTurno = "TD" || xTurno = "T2")) || (Hora = "04:00" && (xTurno = "TN" || xTurno = "T3")) || (Hora = "22:00" && xTurno = "TN"),
+                                    xMeta * 0.75,
+                                    (Hora = "13:00" && (xTurno = "TD" || xTurno = "T1")) || (Hora = "01:00" && (xTurno = "TN" || xTurno = "T3")) || (Hora = "20:00" && xTurno = "T2"),
+                                    xMeta * 0.50,
+                                    xMeta = 0,
+                                    4,
+                                    xMeta
+                                )
                             DelayOutput: =true
                             DisabledBorderColor: =RGBA(166, 166, 166, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             DisabledFill: =RGBA(244, 244, 244, 1)
-                            DisplayMode: =DisplayMode.View
+                            DisplayMode: =If(EditarMeta, DisplayMode.Edit, DisplayMode.View)
                             FocusedBorderThickness: =4
                             Font: =App.Theme.Font
                             Format: =TextFormat.Number
