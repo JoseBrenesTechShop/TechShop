@@ -520,29 +520,78 @@ HoraXhoraRegistro As screen:
                             =UpdateContext({Mostra: true});
                             UpdateContext({FechaSup: DateValue(TablaInfoHxH.Selected.FechaRegistro)});
                             UpdateContext({Dia: Weekday(FechaSup)});
+                            UpdateContext({Hora: Mid(TablaInfoHxH.Selected.'Fecha_Registro_Supervisor ', 12, 5)});
+                            UpdateContext({xMeta: LookUp(Orden_Ejecucion, Orden = TablaInfoHxH.Selected.Orden && Operacion = TablaInfoHxH.Selected.Operacion, Meta)});
+                            UpdateContext({xTurno: TablaInfoHxH.Selected.Turno});
+                            UpdateContext({EditarMeta: (VarName = "2388")})
                         ReflowBehavior: ='PowerAppsOneGrid.ReflowBehavior'.GridOnly
                         Width: =1346
                         X: =0
                         Y: =77
                         ZIndex: =2
 
-                        "'P/N1' As PowerAppsOneGridTemplate_dataField.textualColumn":
-                            FieldDisplayName: ="P/N"
-                            FieldName: ="crfb9_name"
+                        Orden2 As PowerAppsOneGridTemplate_dataField.textualColumn:
+                            FieldDisplayName: ="Orden"
+                            FieldName: ="crfb9_orden"
                             FieldType: ="s"
                             FieldVariantName: ="textualColumn"
                             Order: =1
                             Width: =0
                             ZIndex: =19
 
-                        "'Fecha de creación3' As PowerAppsOneGridTemplate_dataField.textualColumn":
-                            FieldDisplayName: ="Fecha de creación"
-                            FieldName: ="createdon"
-                            FieldType: ="d"
+                        Operacion2 As PowerAppsOneGridTemplate_dataField.textualColumn:
+                            FieldDisplayName: ="Operacion"
+                            FieldName: ="crfb9_operacion"
+                            FieldType: ="s"
                             FieldVariantName: ="textualColumn"
                             Order: =2
                             Width: =0
                             ZIndex: =20
+
+                        Tarima3 As PowerAppsOneGridTemplate_dataField.textualColumn:
+                            FieldDisplayName: ="Tarima"
+                            FieldName: ="crfb9_tarima"
+                            FieldType: ="s"
+                            FieldVariantName: ="textualColumn"
+                            Order: =4
+                            Width: =0
+                            ZIndex: =22
+
+                        Maquina1 As PowerAppsOneGridTemplate_dataField.textualColumn:
+                            FieldDisplayName: ="Maquina"
+                            FieldName: ="crfb9_maquina"
+                            FieldType: ="s"
+                            FieldVariantName: ="textualColumn"
+                            Order: =5
+                            Width: =0
+                            ZIndex: =23
+
+                        Operario1 As PowerAppsOneGridTemplate_dataField.textualColumn:
+                            FieldDisplayName: ="Operario"
+                            FieldName: ="crfb9_operario"
+                            FieldType: ="s"
+                            FieldVariantName: ="textualColumn"
+                            Order: =6
+                            Width: =0
+                            ZIndex: =24
+
+                        Cantidad2 As PowerAppsOneGridTemplate_dataField.textualColumn:
+                            FieldDisplayName: ="Cantidad"
+                            FieldName: ="crfb9_cantidad"
+                            FieldType: ="n"
+                            FieldVariantName: ="textualColumn"
+                            Order: =7
+                            Width: =0
+                            ZIndex: =25
+
+                        Cantidad_Por_Hora1 As PowerAppsOneGridTemplate_dataField.textualColumn:
+                            FieldDisplayName: ="Cantidad_Por_Hora"
+                            FieldName: ="crfb9_cantidad_por_hora"
+                            FieldType: ="n"
+                            FieldVariantName: ="textualColumn"
+                            Order: =8
+                            Width: =0
+                            ZIndex: =26
 
             Container22 As groupContainer.manualLayoutContainer:
                 Fill: =RGBA(40, 134, 222, 0.6)
@@ -909,12 +958,21 @@ HoraXhoraRegistro As screen:
                             BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
                             BorderThickness: =2
                             Color: =RGBA(0, 0, 0, 1)
-                            Default: =TablaInfoHxH.Selected.Cantidad_Por_Hora
+                            Default: |-
+                                =If(
+                                    (Hora = "10:00" && (xTurno = "TD" || xTurno = "T1")) || (Hora = "16:00" && (xTurno = "TD" || xTurno = "T2")) || (Hora = "04:00" && (xTurno = "TN" || xTurno = "T3")) || (Hora = "22:00" && xTurno = "TN"),
+                                    xMeta * 0.75,
+                                    (Hora = "13:00" && (xTurno = "TD" || xTurno = "T1")) || (Hora = "01:00" && (xTurno = "TN" || xTurno = "T3")) || (Hora = "20:00" && xTurno = "T2"),
+                                    xMeta * 0.50,
+                                    xMeta = 0,
+                                    4,
+                                    xMeta
+                                )
                             DelayOutput: =true
                             DisabledBorderColor: =RGBA(166, 166, 166, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             DisabledFill: =RGBA(244, 244, 244, 1)
-                            DisplayMode: =DisplayMode.View
+                            DisplayMode: =If(EditarMeta, DisplayMode.Edit, DisplayMode.View)
                             FocusedBorderThickness: =4
                             Font: =App.Theme.Font
                             Format: =TextFormat.Number
@@ -1517,262 +1575,265 @@ HoraXhoraRegistro As screen:
                     Fill: =RGBA(40, 134, 222, 1)
                     Font: =App.Theme.Font
                     FontWeight: =FontWeight.Bold
-                    Height: =37
+                    Height: =54
                     HoverBorderColor: =App.Theme.Colors.Darker10
                     HoverColor: =RGBA(255, 255, 255, 1)
                     HoverFill: =RGBA(15, 108, 189, 1)
                     OnSelect: |-
-                        =UpdateContext(
-                            {
-                                InfoVieja: {
-                                    codigo: TablaInfoHxH.Selected.CodigoEmpleado,
-                                    fecha: TablaInfoHxH.Selected.FechaRegistro,
-                                    hour: TablaInfoHxH.Selected.Hora,
-                                    semana: TablaInfoHxH.Selected.Semana,
-                                    maquina: TablaInfoHxH.Selected.Maquina,
-                                    turno: TablaInfoHxH.Selected.Turno
+                        =If(
+                            TablaInfoHxH.Selected.FechaRegistro <= Today() && TablaInfoHxH.Selected.FechaRegistro - 2 <= Today(),
+                            UpdateContext(
+                                {
+                                    InfoVieja: {
+                                        codigo: TablaInfoHxH.Selected.CodigoEmpleado,
+                                        fecha: TablaInfoHxH.Selected.FechaRegistro,
+                                        hour: TablaInfoHxH.Selected.Hora,
+                                        semana: TablaInfoHxH.Selected.Semana,
+                                        maquina: TablaInfoHxH.Selected.Maquina,
+                                        turno: TablaInfoHxH.Selected.Turno
+                                    }
                                 }
-                            }
-                        );
-                        UpdateContext(
-                            {
-                                InfoNueva: {
-                                    codigo: TablaInfoHxH.Selected.CodigoEmpleado,
-                                    fecha: FechaSup,
-                                    hour: drpHoraSupervisorHxH_1.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor',
-                                    semana: TablaInfoHxH.Selected.Semana,
-                                    maquina: TablaInfoHxH.Selected.Maquina,
-                                    turno: TablaInfoHxH.Selected.Turno
+                            );
+                            UpdateContext(
+                                {
+                                    InfoNueva: {
+                                        codigo: TablaInfoHxH.Selected.CodigoEmpleado,
+                                        fecha: FechaSup,
+                                        hour: drpHoraSupervisorHxH_1.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor',
+                                        semana: TablaInfoHxH.Selected.Semana,
+                                        maquina: TablaInfoHxH.Selected.Maquina,
+                                        turno: TablaInfoHxH.Selected.Turno
+                                    }
                                 }
-                            }
-                        );
-                        UpdateContext(
-                            {
-                                OrdenEjecucion: LookUp(
-                                    Orden_Ejecucion,
-                                    Orden = TablaInfoHxH.Selected.Orden && Operacion = TablaInfoHxH.Selected.Operacion
-                                )
-                            }
-                        );
-                        UpdateContext(
-                            {
-                                OrdenTarima: LookUp(
-                                    Orden_Tarimas,
-                                    Orden = TablaInfoHxH.Selected.Orden && Operacion = TablaInfoHxH.Selected.Operacion && Tarima = TablaInfoHxH.Selected.Tarima
-                                )
-                            }
-                        );
-                        UpdateContext({ProTotal: OrdenEjecucion.CantidadTotalProducida - TablaInfoHxH.Selected.Cantidad});
-                        UpdateContext({TarimaTotal: OrdenTarima.CantidadTotalProducida - TablaInfoHxH.Selected.Cantidad});
-                        If(
-                            IsBlank(txtCant.Text),
-                            Notify(
-                                "La cantidad no puede estar vacia",
-                                NotificationType.Error
-                            ),
-                            If(
-                                Hour(Now()) < drpHoraSupervisorHxH_1.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor' && Text(
-                                    Now(),
-                                    "mm/dd/yyyy"
-                                ) = drpFechaSupervisorHxH_3.SelectedText.Value,
-                                Notify("No puede agregar datos en horas futuras"),
-                                CountRows(
-                                    Filter(
-                                        'Hora X Hora',
-                                        CodigoEmpleado = TablaInfoHxH.Selected.CodigoEmpleado,
-                                        FechaRegistro = FechaSup,
-                                        Hora = drpHoraSupervisorHxH_1.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                            );
+                            UpdateContext(
+                                {
+                                    OrdenEjecucion: LookUp(
+                                        Orden_Ejecucion,
+                                        Orden = TablaInfoHxH.Selected.Orden && Operacion = TablaInfoHxH.Selected.Operacion
                                     )
-                                ) >= 2,
+                                }
+                            );
+                            UpdateContext(
+                                {
+                                    OrdenTarima: LookUp(
+                                        Orden_Tarimas,
+                                        Orden = TablaInfoHxH.Selected.Orden && Operacion = TablaInfoHxH.Selected.Operacion && Tarima = TablaInfoHxH.Selected.Tarima
+                                    )
+                                }
+                            );
+                            UpdateContext({ProTotal: OrdenEjecucion.CantidadTotalProducida - TablaInfoHxH.Selected.Cantidad});
+                            UpdateContext({TarimaTotal: OrdenTarima.CantidadTotalProducida - TablaInfoHxH.Selected.Cantidad});
+                            If(
+                                IsBlank(txtCant.Text),
                                 Notify(
-                                    "Ya existen dos registros del empleado a esa misma Hora",
+                                    "La cantidad no puede estar vacia",
                                     NotificationType.Error
                                 ),
                                 If(
-                                    LookUp(
-                                        Maquinas,
-                                        Maquina = TablaInfoHxH.Selected.Maquina
-                                    ).Guns = "SI" && TarimaTotal + Value(txtCant.Text) > 50,
-                                    UpdateContext({Aviso: true}),
+                                    Hour(Now()) < drpHoraSupervisorHxH_1.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor' && Text(
+                                        Now(),
+                                        "mm/dd/yyyy"
+                                    ) = drpFechaSupervisorHxH_3.SelectedText.Value,
+                                    Notify("No puede agregar datos en horas futuras"),
+                                    CountRows(
+                                        Filter(
+                                            'Hora X Hora',
+                                            CodigoEmpleado = TablaInfoHxH.Selected.CodigoEmpleado,
+                                            FechaRegistro = FechaSup,
+                                            Hora = drpHoraSupervisorHxH_1.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                                        )
+                                    ) >= 2,
+                                    Notify(
+                                        "Ya existen dos registros del empleado a esa misma Hora",
+                                        NotificationType.Error
+                                    ),
                                     If(
-                                        ProTotal + Value(txtCant.Text) >= OrdenEjecucion.Cantidad + (OrdenEjecucion.Cantidad * 0.015),
-                                        UpdateContext({Bloqueo: true}),
+                                        LookUp(
+                                            Maquinas,
+                                            Maquina = TablaInfoHxH.Selected.Maquina
+                                        ).Guns = "SI" && TarimaTotal + Value(txtCant.Text) > 50,
+                                        UpdateContext({Aviso: true}),
                                         If(
-                                            ((Value(txtCant.Text) / Value(txtMeta.Text)) * 100) < 85,
-                                            UpdateContext({AvisoCausa: true}),
-                                            Patch(
-                                                Orden_Ejecucion,
-                                                OrdenEjecucion,
-                                                {CantidadTotalProducida: ProTotal + Value(txtCant.Text)}
-                                            );
-                                            Patch(
-                                                Orden_Tarimas,
-                                                OrdenTarima,
-                                                {CantidadTotalProducida: TarimaTotal + Value(txtCant.Text)}
-                                            );
-                                            Patch(
-                                                'Hora X Hora',
-                                                TablaInfoHxH.Selected,
-                                                {
-                                                    Cantidad: Value(txtCant.Text),
-                                                    Cantidad_Por_Hora: Value(txtMeta.Text),
-                                                    Comentario: "Ejecucion",
-                                                    Causa: "Bien",
-                                                    FechaRegistro: FechaSup,
-                                                    'Fecha_Registro_Supervisor ': Text(
-                                                        Text(
-                                                            FechaSup,
-                                                            "mm/dd/yyyy"
-                                                        ) & " " & drpHoraSupervisorHxH_1.SelectedText.Value
-                                                    ),
-                                                    Fecha_Hora: Text(
-                                                        Now(),
-                                                        "mm/dd/yyyy hh:mm AM/PM"
-                                                    ),
-                                                    Hora: drpHoraSupervisorHxH_1.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
-                                                }
-                                            );
+                                            ProTotal + Value(txtCant.Text) >= OrdenEjecucion.Cantidad + (OrdenEjecucion.Cantidad * 0.015),
+                                            UpdateContext({Bloqueo: true}),
                                             If(
-                                                InfoNueva.hour <> InfoVieja.hour || InfoNueva.fecha <> InfoVieja.fecha,
-                                                If(
-                                                    !IsBlank(
-                                                        LookUp(
-                                                            'Hora X Hora',
-                                                            CodigoEmpleado = InfoVieja.codigo && Hora = InfoVieja.hour && FechaRegistro = InfoVieja.fecha
-                                                        )
-                                                    ),
-                                                    Patch(
-                                                        HoraxHoraFinals,
-                                                        LookUp(
-                                                            HoraxHoraFinals,
-                                                            Codigo_Empleado = InfoVieja.codigo && Hora = InfoVieja.hour && Fecha = Text(
-                                                                InfoVieja.fecha,
+                                                ((Value(txtCant.Text) / Value(txtMeta.Text)) * 100) < 85,
+                                                UpdateContext({AvisoCausa: true}),
+                                                Patch(
+                                                    Orden_Ejecucion,
+                                                    OrdenEjecucion,
+                                                    {CantidadTotalProducida: ProTotal + Value(txtCant.Text)}
+                                                );
+                                                Patch(
+                                                    Orden_Tarimas,
+                                                    OrdenTarima,
+                                                    {CantidadTotalProducida: TarimaTotal + Value(txtCant.Text)}
+                                                );
+                                                Patch(
+                                                    'Hora X Hora',
+                                                    TablaInfoHxH.Selected,
+                                                    {
+                                                        Cantidad: Value(txtCant.Text),
+                                                        Cantidad_Por_Hora: Value(txtMeta.Text),
+                                                        Comentario: "Ejecucion",
+                                                        Causa: "Bien",
+                                                        FechaRegistro: FechaSup,
+                                                        'Fecha_Registro_Supervisor ': Text(
+                                                            Text(
+                                                                FechaSup,
                                                                 "mm/dd/yyyy"
+                                                            ) & " " & drpHoraSupervisorHxH_1.SelectedText.Value
+                                                        ),
+                                                        Fecha_Hora: Text(
+                                                            Now(),
+                                                            "mm/dd/yyyy hh:mm AM/PM"
+                                                        ),
+                                                        Hora: drpHoraSupervisorHxH_1.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                                                    }
+                                                );
+                                                If(
+                                                    InfoNueva.hour <> InfoVieja.hour || InfoNueva.fecha <> InfoVieja.fecha,
+                                                    If(
+                                                        !IsBlank(
+                                                            LookUp(
+                                                                'Hora X Hora',
+                                                                CodigoEmpleado = InfoVieja.codigo && Hora = InfoVieja.hour && FechaRegistro = InfoVieja.fecha
                                                             )
                                                         ),
+                                                        Patch(
+                                                            HoraxHoraFinals,
+                                                            LookUp(
+                                                                HoraxHoraFinals,
+                                                                Codigo_Empleado = InfoVieja.codigo && Hora = InfoVieja.hour && Fecha = Text(
+                                                                    InfoVieja.fecha,
+                                                                    "mm/dd/yyyy"
+                                                                )
+                                                            ),
+                                                            {
+                                                                Cantidad_Producida: Sum(
+                                                                    Filter(
+                                                                        'Hora X Hora',
+                                                                        CodigoEmpleado = InfoVieja.codigo,
+                                                                        FechaRegistro = InfoVieja.fecha,
+                                                                        Hora = InfoVieja.hour
+                                                                    ),
+                                                                    Cantidad
+                                                                ),
+                                                                Meta: Average(
+                                                                    Filter(
+                                                                        'Hora X Hora',
+                                                                        CodigoEmpleado = InfoVieja.codigo,
+                                                                        FechaRegistro = InfoVieja.fecha,
+                                                                        Hora = InfoVieja.hour
+                                                                    ),
+                                                                    Cantidad_Por_Hora
+                                                                ),
+                                                                Turno: InfoVieja.turno,
+                                                                Ubicacion_Bono: LookUp(
+                                                                    Maquinas,
+                                                                    Maquina = InfoVieja.maquina,
+                                                                    Ubicacion_Bono
+                                                                ),
+                                                                Semana: InfoVieja.semana
+                                                            }
+                                                        ),
+                                                        Remove(
+                                                            HoraxHoraFinals,
+                                                            LookUp(
+                                                                HoraxHoraFinals,
+                                                                Codigo_Empleado = InfoVieja.codigo && Hora = InfoVieja.hour && Fecha = Text(
+                                                                    InfoVieja.fecha,
+                                                                    "mm/dd/yyyy"
+                                                                )
+                                                            )
+                                                        )
+                                                    )
+                                                );
+                                                ClearCollect(
+                                                    colExistingRecord,
+                                                    LookUp(
+                                                        HoraxHoraFinals,
+                                                        Codigo_Empleado = InfoNueva.codigo && Hora = InfoNueva.hour && Fecha = Text(
+                                                            InfoNueva.fecha,
+                                                            "mm/dd/yyyy"
+                                                        )
+                                                    )
+                                                );
+                                                If(
+                                                    !IsEmpty(colExistingRecord),
+                                                    Patch(
+                                                        HoraxHoraFinals,
+                                                        First(colExistingRecord),
                                                         {
                                                             Cantidad_Producida: Sum(
                                                                 Filter(
                                                                     'Hora X Hora',
-                                                                    CodigoEmpleado = InfoVieja.codigo,
-                                                                    FechaRegistro = InfoVieja.fecha,
-                                                                    Hora = InfoVieja.hour
+                                                                    CodigoEmpleado = InfoNueva.codigo,
+                                                                    FechaRegistro = FechaSup,
+                                                                    Hora = InfoNueva.hour
                                                                 ),
                                                                 Cantidad
                                                             ),
                                                             Meta: Average(
                                                                 Filter(
                                                                     'Hora X Hora',
-                                                                    CodigoEmpleado = InfoVieja.codigo,
-                                                                    FechaRegistro = InfoVieja.fecha,
-                                                                    Hora = InfoVieja.hour
+                                                                    CodigoEmpleado = InfoNueva.codigo,
+                                                                    FechaRegistro = FechaSup,
+                                                                    Hora = InfoNueva.hour
                                                                 ),
                                                                 Cantidad_Por_Hora
                                                             ),
-                                                            Turno: InfoVieja.turno,
+                                                            Turno: InfoNueva.turno,
                                                             Ubicacion_Bono: LookUp(
                                                                 Maquinas,
-                                                                Maquina = InfoVieja.maquina,
+                                                                Maquina = InfoNueva.maquina,
                                                                 Ubicacion_Bono
                                                             ),
-                                                            Semana: InfoVieja.semana
+                                                            Semana: InfoNueva.semana
                                                         }
                                                     ),
-                                                    Remove(
+                                                    Collect(
                                                         HoraxHoraFinals,
-                                                        LookUp(
-                                                            HoraxHoraFinals,
-                                                            Codigo_Empleado = InfoVieja.codigo && Hora = InfoVieja.hour && Fecha = Text(
-                                                                InfoVieja.fecha,
+                                                        {
+                                                            Codigo_Empleado: InfoNueva.codigo,
+                                                            Cantidad_Producida: Sum(
+                                                                Filter(
+                                                                    'Hora X Hora',
+                                                                    CodigoEmpleado = InfoNueva.codigo,
+                                                                    FechaRegistro = FechaSup,
+                                                                    Hora = InfoNueva.hour
+                                                                ),
+                                                                Cantidad
+                                                            ),
+                                                            Meta: Average(
+                                                                Filter(
+                                                                    'Hora X Hora',
+                                                                    CodigoEmpleado = InfoNueva.codigo,
+                                                                    FechaRegistro = FechaSup,
+                                                                    Hora = InfoNueva.hour
+                                                                ),
+                                                                Cantidad_Por_Hora
+                                                            ),
+                                                            Fecha_Registro: InfoNueva.fecha,
+                                                            Turno: InfoNueva.turno,
+                                                            Hora: InfoNueva.hour,
+                                                            Ubicacion_Bono: LookUp(
+                                                                Maquinas,
+                                                                Maquina = InfoNueva.maquina,
+                                                                Ubicacion_Bono
+                                                            ),
+                                                            Semana: InfoNueva.semana,
+                                                            Fecha: Text(
+                                                                InfoNueva.fecha,
                                                                 "mm/dd/yyyy"
                                                             )
-                                                        )
+                                                        }
                                                     )
-                                                )
-                                            );
-                                            ClearCollect(
-                                                colExistingRecord,
-                                                LookUp(
-                                                    HoraxHoraFinals,
-                                                    Codigo_Empleado = InfoNueva.codigo && Hora = InfoNueva.hour && Fecha = Text(
-                                                        InfoNueva.fecha,
-                                                        "mm/dd/yyyy"
-                                                    )
-                                                )
-                                            );
-                                            If(
-                                                !IsEmpty(colExistingRecord),
-                                                Patch(
-                                                    HoraxHoraFinals,
-                                                    First(colExistingRecord),
-                                                    {
-                                                        Cantidad_Producida: Sum(
-                                                            Filter(
-                                                                'Hora X Hora',
-                                                                CodigoEmpleado = InfoNueva.codigo,
-                                                                FechaRegistro = FechaSup,
-                                                                Hora = InfoNueva.hour
-                                                            ),
-                                                            Cantidad
-                                                        ),
-                                                        Meta: Average(
-                                                            Filter(
-                                                                'Hora X Hora',
-                                                                CodigoEmpleado = InfoNueva.codigo,
-                                                                FechaRegistro = FechaSup,
-                                                                Hora = InfoNueva.hour
-                                                            ),
-                                                            Cantidad_Por_Hora
-                                                        ),
-                                                        Turno: InfoNueva.turno,
-                                                        Ubicacion_Bono: LookUp(
-                                                            Maquinas,
-                                                            Maquina = InfoNueva.maquina,
-                                                            Ubicacion_Bono
-                                                        ),
-                                                        Semana: InfoNueva.semana
-                                                    }
-                                                ),
-                                                Collect(
-                                                    HoraxHoraFinals,
-                                                    {
-                                                        Codigo_Empleado: InfoNueva.codigo,
-                                                        Cantidad_Producida: Sum(
-                                                            Filter(
-                                                                'Hora X Hora',
-                                                                CodigoEmpleado = InfoNueva.codigo,
-                                                                FechaRegistro = FechaSup,
-                                                                Hora = InfoNueva.hour
-                                                            ),
-                                                            Cantidad
-                                                        ),
-                                                        Meta: Average(
-                                                            Filter(
-                                                                'Hora X Hora',
-                                                                CodigoEmpleado = InfoNueva.codigo,
-                                                                FechaRegistro = FechaSup,
-                                                                Hora = InfoNueva.hour
-                                                            ),
-                                                            Cantidad_Por_Hora
-                                                        ),
-                                                        Fecha_Registro: InfoNueva.fecha,
-                                                        Turno: InfoNueva.turno,
-                                                        Hora: InfoNueva.hour,
-                                                        Ubicacion_Bono: LookUp(
-                                                            Maquinas,
-                                                            Maquina = InfoNueva.maquina,
-                                                            Ubicacion_Bono
-                                                        ),
-                                                        Semana: InfoNueva.semana,
-                                                        Fecha: Text(
-                                                            InfoNueva.fecha,
-                                                            "mm/dd/yyyy"
-                                                        )
-                                                    }
-                                                )
-                                            );
-                                            Refresh('Hora X Hora');
-                                            UpdateContext({Mostra: false})
+                                                );
+                                                Refresh('Hora X Hora');
+                                                UpdateContext({Mostra: false})
+                                            )
                                         )
                                     )
                                 )
@@ -1783,9 +1844,9 @@ HoraXhoraRegistro As screen:
                     PressedFill: =App.Theme.Colors.Darker40
                     Size: =15
                     Text: ="Guardar Cambios"
-                    Width: =190
-                    X: =55
-                    Y: =600
+                    Width: =175
+                    X: =7
+                    Y: =597
                     ZIndex: =2
 
                 Icon5 As icon.CancelBadge:
@@ -1801,6 +1862,30 @@ HoraXhoraRegistro As screen:
                     Width: =38
                     X: =260
                     ZIndex: =3
+
+                Button8_1 As button:
+                    BorderColor: =App.Theme.Colors.Primary
+                    DisabledBorderColor: =RGBA(244, 244, 244, 1)
+                    DisabledColor: =RGBA(166, 166, 166, 1)
+                    DisabledFill: =RGBA(244, 244, 244, 1)
+                    Fill: =RGBA(40, 134, 222, 1)
+                    Font: =App.Theme.Font
+                    FontWeight: =FontWeight.Bold
+                    Height: =54
+                    HoverBorderColor: =App.Theme.Colors.Darker10
+                    HoverColor: =RGBA(255, 255, 255, 1)
+                    HoverFill: =RGBA(15, 108, 189, 1)
+                    OnSelect: |-
+                        =UpdateContext({Eliminar: true})
+                    PressedBorderColor: =App.Theme.Colors.Darker40
+                    PressedColor: =Self.Color
+                    PressedFill: =App.Theme.Colors.Darker40
+                    Size: =15
+                    Text: ="Eliminar"
+                    Width: =93
+                    X: =200
+                    Y: =597
+                    ZIndex: =4
 
     Container18_3 As groupContainer.manualLayoutContainer:
         BorderColor: =RGBA(255, 191, 0, 1)
@@ -2311,6 +2396,7 @@ HoraXhoraRegistro As screen:
                 );
                 Refresh('Hora X Hora');
                 UpdateContext({AvisoCausa: false});
+                UpdateContext({Bloqueo: false});
                 UpdateContext({Mostra: false})
             Size: =15
             Text: ="Guardar"
@@ -2417,4 +2503,196 @@ HoraXhoraRegistro As screen:
             X: =135
             Y: =276
             ZIndex: =8
+
+    Container18_6 As groupContainer.manualLayoutContainer:
+        BorderColor: =RGBA(215, 58, 60, 1)
+        BorderThickness: =5
+        DropShadow: =DropShadow.ExtraBold
+        Fill: =RGBA(255, 255, 255, 1)
+        Height: =141
+        RadiusBottomLeft: =20
+        RadiusBottomRight: =20
+        RadiusTopLeft: =20
+        RadiusTopRight: =20
+        Visible: =Eliminar
+        Width: =423
+        X: =548
+        Y: =360
+        ZIndex: =5
+
+        TextInput1_100 As text:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 18, 107, 1)
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =2
+            Color: =RGBA(0, 0, 0, 1)
+            Default: ="¿Esta seguro/a de eliminar el registro selecionado?"
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            DisplayMode: =DisplayMode.View
+            FocusedBorderThickness: =4
+            Height: =62
+            HoverBorderColor: =RGBA(0, 18, 107, 1)
+            HoverColor: =RGBA(0, 0, 0, 1)
+            HoverFill: =RGBA(186, 202, 226, 1)
+            Mode: =TextMode.MultiLine
+            Size: =15
+            Width: =380
+            X: =21
+            Y: =21
+            ZIndex: =1
+
+        Button6_7 As button:
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            Fill: =RGBA(56, 96, 178, 1)
+            FontWeight: =FontWeight.Semibold
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
+            OnSelect: |-
+                =If(
+                    TablaInfoHxH.Selected.FechaRegistro <= Today() && TablaInfoHxH.Selected.FechaRegistro - 2 <= Today(),
+                    UpdateContext(
+                        {
+                            InfoVieja: {
+                                codigo: TablaInfoHxH.Selected.CodigoEmpleado,
+                                fecha: TablaInfoHxH.Selected.FechaRegistro,
+                                hour: TablaInfoHxH.Selected.Hora,
+                                semana: TablaInfoHxH.Selected.Semana,
+                                maquina: TablaInfoHxH.Selected.Maquina,
+                                turno: TablaInfoHxH.Selected.Turno
+                            }
+                        }
+                    );
+                    UpdateContext(
+                        {
+                            InfoNueva: {
+                                codigo: TablaInfoHxH.Selected.CodigoEmpleado,
+                                fecha: FechaSup,
+                                hour: drpHoraSupervisorHxH_1.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor',
+                                semana: TablaInfoHxH.Selected.Semana,
+                                maquina: TablaInfoHxH.Selected.Maquina,
+                                turno: TablaInfoHxH.Selected.Turno
+                            }
+                        }
+                    );
+                    UpdateContext(
+                        {
+                            OrdenEjecucion: LookUp(
+                                Orden_Ejecucion,
+                                Orden = TablaInfoHxH.Selected.Orden && Operacion = TablaInfoHxH.Selected.Operacion
+                            )
+                        }
+                    );
+                    UpdateContext(
+                        {
+                            OrdenTarima: LookUp(
+                                Orden_Tarimas,
+                                Orden = TablaInfoHxH.Selected.Orden && Operacion = TablaInfoHxH.Selected.Operacion && Tarima = TablaInfoHxH.Selected.Tarima
+                            )
+                        }
+                    );
+                    UpdateContext({ProTotal: OrdenEjecucion.CantidadTotalProducida - TablaInfoHxH.Selected.Cantidad});
+                    UpdateContext({TarimaTotal: OrdenTarima.CantidadTotalProducida - TablaInfoHxH.Selected.Cantidad});
+                    Patch(
+                        Orden_Ejecucion,
+                        OrdenEjecucion,
+                        {CantidadTotalProducida: ProTotal}
+                    );
+                    Patch(
+                        Orden_Tarimas,
+                        OrdenTarima,
+                        {CantidadTotalProducida: TarimaTotal}
+                    );
+                    Remove(
+                        'Hora X Hora',
+                        TablaInfoHxH.Selected
+                    );
+                    If(
+                        !IsBlank(
+                            LookUp(
+                                'Hora X Hora',
+                                CodigoEmpleado = InfoVieja.codigo && Hora = InfoVieja.hour && FechaRegistro = InfoVieja.fecha
+                            )
+                        ),
+                        Patch(
+                            HoraxHoraFinals,
+                            LookUp(
+                                HoraxHoraFinals,
+                                Codigo_Empleado = InfoVieja.codigo && Hora = InfoVieja.hour && Fecha = Text(
+                                    InfoVieja.fecha,
+                                    "mm/dd/yyyy"
+                                )
+                            ),
+                            {
+                                Cantidad_Producida: Sum(
+                                    Filter(
+                                        'Hora X Hora',
+                                        CodigoEmpleado = InfoVieja.codigo,
+                                        FechaRegistro = InfoVieja.fecha,
+                                        Hora = InfoVieja.hour
+                                    ),
+                                    Cantidad
+                                ),
+                                Meta: Average(
+                                    Filter(
+                                        'Hora X Hora',
+                                        CodigoEmpleado = InfoVieja.codigo,
+                                        FechaRegistro = InfoVieja.fecha,
+                                        Hora = InfoVieja.hour
+                                    ),
+                                    Cantidad_Por_Hora
+                                ),
+                                Turno: InfoVieja.turno,
+                                Ubicacion_Bono: LookUp(
+                                    Maquinas,
+                                    Maquina = InfoVieja.maquina,
+                                    Ubicacion_Bono
+                                ),
+                                Semana: InfoVieja.semana
+                            }
+                        ),
+                        Remove(
+                            HoraxHoraFinals,
+                            LookUp(
+                                HoraxHoraFinals,
+                                Codigo_Empleado = InfoVieja.codigo && Hora = InfoVieja.hour && Fecha = Text(
+                                    InfoVieja.fecha,
+                                    "mm/dd/yyyy"
+                                )
+                            )
+                        )
+                    );
+                    Refresh('Hora X Hora');
+                    UpdateContext({Mostra: false});
+                    ,
+                    Notify(
+                        "No se pueden eliminar registros de mas de 3 dias",
+                        NotificationType.Error
+                    )
+                );
+                UpdateContext({Eliminar: false})
+            Size: =15
+            Text: ="Eliminar"
+            X: =34
+            Y: =83
+            ZIndex: =2
+
+        Button6_12 As button:
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            Fill: =RGBA(56, 96, 178, 1)
+            FontWeight: =FontWeight.Semibold
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
+            OnSelect: |-
+                =UpdateContext({Eliminar: false})
+            Size: =15
+            Text: ="Cancelar"
+            X: =226
+            Y: =83
+            ZIndex: =3
 
