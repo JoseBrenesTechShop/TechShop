@@ -253,7 +253,7 @@ HoraXhora As screen:
                     Reset(txtOrdenHxH);
                     Reset(drpHoraSupervisorHxH);
                     Reset(drpFechaSupervisorHxH);
-                    UpdateContext({FechaSup: DateValue("")});
+                    UpdateContext({FechaSup: DateValue(drpFechaSupervisorHxH.SelectedText.Value)});
                     UpdateContext({Dia: Weekday(FechaSup)});
                     UpdateContext({Hora: Blank()});
                     UpdateContext({turnoFinal: Blank()});
@@ -1604,12 +1604,18 @@ HoraXhora As screen:
                                                                                                 }
                                                                                             )
                                                                                         );
-                                                                                        Reset(txtOrdenHxH);
-                                                                                        Reset(txtMaquinaHxH);
                                                                                         Reset(txtTarimaHxH);
+                                                                                        Reset(txtMaquinaHxH);
                                                                                         Reset(txtCantProducidaHxH);
+                                                                                        Reset(txtOrdenHxH);
                                                                                         Reset(drpHoraSupervisorHxH);
-                                                                                        SetFocus(txtOrdenHxH);
+                                                                                        Reset(drpFechaSupervisorHxH);
+                                                                                        UpdateContext({FechaSup: DateValue(drpFechaSupervisorHxH.SelectedText.Value)});
+                                                                                        UpdateContext({Dia: Weekday(FechaSup)});
+                                                                                        UpdateContext({Hora: Blank()});
+                                                                                        UpdateContext({turnoFinal: Blank()});
+                                                                                        UpdateContext({turnoSeleccionado: Blank()});
+                                                                                        UpdateContext({HoraValor: Blank()});
                                                                                         Notify(
                                                                                             "Se ha Guardado exitosamente",
                                                                                             NotificationType.Success
@@ -2101,7 +2107,7 @@ HoraXhora As screen:
                                     Orden: infoOrden.Selected.Orden,
                                     Operacion: infoOrden.Selected.Operacion,
                                     'P/N': infoOrden.Selected.'P/N',
-                                    Cantidad_Por_Hora: infoOrden.Selected.Meta,
+                                    Cantidad_Por_Hora: Value(txtMetaHxH.Text),
                                     Cantidad: Value(txtCantProducidaHxH.Text),
                                     Semana: Value(txtSemanaHxH.Text),
                                     Turno: txtTurnoHxH.Text,
@@ -2134,14 +2140,6 @@ HoraXhora As screen:
                                 infoOrden.Selected,
                                 {CantidadTotalProducida: txtCantTotalHxH.Text + txtCantProducidaHxH.Text}
                             );
-                            Patch(
-                                Orden_Tarimas,
-                                LookUp(
-                                    Orden_Tarimas,
-                                    Orden = infoOrden.Selected.Orden && Operacion = infoOrden.Selected.Operacion && Tarima = txtTarimaHxH.Text
-                                ),
-                                {CantidadTotalProducida: txtCantTarimaHxH.Text + txtCantProducidaHxH.Text}
-                            );
                             If(
                                 IsBlank(txtCantTarimaHxH.Text),
                                 Collect(
@@ -2152,6 +2150,14 @@ HoraXhora As screen:
                                         Tarima: txtTarimaHxH_2.Text,
                                         CantidadTotalProducida: Value(txtCantProducidaHxH.Text)
                                     }
+                                ),
+                                Patch(
+                                    Orden_Tarimas,
+                                    LookUp(
+                                        Orden_Tarimas,
+                                        Orden = infoOrden.Selected.Orden && Operacion = infoOrden.Selected.Operacion && Tarima = txtTarimaHxH.Text
+                                    ),
+                                    {CantidadTotalProducida: txtCantTarimaHxH.Text + txtCantProducidaHxH.Text}
                                 )
                             );
                             ClearCollect(
@@ -2194,7 +2200,6 @@ HoraXhora As screen:
                                         Semana: Value(txtSemanaHxH.Text)
                                     }
                                 ),
-                        // Si no existe, se crea un nuevo registro
                                 Collect(
                                     HoraxHoraFinals,
                                     {
@@ -2229,25 +2234,29 @@ HoraXhora As screen:
                                         Fecha: drpFechaSupervisorHxH.SelectedText.Value
                                     }
                                 )
-                        // Si existe, se actualiza
                             );
-                            Reset(txtOrdenHxH);
-                            Reset(txtMaquinaHxH);
                             Reset(txtTarimaHxH);
+                            Reset(txtMaquinaHxH);
                             Reset(txtCantProducidaHxH);
-                            Reset(txtIdSupervisor);
-                            Reset(txtContraSupervisor);
+                            Reset(txtOrdenHxH);
                             Reset(drpHoraSupervisorHxH);
+                            Reset(drpFechaSupervisorHxH);
+                            UpdateContext({FechaSup: DateValue(drpFechaSupervisorHxH.SelectedText.Value)});
+                            UpdateContext({Dia: Weekday(FechaSup)});
+                            UpdateContext({Hora: Blank()});
+                            UpdateContext({turnoFinal: Blank()});
+                            UpdateContext({turnoSeleccionado: Blank()});
+                            UpdateContext({HoraValor: Blank()});
                             UpdateContext({MostraBloqueo: false});
                             UpdateContext({MostraBloqueoAcesso: false});
                             Notify(
                                 "Se ha Guardado exitosamente",
                                 NotificationType.Success
-                            ),
-                            Notify(
-                                "La contraseña es invalida o no cuenta con los permisos nesesarios",
-                                NotificationType.Error
                             )
+                        ),
+                        Notify(
+                            "La contraseña es invalida o no cuenta con los permisos nesesarios",
+                            NotificationType.Error
                         )
                     )
                 Size: =18
@@ -2281,7 +2290,7 @@ HoraXhora As screen:
             FontWeight: =FontWeight.Semibold
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
-            OnSelect: |-
+            OnSelect: |
                 =If(
                     IsBlank(Dropdown11.SelectedText.Value),
                     Notify(
@@ -2301,7 +2310,7 @@ HoraXhora As screen:
                             Orden: infoOrden.Selected.Orden,
                             Operacion: infoOrden.Selected.Operacion,
                             'P/N': infoOrden.Selected.'P/N',
-                            Cantidad_Por_Hora: infoOrden.Selected.Meta,
+                            Cantidad_Por_Hora: Value(txtMetaHxH.Text),
                             Cantidad: Value(txtCantProducidaHxH.Text),
                             Semana: Value(txtSemanaHxH.Text),
                             Turno: txtTurnoHxH.Text,
@@ -2314,8 +2323,8 @@ HoraXhora As screen:
                             ),
                             FechaRegistro: FechaSup,
                             Tarima: txtTarimaHxH_2.Text,
-                            Comentario: Dropdown11.SelectedText.Value,
-                            Causa: Dropdown11_1.SelectedText.Value,
+                            Comentario: "EJECUCION",
+                            Causa: "BIEN",
                             Descripcion: txtDescripcionHxH.Text,
                             Ubicacion_Bono: LookUp(
                                 Maquinas,
@@ -2334,14 +2343,6 @@ HoraXhora As screen:
                         infoOrden.Selected,
                         {CantidadTotalProducida: txtCantTotalHxH.Text + txtCantProducidaHxH.Text}
                     );
-                    Patch(
-                        Orden_Tarimas,
-                        LookUp(
-                            Orden_Tarimas,
-                            Orden = infoOrden.Selected.Orden && Operacion = infoOrden.Selected.Operacion && Tarima = txtTarimaHxH.Text
-                        ),
-                        {CantidadTotalProducida: txtCantTarimaHxH.Text + txtCantProducidaHxH.Text}
-                    );
                     If(
                         IsBlank(txtCantTarimaHxH.Text),
                         Collect(
@@ -2352,6 +2353,14 @@ HoraXhora As screen:
                                 Tarima: txtTarimaHxH_2.Text,
                                 CantidadTotalProducida: Value(txtCantProducidaHxH.Text)
                             }
+                        ),
+                        Patch(
+                            Orden_Tarimas,
+                            LookUp(
+                                Orden_Tarimas,
+                                Orden = infoOrden.Selected.Orden && Operacion = infoOrden.Selected.Operacion && Tarima = txtTarimaHxH.Text
+                            ),
+                            {CantidadTotalProducida: txtCantTarimaHxH.Text + txtCantProducidaHxH.Text}
                         )
                     );
                     ClearCollect(
@@ -2394,7 +2403,6 @@ HoraXhora As screen:
                                 Semana: Value(txtSemanaHxH.Text)
                             }
                         ),
-                    // Si no existe, se crea un nuevo registro
                         Collect(
                             HoraxHoraFinals,
                             {
@@ -2429,22 +2437,29 @@ HoraXhora As screen:
                                 Fecha: drpFechaSupervisorHxH.SelectedText.Value
                             }
                         )
-                    // Si existe, se actualiza
                     );
                     
                 );
                 Refresh(HoraxHoraFinals);
-                Reset(txtOrdenHxH);
-                Reset(txtMaquinaHxH);
                 Reset(txtTarimaHxH);
+                Reset(txtMaquinaHxH);
                 Reset(txtCantProducidaHxH);
-                SetFocus(txtOrdenHxH);
+                Reset(txtOrdenHxH);
                 Reset(drpHoraSupervisorHxH);
+                Reset(drpFechaSupervisorHxH);
+                UpdateContext({FechaSup: DateValue(drpFechaSupervisorHxH.SelectedText.Value)});
+                UpdateContext({Dia: Weekday(FechaSup)});
+                UpdateContext({Hora: Blank()});
+                UpdateContext({turnoFinal: Blank()});
+                UpdateContext({turnoSeleccionado: Blank()});
+                UpdateContext({HoraValor: Blank()});
+                UpdateContext({MostraBloqueo: false});
+                UpdateContext({MostraBloqueoAcesso: false});
+                UpdateContext({MostraCausa: false});
                 Notify(
                     "Se ha Guardado exitosamente",
                     NotificationType.Success
                 );
-                UpdateContext({MostraCausa: false})
             Size: =15
             Text: ="Guardar"
             X: =336
