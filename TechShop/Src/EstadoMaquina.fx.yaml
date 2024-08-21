@@ -728,15 +728,52 @@ EstadoMaquina As screen:
                                             "Debe indiacar un comentario y una causa para realizar el cambio de estado",
                                             NotificationType.Error
                                         ),
-                                        If(drpComentarioMaquina.SelectedText.Value = "MANTENIMIENTO ", 
-                                                EnviarCorreo.Run("raraya@tsicr.com", texto, HtmlBody.HtmlText); EnviarCorreo.Run("rpereira@tsicr.com", texto, HtmlBody.HtmlText),
-                                            drpComentarioMaquina.SelectedText.Value = "PROGRAMACION",
-                                                EnviarCorreo.Run("raraya@tsicr.com", texto, HtmlBody.HtmlText);EnviarCorreo.Run("wsequeira@tsicr.com", texto, HtmlBody.HtmlText),
-                                            drpComentarioMaquina.SelectedText.Value = "PRODUCCION",
-                                                EnviarCorreo.Run("supervisoresTSI@tsicr.com", texto, HtmlBody.HtmlText); EnviarCorreo.Run("lfernandez@tsicr.com", texto, HtmlBody.HtmlText),
-                                            drpComentarioMaquina.SelectedText.Value = "CALIDAD ",
-                                                EnviarCorreo.Run("vguerrero@tsicr.com", texto, HtmlBody.HtmlText);EnviarCorreo.Run("icespedes@tsicr.com", texto, HtmlBody.HtmlText)
+                                        If(
+                                            drpComentarioMaquina.SelectedText.Value = "MANTENIMIENTO ",
+                                            EnviarCorreo.Run(
+                                                "raraya@tsicr.com",
+                                                texto,
+                                                HtmlBody.HtmlText
                                             );
+                                            EnviarCorreo.Run(
+                                                "rpereira@tsicr.com",
+                                                texto,
+                                                HtmlBody.HtmlText
+                                            ),
+                                            drpComentarioMaquina.SelectedText.Value = "PROGRAMACION",
+                                            EnviarCorreo.Run(
+                                                "raraya@tsicr.com",
+                                                texto,
+                                                HtmlBody.HtmlText
+                                            );
+                                            EnviarCorreo.Run(
+                                                "wsequeira@tsicr.com",
+                                                texto,
+                                                HtmlBody.HtmlText
+                                            ),
+                                            drpComentarioMaquina.SelectedText.Value = "PRODUCCION",
+                                            EnviarCorreo.Run(
+                                                "supervisoresTSI@tsicr.com",
+                                                texto,
+                                                HtmlBody.HtmlText
+                                            );
+                                            EnviarCorreo.Run(
+                                                "lfernandez@tsicr.com",
+                                                texto,
+                                                HtmlBody.HtmlText
+                                            ),
+                                            drpComentarioMaquina.SelectedText.Value = "CALIDAD ",
+                                            EnviarCorreo.Run(
+                                                "vguerrero@tsicr.com",
+                                                texto,
+                                                HtmlBody.HtmlText
+                                            );
+                                            EnviarCorreo.Run(
+                                                "icespedes@tsicr.com",
+                                                texto,
+                                                HtmlBody.HtmlText
+                                            )
+                                        );
                                         Patch(
                                             Historial_Maquinas,
                                             Defaults(Historial_Maquinas),
@@ -746,8 +783,11 @@ EstadoMaquina As screen:
                                                 Motivo_Estado: InfoEstadoMaquinas.Selected.Motivo_Estado,
                                                 Comentario: InfoEstadoMaquinas.Selected.Comentario,
                                                 Causa: InfoEstadoMaquinas.Selected.Causa,
-                                                Fecha_Estado: InfoEstadoMaquinas.Selected.'Fecha de modificación',
-                                                Guns: InfoEstadoMaquinas.Selected.Guns
+                                                Fecha_Estado:Text(InfoEstadoMaquinas.Selected.'Fecha de modificación', "dd/mmm/yyyy hh:mm AM/PM"),
+                                                Fecha_Inicio: InfoEstadoMaquinas.Selected.'Fecha de modificación',
+                                                Fecha_Fin: Now(),
+                                                Guns: InfoEstadoMaquinas.Selected.Guns,
+                                                User: InfoEstadoMaquinas.Selected.User
                                             }
                                         );
                                         Patch(
@@ -758,7 +798,12 @@ EstadoMaquina As screen:
                                                 Motivo_Estado: txtMaquinaDescripcion.Text,
                                                 Comentario: drpComentarioMaquina.SelectedText.Value,
                                                 Causa: drpCausaMaquina.SelectedText.Value,
-                                                Guns: drpGunsSiNo.SelectedText.Value
+                                                Guns: drpGunsSiNo.SelectedText.Value,
+                                                User: LookUp(
+                                                    Empleados,
+                                                    Codigo = VarName,
+                                                    Nombre
+                                                )
                                             }
                                         );
                                         Notify(
@@ -1501,7 +1546,7 @@ EstadoMaquina As screen:
                         BorderColor: =App.Theme.Colors.Darker40
                         DelayItemLoading: =true
                         Height: =577
-                        Items: =Sort(Filter(Historial_Maquinas, Maquina = InfoEstadoMaquinas.Selected.Maquina),'Fecha de modificación', SortOrder.Descending)
+                        Items: =Sort(Filter(Historial_Maquinas, Maquina = InfoEstadoMaquinas.Selected.Maquina),Fecha_Inicio, SortOrder.Descending)
                         Layout: =Layout.Vertical
                         LoadingSpinner: =LoadingSpinner.Data
                         TemplateSize: =287
@@ -1528,9 +1573,13 @@ EstadoMaquina As screen:
                             HoverColor: =RGBA(0, 0, 0, 1)
                             HoverFill: =App.Theme.Colors.Lighter70
                             PaddingLeft: =5
+                            RadiusBottomLeft: =10
+                            RadiusBottomRight: =10
+                            RadiusTopLeft: =10
+                            RadiusTopRight: =10
                             Size: =15
-                            Width: =481
-                            X: =388
+                            Width: =269
+                            X: =600
                             ZIndex: =3
 
                         txtEstadoMaquina_3 As text:
@@ -1552,9 +1601,13 @@ EstadoMaquina As screen:
                             OnSelect: |-
                                 =UpdateContext({Historial: false})
                             PaddingLeft: =5
+                            RadiusBottomLeft: =10
+                            RadiusBottomRight: =10
+                            RadiusTopLeft: =10
+                            RadiusTopRight: =10
                             Size: =15
-                            Width: =481
-                            X: =388
+                            Width: =269
+                            X: =600
                             Y: =30
                             ZIndex: =4
 
@@ -1563,7 +1616,7 @@ EstadoMaquina As screen:
                             BorderColor: =App.Theme.Colors.Darker40
                             BorderThickness: =2
                             Color: =RGBA(255, 255, 255, 1)
-                            Default: ="Fecha"
+                            Default: ="Fecha Inicio"
                             DisabledBorderColor: =RGBA(166, 166, 166, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             DisabledFill: =RGBA(244, 244, 244, 1)
@@ -1577,8 +1630,12 @@ EstadoMaquina As screen:
                             HoverColor: =RGBA(0, 0, 0, 1)
                             HoverFill: =App.Theme.Colors.Lighter70
                             PaddingLeft: =5
+                            RadiusBottomLeft: =10
+                            RadiusBottomRight: =10
+                            RadiusTopLeft: =10
+                            RadiusTopRight: =10
                             Size: =15
-                            Width: =388
+                            Width: =300
                             ZIndex: =5
 
                         txtEstadoMaquina_4 As text:
@@ -1586,7 +1643,8 @@ EstadoMaquina As screen:
                             BorderColor: =RGBA(102, 182, 227, 1)
                             BorderThickness: =5
                             Color: =RGBA(0, 0, 0, 1)
-                            Default: =ThisItem.Fecha_Estado
+                            Default: |-
+                                =If(!IsBlank(ThisItem.Fecha_Inicio),Text(ThisItem.Fecha_Inicio, "dd/mmm/yyyy hh:mm"),ThisItem.Fecha_Estado)
                             DisabledBorderColor: =RGBA(166, 166, 166, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             DisabledFill: =RGBA(244, 244, 244, 1)
@@ -1600,8 +1658,12 @@ EstadoMaquina As screen:
                             OnSelect: |-
                                 =UpdateContext({Historial: false})
                             PaddingLeft: =5
+                            RadiusBottomLeft: =10
+                            RadiusBottomRight: =10
+                            RadiusTopLeft: =10
+                            RadiusTopRight: =10
                             Size: =15
-                            Width: =388
+                            Width: =300
                             Y: =30
                             ZIndex: =6
 
@@ -1619,14 +1681,14 @@ EstadoMaquina As screen:
                             FocusedBorderThickness: =4
                             Font: =App.Theme.Font
                             FontWeight: =FontWeight.Bold
-                            Height: =96
+                            Height: =55
                             HoverBorderColor: =App.Theme.Colors.Darker40
                             HoverColor: =RGBA(0, 0, 0, 1)
                             HoverFill: =App.Theme.Colors.Lighter70
                             PaddingLeft: =5
                             Size: =15
                             Width: =151
-                            Y: =77
+                            Y: =118
                             ZIndex: =7
 
                         TextInput3_13 As text:
@@ -1740,7 +1802,7 @@ EstadoMaquina As screen:
                             DisplayMode: =DisplayMode.View
                             FocusedBorderThickness: =4
                             Font: =App.Theme.Font
-                            Height: =96
+                            Height: =55
                             HoverBorderColor: =RGBA(204, 231, 246, 1)
                             HoverColor: =RGBA(0, 0, 0, 1)
                             HoverFill: =RGBA(204, 231, 246, 1)
@@ -1752,7 +1814,7 @@ EstadoMaquina As screen:
                             Size: =15
                             Width: =803
                             X: =151
-                            Y: =77
+                            Y: =118
                             ZIndex: =12
 
                         TextInput3_18 As text:
@@ -1774,6 +1836,10 @@ EstadoMaquina As screen:
                             HoverColor: =RGBA(0, 0, 0, 1)
                             HoverFill: =App.Theme.Colors.Lighter70
                             PaddingLeft: =5
+                            RadiusBottomLeft: =10
+                            RadiusBottomRight: =10
+                            RadiusTopLeft: =10
+                            RadiusTopRight: =10
                             Size: =15
                             Width: =85
                             X: =869
@@ -1798,11 +1864,122 @@ EstadoMaquina As screen:
                             OnSelect: |-
                                 =UpdateContext({Historial: false})
                             PaddingLeft: =5
+                            RadiusBottomLeft: =10
+                            RadiusBottomRight: =10
+                            RadiusTopLeft: =10
+                            RadiusTopRight: =10
                             Size: =15
                             Width: =85
                             X: =869
                             Y: =30
                             ZIndex: =14
+
+                        TextInput3_19 As text:
+                            Align: =Align.Center
+                            BorderColor: =App.Theme.Colors.Darker40
+                            BorderThickness: =2
+                            Color: =RGBA(255, 255, 255, 1)
+                            Default: ="Fecha Fin"
+                            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                            DisabledColor: =RGBA(166, 166, 166, 1)
+                            DisabledFill: =RGBA(244, 244, 244, 1)
+                            DisplayMode: =DisplayMode.View
+                            Fill: =RGBA(102, 182, 227, 1)
+                            FocusedBorderThickness: =4
+                            Font: =App.Theme.Font
+                            FontWeight: =FontWeight.Bold
+                            Height: =30
+                            HoverBorderColor: =App.Theme.Colors.Darker40
+                            HoverColor: =RGBA(0, 0, 0, 1)
+                            HoverFill: =App.Theme.Colors.Lighter70
+                            PaddingLeft: =5
+                            RadiusBottomLeft: =10
+                            RadiusBottomRight: =10
+                            RadiusTopLeft: =10
+                            RadiusTopRight: =10
+                            Size: =15
+                            Width: =300
+                            X: =300
+                            ZIndex: =15
+
+                        txtEstadoMaquina_9 As text:
+                            Align: =Align.Center
+                            BorderColor: =RGBA(102, 182, 227, 1)
+                            BorderThickness: =5
+                            Color: =RGBA(0, 0, 0, 1)
+                            Default: |-
+                                =Text(ThisItem.Fecha_Fin, "dd/mmm/yyyy hh:mm AM/PM")
+                            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                            DisabledColor: =RGBA(166, 166, 166, 1)
+                            DisabledFill: =RGBA(244, 244, 244, 1)
+                            DisplayMode: =DisplayMode.View
+                            FocusedBorderThickness: =4
+                            Font: =App.Theme.Font
+                            HoverBorderColor: =RGBA(204, 231, 246, 1)
+                            HoverColor: =RGBA(0, 0, 0, 1)
+                            HoverFill: =RGBA(204, 231, 246, 1)
+                            OnChange: =
+                            OnSelect: |-
+                                =UpdateContext({Historial: false})
+                            PaddingLeft: =5
+                            RadiusBottomLeft: =10
+                            RadiusBottomRight: =10
+                            RadiusTopLeft: =10
+                            RadiusTopRight: =10
+                            Size: =15
+                            Width: =300
+                            X: =300
+                            Y: =30
+                            ZIndex: =16
+
+                        TextInput3_20 As text:
+                            Align: =Align.Center
+                            BorderColor: =App.Theme.Colors.Darker40
+                            BorderThickness: =2
+                            Color: =RGBA(255, 255, 255, 1)
+                            Default: ="Usuario"
+                            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                            DisabledColor: =RGBA(166, 166, 166, 1)
+                            DisabledFill: =RGBA(244, 244, 244, 1)
+                            DisplayMode: =DisplayMode.View
+                            Fill: =RGBA(102, 182, 227, 1)
+                            FocusedBorderThickness: =4
+                            Font: =App.Theme.Font
+                            FontWeight: =FontWeight.Bold
+                            Height: =30
+                            HoverBorderColor: =App.Theme.Colors.Darker40
+                            HoverColor: =RGBA(0, 0, 0, 1)
+                            HoverFill: =App.Theme.Colors.Lighter70
+                            PaddingLeft: =5
+                            Size: =15
+                            Width: =151
+                            Y: =79
+                            ZIndex: =17
+
+                        txtEstadoMaquina_11 As text:
+                            BorderColor: =RGBA(102, 182, 227, 1)
+                            BorderThickness: =5
+                            Color: =RGBA(0, 0, 0, 1)
+                            Default: =ThisItem.User
+                            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                            DisabledColor: =RGBA(166, 166, 166, 1)
+                            DisabledFill: =RGBA(244, 244, 244, 1)
+                            DisplayMode: =DisplayMode.View
+                            FocusedBorderThickness: =4
+                            Font: =App.Theme.Font
+                            Height: =30
+                            HoverBorderColor: =RGBA(204, 231, 246, 1)
+                            HoverColor: =RGBA(0, 0, 0, 1)
+                            HoverFill: =RGBA(204, 231, 246, 1)
+                            OnChange: =
+                            OnSelect: |-
+                                =UpdateContext({Historial: false})
+                            PaddingLeft: =10
+                            Size: =15
+                            Width: =803
+                            X: =151
+                            Y: =79
+                            ZIndex: =18
 
         HtmlBody As htmlViewer:
             DisabledBorderColor: =RGBA(166, 166, 166, 1)
