@@ -976,16 +976,7 @@ HoraXhoraRegistro As screen:
                             BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
                             BorderThickness: =2
                             Color: =RGBA(0, 0, 0, 1)
-                            Default: |-
-                                =If(
-                                    (Hora = "10:00" && (xTurno = "TD" || xTurno = "T1")) || (Hora = "16:00" && (xTurno = "TD" || xTurno = "T2")) || (Hora = "04:00" && (xTurno = "TN" || xTurno = "T3")) || (Hora = "22:00" && xTurno = "TN"),
-                                    xMeta * 0.75,
-                                    (Hora = "13:00" && (xTurno = "TD" || xTurno = "T1")) || (Hora = "01:00" && (xTurno = "TN" || xTurno = "T3")) || (Hora = "20:00" && xTurno = "T2"),
-                                    xMeta * 0.50,
-                                    xMeta = 0,
-                                    4,
-                                    xMeta
-                                )
+                            Default: =TablaInfoHxH.Selected.Cantidad_Por_Hora
                             DelayOutput: =true
                             DisabledBorderColor: =RGBA(166, 166, 166, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
@@ -1597,7 +1588,7 @@ HoraXhoraRegistro As screen:
                     HoverBorderColor: =App.Theme.Colors.Darker10
                     HoverColor: =RGBA(255, 255, 255, 1)
                     HoverFill: =RGBA(15, 108, 189, 1)
-                    OnSelect: |-
+                    OnSelect: |
                         =If(
                             TablaInfoHxH.Selected.FechaRegistro <= Today() && TablaInfoHxH.Selected.FechaRegistro - 2 <= Today(),
                             UpdateContext(
@@ -1654,18 +1645,7 @@ HoraXhoraRegistro As screen:
                                         "mm/dd/yyyy"
                                     ) = drpFechaSupervisorHxH_3.SelectedText.Value,
                                     Notify("No puede agregar datos en horas futuras"),
-                                    CountRows(
-                                        Filter(
-                                            'Hora X Hora',
-                                            CodigoEmpleado = TablaInfoHxH.Selected.CodigoEmpleado,
-                                            FechaRegistro = FechaSup,
-                                            Hora = drpHoraSupervisorHxH_1.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
-                                        )
-                                    ) >= 2,
-                                    Notify(
-                                        "Ya existen dos registros del empleado a esa misma Hora",
-                                        NotificationType.Error
-                                    ),
+                                    
                                     If(
                                         LookUp(
                                             Maquinas,
@@ -1850,6 +1830,8 @@ HoraXhoraRegistro As screen:
                                                     )
                                                 );
                                                 Refresh('Hora X Hora');
+                                                SubmitForm(Form11);
+                                                ResetForm(Form11);
                                                 UpdateContext({Mostra: false})
                                             )
                                         )
