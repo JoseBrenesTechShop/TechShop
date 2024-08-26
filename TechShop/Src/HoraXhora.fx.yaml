@@ -1453,6 +1453,21 @@ HoraXhora As screen:
                                                                             ) >= 4,
                                                                             UpdateContext({TextoAdvertencia: "Se llego al limite de 4 registros por hora del empleado"});
                                                                             UpdateContext({Mostra: true}),
+                                                                            /* Aquí se añade la lógica para establecer Cantidad_Por_Hora a 0 si ya existe un registro igual */
+                                                                            If(
+                                                                                CountRows(
+                                                                                    Filter(
+                                                                                        'Hora X Hora',
+                                                                                        Maquina = txtMaquinaHxH_2.Text,
+                                                                                        FechaRegistro = FechaSup,
+                                                                                        Hora = drpHoraSupervisorHxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                                                                                    )
+                                                                                ) > 0,
+                                                                                    /* Si ya existe un registro, establece Cantidad_Por_Hora a 0 */
+                                                                                UpdateContext({CantidadPorHoraGuardar: 0}),
+                                                                                    /* Si no existe un registro, establece Cantidad_Por_Hora a txtMetaHxH.Text */
+                                                                                UpdateContext({CantidadPorHoraGuardar: Value(txtMetaHxH.Text)})
+                                                                            );
                                                                             If(
                                                                                 (txtCantProducidaHxH.Text + txtCantTotalHxH.Text) > (txtCantMaxHxH.Text + (txtCantMaxHxH.Text * 0.015)),
                                                                                 UpdateContext({MostraBloqueo: true}),
@@ -1476,7 +1491,7 @@ HoraXhora As screen:
                                                                                                 Orden: infoOrden.Selected.Orden,
                                                                                                 Operacion: infoOrden.Selected.Operacion,
                                                                                                 'P/N': infoOrden.Selected.'P/N',
-                                                                                                Cantidad_Por_Hora: Value(txtMetaHxH.Text),
+                                                                                                Cantidad_Por_Hora: CantidadPorHoraGuardar,
                                                                                                 Cantidad: Value(txtCantProducidaHxH.Text),
                                                                                                 Semana: Value(txtSemanaHxH.Text),
                                                                                                 Turno: txtTurnoHxH.Text,
@@ -1551,7 +1566,7 @@ HoraXhora As screen:
                                                                                                         ),
                                                                                                         Cantidad
                                                                                                     ),
-                                                                                                    Meta: Average(
+                                                                                                    Meta: Sum(             
                                                                                                         Filter(
                                                                                                             'Hora X Hora',
                                                                                                             CodigoEmpleado = drpOperarioHxH.Selected.Codigo,
@@ -1582,7 +1597,7 @@ HoraXhora As screen:
                                                                                                         ),
                                                                                                         Cantidad
                                                                                                     ),
-                                                                                                    Meta: Average(
+                                                                                                    Meta: Sum(
                                                                                                         Filter(
                                                                                                             'Hora X Hora',
                                                                                                             CodigoEmpleado = drpOperarioHxH.Selected.Codigo,
@@ -1616,6 +1631,7 @@ HoraXhora As screen:
                                                                                         UpdateContext({turnoFinal: Blank()});
                                                                                         UpdateContext({turnoSeleccionado: Blank()});
                                                                                         UpdateContext({HoraValor: Blank()});
+                                                                                        UpdateContext({CantidadPorHoraGuardar: Blank()});
                                                                                         Notify(
                                                                                             "Se ha Guardado exitosamente",
                                                                                             NotificationType.Success
