@@ -1526,20 +1526,38 @@ MantenimientoEmpleado As screen:
                         HoverColor: =RGBA(255, 255, 255, 1)
                         HoverFill: =App.Theme.Colors.Darker10
                         OnSelect: |-
-                            =Patch(
-                                Empleados,
-                                LookUp(Empleados, Codigo = txtCodig.Text),
-                                {
-                                    Acceso: false
-                                }
-                            );
-                            ResetForm(Form1_1);
-                            Notify("Empleado desactivado exitosamente", NotificationType.Success)
+                            =If(
+                                
+                                IsBlank(txtCodig.Text),
+                              
+                                Notify("El campo Código es obligatorio", NotificationType.Error),
+                                
+                                // Si el campo de código no está vacío, proceder con la siguiente validación
+                                If(
+                                    // Verificar que el empleado con el código proporcionado existe
+                                    IsBlank(LookUp(Empleados, Codigo = txtCodig.Text)),
+                                    
+                                    // Mostrar notificación de error si el empleado no existe
+                                    Notify("No existe un empleado con este código", NotificationType.Error),
+                                    
+                                    // Si el empleado existe, proceder con la eliminación
+                                    Remove(
+                                        Empleados,
+                                        LookUp(Empleados, Codigo = txtCodig.Text)
+                                    );
+                                    
+                                    // Opcional: Limpiar el formulario
+                                    ResetForm(Form1),
+                                    
+                                    // Mostrar notificación de éxito
+                                    Notify("Empleado eliminado exitosamente",NotificationType.Success)
+                                )
+                            )
                         PressedBorderColor: =App.Theme.Colors.Darker40
                         PressedColor: =Self.Color
                         PressedFill: =App.Theme.Colors.Darker40
                         Size: =15
-                        Text: ="DESACTIVAR"
+                        Text: ="ELIMINAR"
                         X: =433
                         Y: =17
                         ZIndex: =3
