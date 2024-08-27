@@ -568,7 +568,7 @@ EstadosPermisos As screen:
                             Y: =5
                             ZIndex: =10
 
-                        lbl_FechaTramite_EstadoPermisos As Text:
+                        lbl_FechaTramite_EstadoPermisos As Texto:
                             Align: ='TextCanvas.Align'.Center
                             BorderColor: =RGBA(12, 59, 94, 1)
                             BorderStyle: =BorderStyle.Solid
@@ -588,7 +588,7 @@ EstadosPermisos As screen:
                             Y: =4
                             ZIndex: =11
 
-                        TextCanvas1_1 As Text:
+                        TextCanvas1_1 As Texto:
                             Align: ='TextCanvas.Align'.Center
                             BorderColor: =RGBA(12, 59, 94, 1)
                             BorderStyle: =BorderStyle.Solid
@@ -608,7 +608,7 @@ EstadosPermisos As screen:
                             Y: =70
                             ZIndex: =12
 
-                        TextCanvas1_2 As Text:
+                        TextCanvas1_2 As Texto:
                             Align: ='TextCanvas.Align'.Center
                             BorderColor: =
                             BorderStyle: =BorderStyle.Solid
@@ -628,7 +628,7 @@ EstadosPermisos As screen:
                             Y: =37
                             ZIndex: =13
 
-                        TextCanvas1_3 As Text:
+                        TextCanvas1_3 As Texto:
                             Align: ='TextCanvas.Align'.Center
                             BorderColor: =
                             BorderStyle: =BorderStyle.Solid
@@ -648,7 +648,7 @@ EstadosPermisos As screen:
                             Y: =5
                             ZIndex: =14
 
-                        TextCanvas1_6 As Text:
+                        TextCanvas1_6 As Texto:
                             Align: ='TextCanvas.Align'.Center
                             BorderColor: =
                             BorderStyle: =BorderStyle.Solid
@@ -840,7 +840,7 @@ EstadosPermisos As screen:
                             Font: =App.Theme.Font
                             Height: =39
                             Size: =13
-                            Text: =GaleriaEstado.Selected.Fecha_Inicio
+                            Text: =Text(GaleriaEstado.Selected.Fecha_Inicio, "[$-es-ES]dd/mm/yyyy")
                             Width: =238
                             X: =211
                             Y: =152
@@ -853,7 +853,7 @@ EstadosPermisos As screen:
                             Font: =App.Theme.Font
                             Height: =39
                             Size: =13
-                            Text: =GaleriaEstado.Selected.Fecha_Fin
+                            Text: =Text(GaleriaEstado.Selected.Fecha_Fin, "[$-es-ES]dd/mm/yyyy")
                             Width: =238
                             X: =211
                             Y: =201
@@ -1204,6 +1204,12 @@ EstadosPermisos As screen:
                     "</style>",
                     "</head>",
                     "<body>",
+                      "<table style='width: 100%; border: none;'>",
+                    "<tr>",
+                    "<td style='width: 50%; text-align: left; padding: 0;'><img src='URL_DEL_LOGO_IZQUIERDO' alt='Logo Izquierdo' class='logo' /></td>",
+                    "<td style='width: 50%; text-align: right; padding: 0;'><img src='URL_DEL_LOGO_DERECHO' alt='Logo Derecho' class='logo' /></td>",
+                    "</tr>",
+                    "</table>",
                     "<h1>TRÁMITE PARA PERMISOS Y SOLICITUDES DE VACACIONES</h1>",
                     "<table>",
                     "<tr>",
@@ -1258,29 +1264,25 @@ EstadosPermisos As screen:
                     "</td>",
                     "</tr>",
                    If(
-                        drp_Estado_EstadosPermisos.SelectedText.Value = "Rechazado", 
+                        drp_Estado_EstadosPermisos.SelectedText.Value = "Rechazado",
                         Concatenate(
-                          "<tr>",                                   
-                            "<td colspan='2'>", 
-                              "<h2>Motivo del Rechazo:</h2>", 
-                              "<p>", txt_MotivoRehazo_EstadoPermisos.Text, "</p>", 
-                            "</td>", 
+                          "<tr>",                                  
+                            "<td colspan='2'>",
+                              "<h2>Motivo del Rechazo:</h2>",
+                              "<p>", txt_MotivoRehazo_EstadoPermisos.Text, "</p>",
+                            "</td>",
                           "</tr>"
-                        ), 
-                        "" 
-                      ), 
-                    "<tr>",
-                    "<td>",
+                        ),
+                        ""
+                      ),
+                   "<tr>",
+                    "<td colspan='2'>",
+                    "<center>",
                     "<h3>Firma del solicitante:</h3>",
-                    "<img src='",
-                    img_FirmaSolicitante_EstadoPermisos.Image,
-                    "' alt='Firma del solicitante' width='200'>",
-                    "</td>",
-                    "<td>",
+                    "<p>__________________________</p>",
                     "<h3>Firma del jefe directo:</h3>",
-                    "<img src='",
-                    pnl_FirmaJefe_EstadoPermisos.Image,
-                    "' alt='Firma del jefe directo' width='200'>",
+                    "<img src=", varFirmaJefe, " style='width: 100px;'></img>",
+                    "</center>",
                     "</td>",
                     "</tr>",
                     "</table>",
@@ -1354,23 +1356,98 @@ EstadosPermisos As screen:
                 HoverFill: =RGBA(180, 214, 250, 1)
                 Icon: =Icon.CheckBadge
                 OnSelect: |-
-                    =UpdateContext({ConVisible: false});
-                    CorreoConPDF.Run(
-                     htmlPDF.HtmlText,
-                        LookUp(
-                            Empleados,
-                            Codigo = GaleriaEstado.Selected.Codigo,
-                            Correo
-                        ),
-                        "Revision de Permisos",
-                        "Estimado/a,<br><br>" & "Su solicitud por " & GaleriaEstado.Selected.Solicitud & " ha sido " & drp_Estado_EstadosPermisos.SelectedText.Value & ".<br><br>" & "Si desea saber mas detalles puede revisar sus solicitudes o contactar con Recurso Humanos<br><br>" & "Gracias<br>"
+                    =Set(varFirmaJefe, JSON(pnl_FirmaJefe_EstadoPermisos.Image, JSONFormat.IncludeBinaryData));
+                     
+                    UpdateContext({ConVisible: false});
+                    
+                    If(
+                    drp_Estado_EstadosPermisos.SelectedText.Value = "Aprobado",     
+                    EnviarCorreo.Run(
+                        LookUp(Empleados, Codigo = GaleriaEstado.Selected.Codigo, Correo),
+                        "Revisión de Solicitudes",
+                        "Estimado/a,<br><br>" &
+                        "Le informamos que su solicitud de " & GaleriaEstado.Selected.Solicitud & " ha sido " & drp_Estado_EstadosPermisos.SelectedText.Value & ".<br><br>" &
+                        "Le solicitamos que se presente en el departamento de Capital Humano para firmar su boleta correspondiente. En caso de no acudir a firmar, su solicitud no será tramitada.<br><br>" &
+                        "Gracias.<br>"
                     );
-                    CorreoConPDF.Run(
-                     htmlPDF.HtmlText,
-                        "Desarrollo02@tsicr.com",
-                        "Revision de Permisos",
-                        "Estimado/a,<br><br>" & "Su solicitud por " & GaleriaEstado.Selected.Solicitud & " ha sido " & drp_Estado_EstadosPermisos.SelectedText.Value & ".<br><br>" & "Si desea saber mas detalles puede revisar sus solicitudes o contactar con Recurso Humanos<br><br>" & "Gracias<br>"
                     );
+                    
+                    If(
+                    drp_Estado_EstadosPermisos.SelectedText.Value = "Rechazado",     
+                    EnviarCorreo.Run(
+                        LookUp(Empleados, Codigo = GaleriaEstado.Selected.Codigo, Correo),
+                        "Revisión de Solicitudes",
+                        "Estimado/a,<br><br>" &
+                        "Le informamos que su solicitud de " & GaleriaEstado.Selected.Solicitud & " ha sido " & drp_Estado_EstadosPermisos.SelectedText.Value & ".<br><br>" &
+                        "El motivo el cual fue rechazado fue el siguiente: " & txt_MotivoRehazo_EstadoPermisos.Text & ".<br><br>" &
+                        "Gracias.<br>"
+                    );
+                    );
+                    
+                    If(
+                        VarName <> "yaraya@tsicr.com" && VarName <> "respinoza@tsicr.com" &&
+                        drp_Estado_EstadosPermisos.SelectedText.Value = "Aprobado", 
+                        CorreoConPDF.Run(
+                            htmlPDF.HtmlText,
+                            LookUp(
+                                Empleados,
+                                Codigo = VarName,
+                                Correo
+                            ),
+                            "Revisión de Solicitudes",
+                            "Estimado/a,<br><br>" &
+                            "Se ha aprobado la solicitud del colaborador " & GaleriaEstado.Selected.Nombre & 
+                            ", con el ID " & GaleriaEstado.Selected.Codigo & 
+                            ".<br><br>" &
+                            "La solicitud aprobada comprende un total de " & GaleriaEstado.Selected.DiasSolicitados & 
+                            " días, con fecha de inicio " & lbl_FechaInicioInf_EstadoPermisos.Text & 
+                            " y fecha de fin " & lbl_FechaFinInf_EstadoPermisos.Text & 
+                            ".<br><br>" &
+                            "Para obtener más detalles sobre la solicitud aceptada, por favor, consulte el PDF adjunto o revise la solicitud desde el módulo correspondiente.<br><br>" &
+                            "Gracias,<br>"
+                        );
+                    );
+                    
+                    /*
+                    If(
+                    drp_Estado_EstadosPermisos.SelectedText.Value = "Aprobado"; 
+                    CorreoConPDF.Run(
+                     htmlPDF.HtmlText;
+                        "yaraya@tsicr.com";
+                        "Revisión de Solicitudes";
+                            "Estimado/a,<br><br>" &
+                            "Se ha aprobado la solicitud del colaborador " & GaleriaEstado.Selected.Nombre & 
+                            ", con el ID " & GaleriaEstado.Selected.Codigo & 
+                            ".<br><br>" &
+                            "La solicitud aprobada comprende un total de " & GaleriaEstado.Selected.DiasSolicitados & 
+                            " días, con fecha de inicio " &lbl_FechaInicioInf_EstadoPermisos.Text & 
+                            " y fecha de fin " & lbl_FechaFinInf_EstadoPermisos.Text& 
+                            ".<br><br>" &
+                            "Para obtener más detalles sobre la solicitud aceptada, por favor, consulte el PDF adjunto o revise la solicitud desde el módulo correspondiente.<br><br>" &
+                            "Gracias,<br>"
+                    );;
+                    );;
+                    */
+                    /*
+                    If(
+                    drp_Estado_EstadosPermisos.SelectedText.Value = "Aprobado"; 
+                    CorreoConPDF.Run(
+                     htmlPDF.HtmlText;
+                        "respinoza@tsicr.com";
+                        "Revisión de Solicitudes";
+                            "Estimado/a,<br><br>" &
+                            "Se ha aprobado la solicitud del colaborador " & GaleriaEstado.Selected.Nombre & 
+                            ", con el ID " & GaleriaEstado.Selected.Codigo & 
+                            ".<br><br>" &
+                            "La solicitud aprobada comprende un total de " & GaleriaEstado.Selected.DiasSolicitados & 
+                            " días, con fecha de inicio " &lbl_FechaInicioInf_EstadoPermisos.Text & 
+                            " y fecha de fin " & lbl_FechaFinInf_EstadoPermisos.Text& 
+                            ".<br><br>" &
+                            "Para obtener más detalles sobre la solicitud aceptada, por favor, consulte el PDF adjunto o revise la solicitud desde el módulo correspondiente.<br><br>" &
+                            "Gracias,<br>"
+                    );;
+                    );;
+                    */
                     Patch(
                         TramitesSolicitudes,
                         GaleriaEstado.Selected,
