@@ -434,13 +434,14 @@ BonoSemanal As screen:
                         DisplayMode: =DisplayMode.View
                         Height: =60
                         Icon: =Icon.DocumentPDF
-                        OnSelect: =
+                        OnSelect: |-
+                            =UpdateContext({ConVisible: true});
                         Width: =60
                         X: =820
                         Y: =22
                         ZIndex: =12
 
-                tablaInfoBonoSemanal As Table.pcfdataset:
+                tablaInfoBonoSemanal As Tabla.pcfdataset:
                     DisplayMode: =DisplayMode.Edit
                     FillPortions: =1
                     FontSize: =15
@@ -775,7 +776,7 @@ BonoSemanal As screen:
                         Y: =176
                         ZIndex: =2
 
-                    Table3 As Table.pcfdataset:
+                    Table3 As Tabla.pcfdataset:
                         DisplayMode: =DisplayMode.Edit
                         Height: =199
                         Items: =Filter(BonoDiarios, Codigo = tablaInfoBonoSemanal.Selected.Codigo, Semana = Value(tablaInfoBonoSemanal.Selected.Semana))
@@ -1335,4 +1336,200 @@ BonoSemanal As screen:
         X: =1091
         Y: =8
         ZIndex: =3
+
+    Container3_5 As groupContainer.manualLayoutContainer:
+        BorderColor: =RGBA(39, 113, 194, 1)
+        BorderThickness: =2
+        DropShadow: =DropShadow.Light
+        Fill: =RGBA(255, 255, 255, 1)
+        RadiusBottomLeft: =4
+        RadiusBottomRight: =4
+        RadiusTopLeft: =4
+        RadiusTopRight: =4
+        Visible: =ConVisible
+        X: =433
+        Y: =284
+        ZIndex: =4
+
+        Label4_3 As label:
+            Align: =Align.Center
+            BorderColor: =App.Theme.Colors.Darker40
+            Color: =RGBA(255, 191, 0, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisplayMode: =DisplayMode.View
+            Font: =App.Theme.Font
+            Height: =130
+            Size: =15
+            Text: |-
+                ="      ADVERTENCIA 
+                Por favor, recuerde firmar la solicitud.
+                ¿Desea continuar?"
+            Width: =500
+            ZIndex: =1
+
+        Icon6_3 As icon.Warning:
+            BorderColor: =App.Theme.Colors.Darker40
+            Color: =RGBA(255, 191, 0, 1)
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(244, 244, 244, 1)
+            DisplayMode: =DisplayMode.View
+            Height: =32
+            Icon: =Icon.Warning
+            Width: =54
+            X: =154
+            Y: =23
+            ZIndex: =2
+
+        Container8_2 As groupContainer.manualLayoutContainer:
+            DropShadow: =DropShadow.Light
+            Height: =64
+            RadiusBottomLeft: =30
+            RadiusBottomRight: =30
+            RadiusTopLeft: =30
+            RadiusTopRight: =30
+            Width: =64
+            X: =149
+            Y: =130
+            ZIndex: =5
+
+            Icon8_3 As icon.CheckBadge:
+                BorderColor: =App.Theme.Colors.Darker40
+                Color: =App.Theme.Colors.Darker30
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                DisabledColor: =RGBA(244, 244, 244, 1)
+                HoverFill: =RGBA(180, 214, 250, 1)
+                Icon: =Icon.CheckBadge
+                OnSelect: |-
+                    =Set(varFirmaJefe, JSON(pnl_FirmaJefe_EstadoPermisos.Image, JSONFormat.IncludeBinaryData));
+                    Set(LogotipoTechShop, JSON(Logotipo.Image, JSONFormat.IncludeBinaryData));
+                    
+                    UpdateContext({ConVisible: false});
+                    
+                    If(
+                    drp_Estado_EstadosPermisos.SelectedText.Value = "Aprobado",     
+                    EnviarCorreo.Run(
+                        LookUp(Empleados, Codigo = GaleriaEstado.Selected.Codigo, Correo),
+                        "Revisión de Solicitudes",
+                        "Estimado/a,<br><br>" &
+                        "Le informamos que su solicitud de " & GaleriaEstado.Selected.Solicitud & " ha sido " & drp_Estado_EstadosPermisos.SelectedText.Value & ".<br><br>" &
+                        "Le solicitamos que se presente en el departamento de Capital Humano para firmar su boleta correspondiente. En caso de no acudir a firmar, su solicitud no será tramitada.<br><br>" &
+                        "Gracias.<br>"
+                    );
+                    );
+                    
+                    If(
+                    drp_Estado_EstadosPermisos.SelectedText.Value = "Rechazado",     
+                    EnviarCorreo.Run(
+                        LookUp(Empleados, Codigo = GaleriaEstado.Selected.Codigo, Correo),
+                        "Revisión de Solicitudes",
+                        "Estimado/a,<br><br>" &
+                        "Le informamos que su solicitud de " & GaleriaEstado.Selected.Solicitud & " ha sido " & drp_Estado_EstadosPermisos.SelectedText.Value & ".<br><br>" &
+                        "El motivo el cual fue rechazado fue el siguiente: " & txt_MotivoRehazo_EstadoPermisos.Text & ".<br><br>" &
+                        "Gracias.<br>"
+                    );
+                    );
+                    
+                    If(
+                        drp_Estado_EstadosPermisos.SelectedText.Value = "Aprobado", 
+                        CorreoConPDF.Run(
+                            htmlPDF.HtmlText,
+                            LookUp(
+                                Empleados,
+                                Codigo = VarName,
+                                Correo
+                            ),
+                            "Revisión de Solicitudes",
+                            "Estimado/a,<br><br>" &
+                            "Se ha aprobado la solicitud del colaborador " & GaleriaEstado.Selected.Nombre & 
+                            ", con el ID " & GaleriaEstado.Selected.Codigo & 
+                            ".<br><br>" &
+                            "La solicitud aprobada comprende un total de " & GaleriaEstado.Selected.DiasSolicitados & 
+                            " días, con fecha de inicio " & lbl_FechaInicioInf_EstadoPermisos.Text & 
+                            " y fecha de fin " & lbl_FechaFinInf_EstadoPermisos.Text & 
+                            ".<br><br>" &
+                            "Para obtener más detalles sobre la solicitud aceptada, por favor, consulte el PDF adjunto o revise la solicitud desde el módulo correspondiente.<br><br>" &
+                            "Gracias,<br>"
+                        );
+                    );
+                    
+                    
+                    If(
+                    drp_Estado_EstadosPermisos.SelectedText.Value = "Aprobado", 
+                    CorreoConPDF.Run(
+                     htmlPDF.HtmlText,
+                        "rrhh@tsicr.com",
+                        "Revisión de Solicitudes",
+                            "Estimado/a,<br><br>" &
+                            "Se ha aprobado la solicitud del colaborador " & GaleriaEstado.Selected.Nombre & 
+                            ", con el ID " & GaleriaEstado.Selected.Codigo & 
+                            ".<br><br>" &
+                            "La solicitud aprobada comprende un total de " & GaleriaEstado.Selected.DiasSolicitados & 
+                            " días, con fecha de inicio " &lbl_FechaInicioInf_EstadoPermisos.Text & 
+                            " y fecha de fin " & lbl_FechaFinInf_EstadoPermisos.Text& 
+                            ".<br><br>" &
+                            "Para obtener más detalles sobre la solicitud aceptada, por favor, consulte el PDF adjunto o revise la solicitud desde el módulo correspondiente.<br><br>" &
+                            "Gracias,<br>"
+                    );
+                    );
+                    
+                    
+                    
+                    
+                    
+                    Patch(
+                        TramitesSolicitudes,
+                        GaleriaEstado.Selected,
+                        {
+                            EstadoDeProceso: drp_Estado_EstadosPermisos.SelectedText.Value,
+                            Remunerado: If(
+                                chk_Remunerado_EstadoPermisos.Value,
+                                "SI",
+                                "NO"
+                            ),
+                            JefeDirecto: LookUp(
+                                Empleados,
+                                Codigo = VarName,
+                                Nombre
+                            ),
+                            FirmaJefes: pnl_FirmaJefe_EstadoPermisos.Image,
+                            MotivoRechazo: Left(
+                                txt_MotivoRehazo_EstadoPermisos.Text,
+                                100
+                            )
+                        }
+                    );
+                    Notify(
+                        "Datos guardados correctamente",
+                        NotificationType.Success
+                    );
+                    Reset(txt_MotivoRehazo_EstadoPermisos);
+                    Reset(drp_Estado_EstadosPermisos);
+                    Reset(chk_Remunerado_EstadoPermisos);
+                    Reset(chk_NoRemunerado_EstadoPermisos);
+                    Reset(pnl_FirmaJefe_EstadoPermisos)
+                ZIndex: =1
+
+        Container8_3 As groupContainer.manualLayoutContainer:
+            DropShadow: =DropShadow.Light
+            Height: =64
+            RadiusBottomLeft: =30
+            RadiusBottomRight: =30
+            RadiusTopLeft: =30
+            RadiusTopRight: =30
+            Width: =64
+            X: =275
+            Y: =130
+            ZIndex: =6
+
+            Icon15_4 As icon.CancelBadge:
+                BorderColor: =App.Theme.Colors.Darker40
+                Color: =App.Theme.Colors.Darker30
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                DisabledColor: =RGBA(244, 244, 244, 1)
+                FocusedBorderThickness: =30
+                HoverFill: =RGBA(180, 214, 250, 1)
+                Icon: =Icon.CancelBadge
+                OnSelect: |-
+                    =UpdateContext({ConVisible: false});
+                ZIndex: =1
 
