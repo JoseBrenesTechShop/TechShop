@@ -425,21 +425,67 @@ BonoSemanal As screen:
                         Y: =22
                         ZIndex: =11
 
-                    EnviarComprobanteBonos As icon.VerticalLine:
-                        AlignInContainer: =AlignInContainer.Stretch
+                    Label9_23 As label:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisabledColor: =RGBA(166, 166, 166, 1)
+                        FontWeight: =FontWeight.Bold
+                        Height: =75
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =10
+                        Text: ="Enviar comprobante automatico"
+                        Width: =200
+                        ZIndex: =12
+
+                    Icon14_87 As icon.VerticalLine:
+                        AlignInContainer: =AlignInContainer.Center
                         BorderColor: =App.Theme.Colors.Darker40
                         Color: =RGBA(255, 255, 255, 1)
                         DisabledBorderColor: =RGBA(166, 166, 166, 1)
                         DisabledColor: =RGBA(244, 244, 244, 1)
-                        DisplayMode: =DisplayMode.View
                         Height: =60
                         Icon: =Icon.DocumentPDF
                         OnSelect: |-
-                            =UpdateContext({ConVisible: true});
+                            =
+                            UpdateContext({ConVisible: true});
                         Width: =60
                         X: =820
                         Y: =22
-                        ZIndex: =12
+                        ZIndex: =13
+
+                    Label9_24 As label:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisabledColor: =RGBA(166, 166, 166, 1)
+                        FontWeight: =FontWeight.Bold
+                        Height: =75
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =10
+                        Text: ="Enviar comprobante por seleccion"
+                        Width: =200
+                        ZIndex: =14
+
+                    Icon14_90 As icon.VerticalLine:
+                        AlignInContainer: =AlignInContainer.Center
+                        BorderColor: =App.Theme.Colors.Darker40
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                        DisabledColor: =RGBA(244, 244, 244, 1)
+                        Height: =60
+                        Icon: =Icon.DocumentPDF
+                        OnSelect: =Navigate(EnvioBonos, ScreenTransition.Fade)
+                        Width: =60
+                        X: =820
+                        Y: =22
+                        ZIndex: =15
 
                 tablaInfoBonoSemanal As Tabla.pcfdataset:
                     DisplayMode: =DisplayMode.Edit
@@ -1362,7 +1408,7 @@ BonoSemanal As screen:
             Size: =15
             Text: |-
                 ="      ADVERTENCIA 
-                Por favor, recuerde firmar la solicitud.
+                ¿Esta seguro de enviar todos los comprobantes de bono a los operarios automaticamente?
                 ¿Desea continuar?"
             Width: =500
             ZIndex: =1
@@ -1376,8 +1422,8 @@ BonoSemanal As screen:
             Height: =32
             Icon: =Icon.Warning
             Width: =54
-            X: =154
-            Y: =23
+            X: =149
+            Y: =12
             ZIndex: =2
 
         Container8_2 As groupContainer.manualLayoutContainer:
@@ -1399,114 +1445,7 @@ BonoSemanal As screen:
                 DisabledColor: =RGBA(244, 244, 244, 1)
                 HoverFill: =RGBA(180, 214, 250, 1)
                 Icon: =Icon.CheckBadge
-                OnSelect: |-
-                    =Set(varFirmaJefe, JSON(pnl_FirmaJefe_EstadoPermisos.Image, JSONFormat.IncludeBinaryData));
-                    Set(LogotipoTechShop, JSON(Logotipo.Image, JSONFormat.IncludeBinaryData));
-                    
-                    UpdateContext({ConVisible: false});
-                    
-                    If(
-                    drp_Estado_EstadosPermisos.SelectedText.Value = "Aprobado",     
-                    EnviarCorreo.Run(
-                        LookUp(Empleados, Codigo = GaleriaEstado.Selected.Codigo, Correo),
-                        "Revisión de Solicitudes",
-                        "Estimado/a,<br><br>" &
-                        "Le informamos que su solicitud de " & GaleriaEstado.Selected.Solicitud & " ha sido " & drp_Estado_EstadosPermisos.SelectedText.Value & ".<br><br>" &
-                        "Le solicitamos que se presente en el departamento de Capital Humano para firmar su boleta correspondiente. En caso de no acudir a firmar, su solicitud no será tramitada.<br><br>" &
-                        "Gracias.<br>"
-                    );
-                    );
-                    
-                    If(
-                    drp_Estado_EstadosPermisos.SelectedText.Value = "Rechazado",     
-                    EnviarCorreo.Run(
-                        LookUp(Empleados, Codigo = GaleriaEstado.Selected.Codigo, Correo),
-                        "Revisión de Solicitudes",
-                        "Estimado/a,<br><br>" &
-                        "Le informamos que su solicitud de " & GaleriaEstado.Selected.Solicitud & " ha sido " & drp_Estado_EstadosPermisos.SelectedText.Value & ".<br><br>" &
-                        "El motivo el cual fue rechazado fue el siguiente: " & txt_MotivoRehazo_EstadoPermisos.Text & ".<br><br>" &
-                        "Gracias.<br>"
-                    );
-                    );
-                    
-                    If(
-                        drp_Estado_EstadosPermisos.SelectedText.Value = "Aprobado", 
-                        CorreoConPDF.Run(
-                            htmlPDF.HtmlText,
-                            LookUp(
-                                Empleados,
-                                Codigo = VarName,
-                                Correo
-                            ),
-                            "Revisión de Solicitudes",
-                            "Estimado/a,<br><br>" &
-                            "Se ha aprobado la solicitud del colaborador " & GaleriaEstado.Selected.Nombre & 
-                            ", con el ID " & GaleriaEstado.Selected.Codigo & 
-                            ".<br><br>" &
-                            "La solicitud aprobada comprende un total de " & GaleriaEstado.Selected.DiasSolicitados & 
-                            " días, con fecha de inicio " & lbl_FechaInicioInf_EstadoPermisos.Text & 
-                            " y fecha de fin " & lbl_FechaFinInf_EstadoPermisos.Text & 
-                            ".<br><br>" &
-                            "Para obtener más detalles sobre la solicitud aceptada, por favor, consulte el PDF adjunto o revise la solicitud desde el módulo correspondiente.<br><br>" &
-                            "Gracias,<br>"
-                        );
-                    );
-                    
-                    
-                    If(
-                    drp_Estado_EstadosPermisos.SelectedText.Value = "Aprobado", 
-                    CorreoConPDF.Run(
-                     htmlPDF.HtmlText,
-                        "rrhh@tsicr.com",
-                        "Revisión de Solicitudes",
-                            "Estimado/a,<br><br>" &
-                            "Se ha aprobado la solicitud del colaborador " & GaleriaEstado.Selected.Nombre & 
-                            ", con el ID " & GaleriaEstado.Selected.Codigo & 
-                            ".<br><br>" &
-                            "La solicitud aprobada comprende un total de " & GaleriaEstado.Selected.DiasSolicitados & 
-                            " días, con fecha de inicio " &lbl_FechaInicioInf_EstadoPermisos.Text & 
-                            " y fecha de fin " & lbl_FechaFinInf_EstadoPermisos.Text& 
-                            ".<br><br>" &
-                            "Para obtener más detalles sobre la solicitud aceptada, por favor, consulte el PDF adjunto o revise la solicitud desde el módulo correspondiente.<br><br>" &
-                            "Gracias,<br>"
-                    );
-                    );
-                    
-                    
-                    
-                    
-                    
-                    Patch(
-                        TramitesSolicitudes,
-                        GaleriaEstado.Selected,
-                        {
-                            EstadoDeProceso: drp_Estado_EstadosPermisos.SelectedText.Value,
-                            Remunerado: If(
-                                chk_Remunerado_EstadoPermisos.Value,
-                                "SI",
-                                "NO"
-                            ),
-                            JefeDirecto: LookUp(
-                                Empleados,
-                                Codigo = VarName,
-                                Nombre
-                            ),
-                            FirmaJefes: pnl_FirmaJefe_EstadoPermisos.Image,
-                            MotivoRechazo: Left(
-                                txt_MotivoRehazo_EstadoPermisos.Text,
-                                100
-                            )
-                        }
-                    );
-                    Notify(
-                        "Datos guardados correctamente",
-                        NotificationType.Success
-                    );
-                    Reset(txt_MotivoRehazo_EstadoPermisos);
-                    Reset(drp_Estado_EstadosPermisos);
-                    Reset(chk_Remunerado_EstadoPermisos);
-                    Reset(chk_NoRemunerado_EstadoPermisos);
-                    Reset(pnl_FirmaJefe_EstadoPermisos)
+                OnSelect: =
                 ZIndex: =1
 
         Container8_3 As groupContainer.manualLayoutContainer:
