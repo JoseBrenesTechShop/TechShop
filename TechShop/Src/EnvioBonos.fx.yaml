@@ -4,7 +4,7 @@
 
     ScreenContainer11 As groupContainer.verticalAutoLayoutContainer:
         DropShadow: =DropShadow.Light
-        Fill: =RGBA(245, 245, 245, 1)
+        Fill: =RGBA(174, 208, 221, 1)
         Height: =Parent.Height
         LayoutAlignItems: =LayoutAlignItems.Stretch
         LayoutDirection: =LayoutDirection.Vertical
@@ -812,17 +812,27 @@
                 DisabledColor: =RGBA(244, 244, 244, 1)
                 HoverFill: =RGBA(180, 214, 250, 1)
                 Icon: =Icon.CheckBadge
-                OnSelect: |-
-                    =ForAll(
-                        SelectedEmployees,
+                OnSelect: |
+                    =Set(LogotipoTech, JSON(Logotipo_1.Image, JSONFormat.IncludeBinaryData));
+                    
                         EnviarComprobanteSeleccionadosPDF.Run(
                             "ComprobanteBono", 
                             "Prueba",
                             drpSemanaBono_1.SelectedText.Value,
-                            EmployeeCodesString
-                        )
-                    );
+                            EmployeeCodesString,
+                            LogotipoTech
+                        );
                     
+                        EnviarComprobanteFinancieroSeleccionadosPDF.Run(
+                            "Comprobante Financiero", 
+                            "Prueba",
+                            drpSemanaBono_1.SelectedText.Value,
+                            EmployeeCodesString,
+                            "Desarrollo02@tsicr.com",
+                            LogotipoTech
+                        );
+                    
+                    Notify("Comprobante de Bono por selección enviado exitosamente", NotificationType.Success);
                     UpdateContext({ConVisible: false});
                     
                     Clear(SelectedEmployees);
@@ -853,4 +863,14 @@
                 OnSelect: |-
                     =UpdateContext({ConVisible: false});
                 ZIndex: =1
+
+    Logotipo_1 As image:
+        BorderColor: =App.Theme.Colors.Darker40
+        DisabledBorderColor: =RGBA(166, 166, 166, 1)
+        DisabledFill: =RGBA(244, 244, 244, 1)
+        Image: =Logo
+        Visible: =false
+        X: =40
+        Y: =40
+        ZIndex: =3
 
