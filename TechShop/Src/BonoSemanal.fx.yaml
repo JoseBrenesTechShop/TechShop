@@ -1425,22 +1425,31 @@ BonoSemanal As screen:
                 HoverFill: =RGBA(180, 214, 250, 1)
                 Icon: =Icon.CheckBadge
                 OnSelect: |-
-                    =  EnviarComprobanteFinancieroPDF.Run(
+                    =If(
+                        !IsBlank(drpSemanaBono.SelectedText.Value),
+                        EnviarComprobanteFinancieroPDF.Run(
                             "Comprobante Financiero",
                             "Prueba",
-                            drpSemanaBono_1.SelectedText.Value,
+                            drpSemanaBono.SelectedText.Value,
                             "Desarrollo02@tsicr.com",
                             LogotipoTech
-                        );
-                    
-                    EnviarComprobantePDF.Run(
-                        "Comprobante Bono",
-                        "Prueba",
-                        drpSemanaBono.SelectedText.Value,
-                        LogotipoTech
+                        ),
+                        Notify("Por favor, seleccione una semana válida para enviar los comprobantes.", NotificationType.Error)
                     );
-                    Notify("Comprobante de Bono automatico enviado exitosamente", NotificationType.Success);
-                    UpdateContext({ConVisible: false});
+                    
+                    If(
+                        
+                        !IsBlank(drpSemanaBono.SelectedText.Value),
+                        EnviarComprobantePDF.Run(
+                            "Comprobante Bono",
+                            "Prueba",
+                            drpSemanaBono.SelectedText.Value,
+                            LogotipoTech
+                        ),
+                        Notify("Por favor, seleccione una semana válida para enviar los comprobantes.", NotificationType.Error)
+                    );
+                    
+                    UpdateContext({ConVisible: false})
                 ZIndex: =1
 
         Container8_3 As groupContainer.manualLayoutContainer:
