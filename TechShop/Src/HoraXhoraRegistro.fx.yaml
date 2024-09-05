@@ -1596,7 +1596,7 @@ HoraXhoraRegistro As screen:
                     HoverBorderColor: =App.Theme.Colors.Darker10
                     HoverColor: =RGBA(255, 255, 255, 1)
                     HoverFill: =RGBA(15, 108, 189, 1)
-                    OnSelect: |
+                    OnSelect: |-
                         =If(
                             TablaInfoHxH.Selected.FechaRegistro <= Today() && TablaInfoHxH.Selected.FechaRegistro - 2 <= Today(),
                             UpdateContext(
@@ -1607,7 +1607,11 @@ HoraXhoraRegistro As screen:
                                         hour: TablaInfoHxH.Selected.Hora,
                                         semana: TablaInfoHxH.Selected.Semana,
                                         maquina: TablaInfoHxH.Selected.Maquina,
-                                        turno: TablaInfoHxH.Selected.Turno
+                                        turno: TablaInfoHxH.Selected.Turno,
+                                        estado: LookUp(
+                                        Orden_Ejecucion,
+                                        Orden = TablaInfoHxH.Selected.Orden && Operacion = TablaInfoHxH.Selected.Operacion, 'Permiso_1.5'
+                                    )
                                     }
                                 }
                             );
@@ -1653,7 +1657,6 @@ HoraXhoraRegistro As screen:
                                         "mm/dd/yyyy"
                                     ) = drpFechaSupervisorHxH_3.SelectedText.Value,
                                     Notify("No puede agregar datos en horas futuras"),
-                                    
                                     If(
                                         LookUp(
                                             Maquinas,
@@ -1661,7 +1664,38 @@ HoraXhoraRegistro As screen:
                                         ).Guns = "SI" && TarimaTotal + Value(txtCant.Text) > 50,
                                         UpdateContext({Aviso: true}),
                                         If(
-                                            ProTotal + Value(txtCant.Text) >= OrdenEjecucion.Cantidad + (OrdenEjecucion.Cantidad * 0.015),
+                                            ProTotal + Value(txtCant.Text) >= OrdenEjecucion.Cantidad + (OrdenEjecucion.Cantidad * 0.015) && InfoVieja.estado <> "Aprobado",
+                                            If(
+                                                IsBlank(
+                                                    LookUp(
+                                                        'RegistroOredenes_1.5',
+                                                        Orden = TablaInfoHxH.Selected.Orden && Operacion = TablaInfoHxH.Selected.Operacion
+                                                    )
+                                                ),
+                                                Collect(
+                                                    'RegistroOredenes_1.5',
+                                                    {
+                                                        Orden: TablaInfoHxH.Selected.Orden,
+                                                        Operacion: TablaInfoHxH.Selected.Operacion,
+                                                        User_Solicitud: txtEmpleadoEnUso_1.Text
+                                                    }
+                                                ),
+                                                Remove(
+                                                    'RegistroOredenes_1.5',
+                                                    LookUp(
+                                                        'RegistroOredenes_1.5',
+                                                        Orden = TablaInfoHxH.Selected.Orden && Operacion = TablaInfoHxH.Selected.Operacion
+                                                    )
+                                                );
+                                                Collect(
+                                                    'RegistroOredenes_1.5',
+                                                    {
+                                                        Orden: TablaInfoHxH.Selected.Orden,
+                                                        Operacion: TablaInfoHxH.Selected.Operacion,
+                                                        User_Solicitud: txtEmpleadoEnUso_1.Text
+                                                    }
+                                                )
+                                            );
                                             UpdateContext({Bloqueo: true}),
                                             If(
                                                 ((Value(txtCant.Text) / Value(txtMeta.Text)) * 100) < 85,
