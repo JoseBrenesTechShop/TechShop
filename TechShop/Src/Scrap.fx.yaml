@@ -10,9 +10,8 @@ Scrap As screen:
         DefaultMode: =FormMode.New
         Fill: =RGBA(143, 180, 219, 1)
         Height: =369
-        Width: =1049
-        X: =316
-        Y: =76
+        Width: =1366
+        Y: =116
         ZIndex: =2
 
         Fecha_DataCard6 As typedDataCard.allowedValuesStringEditCard:
@@ -28,7 +27,7 @@ Scrap As screen:
             Required: =false
             Update: =TextInput6.Text
             Visible: =false
-            Width: =349
+            Width: =455
             X: =0
             Y: =0
             ZIndex: =1
@@ -41,7 +40,7 @@ Scrap As screen:
                 Height: =34
                 Size: =13
                 Text: =Parent.DisplayName
-                Width: =110
+                Width: =(Parent.Width - 60) * 0.4
                 Wrap: =false
                 X: =15
                 Y: =
@@ -111,8 +110,8 @@ Scrap As screen:
             Height: =70
             Required: =false
             Update: =If(Not IsBlank(DateValue3.SelectedDate), Date(Year(DateValue3.SelectedDate), Month(DateValue3.SelectedDate), Day(DateValue3.SelectedDate)))
-            Width: =349
-            X: =1
+            Width: =455
+            X: =0
             Y: =0
             ZIndex: =1
 
@@ -121,13 +120,13 @@ Scrap As screen:
                 Color: =App.Theme.Colors.Darker30
                 DisabledColor: =RGBA(166, 166, 166, 1)
                 Font: =App.Theme.Font
-                Height: =34
+                Height: =30
                 Size: =13
                 Text: ="Fecha"
                 Width: =(Parent.Width - 60) * 0.4
                 Wrap: =false
-                X: =15
-                Y: =16
+                X: =10
+                Y: =17
                 ZIndex: =1
 
             DateValue3 As datepicker:
@@ -149,7 +148,7 @@ Scrap As screen:
                 StartYear: =1899
                 Tooltip: =Parent.DisplayName
                 Width: =(Parent.Width - 60) * 0.6
-                X: =130
+                X: =150
                 Y: =10
                 ZIndex: =2
 
@@ -211,16 +210,16 @@ Scrap As screen:
             BorderColor: =App.Theme.Colors.Darker40
             BorderStyle: =BorderStyle.Solid
             DataField: ="crfb9_orden"
-            Default: =TableScrap.Selected.Orden
+            Default: =
             DisplayMode: =Parent.DisplayMode
             DisplayName: =DataSourceInfo([@Scrap_1],DataSourceInfo.DisplayName,crfb9_orden)
             Fill: =RGBA(0, 0, 0, 0)
-            Height: =50
+            Height: =63
             MaxLength: =DataSourceInfo([@Scrap_1], DataSourceInfo.MaxLength, crfb9_orden)
             Required: =false
             Update: =Upper(DataCardValue225.Text)
-            Width: =349
-            X: =2
+            Width: =450
+            X: =1
             Y: =0
             ZIndex: =1
 
@@ -232,9 +231,10 @@ Scrap As screen:
                 Height: =34
                 Size: =13
                 Text: =Parent.DisplayName
-                Width: =125
+                Width: =(Parent.Width - 60) * 0.4
                 Wrap: =false
-                Y: =10 + (DataCardValue225.Height / 2) - (Self.Height / 2)
+                X: =10
+                Y: =17
                 ZIndex: =1
 
             DataCardValue225 As text:
@@ -252,6 +252,12 @@ Scrap As screen:
                 HoverBorderColor: =App.Theme.Colors.Darker40
                 HoverColor: =RGBA(0, 0, 0, 1)
                 HoverFill: =App.Theme.Colors.Lighter70
+                OnChange: |-
+                    =If(
+                        IsBlank(DataCardValue225.Text),
+                        ClearCollect(FilteredOrders, Orden_Ejecucion), // Si no hay texto, vaciar la colección
+                        ClearCollect(FilteredOrders, Filter(Orden_Ejecucion, 'P/N' = DataCardValue225.Text)) // Filtrar por número de orden
+                    );
                 PaddingLeft: =5
                 RadiusBottomLeft: =0
                 RadiusBottomRight: =0
@@ -259,8 +265,8 @@ Scrap As screen:
                 RadiusTopRight: =0
                 Size: =13
                 Tooltip: =Parent.DisplayName
-                Width: =179
-                X: =106
+                Width: =(Parent.Width - 60) * 0.6
+                X: =150
                 Y: =10
                 ZIndex: =2
 
@@ -301,17 +307,17 @@ Scrap As screen:
             BorderColor: =App.Theme.Colors.Darker40
             BorderStyle: =BorderStyle.Solid
             DataField: ="crfb9_pn"
-            Default: =TableScrap.Selected.'P/N'
+            Default: =LookUp(Orden_Ejecucion, Orden = Text(DataCardValue225.Text), 'P/N')
             DisplayMode: =Parent.DisplayMode
             DisplayName: =DataSourceInfo([@Scrap_1],DataSourceInfo.DisplayName,crfb9_pn)
             Fill: =RGBA(0, 0, 0, 0)
             Height: =50
             MaxLength: =DataSourceInfo([@Scrap_1], DataSourceInfo.MaxLength, crfb9_pn)
             Required: =false
-            Update: =Dropdown10.Selected.'P/N'
-            Width: =349
-            X: =0
-            Y: =1
+            Update: =DataCardValue244.Text
+            Width: =455
+            X: =910
+            Y: =0
             ZIndex: =1
 
             DataCardKey225 As label:
@@ -324,8 +330,8 @@ Scrap As screen:
                 Text: =Parent.DisplayName
                 Width: =(Parent.Width - 60) * 0.4
                 Wrap: =false
-                X: =15
-                Y: =
+                X: =10
+                Y: =17
                 ZIndex: =1
 
             ErrorMessage223 As label:
@@ -361,39 +367,32 @@ Scrap As screen:
                 Y: =DataCardKey225.Y
                 ZIndex: =4
 
-            Dropdown10 As dropdown:
-                AllowEmptySelection: =true
-                BorderColor: =App.Theme.Colors.Darker40
-                ChevronBackground: =RGBA(15, 108, 189, 1)
-                ChevronDisabledBackground: =RGBA(15, 108, 189, 1)
-                ChevronDisabledFill: =RGBA(244, 244, 244, 1)
-                ChevronHoverBackground: =RGBA(15, 84, 140, 1)
-                ChevronHoverFill: =RGBA(255, 255, 255, 1)
-                Default: =
-                DisabledBorderColor: =RGBA(15, 108, 189, 1)
+            DataCardValue244 As text:
+                BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                BorderThickness: =2
+                Color: =RGBA(0, 0, 0, 1)
+                Default: =Parent.Default
+                DelayOutput: =true
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
                 DisabledColor: =RGBA(166, 166, 166, 1)
                 DisabledFill: =RGBA(244, 244, 244, 1)
+                DisplayMode: =DisplayMode.View
+                FocusedBorderThickness: =4
                 Font: =App.Theme.Font
-                HoverColor: =RGBA(50, 49, 48, 1)
-                HoverFill: =RGBA(255, 255, 255, 1)
-                Items: |-
-                    =If(
-                        IsBlank(txtScrapPN.Value),
-                        Sort('Tipo_P/N', 'P/N', SortOrder.Ascending),
-                        Sort(
-                            Filter('Tipo_P/N', txtScrapPN.Value in 'P/N'),
-                            'P/N',
-                            SortOrder.Ascending
-                        )
-                    )
-                PressedColor: =RGBA(255, 255, 255, 1)
-                PressedFill: =App.Theme.Colors.Darker30
-                SelectionFill: =App.Theme.Colors.Primary
+                HoverBorderColor: =App.Theme.Colors.Darker40
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =App.Theme.Colors.Lighter70
+                PaddingLeft: =5
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
                 Size: =13
-                Width: =173.4
-                X: =130.6
+                Tooltip: =Parent.DisplayName
+                Width: =(Parent.Width - 60) * 0.6
+                X: =150
                 Y: =10
-                ZIndex: =5
+                ZIndex: =6
 
         Maquina_DataCard30 As typedDataCard.allowedValuesStringEditCard:
             AllowedValues: =DataSourceInfo([@Scrap_1], DataSourceInfo.AllowedValues, crfb9_maquina)
@@ -407,8 +406,8 @@ Scrap As screen:
             Height: =70
             Required: =false
             Update: =DataCardValue206.Selected.Maquina
-            Width: =349
-            X: =1
+            Width: =455
+            X: =0
             Y: =1
             ZIndex: =1
 
@@ -420,10 +419,10 @@ Scrap As screen:
                 Height: =34
                 Size: =13
                 Text: =Parent.DisplayName
-                Width: =110
+                Width: =(Parent.Width - 60) * 0.4
                 Wrap: =false
-                X: =15
-                Y: =16
+                X: =10
+                Y: =17
                 ZIndex: =1
 
             DataCardValue206 As dropdown:
@@ -458,8 +457,8 @@ Scrap As screen:
                 SelectionFill: =App.Theme.Colors.Primary
                 Size: =10
                 Tooltip: =Parent.DisplayName
-                Width: =(Parent.Width - 60) * 0.6
-                X: =110
+                Width: =234
+                X: =150
                 Y: =10
                 ZIndex: =2
 
@@ -508,8 +507,8 @@ Scrap As screen:
             MaxLength: =DataSourceInfo([@Scrap_1], DataSourceInfo.MaxLength, crfb9_operario)
             Required: =false
             Update: =Dropdown9.Selected.Nombre
-            Width: =349
-            X: =2
+            Width: =450
+            X: =450
             Y: =1
             ZIndex: =1
 
@@ -521,9 +520,10 @@ Scrap As screen:
                 Height: =34
                 Size: =13
                 Text: =Parent.DisplayName
-                Width: =125
+                Width: =(Parent.Width - 60) * 0.4
                 Wrap: =false
-                Y: =
+                X: =10
+                Y: =17
                 ZIndex: =1
 
             ErrorMessage213 As label:
@@ -594,8 +594,8 @@ Scrap As screen:
                 PressedFill: =App.Theme.Colors.Darker30
                 SelectionFill: =App.Theme.Colors.Primary
                 Size: =13
-                Width: =195
-                X: =125
+                Width: =234
+                X: =150
                 Y: =10
                 ZIndex: =5
 
@@ -611,9 +611,9 @@ Scrap As screen:
             Height: =50
             Required: =false
             Update: =DataCardValue217.Selected.Turno_Op
-            Width: =349
-            X: =0
-            Y: =2
+            Width: =455
+            X: =900
+            Y: =1
             ZIndex: =1
 
             DataCardKey218 As label:
@@ -626,8 +626,8 @@ Scrap As screen:
                 Text: =Parent.DisplayName
                 Width: =(Parent.Width - 60) * 0.4
                 Wrap: =false
-                X: =15
-                Y: =10 + (DataCardValue217.Height / 2) - (Self.Height / 2)
+                X: =10
+                Y: =17
                 ZIndex: =1
 
             DataCardValue217 As dropdown:
@@ -653,7 +653,7 @@ Scrap As screen:
                 Size: =13
                 Tooltip: =Parent.DisplayName
                 Width: =(Parent.Width - 60) * 0.6
-                X: =DataCardKey218.X + DataCardKey218.Width
+                X: =150
                 Y: =10
                 ZIndex: =2
 
@@ -701,8 +701,8 @@ Scrap As screen:
             Height: =70
             Required: =false
             Update: =Value(DataCardValue223.Text)
-            Width: =349
-            X: =1
+            Width: =455
+            X: =0
             Y: =2
             ZIndex: =1
 
@@ -714,10 +714,10 @@ Scrap As screen:
                 Height: =34
                 Size: =13
                 Text: =Parent.DisplayName
-                Width: =110
+                Width: =(Parent.Width - 60) * 0.4
                 Wrap: =false
-                X: =15
-                Y: =10 + (DataCardValue223.Height / 2) - (Self.Height / 2)
+                X: =10
+                Y: =17
                 ZIndex: =1
 
             DataCardValue223 As text:
@@ -743,8 +743,8 @@ Scrap As screen:
                 RadiusTopRight: =0
                 Size: =13
                 Tooltip: =Parent.DisplayName
-                Width: =(Parent.Width - 60) * 0.6
-                X: =110
+                Width: =234
+                X: =150
                 Y: =10
                 ZIndex: =2
 
@@ -792,8 +792,8 @@ Scrap As screen:
             Height: =50
             Required: =false
             Update: =Value(DataCardValue207.Text)
-            Width: =349
-            X: =2
+            Width: =450
+            X: =1
             Y: =2
             ZIndex: =1
 
@@ -805,9 +805,10 @@ Scrap As screen:
                 Height: =34
                 Size: =13
                 Text: =Parent.DisplayName
-                Width: =125
+                Width: =(Parent.Width - 60) * 0.4
                 Wrap: =false
-                Y: =10 + (DataCardValue207.Height / 2) - (Self.Height / 2)
+                X: =10
+                Y: =17
                 ZIndex: =1
 
             DataCardValue207 As text:
@@ -833,8 +834,8 @@ Scrap As screen:
                 RadiusTopRight: =0
                 Size: =13
                 Tooltip: =Parent.DisplayName
-                Width: =195
-                X: =DataCardKey208.X + DataCardKey208.Width
+                Width: =234
+                X: =150
                 Y: =10
                 ZIndex: =2
 
@@ -883,9 +884,9 @@ Scrap As screen:
             MaxLength: =DataSourceInfo([@Scrap_1], DataSourceInfo.MaxLength, crfb9_tarima)
             Required: =false
             Update: =DataCardValue208.Text
-            Width: =349
-            X: =0
-            Y: =3
+            Width: =455
+            X: =3
+            Y: =2
             ZIndex: =1
 
             DataCardKey209 As label:
@@ -898,8 +899,8 @@ Scrap As screen:
                 Text: =Parent.DisplayName
                 Width: =(Parent.Width - 60) * 0.4
                 Wrap: =false
-                X: =15
-                Y: =10 + (DataCardValue208.Height / 2) - (Self.Height / 2)
+                X: =10
+                Y: =17
                 ZIndex: =1
 
             DataCardValue208 As text:
@@ -926,7 +927,7 @@ Scrap As screen:
                 Size: =13
                 Tooltip: =Parent.DisplayName
                 Width: =(Parent.Width - 60) * 0.6
-                X: =DataCardKey209.X + DataCardKey209.Width
+                X: =150
                 Y: =10
                 ZIndex: =2
 
@@ -975,8 +976,8 @@ Scrap As screen:
             Height: =70
             Required: =false
             Update: =DataCardValue184.Selected.Value
-            Width: =349
-            X: =1
+            Width: =455
+            X: =0
             Y: =3
             ZIndex: =1
 
@@ -988,10 +989,10 @@ Scrap As screen:
                 Height: =34
                 Size: =13
                 Text: =Parent.DisplayName
-                Width: =110
+                Width: =(Parent.Width - 60) * 0.4
                 Wrap: =false
-                X: =15
-                Y: =10 + (DataCardValue184.Height / 2) - (Self.Height / 2)
+                X: =10
+                Y: =17
                 ZIndex: =1
 
             DataCardValue184 As dropdown:
@@ -1017,8 +1018,8 @@ Scrap As screen:
                 SelectionFill: =App.Theme.Colors.Primary
                 Size: =10
                 Tooltip: =Parent.DisplayName
-                Width: =(Parent.Width - 60) * 0.6
-                X: =110
+                Width: =234
+                X: =150
                 Y: =10
                 ZIndex: =2
 
@@ -1067,8 +1068,8 @@ Scrap As screen:
             Height: =50
             Required: =false
             Update: =DataCardValue216.Selected.Value
-            Width: =349
-            X: =2
+            Width: =450
+            X: =1
             Y: =3
             ZIndex: =1
 
@@ -1080,9 +1081,10 @@ Scrap As screen:
                 Height: =33
                 Size: =13
                 Text: ="Inconformidad"
-                Width: =125
+                Width: =(Parent.Width - 60) * 0.4
                 Wrap: =false
-                Y: =10 + (DataCardValue216.Height / 2) - (Self.Height / 2)
+                X: =10
+                Y: =17
                 ZIndex: =1
 
             DataCardValue216 As dropdown:
@@ -1122,8 +1124,8 @@ Scrap As screen:
                 SelectionFill: =App.Theme.Colors.Primary
                 Size: =10
                 Tooltip: =Parent.DisplayName
-                Width: =195
-                X: =DataCardKey217.X + DataCardKey217.Width
+                Width: =234
+                X: =150
                 Y: =10
                 ZIndex: =2
 
@@ -1172,9 +1174,9 @@ Scrap As screen:
             MaxLength: =DataSourceInfo([@Scrap_1], DataSourceInfo.MaxLength, crfb9_item)
             Required: =false
             Update: =DataCardValue211.Text
-            Width: =349
-            X: =0
-            Y: =4
+            Width: =455
+            X: =3
+            Y: =3
             ZIndex: =1
 
             DataCardKey212 As label:
@@ -1187,8 +1189,8 @@ Scrap As screen:
                 Text: =Parent.DisplayName
                 Width: =(Parent.Width - 60) * 0.4
                 Wrap: =false
-                X: =15
-                Y: =10 + (DataCardValue211.Height / 2) - (Self.Height / 2)
+                X: =10
+                Y: =17
                 ZIndex: =1
 
             DataCardValue211 As text:
@@ -1217,7 +1219,7 @@ Scrap As screen:
                 Size: =13
                 Tooltip: =Parent.DisplayName
                 Width: =(Parent.Width - 60) * 0.6
-                X: =130.6
+                X: =150
                 Y: =10
                 ZIndex: =2
 
@@ -1266,7 +1268,7 @@ Scrap As screen:
             MaxLength: =DataSourceInfo([@Scrap_1], DataSourceInfo.MaxLength, crfb9_ubicacion)
             Required: =false
             Update: =Dropdown7.SelectedText.Ubicacion
-            Width: =349
+            Width: =450
             X: =1
             Y: =4
             ZIndex: =1
@@ -1281,8 +1283,8 @@ Scrap As screen:
                 Text: =Parent.DisplayName
                 Width: =(Parent.Width - 60) * 0.4
                 Wrap: =false
-                X: =15
-                Y: =13.5
+                X: =10
+                Y: =17
                 ZIndex: =1
 
             ErrorMessage53 As label:
@@ -1340,8 +1342,8 @@ Scrap As screen:
                 PressedFill: =App.Theme.Colors.Darker30
                 SelectionFill: =App.Theme.Colors.Primary
                 Size: =13
-                Width: =173.4
-                X: =110
+                Width: =234
+                X: =150
                 Y: =10
                 ZIndex: =5
 
@@ -1359,7 +1361,7 @@ Scrap As screen:
         HeadingFont: =App.Theme.Font
         HeadingFontWeight: =FontWeight.Normal
         HeadingSize: =10
-        Height: =320
+        Height: =278
         HoverColor: =RGBA(0, 0, 0, 1)
         HoverFill: =App.Theme.Colors.Lighter80
         InputFill: =RGBA(255, 255, 255, 1)
@@ -1377,7 +1379,7 @@ Scrap As screen:
         Size: =10
         Width: =1366
         X: =0
-        Y: =445
+        Y: =485
         ZIndex: =11
 
         Maquina_Columna3 As dataTableColumn.textualColumn:
@@ -2306,116 +2308,9 @@ Scrap As screen:
         TriggerOutput: ='TextInputCanvas.TriggerOutput'.Keypress
         Type: ='TextInputCanvas.Type'.Search
         Width: =316
-        X: =0
-        Y: =155
+        X: =918
+        Y: =76
         ZIndex: =31
-
-    TableScrap As Table.pcfdataset:
-        BasePaletteColor: =RGBA(5, 102, 178, 1)
-        DisplayMode: =DisplayMode.Edit
-        EnableRangeSelection: ='PowerAppsOneGrid.EnableRangeSelection'.Enable
-        EnableSorting: ='PowerAppsOneGrid.EnableSorting'.Enable
-        Font: =Font.'Segoe UI'
-        FontColor: =RGBA(0, 0, 0, 1)
-        FontSize: =16
-        FontWeight: =FontWeight.Semibold
-        HeaderFontColor: =
-        HeaderFontSize: =0
-        HeaderFontWeight: =FontWeight.Lighter
-        Height: =155
-        Items: =Search(Orden_Ejecucion, txtOrdenScrap.Value, Orden) 
-        onCellValueChange: =false
-        onFilter: =false
-        onNavigate: =false
-        onRowSelect: =false
-        onSave: =false
-        OnSelect: =
-        ReflowBehavior: ='PowerAppsOneGrid.ReflowBehavior'.Reflow
-        Width: =316
-        X: =0
-        Y: =288
-        ZIndex: =32
-
-        Meta3 As PowerAppsOneGridTemplate_dataField.textualColumn:
-            FieldDisplayName: ="Meta"
-            FieldName: ="crfb9_meta"
-            FieldType: ="n"
-            FieldVariantName: ="textualColumn"
-            Order: =9
-            Width: =0
-            ZIndex: =22
-
-        Tiempo_Maquina1 As PowerAppsOneGridTemplate_dataField.textualColumn:
-            FieldDisplayName: ="Tiempo_Maquina"
-            FieldName: ="crfb9_tiempo_maquina"
-            FieldType: ="n"
-            FieldVariantName: ="textualColumn"
-            Order: =8
-            Width: =0
-            ZIndex: =23
-
-        Tarima1 As PowerAppsOneGridTemplate_dataField.textualColumn:
-            FieldDisplayName: ="Tarima"
-            FieldName: ="crfb9_tarima"
-            FieldType: ="n"
-            FieldVariantName: ="textualColumn"
-            Order: =7
-            Width: =0
-            ZIndex: =24
-
-        Cantidad1 As PowerAppsOneGridTemplate_dataField.textualColumn:
-            FieldDisplayName: ="Cantidad"
-            FieldName: ="crfb9_cantidad"
-            FieldType: ="n"
-            FieldVariantName: ="textualColumn"
-            Order: =6
-            Width: =0
-            ZIndex: =25
-
-        Descripcion1 As PowerAppsOneGridTemplate_dataField.textualColumn:
-            FieldDisplayName: ="Descripcion"
-            FieldName: ="crfb9_descripcion"
-            FieldType: ="s"
-            FieldVariantName: ="textualColumn"
-            Order: =5
-            Width: =0
-            ZIndex: =26
-
-        Operacion1 As PowerAppsOneGridTemplate_dataField.textualColumn:
-            FieldDisplayName: ="Operacion"
-            FieldName: ="crfb9_operacion"
-            FieldType: ="s"
-            FieldVariantName: ="textualColumn"
-            Order: =4
-            Width: =0
-            ZIndex: =27
-
-        "'P/N3' As PowerAppsOneGridTemplate_dataField.textualColumn":
-            FieldDisplayName: ="P/N"
-            FieldName: ="crfb9_pn"
-            FieldType: ="s"
-            FieldVariantName: ="textualColumn"
-            Order: =3
-            Width: =0
-            ZIndex: =28
-
-        "'Fecha de creación6' As PowerAppsOneGridTemplate_dataField.textualColumn":
-            FieldDisplayName: ="Fecha de creación"
-            FieldName: ="createdon"
-            FieldType: ="d"
-            FieldVariantName: ="textualColumn"
-            Order: =2
-            Width: =0
-            ZIndex: =29
-
-        Orden1 As PowerAppsOneGridTemplate_dataField.textualColumn:
-            FieldDisplayName: ="Orden"
-            FieldName: ="crfb9_orden"
-            FieldType: ="s"
-            FieldVariantName: ="textualColumn"
-            Order: =1
-            Width: =0
-            ZIndex: =30
 
     "txtMaquinaScrap As 'Text input'":
         Appearance: ='TextInputCanvas.Appearance'.FilledLighter
@@ -2432,9 +2327,9 @@ Scrap As screen:
         Placeholder: ="Ingrese la Maquina a buscar"
         TriggerOutput: ='TextInputCanvas.TriggerOutput'.Keypress
         Type: ='TextInputCanvas.Type'.Search
-        Width: =316
+        Width: =337
         X: =0
-        Y: =79
+        Y: =76
         ZIndex: =33
 
     "txtOperarioScrap As 'Text input'":
@@ -2452,9 +2347,9 @@ Scrap As screen:
         Placeholder: ="Ingrese el Operario a buscar"
         TriggerOutput: ='TextInputCanvas.TriggerOutput'.Keypress
         Type: ='TextInputCanvas.Type'.Search
-        Width: =316
-        X: =0
-        Y: =119
+        Width: =356
+        X: =337
+        Y: =79
         ZIndex: =34
 
     TextInput8 As text:
@@ -2528,47 +2423,7 @@ Scrap As screen:
             );
         Text: ="Guardar"
         Width: =173.4
-        X: =1145
-        Y: =366
+        X: =1119
+        Y: =408
         ZIndex: =36
-
-    "txtOrdenScrap As 'Text input'":
-        Appearance: ='TextInputCanvas.Appearance'.FilledLighter
-        BasePaletteColor: =RGBA(16, 120, 199, 1)
-        BorderColor: =RGBA(15, 84, 140, 1)
-        BorderStyle: =BorderStyle.Solid
-        BorderThickness: =4
-        DisplayMode: =DisplayMode.View
-        Fill: =
-        Font: =Font.'Segoe UI'
-        FontColor: =RGBA(0, 0, 0, 1)
-        Height: =209
-        Mode: ='TextInputCanvas.Mode'.SingleLine
-        Placeholder: ="Ingrese la Orden a buscar"
-        TriggerOutput: ='TextInputCanvas.TriggerOutput'.Keypress
-        Type: ='TextInputCanvas.Type'.Search
-        Width: =316
-        X: =0
-        Y: =235
-        ZIndex: =37
-
-    "txtScrapPN As 'Text input'":
-        Appearance: ='TextInputCanvas.Appearance'.FilledLighter
-        BasePaletteColor: =RGBA(16, 120, 199, 1)
-        BorderColor: =RGBA(15, 84, 140, 1)
-        BorderStyle: =BorderStyle.Solid
-        BorderThickness: =4
-        DisplayMode: =DisplayMode.Edit
-        Fill: =
-        Font: =Font.'Segoe UI'
-        FontColor: =RGBA(0, 0, 0, 1)
-        Height: =40
-        Mode: ='TextInputCanvas.Mode'.SingleLine
-        Placeholder: ="Ingrese el P/N a buscar"
-        TriggerOutput: ='TextInputCanvas.TriggerOutput'.Keypress
-        Type: ='TextInputCanvas.Type'.Search
-        Width: =316
-        X: =0
-        Y: =195
-        ZIndex: =38
 
