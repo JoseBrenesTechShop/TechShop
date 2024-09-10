@@ -1402,278 +1402,284 @@ HoraXhora As screen:
                                                         NotificationType.Error
                                                     ),
                                                     If(
-                                                        IsBlank(drp_Hora_HxH.SelectedText.Value),
+                                                        Value(txt_CantProducida_HxH.Text) < 0 || Left(txt_CantProducida_HxH.Text, 1) = "-",
                                                         Notify(
-                                                            "Debe seleccionar una Hora de registro",
+                                                            "La cantidad no puede ser negativa",
                                                             NotificationType.Error
                                                         ),
                                                         If(
-                                                            Hour(Now()) < drp_Hora_HxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor' && Text(
-                                                                Now(),
-                                                                "mm/dd/yyyy"
-                                                            ) = drp_Fecha_HxH.SelectedText.Value,
-                                                            Notify("No puede agregar datos en horas futuras"),
+                                                            IsBlank(drp_Hora_HxH.SelectedText.Value),
+                                                            Notify(
+                                                                "Debe seleccionar una Hora de registro",
+                                                                NotificationType.Error
+                                                            ),
                                                             If(
-                                                                txt_Turno_HxH.Text = "LIBRE",
-                                                                Notify(
-                                                                    "No se puede crear un registro si el Turno del operario es LIBRE",
-                                                                    NotificationType.Error
-                                                                ),
+                                                                Hour(Now()) < drp_Hora_HxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor' && Text(
+                                                                    Now(),
+                                                                    "mm/dd/yyyy"
+                                                                ) = drp_Fecha_HxH.SelectedText.Value,
+                                                                Notify("No puede agregar datos en horas futuras"),
                                                                 If(
-                                                                    (txt_CantProducida_HxH.Text + txt_CantTotal_HxH.Text) = Value(txt_CantMax_HxH.Text),
-                                                                    UpdateContext({TextoAdvertencia: "La cantidad total de la Orden junto a la operación seleccionada ha cumplido con la cantidad maxima deseada."});
-                                                                    UpdateContext({Mostra: true})
-                                                                );
-                                                                If(
-                                                                    (txt_MaquinaView_HxH.Text = "SIERRABHERINGER1" || txt_MaquinaView_HxH.Text = "SIERRABHERINGER2") && txt_OP_HxH.Text <> "10",
-                                                                    UpdateContext({TextoAdvertencia: "Para la maquina seleccionada la operacion debe ser la 10"});
-                                                                    UpdateContext({Mostra: true}),
+                                                                    txt_Turno_HxH.Text = "LIBRE",
+                                                                    Notify(
+                                                                        "No se puede crear un registro si el Turno del operario es LIBRE",
+                                                                        NotificationType.Error
+                                                                    ),
                                                                     If(
-                                                                        LookUp(
-                                                                            Maquinas,
-                                                                            Maquina = Upper(txt_Maquina_HxH.Text)
-                                                                        ).Guns = "SI" && (txt_CantProducida_HxH.Text + txt_CantTarima_HxH.Text) > 50,
-                                                                        UpdateContext({TextoAdvertencia: "La cantidad digitada supera la cantidad maxima (50) permitida por tarima. Por favor revisar la informacion digitada."});
+                                                                        (txt_CantProducida_HxH.Text + txt_CantTotal_HxH.Text) = Value(txt_CantMax_HxH.Text),
+                                                                        UpdateContext({TextoAdvertencia: "La cantidad total de la Orden junto a la operación seleccionada ha cumplido con la cantidad maxima deseada."});
+                                                                        UpdateContext({Mostra: true})
+                                                                    );
+                                                                    If(
+                                                                        (txt_MaquinaView_HxH.Text = "SIERRABHERINGER1" || txt_MaquinaView_HxH.Text = "SIERRABHERINGER2") && txt_OP_HxH.Text <> "10",
+                                                                        UpdateContext({TextoAdvertencia: "Para la maquina seleccionada la operacion debe ser la 10"});
                                                                         UpdateContext({Mostra: true}),
                                                                         If(
-                                                                            CountRows(
-                                                                                Filter(
-                                                                                    'Hora X Hora',
-                                                                                    Orden = txt_Orden_HxH.Text,
-                                                                                    Operacion = txt_OP_HxH.Text,
-                                                                                    Maquina = txt_MaquinaView_HxH.Text,
-                                                                                    FechaRegistro = FechaSup,
-                                                                                    Hora = drp_Hora_HxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
-                                                                                )
-                                                                            ) >= 2,
-                                                                            UpdateContext({TextoAdvertencia: "Ya existen 2 registros de la maquina a la hora seleccionada"});
+                                                                            LookUp(
+                                                                                Maquinas,
+                                                                                Maquina = Upper(txt_Maquina_HxH.Text)
+                                                                            ).Guns = "SI" && (txt_CantProducida_HxH.Text + txt_CantTarima_HxH.Text) > 50,
+                                                                            UpdateContext({TextoAdvertencia: "La cantidad digitada supera la cantidad maxima (50) permitida por tarima. Por favor revisar la informacion digitada."});
                                                                             UpdateContext({Mostra: true}),
-                                                                            CountRows(
-                                                                                Filter(
-                                                                                    'Hora X Hora',
-                                                                                    CodigoEmpleado = drp_Operario_HxH.SelectedText.Codigo,
-                                                                                    FechaRegistro = FechaSup,
-                                                                                    Hora = drp_Hora_HxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
-                                                                                )
-                                                                            ) >= 4,
-                                                                            UpdateContext({TextoAdvertencia: "Se llego al limite de 4 registros por hora del empleado"});
-                                                                            UpdateContext({Mostra: true}),
-                                                                            /* Aquí se añade la lógica para establecer Cantidad_Por_Hora a 0 si ya existe un registro igual */
                                                                             If(
                                                                                 CountRows(
                                                                                     Filter(
                                                                                         'Hora X Hora',
+                                                                                        Orden = txt_Orden_HxH.Text,
+                                                                                        Operacion = txt_OP_HxH.Text,
                                                                                         Maquina = txt_MaquinaView_HxH.Text,
                                                                                         FechaRegistro = FechaSup,
                                                                                         Hora = drp_Hora_HxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
                                                                                     )
-                                                                                ) > 0,
-                                                                                    /* Si ya existe un registro, establece Cantidad_Por_Hora a 0 */
-                                                                                UpdateContext({CantidadPorHoraGuardar: 0}),
-                                                                                    /* Si no existe un registro, establece Cantidad_Por_Hora a txtMetaHxH.Text */
-                                                                                UpdateContext({CantidadPorHoraGuardar: Value(txt_Meta_HxH.Text)})
-                                                                            ),
-                                                                            If(
-                                                                                (txt_CantProducida_HxH.Text + txt_CantTotal_HxH.Text) > (txt_CantMax_HxH.Text + (txt_CantMax_HxH.Text * 0.015)) && glr_Info_HxH.Selected.'Permiso_1.5' <> "Aprobado",
+                                                                                ) >= 2,
+                                                                                UpdateContext({TextoAdvertencia: "Ya existen 2 registros de la maquina a la hora seleccionada"});
+                                                                                UpdateContext({Mostra: true}),
+                                                                                CountRows(
+                                                                                    Filter(
+                                                                                        'Hora X Hora',
+                                                                                        CodigoEmpleado = drp_Operario_HxH.SelectedText.Codigo,
+                                                                                        FechaRegistro = FechaSup,
+                                                                                        Hora = drp_Hora_HxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                                                                                    )
+                                                                                ) >= 4,
+                                                                                UpdateContext({TextoAdvertencia: "Se llego al limite de 4 registros por hora del empleado"});
+                                                                                UpdateContext({Mostra: true}),
+                                                                            /* Aquí se añade la lógica para establecer Cantidad_Por_Hora a 0 si ya existe un registro igual */
                                                                                 If(
-                                                                                    IsBlank(
-                                                                                        LookUp(
-                                                                                            'RegistroOredenes_1.5_1',
-                                                                                            Orden = glr_Info_HxH.Selected.Orden && Operacion = glr_Info_HxH.Selected.Operacion
+                                                                                    CountRows(
+                                                                                        Filter(
+                                                                                            'Hora X Hora',
+                                                                                            Maquina = txt_MaquinaView_HxH.Text,
+                                                                                            FechaRegistro = FechaSup,
+                                                                                            Hora = drp_Hora_HxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
                                                                                         )
-                                                                                    ),
-                                                                                    Collect(
-                                                                                        'RegistroOredenes_1.5_1',
-                                                                                        {
-                                                                                            Orden: glr_Info_HxH.Selected.Orden,
-                                                                                            Operacion: glr_Info_HxH.Selected.Operacion,
-                                                                                            User_Solicitud: txtEmpleadoEnUso.Text
-                                                                                        }
-                                                                                    ),
-                                                                                    Remove(
-                                                                                        'RegistroOredenes_1.5_1',
-                                                                                        LookUp(
+                                                                                    ) > 0,
+                                                                                    /* Si ya existe un registro, establece Cantidad_Por_Hora a 0 */
+                                                                                    UpdateContext({CantidadPorHoraGuardar: 0}),
+                                                                                    /* Si no existe un registro, establece Cantidad_Por_Hora a txtMetaHxH.Text */
+                                                                                    UpdateContext({CantidadPorHoraGuardar: Value(txt_Meta_HxH.Text)})
+                                                                                ),
+                                                                                If(
+                                                                                    (txt_CantProducida_HxH.Text + txt_CantTotal_HxH.Text) > (txt_CantMax_HxH.Text + (txt_CantMax_HxH.Text * 0.015)) && glr_Info_HxH.Selected.'Permiso_1.5' <> "Aprobado",
+                                                                                    If(
+                                                                                        IsBlank(
+                                                                                            LookUp(
+                                                                                                'RegistroOredenes_1.5_1',
+                                                                                                Orden = glr_Info_HxH.Selected.Orden && Operacion = glr_Info_HxH.Selected.Operacion
+                                                                                            )
+                                                                                        ),
+                                                                                        Collect(
                                                                                             'RegistroOredenes_1.5_1',
-                                                                                            Orden = glr_Info_HxH.Selected.Orden && Operacion = glr_Info_HxH.Selected.Operacion
+                                                                                            {
+                                                                                                Orden: glr_Info_HxH.Selected.Orden,
+                                                                                                Operacion: glr_Info_HxH.Selected.Operacion,
+                                                                                                User_Solicitud: txtEmpleadoEnUso.Text
+                                                                                            }
+                                                                                        ),
+                                                                                        Remove(
+                                                                                            'RegistroOredenes_1.5_1',
+                                                                                            LookUp(
+                                                                                                'RegistroOredenes_1.5_1',
+                                                                                                Orden = glr_Info_HxH.Selected.Orden && Operacion = glr_Info_HxH.Selected.Operacion
+                                                                                            )
+                                                                                        );
+                                                                                        Collect(
+                                                                                            'RegistroOredenes_1.5_1',
+                                                                                            {
+                                                                                                Orden: glr_Info_HxH.Selected.Orden,
+                                                                                                Operacion: glr_Info_HxH.Selected.Operacion,
+                                                                                                User_Solicitud: txtEmpleadoEnUso.Text
+                                                                                            }
                                                                                         )
                                                                                     );
-                                                                                    Collect(
-                                                                                        'RegistroOredenes_1.5_1',
-                                                                                        {
-                                                                                            Orden: glr_Info_HxH.Selected.Orden,
-                                                                                            Operacion: glr_Info_HxH.Selected.Operacion,
-                                                                                            User_Solicitud: txtEmpleadoEnUso.Text
-                                                                                        }
-                                                                                    )
-                                                                                );
-                                                                                UpdateContext({MostraBloqueo: true}),
+                                                                                    UpdateContext({MostraBloqueo: true}),
                                                                                 /*If(
                                                                                     (txtCantProducidaHxH.Text + txtCantTotalHxH.Text) > Value(txtCantMaxHxH.Text),
                                                                                     UpdateContext({TextoAdvertencia: "La cantidad total producida ha superado la cantidad maxima de la orden."});
                                                                                     UpdateContext({Mostra: true}),*/
-                                                                                If(
-                                                                                    Efi < 80,
-                                                                                    UpdateContext({MostraCausa: true}),
-                                                                                    Collect(
-                                                                                        'Hora X Hora',
-                                                                                        {
-                                                                                            CodigoEmpleado: LookUp(
-                                                                                                Empleados,
-                                                                                                Nombre = drp_Operario_HxH.Selected.Empleado,
-                                                                                                Codigo
-                                                                                            ),
-                                                                                            Operario: drp_Operario_HxH.Selected.Empleado,
-                                                                                            Maquina: txt_MaquinaView_HxH.Text,
-                                                                                            Orden: glr_Info_HxH.Selected.Orden,
-                                                                                            Operacion: glr_Info_HxH.Selected.Operacion,
-                                                                                            'P/N': glr_Info_HxH.Selected.'P/N',
-                                                                                            Cantidad_Por_Hora: CantidadPorHoraGuardar,
-                                                                                            Cantidad: Value(txt_CantProducida_HxH.Text),
-                                                                                            Semana: Value(txt_Semana_HxH.Text),
-                                                                                            Turno: txt_Turno_HxH.Text,
-                                                                                            User: txtEmpleadoEnUso.Text,
-                                                                                            'Fecha_Registro_Supervisor ': Text(
-                                                                                                Text(
-                                                                                                    FechaSup,
-                                                                                                    "mm/dd/yyyy"
-                                                                                                ) & " " & drp_Hora_HxH.SelectedText.Value
-                                                                                            ),
-                                                                                            FechaRegistro: FechaSup,
-                                                                                            Tarima: txt_TarimaView_HxH.Text,
-                                                                                            Comentario: "PRODUCCION",
-                                                                                            Causa: "Bien",
-                                                                                            Descripcion: txt_Descripcion_HxH.Text,
-                                                                                            Ubicacion_Bono: LookUp(
-                                                                                                Maquinas,
-                                                                                                Maquina = txt_MaquinaView_HxH.Text,
-                                                                                                Ubicacion_Bono
-                                                                                            ),
-                                                                                            Fecha_Hora: Text(
-                                                                                                Now(),
-                                                                                                "mm/dd/yyyy hh:mm AM/PM"
-                                                                                            ),
-                                                                                            Hora: drp_Hora_HxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
-                                                                                        }
-                                                                                    );
-                                                                                    Patch(
-                                                                                        Orden_Ejecucion,
-                                                                                        glr_Info_HxH.Selected,
-                                                                                        {CantidadTotalProducida: txt_CantTotal_HxH.Text + txt_CantProducida_HxH.Text}
-                                                                                    );
                                                                                     If(
-                                                                                        IsBlank(txt_CantTarima_HxH.Text),
+                                                                                        Efi < 80,
+                                                                                        UpdateContext({MostraCausa: true}),
                                                                                         Collect(
-                                                                                            Orden_Tarimas,
+                                                                                            'Hora X Hora',
                                                                                             {
-                                                                                                Orden: txt_Orden_HxH.Text,
-                                                                                                Operacion: txt_OP_HxH.Text,
-                                                                                                Tarima: txt_TarimaView_HxH.Text,
-                                                                                                CantidadTotalProducida: Value(txt_CantProducida_HxH.Text)
-                                                                                            }
-                                                                                        ),
-                                                                                        Patch(
-                                                                                            Orden_Tarimas,
-                                                                                            LookUp(
-                                                                                                Orden_Tarimas,
-                                                                                                Orden = glr_Info_HxH.Selected.Orden && Operacion = glr_Info_HxH.Selected.Operacion && Tarima = txt_Tarima_HxH.Text
-                                                                                            ),
-                                                                                            {CantidadTotalProducida: txt_CantTarima_HxH.Text + txt_CantProducida_HxH.Text}
-                                                                                        )
-                                                                                    );
-                                                                                    ClearCollect(
-                                                                                        colExistingRecord,
-                                                                                        LookUp(
-                                                                                            HoraxHoraFinals,
-                                                                                            Codigo_Empleado = drp_Operario_HxH.Selected.Codigo && Hora = drp_Hora_HxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor' && Fecha = drp_Fecha_HxH.SelectedText.Value
-                                                                                        )
-                                                                                    );
-                                                                                    
-                                                                                    If(
-                                                                                        !IsEmpty(colExistingRecord),
-                                                                                        Patch(
-                                                                                            HoraxHoraFinals,
-                                                                                            First(colExistingRecord),
-                                                                                            {
-                                                                                                Cantidad_Producida: Sum(
-                                                                                                    Filter(
-                                                                                                        'Hora X Hora',
-                                                                                                        CodigoEmpleado = drp_Operario_HxH.Selected.Codigo,
-                                                                                                        FechaRegistro = FechaSup,
-                                                                                                        Hora = drp_Hora_HxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
-                                                                                                    ),
-                                                                                                    Cantidad
+                                                                                                CodigoEmpleado: LookUp(
+                                                                                                    Empleados,
+                                                                                                    Nombre = drp_Operario_HxH.Selected.Empleado,
+                                                                                                    Codigo
                                                                                                 ),
-                                                                                                Meta: Sum(
-                                                                                                    Filter(
-                                                                                                        'Hora X Hora',
-                                                                                                        CodigoEmpleado = drp_Operario_HxH.Selected.Codigo,
-                                                                                                        FechaRegistro = FechaSup,
-                                                                                                        Hora = drp_Hora_HxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
-                                                                                                    ),
-                                                                                                    Cantidad_Por_Hora
-                                                                                                ),
-                                                                                                Turno: txt_Turno_HxH.Text,
-                                                                                                Ubicacion_Bono: LookUp(
-                                                                                                    Maquinas,
-                                                                                                    Maquina = txt_MaquinaView_HxH.Text,
-                                                                                                    Ubicacion_Bono
-                                                                                                ),
-                                                                                                Semana: Value(txt_Semana_HxH.Text)
-                                                                                            }
-                                                                                        ),
-                                                                                        Collect(
-                                                                                            HoraxHoraFinals,
-                                                                                            {
-                                                                                                Codigo_Empleado: drp_Operario_HxH.Selected.Codigo,
-                                                                                                Cantidad_Producida: Sum(
-                                                                                                    Filter(
-                                                                                                        'Hora X Hora',
-                                                                                                        CodigoEmpleado = drp_Operario_HxH.Selected.Codigo,
-                                                                                                        FechaRegistro = FechaSup,
-                                                                                                        Hora = drp_Hora_HxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
-                                                                                                    ),
-                                                                                                    Cantidad
-                                                                                                ),
-                                                                                                Meta: Sum(
-                                                                                                    Filter(
-                                                                                                        'Hora X Hora',
-                                                                                                        CodigoEmpleado = drp_Operario_HxH.Selected.Codigo,
-                                                                                                        FechaRegistro = FechaSup,
-                                                                                                        Hora = drp_Hora_HxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
-                                                                                                    ),
-                                                                                                    Cantidad_Por_Hora
-                                                                                                ),
-                                                                                                Fecha_Registro: FechaSup,
-                                                                                                Turno: txt_Turno_HxH.Text,
-                                                                                                Hora: drp_Hora_HxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor',
-                                                                                                Ubicacion_Bono: LookUp(
-                                                                                                    Maquinas,
-                                                                                                    Maquina = txt_MaquinaView_HxH.Text,
-                                                                                                    Ubicacion_Bono
-                                                                                                ),
+                                                                                                Operario: drp_Operario_HxH.Selected.Empleado,
+                                                                                                Maquina: txt_MaquinaView_HxH.Text,
+                                                                                                Orden: glr_Info_HxH.Selected.Orden,
+                                                                                                Operacion: glr_Info_HxH.Selected.Operacion,
+                                                                                                'P/N': glr_Info_HxH.Selected.'P/N',
+                                                                                                Cantidad_Por_Hora: CantidadPorHoraGuardar,
+                                                                                                Cantidad: Value(txt_CantProducida_HxH.Text),
                                                                                                 Semana: Value(txt_Semana_HxH.Text),
-                                                                                                Fecha: drp_Fecha_HxH.SelectedText.Value
+                                                                                                Turno: txt_Turno_HxH.Text,
+                                                                                                User: txtEmpleadoEnUso.Text,
+                                                                                                'Fecha_Registro_Supervisor ': Text(
+                                                                                                    Text(
+                                                                                                        FechaSup,
+                                                                                                        "mm/dd/yyyy"
+                                                                                                    ) & " " & drp_Hora_HxH.SelectedText.Value
+                                                                                                ),
+                                                                                                FechaRegistro: FechaSup,
+                                                                                                Tarima: txt_TarimaView_HxH.Text,
+                                                                                                Comentario: "PRODUCCION",
+                                                                                                Causa: "Bien",
+                                                                                                Descripcion: txt_Descripcion_HxH.Text,
+                                                                                                Ubicacion_Bono: LookUp(
+                                                                                                    Maquinas,
+                                                                                                    Maquina = txt_MaquinaView_HxH.Text,
+                                                                                                    Ubicacion_Bono
+                                                                                                ),
+                                                                                                Fecha_Hora: Text(
+                                                                                                    Now(),
+                                                                                                    "mm/dd/yyyy hh:mm AM/PM"
+                                                                                                ),
+                                                                                                Hora: drp_Hora_HxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
                                                                                             }
+                                                                                        );
+                                                                                        Patch(
+                                                                                            Orden_Ejecucion,
+                                                                                            glr_Info_HxH.Selected,
+                                                                                            {CantidadTotalProducida: txt_CantTotal_HxH.Text + txt_CantProducida_HxH.Text}
+                                                                                        );
+                                                                                        If(
+                                                                                            IsBlank(txt_CantTarima_HxH.Text),
+                                                                                            Collect(
+                                                                                                Orden_Tarimas,
+                                                                                                {
+                                                                                                    Orden: txt_Orden_HxH.Text,
+                                                                                                    Operacion: txt_OP_HxH.Text,
+                                                                                                    Tarima: txt_TarimaView_HxH.Text,
+                                                                                                    CantidadTotalProducida: Value(txt_CantProducida_HxH.Text)
+                                                                                                }
+                                                                                            ),
+                                                                                            Patch(
+                                                                                                Orden_Tarimas,
+                                                                                                LookUp(
+                                                                                                    Orden_Tarimas,
+                                                                                                    Orden = glr_Info_HxH.Selected.Orden && Operacion = glr_Info_HxH.Selected.Operacion && Tarima = txt_Tarima_HxH.Text
+                                                                                                ),
+                                                                                                {CantidadTotalProducida: txt_CantTarima_HxH.Text + txt_CantProducida_HxH.Text}
+                                                                                            )
+                                                                                        );
+                                                                                        ClearCollect(
+                                                                                            colExistingRecord,
+                                                                                            LookUp(
+                                                                                                HoraxHoraFinals,
+                                                                                                Codigo_Empleado = drp_Operario_HxH.Selected.Codigo && Hora = drp_Hora_HxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor' && Fecha = drp_Fecha_HxH.SelectedText.Value
+                                                                                            )
+                                                                                        );
+                                                                                        If(
+                                                                                            !IsEmpty(colExistingRecord),
+                                                                                            Patch(
+                                                                                                HoraxHoraFinals,
+                                                                                                First(colExistingRecord),
+                                                                                                {
+                                                                                                    Cantidad_Producida: Sum(
+                                                                                                        Filter(
+                                                                                                            'Hora X Hora',
+                                                                                                            CodigoEmpleado = drp_Operario_HxH.Selected.Codigo,
+                                                                                                            FechaRegistro = FechaSup,
+                                                                                                            Hora = drp_Hora_HxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                                                                                                        ),
+                                                                                                        Cantidad
+                                                                                                    ),
+                                                                                                    Meta: Sum(
+                                                                                                        Filter(
+                                                                                                            'Hora X Hora',
+                                                                                                            CodigoEmpleado = drp_Operario_HxH.Selected.Codigo,
+                                                                                                            FechaRegistro = FechaSup,
+                                                                                                            Hora = drp_Hora_HxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                                                                                                        ),
+                                                                                                        Cantidad_Por_Hora
+                                                                                                    ),
+                                                                                                    Turno: txt_Turno_HxH.Text,
+                                                                                                    Ubicacion_Bono: LookUp(
+                                                                                                        Maquinas,
+                                                                                                        Maquina = txt_MaquinaView_HxH.Text,
+                                                                                                        Ubicacion_Bono
+                                                                                                    ),
+                                                                                                    Semana: Value(txt_Semana_HxH.Text)
+                                                                                                }
+                                                                                            ),
+                                                                                            Collect(
+                                                                                                HoraxHoraFinals,
+                                                                                                {
+                                                                                                    Codigo_Empleado: drp_Operario_HxH.Selected.Codigo,
+                                                                                                    Cantidad_Producida: Sum(
+                                                                                                        Filter(
+                                                                                                            'Hora X Hora',
+                                                                                                            CodigoEmpleado = drp_Operario_HxH.Selected.Codigo,
+                                                                                                            FechaRegistro = FechaSup,
+                                                                                                            Hora = drp_Hora_HxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                                                                                                        ),
+                                                                                                        Cantidad
+                                                                                                    ),
+                                                                                                    Meta: Sum(
+                                                                                                        Filter(
+                                                                                                            'Hora X Hora',
+                                                                                                            CodigoEmpleado = drp_Operario_HxH.Selected.Codigo,
+                                                                                                            FechaRegistro = FechaSup,
+                                                                                                            Hora = drp_Hora_HxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                                                                                                        ),
+                                                                                                        Cantidad_Por_Hora
+                                                                                                    ),
+                                                                                                    Fecha_Registro: FechaSup,
+                                                                                                    Turno: txt_Turno_HxH.Text,
+                                                                                                    Hora: drp_Hora_HxH.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor',
+                                                                                                    Ubicacion_Bono: LookUp(
+                                                                                                        Maquinas,
+                                                                                                        Maquina = txt_MaquinaView_HxH.Text,
+                                                                                                        Ubicacion_Bono
+                                                                                                    ),
+                                                                                                    Semana: Value(txt_Semana_HxH.Text),
+                                                                                                    Fecha: drp_Fecha_HxH.SelectedText.Value
+                                                                                                }
+                                                                                            )
+                                                                                        );
+                                                                                        Reset(txt_Tarima_HxH);
+                                                                                        Reset(txt_Maquina_HxH);
+                                                                                        Reset(txt_CantProducida_HxH);
+                                                                                        Reset(txt_Orden_HxH);
+                                                                                        Reset(drp_Hora_HxH);
+                                                                                        Reset(drp_Fecha_HxH);
+                                                                                        UpdateContext({FechaSup: DateValue(drp_Fecha_HxH.SelectedText.Value)});
+                                                                                        UpdateContext({Dia: Weekday(FechaSup)});
+                                                                                        UpdateContext({Hora: Blank()});
+                                                                                        UpdateContext({turnoFinal: Blank()});
+                                                                                        UpdateContext({turnoSeleccionado: Blank()});
+                                                                                        UpdateContext({HoraValor: Blank()});
+                                                                                        UpdateContext({CantidadPorHoraGuardar: Blank()});
+                                                                                        Notify(
+                                                                                            "Se ha Guardado exitosamente",
+                                                                                            NotificationType.Success
                                                                                         )
                                                                                     );
-                                                                                    Reset(txt_Tarima_HxH);
-                                                                                    Reset(txt_Maquina_HxH);
-                                                                                    Reset(txt_CantProducida_HxH);
-                                                                                    Reset(txt_Orden_HxH);
-                                                                                    Reset(drp_Hora_HxH);
-                                                                                    Reset(drp_Fecha_HxH);
-                                                                                    UpdateContext({FechaSup: DateValue(drp_Fecha_HxH.SelectedText.Value)});
-                                                                                    UpdateContext({Dia: Weekday(FechaSup)});
-                                                                                    UpdateContext({Hora: Blank()});
-                                                                                    UpdateContext({turnoFinal: Blank()});
-                                                                                    UpdateContext({turnoSeleccionado: Blank()});
-                                                                                    UpdateContext({HoraValor: Blank()});
-                                                                                    UpdateContext({CantidadPorHoraGuardar: Blank()});
-                                                                                    Notify(
-                                                                                        "Se ha Guardado exitosamente",
-                                                                                        NotificationType.Success
-                                                                                    )
-                                                                                );
+                                                                                )
                                                                             )
                                                                         )
                                                                     )
@@ -1939,6 +1945,22 @@ HoraXhora As screen:
             X: =583
             Y: =393
             ZIndex: =3
+
+        Label15 As label:
+            Align: =Align.Center
+            BorderColor: =App.Theme.Colors.Darker40
+            Color: =RGBA(255, 255, 255, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            Fill: =RGBA(189, 49, 51, 1)
+            Font: =App.Theme.Font
+            FontWeight: =FontWeight.Bold
+            Height: =187
+            Size: =20
+            Text: ="Está intentando hacer un registro que supera el 1.5 de la cantidad máxima de la orden. Actualmente, la orden y la operación no tienen permiso para guardar este tipo de registros. Al darle continuar, estará enviando una solicitud al supervisor a cargo para aprobar el ingreso de registros que superen el 1.5."
+            Width: =864
+            X: =250
+            Y: =176
+            ZIndex: =4
 
     cnt_Comentario_HxH As groupContainer.manualLayoutContainer:
         BorderColor: =RGBA(255, 191, 0, 1)
@@ -2206,10 +2228,24 @@ HoraXhora As screen:
             Y: =276
             ZIndex: =8
 
+        Label11 As label:
+            Align: =Align.Center
+            BorderColor: =App.Theme.Colors.Darker40
+            Color: =RGBA(0, 0, 0, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            Font: =App.Theme.Font
+            Height: =86
+            Size: =18
+            Text: ="La eficiencia del operario es inferior al 85%. Por favor, indique un comentario y la causa correspondiente."
+            Width: =556
+            X: =40
+            Y: =12
+            ZIndex: =9
+
     cnt_BloqueoAviso_HxH As groupContainer.manualLayoutContainer:
         DropShadow: =DropShadow.Light
         Fill: =RGBA(184, 0, 0, 1)
-        Height: =389
+        Height: =284
         RadiusBottomLeft: =30
         RadiusBottomRight: =30
         RadiusTopLeft: =30
@@ -2217,7 +2253,7 @@ HoraXhora As screen:
         Visible: =MostraBloqueoAcesso
         Width: =907
         X: =229
-        Y: =124
+        Y: =163
         ZIndex: =5
 
         btn_ContinuarBloqueo_HxH As button:
@@ -2238,6 +2274,21 @@ HoraXhora As screen:
             Text: ="Continuar"
             Width: =258
             X: =324
-            Y: =269
+            Y: =192
             ZIndex: =5
+
+        Label24 As label:
+            Align: =Align.Center
+            BorderColor: =App.Theme.Colors.Darker40
+            Color: =RGBA(255, 255, 255, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            Font: =App.Theme.Font
+            FontWeight: =FontWeight.Bold
+            Height: =151
+            Size: =18
+            Text: ="La solicitud ha sido enviada al supervisor. Por favor, comuníquese con él para llevar a cabo la aprobación. El registro actual no se guardará; continúe con el proceso mientras el supervisor aprueba la solicitud."
+            Width: =843
+            X: =31
+            Y: =18
+            ZIndex: =6
 
