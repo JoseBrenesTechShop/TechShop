@@ -1716,185 +1716,184 @@ HoraXhoraRegistro As screen:
                                                     )
                                                 );
                                                 UpdateContext({Bloqueo: true}),
-                                                If(
+                                                /*If(
                                                     ((Value(txt_Cantidad_HxHR.Text) / Value(txt_Meta_HxHR.Text)) * 100) < 85,
-                                                    UpdateContext({AvisoCausa: true}),
-                                                    Patch(
-                                                        Orden_Ejecucion,
-                                                        OrdenEjecucion,
-                                                        {CantidadTotalProducida: ProTotal + Value(txt_Cantidad_HxHR.Text)}
-                                                    );
-                                                    Patch(
-                                                        Orden_Tarimas,
-                                                        OrdenTarima,
-                                                        {CantidadTotalProducida: TarimaTotal + Value(txt_Cantidad_HxHR.Text)}
-                                                    );
-                                                    Patch(
-                                                        'Hora X Hora',
-                                                        tbl_Info_HxHR.Selected,
-                                                        {
-                                                            Cantidad: Value(txt_Cantidad_HxHR.Text),
-                                                            Cantidad_Por_Hora: Value(txt_Meta_HxHR.Text),
-                                                            Comentario: "PRODUCCION",
-                                                            Causa: "Bien",
-                                                            FechaRegistro: FechaSup,
-                                                            'Fecha_Registro_Supervisor ': Text(
-                                                                Text(
-                                                                    FechaSup,
-                                                                    "mm/dd/yyyy"
-                                                                ) & " " & drpHoraSupervisorHxH_1.SelectedText.Value
-                                                            ),
-                                                            Fecha_Hora: Text(
-                                                                Now(),
-                                                                "mm/dd/yyyy hh:mm AM/PM"
-                                                            ),
-                                                            Hora: drpHoraSupervisorHxH_1.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
-                                                        }
-                                                    );
+                                                    UpdateContext({AvisoCausa: true}),*/
+                                                Patch(
+                                                    Orden_Ejecucion,
+                                                    OrdenEjecucion,
+                                                    {CantidadTotalProducida: ProTotal + Value(txt_Cantidad_HxHR.Text)}
+                                                );
+                                                Patch(
+                                                    Orden_Tarimas,
+                                                    OrdenTarima,
+                                                    {CantidadTotalProducida: TarimaTotal + Value(txt_Cantidad_HxHR.Text)}
+                                                );
+                                                Patch(
+                                                    'Hora X Hora',
+                                                    tbl_Info_HxHR.Selected,
+                                                    {
+                                                        Cantidad: Value(txt_Cantidad_HxHR.Text),
+                                                        Cantidad_Por_Hora: Value(txt_Meta_HxHR.Text),
+                                                        Comentario: "PRODUCCION",
+                                                        Causa: "Bien",
+                                                        FechaRegistro: FechaSup,
+                                                        'Fecha_Registro_Supervisor ': Text(
+                                                            Text(
+                                                                FechaSup,
+                                                                "mm/dd/yyyy"
+                                                            ) & " " & drpHoraSupervisorHxH_1.SelectedText.Value
+                                                        ),
+                                                        Fecha_Hora: Text(
+                                                            Now(),
+                                                            "mm/dd/yyyy hh:mm AM/PM"
+                                                        ),
+                                                        Hora: drpHoraSupervisorHxH_1.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                                                    }
+                                                );
+                                                If(
+                                                    InfoNueva.hour <> InfoVieja.hour || InfoNueva.fecha <> InfoVieja.fecha,
                                                     If(
-                                                        InfoNueva.hour <> InfoVieja.hour || InfoNueva.fecha <> InfoVieja.fecha,
-                                                        If(
-                                                            !IsBlank(
-                                                                LookUp(
-                                                                    'Hora X Hora',
-                                                                    CodigoEmpleado = InfoVieja.codigo && Hora = InfoVieja.hour && FechaRegistro = InfoVieja.fecha
+                                                        !IsBlank(
+                                                            LookUp(
+                                                                'Hora X Hora',
+                                                                CodigoEmpleado = InfoVieja.codigo && Hora = InfoVieja.hour && FechaRegistro = InfoVieja.fecha
+                                                            )
+                                                        ),
+                                                        Patch(
+                                                            HoraxHoraFinals,
+                                                            LookUp(
+                                                                HoraxHoraFinals,
+                                                                Codigo_Empleado = InfoVieja.codigo && Hora = InfoVieja.hour && Fecha = Text(
+                                                                    InfoVieja.fecha,
+                                                                    "mm/dd/yyyy"
                                                                 )
                                                             ),
-                                                            Patch(
-                                                                HoraxHoraFinals,
-                                                                LookUp(
-                                                                    HoraxHoraFinals,
-                                                                    Codigo_Empleado = InfoVieja.codigo && Hora = InfoVieja.hour && Fecha = Text(
-                                                                        InfoVieja.fecha,
-                                                                        "mm/dd/yyyy"
-                                                                    )
+                                                            {
+                                                                Cantidad_Producida: Sum(
+                                                                    Filter(
+                                                                        'Hora X Hora',
+                                                                        CodigoEmpleado = InfoVieja.codigo,
+                                                                        FechaRegistro = InfoVieja.fecha,
+                                                                        Hora = InfoVieja.hour
+                                                                    ),
+                                                                    Cantidad
                                                                 ),
-                                                                {
-                                                                    Cantidad_Producida: Sum(
-                                                                        Filter(
-                                                                            'Hora X Hora',
-                                                                            CodigoEmpleado = InfoVieja.codigo,
-                                                                            FechaRegistro = InfoVieja.fecha,
-                                                                            Hora = InfoVieja.hour
-                                                                        ),
-                                                                        Cantidad
+                                                                Meta: Sum(
+                                                                    Filter(
+                                                                        'Hora X Hora',
+                                                                        CodigoEmpleado = InfoVieja.codigo,
+                                                                        FechaRegistro = InfoVieja.fecha,
+                                                                        Hora = InfoVieja.hour
                                                                     ),
-                                                                    Meta: Sum(
-                                                                        Filter(
-                                                                            'Hora X Hora',
-                                                                            CodigoEmpleado = InfoVieja.codigo,
-                                                                            FechaRegistro = InfoVieja.fecha,
-                                                                            Hora = InfoVieja.hour
-                                                                        ),
-                                                                        Cantidad_Por_Hora
-                                                                    ),
-                                                                    Turno: InfoVieja.turno,
-                                                                    Ubicacion_Bono: LookUp(
-                                                                        Maquinas,
-                                                                        Maquina = InfoVieja.maquina,
-                                                                        Ubicacion_Bono
-                                                                    ),
-                                                                    Semana: InfoVieja.semana
-                                                                }
-                                                            ),
-                                                            Remove(
+                                                                    Cantidad_Por_Hora
+                                                                ),
+                                                                Turno: InfoVieja.turno,
+                                                                Ubicacion_Bono: LookUp(
+                                                                    Maquinas,
+                                                                    Maquina = InfoVieja.maquina,
+                                                                    Ubicacion_Bono
+                                                                ),
+                                                                Semana: InfoVieja.semana
+                                                            }
+                                                        ),
+                                                        Remove(
+                                                            HoraxHoraFinals,
+                                                            LookUp(
                                                                 HoraxHoraFinals,
-                                                                LookUp(
-                                                                    HoraxHoraFinals,
-                                                                    Codigo_Empleado = InfoVieja.codigo && Hora = InfoVieja.hour && Fecha = Text(
-                                                                        InfoVieja.fecha,
-                                                                        "mm/dd/yyyy"
-                                                                    )
+                                                                Codigo_Empleado = InfoVieja.codigo && Hora = InfoVieja.hour && Fecha = Text(
+                                                                    InfoVieja.fecha,
+                                                                    "mm/dd/yyyy"
                                                                 )
                                                             )
                                                         )
-                                                    );
-                                                    ClearCollect(
-                                                        colExistingRecord,
-                                                        LookUp(
-                                                            HoraxHoraFinals,
-                                                            Codigo_Empleado = InfoNueva.codigo && Hora = InfoNueva.hour && Fecha = Text(
+                                                    )
+                                                );
+                                                ClearCollect(
+                                                    colExistingRecord,
+                                                    LookUp(
+                                                        HoraxHoraFinals,
+                                                        Codigo_Empleado = InfoNueva.codigo && Hora = InfoNueva.hour && Fecha = Text(
+                                                            InfoNueva.fecha,
+                                                            "mm/dd/yyyy"
+                                                        )
+                                                    )
+                                                );
+                                                If(
+                                                    !IsEmpty(colExistingRecord),
+                                                    Patch(
+                                                        HoraxHoraFinals,
+                                                        First(colExistingRecord),
+                                                        {
+                                                            Cantidad_Producida: Sum(
+                                                                Filter(
+                                                                    'Hora X Hora',
+                                                                    CodigoEmpleado = InfoNueva.codigo,
+                                                                    FechaRegistro = FechaSup,
+                                                                    Hora = InfoNueva.hour
+                                                                ),
+                                                                Cantidad
+                                                            ),
+                                                            Meta: Sum(
+                                                                Filter(
+                                                                    'Hora X Hora',
+                                                                    CodigoEmpleado = InfoNueva.codigo,
+                                                                    FechaRegistro = FechaSup,
+                                                                    Hora = InfoNueva.hour
+                                                                ),
+                                                                Cantidad_Por_Hora
+                                                            ),
+                                                            Turno: InfoNueva.turno,
+                                                            Ubicacion_Bono: LookUp(
+                                                                Maquinas,
+                                                                Maquina = InfoNueva.maquina,
+                                                                Ubicacion_Bono
+                                                            ),
+                                                            Semana: InfoNueva.semana
+                                                        }
+                                                    ),
+                                                    Collect(
+                                                        HoraxHoraFinals,
+                                                        {
+                                                            Codigo_Empleado: InfoNueva.codigo,
+                                                            Cantidad_Producida: Sum(
+                                                                Filter(
+                                                                    'Hora X Hora',
+                                                                    CodigoEmpleado = InfoNueva.codigo,
+                                                                    FechaRegistro = FechaSup,
+                                                                    Hora = InfoNueva.hour
+                                                                ),
+                                                                Cantidad
+                                                            ),
+                                                            Meta: Sum(
+                                                                Filter(
+                                                                    'Hora X Hora',
+                                                                    CodigoEmpleado = InfoNueva.codigo,
+                                                                    FechaRegistro = FechaSup,
+                                                                    Hora = InfoNueva.hour
+                                                                ),
+                                                                Cantidad_Por_Hora
+                                                            ),
+                                                            Fecha_Registro: InfoNueva.fecha,
+                                                            Turno: InfoNueva.turno,
+                                                            Hora: InfoNueva.hour,
+                                                            Ubicacion_Bono: LookUp(
+                                                                Maquinas,
+                                                                Maquina = InfoNueva.maquina,
+                                                                Ubicacion_Bono
+                                                            ),
+                                                            Semana: InfoNueva.semana,
+                                                            Fecha: Text(
                                                                 InfoNueva.fecha,
                                                                 "mm/dd/yyyy"
                                                             )
-                                                        )
-                                                    );
-                                                    If(
-                                                        !IsEmpty(colExistingRecord),
-                                                        Patch(
-                                                            HoraxHoraFinals,
-                                                            First(colExistingRecord),
-                                                            {
-                                                                Cantidad_Producida: Sum(
-                                                                    Filter(
-                                                                        'Hora X Hora',
-                                                                        CodigoEmpleado = InfoNueva.codigo,
-                                                                        FechaRegistro = FechaSup,
-                                                                        Hora = InfoNueva.hour
-                                                                    ),
-                                                                    Cantidad
-                                                                ),
-                                                                Meta: Sum(
-                                                                    Filter(
-                                                                        'Hora X Hora',
-                                                                        CodigoEmpleado = InfoNueva.codigo,
-                                                                        FechaRegistro = FechaSup,
-                                                                        Hora = InfoNueva.hour
-                                                                    ),
-                                                                    Cantidad_Por_Hora
-                                                                ),
-                                                                Turno: InfoNueva.turno,
-                                                                Ubicacion_Bono: LookUp(
-                                                                    Maquinas,
-                                                                    Maquina = InfoNueva.maquina,
-                                                                    Ubicacion_Bono
-                                                                ),
-                                                                Semana: InfoNueva.semana
-                                                            }
-                                                        ),
-                                                        Collect(
-                                                            HoraxHoraFinals,
-                                                            {
-                                                                Codigo_Empleado: InfoNueva.codigo,
-                                                                Cantidad_Producida: Sum(
-                                                                    Filter(
-                                                                        'Hora X Hora',
-                                                                        CodigoEmpleado = InfoNueva.codigo,
-                                                                        FechaRegistro = FechaSup,
-                                                                        Hora = InfoNueva.hour
-                                                                    ),
-                                                                    Cantidad
-                                                                ),
-                                                                Meta: Sum(
-                                                                    Filter(
-                                                                        'Hora X Hora',
-                                                                        CodigoEmpleado = InfoNueva.codigo,
-                                                                        FechaRegistro = FechaSup,
-                                                                        Hora = InfoNueva.hour
-                                                                    ),
-                                                                    Cantidad_Por_Hora
-                                                                ),
-                                                                Fecha_Registro: InfoNueva.fecha,
-                                                                Turno: InfoNueva.turno,
-                                                                Hora: InfoNueva.hour,
-                                                                Ubicacion_Bono: LookUp(
-                                                                    Maquinas,
-                                                                    Maquina = InfoNueva.maquina,
-                                                                    Ubicacion_Bono
-                                                                ),
-                                                                Semana: InfoNueva.semana,
-                                                                Fecha: Text(
-                                                                    InfoNueva.fecha,
-                                                                    "mm/dd/yyyy"
-                                                                )
-                                                            }
-                                                        )
-                                                    );
-                                                    Refresh('Hora X Hora');
-                                                    SubmitForm(frm_Info_HxHR);
-                                                    ResetForm(frm_Info_HxHR);
-                                                    UpdateContext({Mostra: false})
-                                                )
+                                                        }
+                                                    )
+                                                );
+                                                Refresh('Hora X Hora');
+                                                SubmitForm(frm_Info_HxHR);
+                                                ResetForm(frm_Info_HxHR);
+                                                UpdateContext({Mostra: false})
                                             )
                                         )
                                     )
