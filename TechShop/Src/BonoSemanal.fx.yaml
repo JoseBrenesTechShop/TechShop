@@ -1445,29 +1445,55 @@ BonoSemanal As screen:
         ZIndex: =4
 
         Label25 As label:
+            Align: =Align.Center
             BorderColor: =App.Theme.Colors.Darker40
             Color: =RGBA(0, 0, 0, 1)
             DisabledColor: =RGBA(166, 166, 166, 1)
             Font: =App.Theme.Font
             Height: =85
             Size: =13
-            Text: ="Text"
+            Text: ="¿Esta seguro/a de enviar un comprobante de bono a todos los empleados de la semana seleccionada?"
             Width: =342
             X: =68
             Y: =24
             ZIndex: =1
 
-        Icon4 As icon.CheckBadge:
+        icn_Continuar_BS As icon.CheckBadge:
             BorderColor: =App.Theme.Colors.Darker40
             Color: =App.Theme.Colors.Darker30
             DisabledBorderColor: =RGBA(166, 166, 166, 1)
             DisabledColor: =RGBA(244, 244, 244, 1)
             Icon: =Icon.CheckBadge
-            X: =137
+            OnSelect: |-
+                =If(
+                    !IsBlank(drp_Semana_BS.SelectedText.Value),
+                    
+                    EnviarComprobantePDF.Run(
+                        "Comprobante Bono Semanal - Semana " & drp_Semana_BS.SelectedText.Value,
+                        "Estimado(a),<br><br>Adjunto encontrará el comprobante de bono semanal correspondiente a la semana " & drp_Semana_BS.SelectedText.Value & ". Este documento es generado automáticamente por nuestro sistema. Por favor, revise la información con detenimiento.<br><br>Este comprobante es una prueba y los datos presentados no son reales.<br><br>Quedamos a su disposición para cualquier consulta.<br><br>Atentamente,<br>Equipo de desarollo y analisis",
+                        drp_Semana_BS.SelectedText.Value,
+                        LogotipoTech,
+                        ImagenBono1,
+                        ImagenBono2
+                    );
+                
+                    EnviarComprobanteFinancieroPDF.Run(
+                        "Comprobante Financiero Semanal - Semana " & drp_Semana_BS.SelectedText.Value,
+                        "Estimado(a),<br><br>Adjunto encontrará el comprobante financiero semanal correspondiente a la semana " & drp_Semana_BS.SelectedText.Value & ". Este documento es generado automáticamente por nuestro sistema. Por favor, revise la información con detenimiento.<br><br>Este comprobante es una prueba y los datos presentados no son reales.<br><br>Quedamos a su disposición para cualquier consulta.<br><br>Atentamente,<br>Equipo de desarollo y analisis",
+                        drp_Semana_BS.SelectedText.Value,
+                        "Desarrollo02@tsicr.com",
+                        LogotipoTech
+                    );
+                
+                    Notify("Comprobante de Bono automatico enviado exitosamente", NotificationType.Success);
+                    UpdateContext({ConVisible: false});
+                );
+                Notify("Por favor, selecciona una semana antes de continuar.", NotificationType.Error)
+            X: =151
             Y: =109
             ZIndex: =2
 
-        Icon4_7 As icon.CheckBadge:
+        icn_Cancelar_BS As icon.CheckBadge:
             BorderColor: =App.Theme.Colors.Darker40
             Color: =App.Theme.Colors.Darker30
             DisabledBorderColor: =RGBA(166, 166, 166, 1)
