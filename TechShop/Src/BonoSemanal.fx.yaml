@@ -52,7 +52,7 @@ BonoSemanal As screen:
                 Width: =75
                 ZIndex: =1
 
-            txtEmpleadoEnUso_2 As text:
+            txt_User_BS As text:
                 Align: =Align.Center
                 AlignInContainer: =AlignInContainer.Center
                 BorderColor: =RGBA(204, 231, 246, 1)
@@ -451,51 +451,6 @@ BonoSemanal As screen:
                         Width: =175
                         ZIndex: =12
 
-                tablaInfoBonoSemanal As Table.pcfdataset:
-                    DisplayMode: =DisplayMode.Edit
-                    FontSize: =15
-                    HeaderFontSize: =15
-                    HeaderFontWeight: =FontWeight.Bold
-                    Height: =Parent.Height - 75
-                    Items: |-
-                        =Filter(
-                            BonoSemanals,
-                            IsBlank(txtFiltroCodigoBono.Text) || Codigo = txtFiltroCodigoBono.Text,
-                            IsBlank(drpSemanaBono.SelectedText.Value) || Semana = drpSemanaBono.SelectedText.Value,
-                            Año = drpAñoBono.SelectedText.Value
-                        )
-                    LayoutMinHeight: =If(Self.Y + 500 > Parent.Height, Parent.Height - Self.Y, 500)
-                    LayoutMinWidth: =If(Self.X + 800 > Parent.Width, Parent.Width - Self.X, 800)
-                    onCellValueChange: =false
-                    onFilter: =false
-                    onNavigate: =false
-                    onRowSelect: =false
-                    onSave: =false
-                    OnSelect: |-
-                        =UpdateContext({Mostrar: true})
-                    Width: =Parent.Width
-                    X: =0
-                    Y: =0
-                    ZIndex: =2
-
-                    ID4 As PowerAppsOneGridTemplate_dataField.textualColumn:
-                        FieldDisplayName: ="ID"
-                        FieldName: ="crfb9_id"
-                        FieldType: ="s"
-                        FieldVariantName: ="textualColumn"
-                        Order: =1
-                        Width: =0
-                        ZIndex: =35
-
-                    "'Fecha de creación7' As PowerAppsOneGridTemplate_dataField.textualColumn":
-                        FieldDisplayName: ="Fecha de creación"
-                        FieldName: ="createdon"
-                        FieldType: ="d"
-                        FieldVariantName: ="textualColumn"
-                        Order: =2
-                        Width: =0
-                        ZIndex: =36
-
                 tbl_Bonos_BS As Table.pcfdataset:
                     DisplayMode: =DisplayMode.Edit
                     FontSize: =15
@@ -523,12 +478,39 @@ BonoSemanal As screen:
                     Y: =0
                     ZIndex: =2
 
+                    Codigo4 As PowerAppsOneGridTemplate_dataField.textualColumn:
+                        FieldDisplayName: ="Codigo"
+                        FieldName: ="crfb9_codigo"
+                        FieldType: ="s"
+                        FieldVariantName: ="textualColumn"
+                        Order: =1
+                        Width: =0
+                        ZIndex: =35
+
+                    Empleado5 As PowerAppsOneGridTemplate_dataField.textualColumn:
+                        FieldDisplayName: ="Empleado"
+                        FieldName: ="crfb9_empleado"
+                        FieldType: ="s"
+                        FieldVariantName: ="textualColumn"
+                        Order: =2
+                        Width: =0
+                        ZIndex: =36
+
                     ID5 As PowerAppsOneGridTemplate_dataField.textualColumn:
                         FieldDisplayName: ="ID"
                         FieldName: ="crfb9_id"
                         FieldType: ="s"
                         FieldVariantName: ="textualColumn"
                         Order: =1
+                        Width: =0
+                        ZIndex: =37
+
+                    SubTotal1 As PowerAppsOneGridTemplate_dataField.textualColumn:
+                        FieldDisplayName: ="SubTotal"
+                        FieldName: ="crfb9_subtotal"
+                        FieldType: ="n"
+                        FieldVariantName: ="textualColumn"
+                        Order: =3
                         Width: =0
                         ZIndex: =37
 
@@ -540,6 +522,33 @@ BonoSemanal As screen:
                         Order: =2
                         Width: =0
                         ZIndex: =38
+
+                    Penalizacion1 As PowerAppsOneGridTemplate_dataField.textualColumn:
+                        FieldDisplayName: ="Penalizacion"
+                        FieldName: ="crfb9_penalizacion"
+                        FieldType: ="n"
+                        FieldVariantName: ="textualColumn"
+                        Order: =4
+                        Width: =0
+                        ZIndex: =38
+
+                    BonoTotal1 As PowerAppsOneGridTemplate_dataField.textualColumn:
+                        FieldDisplayName: ="BonoTotal"
+                        FieldName: ="crfb9_bonototal"
+                        FieldType: ="n"
+                        FieldVariantName: ="textualColumn"
+                        Order: =5
+                        Width: =0
+                        ZIndex: =39
+
+                    Semana1 As PowerAppsOneGridTemplate_dataField.textualColumn:
+                        FieldDisplayName: ="Semana"
+                        FieldName: ="crfb9_semana"
+                        FieldType: ="s"
+                        FieldVariantName: ="textualColumn"
+                        Order: =6
+                        Width: =0
+                        ZIndex: =40
 
             MainContainer5_3 As groupContainer.verticalAutoLayoutContainer:
                 DropShadow: =DropShadow.Light
@@ -554,7 +563,9 @@ BonoSemanal As screen:
                 RadiusBottomRight: =8
                 RadiusTopLeft: =8
                 RadiusTopRight: =8
-                Visible: =Mostrar
+                Visible: |-
+                    =//Mostrar
+                    true
                 ZIndex: =3
 
                 Container25 As groupContainer.manualLayoutContainer:
@@ -722,15 +733,25 @@ BonoSemanal As screen:
                             HoverFill: =App.Theme.Colors.Darker10
                             OnSelect: |-
                                 =If(
-                                    IsBlank(txt_SubTotal_BS.Text) || IsBlank(txt_Reduccion_BS.Text), //Pregunta
+                                    IsBlank(txt_SubTotal_BS.Text) || IsBlank(txt_Reduccion_BS.Text),//Pregunta
                                     Notify(
                                         "No puede dejar campos vacios",
                                         NotificationType.Error
                                     ),
-                                    Value(txt_Reduccion_BS.Text) > Value(txt_SubTotal_BS.Text), //Pregunta
+                                    Value(txt_Reduccion_BS.Text) > Value(txt_SubTotal_BS.Text),//Pregunta
                                     Notify(
                                         "La reduccion no puede ser mayor que el subtotal",
                                         NotificationType.Error
+                                    ),
+                                    Patch(
+                                        BonoSemanals,
+                                        tbl_Bonos_BS.Selected,
+                                        {
+                                            SubTotal: Value(Trim(txt_SubTotal_BS.Text)),
+                                            Penalizacion: Value(Trim(txt_Reduccion_BS.Text)),
+                                            BonoTotal: Value(txt_Total_BS.Text),
+                                            User: txt_User_BS.Text
+                                        }
                                     )
                                 )
                             PressedBorderColor: =App.Theme.Colors.Darker40
@@ -774,7 +795,7 @@ BonoSemanal As screen:
                     Table3 As Table.pcfdataset:
                         DisplayMode: =DisplayMode.Edit
                         Height: =199
-                        Items: =Filter(BonoDiarios, Codigo = tablaInfoBonoSemanal.Selected.Codigo, Semana = Value(tablaInfoBonoSemanal.Selected.Semana))
+                        Items: =Filter(BonoDiarios, Codigo = tbl_Bonos_BS.Selected.Codigo, Semana = Value(tbl_Bonos_BS.Selected.Semana))
                         onCellValueChange: =false
                         onFilter: =false
                         onNavigate: =false
@@ -1169,6 +1190,56 @@ BonoSemanal As screen:
                         X: =21
                         Y: =448
                         ZIndex: =14
+
+                        Title3 As label:
+                            Align: =Align.Center
+                            Color: =RGBA(50, 49, 48, 1)
+                            DisabledColor: =RGBA(166, 166, 166, 1)
+                            FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                            OnSelect: =Select(Parent)
+                            PaddingBottom: =0
+                            PaddingLeft: =10
+                            PaddingRight: =0
+                            Text: =ThisItem.Value
+                            VerticalAlign: =VerticalAlign.Top
+                            Width: =Parent.TemplateWidth - 173
+                            Y: =3
+                            ZIndex: =1
+
+                        Subtitle2_8 As label:
+                            Align: =Align.Center
+                            Color: =RGBA(0, 0, 0, 1)
+                            DisabledColor: =RGBA(166, 166, 166, 1)
+                            FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                            Height: =37
+                            OnSelect: =Select(Parent)
+                            PaddingBottom: =0
+                            PaddingLeft: =0
+                            PaddingRight: =20
+                            PaddingTop: =0
+                            Size: =12
+                            Text: |
+                                =If(ThisItem.Value = "Tardia",
+                                    If(CountRows(Filter(Incumplimiento_Personal, Id_Operario = tbl_Bonos_BS.Selected.Codigo, Tipo_Incumplimiento = "Tardia")) = 1, "10%",
+                                    CountRows(Filter(Incumplimiento_Personal, Id_Operario = tbl_Bonos_BS.Selected.Codigo, Tipo_Incumplimiento = "Tardia")) = 2, "50%",
+                                    "100%"
+                                    ),
+                                    LookUp(Incumplimiento_Tipos, Incumplimiento_Op = ThisItem.Value, Porcentaje) & "%"
+                                )
+                            VerticalAlign: =VerticalAlign.Top
+                            Width: =173
+                            X: =217
+                            Y: =10
+                            ZIndex: =2
+
+                        Separator2_3 As rectangle:
+                            BorderColor: =RGBA(0, 18, 107, 1)
+                            Fill: =RGBA(214, 221, 224, 1)
+                            Height: =4
+                            OnSelect: =Select(Parent)
+                            Width: =Parent.TemplateWidth
+                            Y: =43
+                            ZIndex: =3
 
                     txtCantTotalHxH_5 As text:
                         Align: =Align.Center
