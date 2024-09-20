@@ -275,7 +275,7 @@ EnvioDeBonos As screen:
                     Height: =60
                     HoverColor: =RGBA(0, 0, 0, 1)
                     HoverFill: =RGBA(71, 158, 245, 1)
-                    Items: =Distinct(BonoDiarios, Semana)
+                    Items: =Distinct(BonoSemanals, SemanaNumber)
                     PressedColor: =RGBA(255, 255, 255, 1)
                     PressedFill: =RGBA(0, 18, 107, 1)
                     SelectionFill: =RGBA(15, 108, 189, 1)
@@ -429,7 +429,7 @@ EnvioDeBonos As screen:
                     RadiusTopRight: =8
                     ZIndex: =4
 
-                    ListaEmpleadosSeleccionados As Table.pcfdataset:
+                    ListaEmpleadosSeleccionados As Tabla.pcfdataset:
                         DisplayMode: =DisplayMode.Edit
                         FillPortions: =1
                         Height: =If(Self.Y + 500 > Parent.Height, Parent.Height - Self.Y, 500)
@@ -487,7 +487,7 @@ EnvioDeBonos As screen:
                             =Filter(
                                 BonoSemanals,
                                 IsBlank(txtCodigoBono.Text) || Codigo = txtCodigoBono.Text,
-                                IsBlank(dropSemanaBonos.Selected.Value) || Semana = dropSemanaBonos.SelectedText.Value,
+                                IsBlank(dropSemanaBonos.Selected.Value) || SemanaNumber = dropSemanaBonos.Selected.Value,
                                 IsBlank(dropSemanaAnos.Selected.Value) || Año = dropSemanaAnos.Selected.Value
                             )
                         Layout: =Layout.Vertical
@@ -570,7 +570,7 @@ EnvioDeBonos As screen:
                             PaddingLeft: =0
                             PaddingRight: =0
                             PaddingTop: =0
-                            Text: =ThisItem.Semana
+                            Text: =ThisItem.SemanaNumber
                             VerticalAlign: =VerticalAlign.Top
                             Width: =330
                             X: =156
@@ -720,7 +720,7 @@ EnvioDeBonos As screen:
                             Y: =168
                             ZIndex: =13
 
-                        btnAgregarEmpleado As Button:
+                        btnAgregarEmpleado As Botón:
                             Appearance: ='ButtonCanvas.Appearance'.Secondary
                             BorderColor: =RGBA(71, 158, 245, 1)
                             BorderThickness: =1
@@ -756,7 +756,7 @@ EnvioDeBonos As screen:
                             Y: =37
                             ZIndex: =14
 
-                        btnEliminarEmpleado As Button:
+                        btnEliminarEmpleado As Botón:
                             Appearance: ='ButtonCanvas.Appearance'.Secondary
                             BorderColor: =RGBA(71, 158, 245, 1)
                             BorderThickness: =1
@@ -869,39 +869,12 @@ EnvioDeBonos As screen:
                         EnviarComprobanteSeleccionadosPDF.Run(
                             "Comprobante Bono Semanal - Semana " & dropSemanaBonos.SelectedText.Value,
                             "Estimado(a),<br><br>Adjunto encontrará el comprobante de bono semanal correspondiente a la semana " & dropSemanaBonos.SelectedText.Value & ". Este documento es generado automáticamente por nuestro sistema. Por favor, revise la información con detenimiento.<br><br>Este comprobante es una prueba y los datos presentados no son reales.<br><br>Quedamos a su disposición para cualquier consulta.<br><br>Atentamente,<br>Equipo de desarollo y analisis",
-                            dropSemanaBonos.SelectedText.Value,
                             EmployeeCodesString,
                             LogotipoTech,
                             ImagenBono1,
                             ImagenBono2,
-                            Incum,
-                            If(
-                                Title3.Text = "Tardia",
-                                If(
-                                    CountRows(
-                                        Filter(
-                                            Incumplimiento_Personal,
-                                            Id_Operario = tbl_Bonos_BS.Selected.Codigo,
-                                            Tipo_Incumplimiento = "Tardia"
-                                        )
-                                    ) = 1,
-                                    "10%",
-                                    CountRows(
-                                        Filter(
-                                            Incumplimiento_Personal,
-                                            Id_Operario = tbl_Bonos_BS.Selected.Codigo,
-                                            Tipo_Incumplimiento = "Tardia"
-                                        )
-                                    ) = 2,
-                                    "50%",
-                                    "100%"
-                                ),
-                                LookUp(
-                                    Incumplimiento_Tipos,
-                                    Incumplimiento_Op = Title3.Text,
-                                    Porcentaje
-                                ) & "%"
-                            )
+                            dropSemanaBonos.SelectedText.Value
+                            
                         );
                         EnviarComprobanteFinancieroSeleccionadosPDF.Run(
                             "Comprobante Financiero Semanal - Semana " & dropSemanaBonos.SelectedText.Value,
