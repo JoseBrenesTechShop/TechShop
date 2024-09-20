@@ -429,7 +429,7 @@ EnvioDeBonos As screen:
                     RadiusTopRight: =8
                     ZIndex: =4
 
-                    ListaEmpleadosSeleccionados As Table.pcfdataset:
+                    ListaEmpleadosSeleccionados As Tabla.pcfdataset:
                         DisplayMode: =DisplayMode.Edit
                         FillPortions: =1
                         Height: =If(Self.Y + 500 > Parent.Height, Parent.Height - Self.Y, 500)
@@ -720,7 +720,7 @@ EnvioDeBonos As screen:
                             Y: =168
                             ZIndex: =13
 
-                        btnAgregarEmpleado As Button:
+                        btnAgregarEmpleado As Botón:
                             Appearance: ='ButtonCanvas.Appearance'.Secondary
                             BorderColor: =RGBA(71, 158, 245, 1)
                             BorderThickness: =1
@@ -756,7 +756,7 @@ EnvioDeBonos As screen:
                             Y: =37
                             ZIndex: =14
 
-                        btnEliminarEmpleado As Button:
+                        btnEliminarEmpleado As Botón:
                             Appearance: ='ButtonCanvas.Appearance'.Secondary
                             BorderColor: =RGBA(71, 158, 245, 1)
                             BorderThickness: =1
@@ -843,14 +843,29 @@ EnvioDeBonos As screen:
                 DisabledColor: =RGBA(244, 244, 244, 1)
                 HoverFill: =RGBA(180, 214, 250, 1)
                 Icon: =Icon.CheckBadge
-                OnSelect: |-
-                    =If(
-                        !IsBlank(dropSemanaBonos.SelectedText.Value),
-                        
-                        Set(LogotipoTech, JSON(Logotipo_1.Image, JSONFormat.IncludeBinaryData));
-                        Set(ImagenBono1, JSON(imagenPagosBonos.Image, JSONFormat.IncludeBinaryData));
-                        Set(ImagenBono2, JSON(imagenPagosBono2.Image, JSONFormat.IncludeBinaryData));
-                    
+                OnSelect: |
+                    =
+                        Set(
+                            LogotipoTech,
+                            JSON(
+                                Logotipo_1.Image,
+                                JSONFormat.IncludeBinaryData
+                            )
+                        );
+                        Set(
+                            ImagenBono1,
+                            JSON(
+                                imagenPagosBonos.Image,
+                                JSONFormat.IncludeBinaryData
+                            )
+                        );
+                        Set(
+                            ImagenBono2,
+                            JSON(
+                                imagenPagosBono2.Image,
+                                JSONFormat.IncludeBinaryData
+                            )
+                        );
                         EnviarComprobanteSeleccionadosPDF.Run(
                             "Comprobante Bono Semanal - Semana " & dropSemanaBonos.SelectedText.Value,
                             "Estimado(a),<br><br>Adjunto encontrará el comprobante de bono semanal correspondiente a la semana " & dropSemanaBonos.SelectedText.Value & ". Este documento es generado automáticamente por nuestro sistema. Por favor, revise la información con detenimiento.<br><br>Este comprobante es una prueba y los datos presentados no son reales.<br><br>Quedamos a su disposición para cualquier consulta.<br><br>Atentamente,<br>Equipo de desarollo y analisis",
@@ -858,9 +873,36 @@ EnvioDeBonos As screen:
                             EmployeeCodesString,
                             LogotipoTech,
                             ImagenBono1,
-                            ImagenBono2
+                            ImagenBono2,
+                            Incum,
+                            If(
+                                Title3.Text = "Tardia",
+                                If(
+                                    CountRows(
+                                        Filter(
+                                            Incumplimiento_Personal,
+                                            Id_Operario = tbl_Bonos_BS.Selected.Codigo,
+                                            Tipo_Incumplimiento = "Tardia"
+                                        )
+                                    ) = 1,
+                                    "10%",
+                                    CountRows(
+                                        Filter(
+                                            Incumplimiento_Personal,
+                                            Id_Operario = tbl_Bonos_BS.Selected.Codigo,
+                                            Tipo_Incumplimiento = "Tardia"
+                                        )
+                                    ) = 2,
+                                    "50%",
+                                    "100%"
+                                ),
+                                LookUp(
+                                    Incumplimiento_Tipos,
+                                    Incumplimiento_Op = Title3.Text,
+                                    Porcentaje
+                                ) & "%"
+                            )
                         );
-                    
                         EnviarComprobanteFinancieroSeleccionadosPDF.Run(
                             "Comprobante Financiero Semanal - Semana " & dropSemanaBonos.SelectedText.Value,
                             "Estimado(a),<br><br>Adjunto encontrará el comprobante financiero semanal correspondiente a la semana " & dropSemanaBonos.SelectedText.Value & ". Este documento es generado automáticamente por nuestro sistema. Por favor, revise la información con detenimiento.<br><br>Este comprobante es una prueba y los datos presentados no son reales.<br><br>Quedamos a su disposición para cualquier consulta.<br><br>Atentamente,<br>Equipo de desarollo y analisis",
@@ -869,16 +911,17 @@ EnvioDeBonos As screen:
                             "Desarrollo02@tsicr.com",
                             LogotipoTech
                         );
-                    
-                        Notify("Comprobante de Bono por selección enviado exitosamente", NotificationType.Success);
+                        Notify(
+                            "Comprobante de Bono por selección enviado exitosamente",
+                            NotificationType.Success
+                        );
                         UpdateContext({ConVisible: false});
-                    
                         Clear(SelectedEmployees);
                         Clear(EmployeeCodes);
-                        Set(EmployeeCodesString, "");
-                    
-                    );
-                    Notify("Por favor, selecciona una semana antes de continuar.", NotificationType.Error)
+                        Set(
+                            EmployeeCodesString,
+                            ""
+                        );
                 ZIndex: =1
 
         Container8_5 As groupContainer.manualLayoutContainer:
