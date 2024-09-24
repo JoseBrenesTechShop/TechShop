@@ -441,9 +441,8 @@ BonoSemanal As screen:
                         HoverBorderColor: =App.Theme.Colors.Darker10
                         HoverColor: =RGBA(255, 255, 255, 1)
                         HoverFill: =App.Theme.Colors.Darker10
-                        OnSelect: |-
-                            =
-                            UpdateContext({ConVisible: true});
+                        OnSelect: |
+                            =UpdateContext({ConVisible: true});
                         PaddingBottom: =0
                         PaddingLeft: =0
                         PaddingRight: =0
@@ -634,13 +633,23 @@ BonoSemanal As screen:
                         ZIndex: =40
 
                     Ubicacion1 As PowerAppsOneGridTemplate_dataField.textualColumn:
+                        CanGrow: =false
                         FieldDisplayName: ="Ubicacion"
                         FieldName: ="crfb9_ubicacion"
                         FieldType: ="s"
                         FieldVariantName: ="textualColumn"
                         Order: =9
-                        Width: =0
+                        Width: =120
                         ZIndex: =43
+
+                    Aprovado1 As PowerAppsOneGridTemplate_dataField.textualColumn:
+                        FieldDisplayName: ="Aprovado"
+                        FieldName: ="crfb9_aprovado"
+                        FieldType: ="s"
+                        FieldVariantName: ="textualColumn"
+                        Order: =9
+                        Width: =0
+                        ZIndex: =46
 
             Menu_Info_BS As groupContainer.verticalAutoLayoutContainer:
                 DropShadow: =DropShadow.Light
@@ -1719,7 +1728,6 @@ BonoSemanal As screen:
             OnSelect: |-
                 =If(
                     !IsBlank(drp_Semana_BS.SelectedText.Value),
-                    
                     EnviarComprobantePDF.Run(
                         "Comprobante Bono Semanal - Semana " & drp_Semana_BS.SelectedText.Value,
                         "Estimado(a),<br><br>Adjunto encontrará el comprobante de bono semanal correspondiente a la semana " & drp_Semana_BS.SelectedText.Value & ". Este documento es generado automáticamente por nuestro sistema. Por favor, revise la información con detenimiento.<br><br>Este comprobante es una prueba y los datos presentados no son reales.<br><br>Quedamos a su disposición para cualquier consulta.<br><br>Atentamente,<br>Equipo de desarollo y analisis",
@@ -1728,7 +1736,6 @@ BonoSemanal As screen:
                         drp_Semana_BS.SelectedText.Value,
                         drp_Ubicacion_BS.SelectedText.Value
                     );
-                
                     EnviarComprobanteFinancieroPDF.Run(
                         "Comprobante Financiero Semanal - Semana " & drp_Semana_BS.SelectedText.Value,
                         "Estimado(a),<br><br>Adjunto encontrará el comprobante financiero semanal correspondiente a la semana " & drp_Semana_BS.SelectedText.Value & ". Este documento es generado automáticamente por nuestro sistema. Por favor, revise la información con detenimiento.<br><br>Este comprobante es una prueba y los datos presentados no son reales.<br><br>Quedamos a su disposición para cualquier consulta.<br><br>Atentamente,<br>Equipo de desarollo y analisis",
@@ -1736,11 +1743,37 @@ BonoSemanal As screen:
                         LogotipoTech,
                         drp_Semana_BS.SelectedText.Value
                     );
-                
-                    Notify("Comprobante de Bono automatico enviado exitosamente", NotificationType.Success);
+                    ClearCollect(
+                        BonosList,
+                        Filter(
+                            BonoSemanals,
+                            IsBlank(drp_Semana_BS.SelectedText.Value) || SemanaNumber = drp_Semana_BS.Selected.Value,
+                            Año = drp_Año_BS.SelectedText.Value,
+                            Ubicacion = drp_Ubicacion_BS.SelectedText.Value
+                        )
+                    );
+                    ForAll(
+                        BonosList,
+                        Patch(
+                            BonoSemanals,
+                            LookUp(
+                                BonoSemanals,
+                                ID = BonosList[@ID]
+                            ),
+                            {Aprovado: true}
+                        )
+                    );
+                    Notify(
+                        "Comprobante de Bono automatico enviado exitosamente",
+                        NotificationType.Success
+                    );
                     UpdateContext({ConVisible: false});
+                    
                 );
-                Notify("Por favor, selecciona una semana antes de continuar.", NotificationType.Error)
+                Notify(
+                    "Por favor, selecciona una semana antes de continuar.",
+                    NotificationType.Error
+                )
             X: =151
             Y: =109
             ZIndex: =2
