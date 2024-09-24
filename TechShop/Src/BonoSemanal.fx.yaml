@@ -633,23 +633,14 @@ BonoSemanal As screen:
                         ZIndex: =40
 
                     Ubicacion1 As PowerAppsOneGridTemplate_dataField.textualColumn:
-                        CanGrow: =false
+                        CanGrow: =true
                         FieldDisplayName: ="Ubicacion"
                         FieldName: ="crfb9_ubicacion"
                         FieldType: ="s"
                         FieldVariantName: ="textualColumn"
                         Order: =9
-                        Width: =120
-                        ZIndex: =43
-
-                    Aprovado1 As PowerAppsOneGridTemplate_dataField.textualColumn:
-                        FieldDisplayName: ="Aprovado"
-                        FieldName: ="crfb9_aprovado"
-                        FieldType: ="s"
-                        FieldVariantName: ="textualColumn"
-                        Order: =9
                         Width: =0
-                        ZIndex: =46
+                        ZIndex: =43
 
             Menu_Info_BS As groupContainer.verticalAutoLayoutContainer:
                 DropShadow: =DropShadow.Light
@@ -739,10 +730,36 @@ BonoSemanal As screen:
                             BorderStyle: =BorderStyle.None
                             BorderThickness: =2
                             Color: =RGBA(0, 0, 0, 1)
-                            Default: =tbl_Bonos_BS.Selected.Penalizacion
+                            Default: |-
+                                =If(
+                                    Value(txt_PorScrap_BS.Text) > 3 && Value(txt_PorScrap_BS.Text) <= 5,
+                                    If(
+                                        20 + Value(txt_Icum_BS.Text) >= 100,
+                                        Value(txt_SubTotal_BS.Text),
+                                        Value(txt_SubTotal_BS.Text) * ((20 + Value(txt_Icum_BS.Text)) / 100)
+                                    ),
+                                    If(
+                                        Value(txt_PorScrap_BS.Text) > 5 && Value(txt_PorScrap_BS.Text) <= 8,
+                                        If(
+                                            30 + Value(txt_Icum_BS.Text) >= 100,
+                                            Value(txt_SubTotal_BS.Text),
+                                            Value(txt_SubTotal_BS.Text) * ((30 + Value(txt_Icum_BS.Text)) / 100)
+                                        ),
+                                        If(
+                                            Value(txt_PorScrap_BS.Text) > 8 || Value(txt_Icum_BS.Text) >= 100,
+                                            Value(txt_SubTotal_BS.Text),
+                                            If(
+                                                Value(txt_Icum_BS.Text) > 0,
+                                                Value(txt_SubTotal_BS.Text) * (Value(txt_Icum_BS.Text) / 100),
+                                                0
+                                            )
+                                        )
+                                    )
+                                )
                             DisabledBorderColor: =RGBA(166, 166, 166, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             DisabledFill: =RGBA(244, 244, 244, 1)
+                            DisplayMode: =DisplayMode.View
                             FocusedBorderThickness: =4
                             Format: =TextFormat.Number
                             HintText: ="Reduccion"
@@ -833,14 +850,14 @@ BonoSemanal As screen:
                             HoverFill: =App.Theme.Colors.Darker10
                             OnSelect: |-
                                 =If(
-                                    IsBlank(txt_SubTotal_BS.Text) || IsBlank(txt_Reduccion_BS.Text),//Pregunta
+                                    IsBlank(txt_SubTotal_BS.Text) || IsBlank(txt_Icum_BS.Text) || IsBlank(txt_PorScrap_BS.Text),//Pregunta
                                     Notify(
                                         "No puede dejar campos vacios",
                                         NotificationType.Error
                                     ),
-                                    Value(txt_Reduccion_BS.Text) > Value(txt_SubTotal_BS.Text),//Pregunta
+                                    Value(txt_Icum_BS.Text) > 100 || Value(txt_PorScrap_BS.Text) > 100,//Pregunta
                                     Notify(
-                                        "La reduccion no puede ser mayor que el subtotal",
+                                        "Los porcentajes no pueden ser mayores que 100",
                                         NotificationType.Error
                                     ),
                                     UpdateContext({Justi:true})
@@ -1209,11 +1226,10 @@ BonoSemanal As screen:
                         BorderStyle: =BorderStyle.None
                         BorderThickness: =2
                         Color: =RGBA(0, 0, 0, 1)
-                        Default: =tbl_Bonos_BS.Selected.PorcentajeScrap & "%"
+                        Default: =tbl_Bonos_BS.Selected.PorcentajeScrap
                         DisabledBorderColor: =RGBA(166, 166, 166, 1)
                         DisabledColor: =RGBA(166, 166, 166, 1)
                         DisabledFill: =RGBA(244, 244, 244, 1)
-                        DisplayMode: =DisplayMode.View
                         FocusedBorderThickness: =4
                         Format: =TextFormat.Number
                         HintText: ="Scrap %"
@@ -1436,11 +1452,10 @@ BonoSemanal As screen:
                         BorderStyle: =BorderStyle.None
                         BorderThickness: =2
                         Color: =RGBA(0, 0, 0, 1)
-                        Default: =tbl_Bonos_BS.Selected.PorIncumplimiento & "%"
+                        Default: =tbl_Bonos_BS.Selected.PorIncumplimiento
                         DisabledBorderColor: =RGBA(166, 166, 166, 1)
                         DisabledColor: =RGBA(166, 166, 166, 1)
                         DisabledFill: =RGBA(244, 244, 244, 1)
-                        DisplayMode: =DisplayMode.View
                         FocusedBorderThickness: =4
                         Format: =TextFormat.Number
                         HintText: ="Incum %"
@@ -1587,12 +1602,16 @@ BonoSemanal As screen:
                                         tbl_Bonos_BS.Selected,
                                         {
                                             SubTotal: Value(Trim(txt_SubTotal_BS.Text)),
-                                            Penalizacion: Value(Trim(txt_Reduccion_BS.Text)),
-                                            BonoTotal: Value(txt_Total_BS.Text),
+                                            PorcentajeScrap: Value(txt_PorScrap_BS.Text),
+                                            PorIncumplimiento: Value(txt_Icum_BS.Text),
                                             User: txt_User_BS.Text,
                                             Justificacion: txt_Justificacion_BS.Text
                                         }
-                                    )
+                                    );
+                                    Reset(txt_Justificacion_BS);
+                                    Refresh(BonoSemanals);
+                                    UpdateContext({Mostrar: false});
+                                    UpdateContext({Justi: false});
                                 )
                             PressedBorderColor: =App.Theme.Colors.Darker40
                             PressedColor: =Self.Color
@@ -1623,7 +1642,10 @@ BonoSemanal As screen:
                             OnSelect: |
                                 =UpdateContext({Justi:false});
                                 Reset(txt_SubTotal_BS);
-                                Reset(txt_Reduccion_BS)
+                                Reset(txt_Justificacion_BS);
+                                Reset(txt_Reduccion_BS);
+                                Reset(txt_PorScrap_BS);
+                                Reset(txt_Icum_BS)
                             PressedBorderColor: =App.Theme.Colors.Darker40
                             PressedColor: =Self.Color
                             PressedFill: =App.Theme.Colors.Darker40
