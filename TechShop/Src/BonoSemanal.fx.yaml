@@ -346,7 +346,7 @@ BonoSemanal As screen:
                         Height: =50
                         HoverColor: =RGBA(0, 0, 0, 1)
                         HoverFill: =RGBA(71, 158, 245, 1)
-                        Items: =Distinct(BonoSemanals, SemanaNumber)
+                        Items: =Sort(Distinct(BonoSemanals, SemanaNumber),ThisRecord.Value,SortOrder.Descending)
                         PressedColor: =RGBA(255, 255, 255, 1)
                         PressedFill: =RGBA(0, 18, 107, 1)
                         SelectionFill: =RGBA(15, 108, 189, 1)
@@ -535,7 +535,7 @@ BonoSemanal As screen:
                         Width: =55
                         ZIndex: =17
 
-                tbl_Bonos_BS As Tabla.pcfdataset:
+                tbl_Bonos_BS As Table.pcfdataset:
                     DisplayMode: =DisplayMode.Edit
                     FontSize: =15
                     HeaderFontSize: =15
@@ -901,7 +901,7 @@ BonoSemanal As screen:
                         Y: =176
                         ZIndex: =2
 
-                    Table3 As Tabla.pcfdataset:
+                    Table3 As Table.pcfdataset:
                         DisplayMode: =DisplayMode.Edit
                         Height: =199
                         Items: =Filter(BonoDiarios, Codigo = tbl_Bonos_BS.Selected.Codigo, Semana = Value(tbl_Bonos_BS.Selected.Semana))
@@ -979,15 +979,19 @@ BonoSemanal As screen:
                             Width: =0
                             ZIndex: =27
 
-                    tbl_BonoDiario_BS As Tabla.pcfdataset:
+                    tbl_BonoDiario_BS As Table.pcfdataset:
                         DisplayMode: =DisplayMode.Edit
                         Height: =199
                         Items: |-
-                            =Filter(
-                                BonoDiarios,
-                                Codigo = tbl_Bonos_BS.Selected.Codigo,
-                                Semana = Value(tbl_Bonos_BS.Selected.SemanaNumber),
-                                UbicacionBono = tbl_Bonos_BS.Selected.Ubicacion
+                            =Sort(
+                                Filter(
+                                    BonoDiarios,
+                                    Codigo = tbl_Bonos_BS.Selected.Codigo,
+                                    Semana = Value(tbl_Bonos_BS.Selected.SemanaNumber),
+                                    UbicacionBono = tbl_Bonos_BS.Selected.Ubicacion
+                                ),
+                                Fecha,
+                                SortOrder.Ascending
                             )
                         onCellValueChange: =false
                         onFilter: =false
@@ -1661,6 +1665,27 @@ BonoSemanal As screen:
                             Y: =223
                             ZIndex: =4
 
+                    txtFiltroCodigoBono_9 As text:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =2
+                        Color: =RGBA(255, 255, 255, 1)
+                        Default: =tbl_Bonos_BS.Selected.Empleado
+                        DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                        DisabledColor: =RGBA(166, 166, 166, 1)
+                        DisabledFill: =RGBA(244, 244, 244, 1)
+                        DisplayMode: =DisplayMode.View
+                        Fill: =RGBA(40, 134, 222, 1)
+                        FocusedBorderThickness: =4
+                        Height: =26
+                        HoverBorderColor: =RGBA(0, 18, 107, 1)
+                        HoverColor: =RGBA(0, 0, 0, 1)
+                        HoverFill: =RGBA(186, 202, 226, 1)
+                        PaddingLeft: =5
+                        Size: =11
+                        Width: =241
+                        ZIndex: =22
+
     txt_TotalBonos_BS As text:
         Align: =Align.Center
         BorderColor: =RGBA(0, 18, 107, 1)
@@ -1668,7 +1693,7 @@ BonoSemanal As screen:
         BorderThickness: =2
         Color: =RGBA(0, 0, 0, 1)
         Default: |-
-            ="₡" & Sum(
+            ="₡" & Text(Sum(
                 Filter(
                     BonoSemanals,
                     IsBlank(txt_Codigo_BS.Text) || Codigo = txt_Codigo_BS.Text,
@@ -1677,7 +1702,7 @@ BonoSemanal As screen:
                     Ubicacion = drp_Ubicacion_BS.SelectedText.Value
                 ),
                 BonoTotal
-            )
+            ), "###,###,###,###.00")
         DisabledBorderColor: =RGBA(166, 166, 166, 1)
         DisabledColor: =RGBA(166, 166, 166, 1)
         DisabledFill: =RGBA(244, 244, 244, 1)
@@ -1695,8 +1720,8 @@ BonoSemanal As screen:
         RadiusTopLeft: =20
         RadiusTopRight: =20
         Size: =15
-        Width: =150
-        X: =1096
+        Width: =170
+        X: =1089
         Y: =40
         ZIndex: =2
 
