@@ -1123,22 +1123,45 @@ MantenimientoEmpleado As screen:
                         Default: ={}
                         DelayItemLoading: =true
                         Fill: =RGBA(255, 255, 255, 1)
-                        Height: =551
+                        Height: =480
                         Items: |-
                             =If(
-                                IsBlank(txtIDEmpleadoSolicitud_1.Text),
+                                IsBlank(txtIDEmpleadoSolicitud_1.Text) && IsBlank(txtNombreEmpleado.Text), 
                                 Sort(
-                                    Empleados,
+                                    Empleados, 
                                     Codigo, 
                                     SortOrder.Descending
-                                ),
-                                Sort(
-                                    Filter(
-                                        Empleados,
-                                        Codigo = txtIDEmpleadoSolicitud_1.Text
-                                    ),
-                                    Codigo,
-                                    SortOrder.Descending
+                                ), 
+                                If(
+                                    IsBlank(txtIDEmpleadoSolicitud_1.Text), 
+                                    Sort(
+                                        Filter(
+                                            Empleados, 
+                                            StartsWith(Nombre, txtNombreEmpleado.Text)
+                                        ), 
+                                        Codigo, 
+                                        SortOrder.Descending
+                                    ), 
+                                    If(
+                                        IsBlank(txtNombreEmpleado), 
+                                        Sort(
+                                            Filter(
+                                                Empleados, 
+                                                Codigo = txtIDEmpleadoSolicitud_1.Text
+                                            ), 
+                                            Codigo, 
+                                            SortOrder.Descending
+                                        ), 
+                                        Sort(
+                                            Filter(
+                                                Empleados, 
+                                                Codigo = txtIDEmpleadoSolicitud_1.Text && 
+                                                StartsWith(Nombre, txtNombreEmpleado.Text)
+                                            ), 
+                                            Codigo, 
+                                            SortOrder.Descending
+                                        )
+                                    )
                                 )
                             )
                         Layout: =Layout.Vertical
@@ -1148,7 +1171,7 @@ MantenimientoEmpleado As screen:
                         TemplateSize: =223
                         Transition: =Transition.Pop
                         Width: =920
-                        Y: =79
+                        Y: =150
                         ZIndex: =1
 
                         Title2_2 As label:
@@ -1648,6 +1671,115 @@ MantenimientoEmpleado As screen:
                         X: =623
                         Y: =16
                         ZIndex: =10
+
+                    lblNombre As button:
+                        BorderColor: =App.Theme.Colors.Primary
+                        DisabledBorderColor: =RGBA(244, 244, 244, 1)
+                        DisabledColor: =RGBA(166, 166, 166, 1)
+                        DisabledFill: =RGBA(244, 244, 244, 1)
+                        DisplayMode: =If(IsBlank(Gallery3.Selected), DisplayMode.Edit, DisplayMode.Disabled)
+                        Fill: =RGBA(40, 134, 222, 1)
+                        Font: =App.Theme.Font
+                        FontWeight: =FontWeight.Semibold
+                        Height: =46
+                        HoverBorderColor: =RGBA(180, 214, 250, 1)
+                        HoverColor: =RGBA(255, 255, 255, 1)
+                        HoverFill: =App.Theme.Colors.Darker10
+                        OnSelect: |-
+                            =If(
+                                IsBlank(txtNombr.Text) || 
+                                IsBlank(txtCodig.Text) || 
+                                IsBlank(txtContrasena.Text) || 
+                                IsBlank(dropPuestoo.Selected.Descripcion) || 
+                                IsBlank(comboContrato.Selected.Value),
+                                
+                                
+                                Notify("Todos los campos (Nombre, Código, Contraseña, Puesto y Contrato) son obligatorios", NotificationType.Error),
+                            
+                                // Validar que no haya duplicados en la base de datos
+                                If(
+                                    !IsBlank(LookUp(Empleados, Codigo = txtCodig.Text)),
+                                    
+                                    Notify("Ya existe un empleado con este código", NotificationType.Error),
+                                
+                                    // Validar que el Puesto y el Contrato sean válidos
+                                    If(
+                                        IsBlank(dropPuestoo.Selected.Descripcion) || 
+                                        IsBlank(comboContrato.Selected.Value),
+                            
+                                        Notify("El Puesto y el Contrato deben ser seleccionados", NotificationType.Error),
+                            
+                                        // Si pasa todas las validaciones, proceder con el Patch
+                                        Patch(
+                                            Empleados,
+                                            Defaults(Empleados),
+                                            {
+                                                Nombre: txtNombr.Text,
+                                                Codigo: txtCodig.Text,
+                                                Contraseña: txtContrasena.Text,
+                                                Area: dropAreaa.Selected.Descripcion,
+                                                Puesto: dropPuestoo.Selected.Descripcion,
+                                                Rol: dropRoll.Selected.Descripcion,
+                                                Acceso: toggleAcesso.Value,
+                                                Contrato: comboContrato.Selected.Value,
+                                                Correo: DataCardValue17.Text
+                            
+                                            }
+                                        );
+                                        ResetForm(Form1), // Opcional, para limpiar el formulario
+                                        Notify("Empleado agregado exitosamente", NotificationType.Success)
+                                    )
+                                )
+                            )
+                        PressedBorderColor: =App.Theme.Colors.Darker40
+                        PressedColor: =Self.Color
+                        PressedFill: =App.Theme.Colors.Darker40
+                        Size: =15
+                        Text: ="NOMBRE"
+                        X: =56
+                        Y: =87
+                        ZIndex: =11
+
+                    txtNombreEmpleado As text:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(153, 207, 236, 1)
+                        BorderThickness: =2
+                        Color: =RGBA(0, 0, 0, 1)
+                        Default: =
+                        DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                        DisabledColor: =RGBA(166, 166, 166, 1)
+                        DisabledFill: =RGBA(244, 244, 244, 1)
+                        FocusedBorderThickness: =4
+                        Font: =App.Theme.Font
+                        Height: =46
+                        HintText: ="Nombre del empleado"
+                        HoverBorderColor: =App.Theme.Colors.Darker40
+                        HoverColor: =RGBA(0, 0, 0, 1)
+                        HoverFill: =App.Theme.Colors.Lighter70
+                        OnSelect: =Reset(txtNombreEmpleado)
+                        PaddingLeft: =5
+                        RadiusBottomLeft: =10
+                        RadiusBottomRight: =10
+                        RadiusTopLeft: =10
+                        RadiusTopRight: =10
+                        Size: =15
+                        Width: =658
+                        X: =246
+                        Y: =89
+                        ZIndex: =12
+
+                    Icon14_51 As icon.VerticalLine:
+                        BorderColor: =App.Theme.Colors.Darker40
+                        Color: =RGBA(153, 160, 196, 1)
+                        DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                        DisabledColor: =RGBA(244, 244, 244, 1)
+                        DisplayMode: =DisplayMode.View
+                        Height: =60
+                        Icon: =Icon.VerticalLine
+                        Width: =30
+                        X: =216
+                        Y: =80
+                        ZIndex: =13
 
     Container13_6 As groupContainer.manualLayoutContainer:
         BorderColor: =RGBA(255, 191, 0, 1)
