@@ -1493,26 +1493,58 @@ MantenimientoEmpleado As screen:
                         HoverFill: =App.Theme.Colors.Darker10
                         OnSelect: |-
                             =If(
-                                IsBlank(txtNombr.Text) || 
-                                IsBlank(txtCodig.Text) || 
-                                IsBlank(txtContrasena.Text) || 
-                                IsBlank(dropPuestoo.Selected.Descripcion) || 
-                                IsBlank(dropAreaa.Selected.Descripcion) ||
-                                IsBlank(comboContrato.Selected.Value),
-                                
-                                Notify("Todos los campos (Nombre, Código, Contraseña, Puesto y Contrato) son obligatorios", NotificationType.Error),
-                            
+                                IsBlank(txtNombr.Text) || IsBlank(txtCodig.Text) || IsBlank(txtContrasena.Text) || IsBlank(dropPuestoo.Selected.Descripcion) || IsBlank(dropAreaa.Selected.Descripcion) || IsBlank(comboContrato.Selected.Value),
+                                Notify(
+                                    "Todos los campos (Nombre, Código, Contraseña, Puesto y Contrato) son obligatorios",
+                                    NotificationType.Error
+                                ),
                                 // Validar que el código existe en la base de datos antes de modificar
                                 If(
-                                    IsBlank(LookUp(Empleados, Codigo = txtCodig.Text)),
-                                    
-                                    Notify("No existe un empleado con este código", NotificationType.Error),
-                                
+                                    txtCodig.Text <> Gallery3.Selected.Codigo,
+                                    If(
+                                        !IsBlank(
+                                            LookUp(
+                                                Empleados,
+                                                Codigo = txtCodig.Text
+                                            )
+                                        ),
+                                        Notify(
+                                            "Ya existe un empleado con este código",
+                                            NotificationType.Error
+                                        ),
+                                        Patch(
+                                            Empleados,
+                                            LookUp(
+                                                Empleados,
+                                                Codigo = Gallery3.Selected.Codigo
+                                            ),
+                                            {
+                                                Codigo: txtCodig.Text,
+                                                Nombre: txtNombr.Text,
+                                                Contraseña: txtContrasena.Text,
+                                                Area: dropAreaa.Selected.Descripcion,
+                                                Puesto: dropPuestoo.Selected.Descripcion,
+                                                Rol: dropRoll.Selected.Descripcion,
+                                                Acceso: toggleAcesso.Value,
+                                                Contrato: comboContrato.Selected.Value,
+                                                Correo: DataCardValue17.Text
+                                            }
+                                        );
+                                        ResetForm(Form1),// Opcional, para limpiar el formulario
+                                        Notify(
+                                            "Empleado modificado exitosamente",
+                                            NotificationType.Success
+                                        )
+                                    ),
                                     // Si pasa todas las validaciones, proceder con el Patch para modificar
                                     Patch(
                                         Empleados,
-                                        LookUp(Empleados, Codigo = txtCodig.Text),
+                                        LookUp(
+                                            Empleados,
+                                            Codigo = Gallery3.Selected.Codigo
+                                        ),
                                         {
+                                            Codigo: txtCodig.Text,
                                             Nombre: txtNombr.Text,
                                             Contraseña: txtContrasena.Text,
                                             Area: dropAreaa.Selected.Descripcion,
@@ -1523,9 +1555,11 @@ MantenimientoEmpleado As screen:
                                             Correo: DataCardValue17.Text
                                         }
                                     );
-                            
-                                    ResetForm(Form1), // Opcional, para limpiar el formulario
-                                    Notify("Empleado modificado exitosamente", NotificationType.Success)
+                                    ResetForm(Form1),// Opcional, para limpiar el formulario
+                                    Notify(
+                                        "Empleado modificado exitosamente",
+                                        NotificationType.Success
+                                    )
                                 )
                             )
                         PressedBorderColor: =App.Theme.Colors.Darker40
@@ -1677,7 +1711,7 @@ MantenimientoEmpleado As screen:
                         DisabledBorderColor: =RGBA(244, 244, 244, 1)
                         DisabledColor: =RGBA(166, 166, 166, 1)
                         DisabledFill: =RGBA(244, 244, 244, 1)
-                        DisplayMode: =If(IsBlank(Gallery3.Selected), DisplayMode.Edit, DisplayMode.Disabled)
+                        DisplayMode: =DisplayMode.View
                         Fill: =RGBA(40, 134, 222, 1)
                         Font: =App.Theme.Font
                         FontWeight: =FontWeight.Semibold
