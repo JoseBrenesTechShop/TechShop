@@ -383,27 +383,220 @@ EstadosPermisos As screen:
                         Fill: =RGBA(204, 231, 246, 0.7)
                         Height: =564
                         Items: |-
-                            =If(IsBlank(txtIDEmpleadoSolicitud.Text),
-                                Sort(
+                            =Sort(
+                                If(
+                                //Gerente de produccion
+                                    LookUp(
+                                        Empleados,
+                                        Codigo = VarName
+                                    ).Puesto = "GERENTE DE PRODUCCION",
                                     Filter(
                                         TramitesSolicitudes,
                                         EstadoDeProceso = drpEstadoSolicitud.SelectedText.Value,
-                                        Solicitud = dropTipo.SelectedText.Value || IsBlank(dropTipo.SelectedText.Value)
-                                        
+                                        (IsBlank(txtIDEmpleadoSolicitud.Text) || Codigo = txtIDEmpleadoSolicitud.Text),
+                                        Solicitud = dropTipo.SelectedText.Value || IsBlank(dropTipo.SelectedText.Value),
+                                        (Departamento = "PRODUCCION" || Puesto in [
+                                            "ING DE MEJORA CONTINUA",
+                                            "JEFE DE PROGRAMACION",
+                                            "JEFE DE DESARROLLO Y ANALISIS"
+                                        ]) && Puesto <> "GERENTE DE PRODUCCION"
                                     ),
-                                    FechaTramite,
-                                    SortOrder.Descending
-                                ),
-                                Sort(
+                            
+                            
+                                //Supervisor de Produccion
+                                    LookUp(
+                                        Empleados,
+                                        Codigo = VarName
+                                    ).Puesto = "SUPERVISOR DE PRODUCCIÓN",
                                     Filter(
                                         TramitesSolicitudes,
-                                        EstadoDeProceso = drpEstadoSolicitud.SelectedText.Value &&
-                                        Codigo = LookUp(Empleados, Codigo = txtIDEmpleadoSolicitud.Text, Codigo),
-                                        Solicitud = dropTipo.SelectedText.Value  || IsBlank(dropTipo.SelectedText.Value)
+                                        EstadoDeProceso = drpEstadoSolicitud.SelectedText.Value,
+                                        IsBlank(txtIDEmpleadoSolicitud.Text) || Codigo = txtIDEmpleadoSolicitud.Text,
+                                        Solicitud = dropTipo.SelectedText.Value || IsBlank(dropTipo.SelectedText.Value),
+                                        Departamento = "PRODUCCION",
+                                        Puesto <> "GERENTE DE PRODUCCION",
+                                        Puesto <> "SUPERVISOR DE PRODUCCIÓN"
                                     ),
-                                    FechaTramite,
-                                    SortOrder.Descending
-                                )
+                            
+                            
+                                //Gerente de Calidad
+                                    LookUp(
+                                        Empleados,
+                                        Codigo = VarName
+                                    ).Puesto = "GERENTE CALIDAD",
+                                    Filter(
+                                        TramitesSolicitudes,
+                                        EstadoDeProceso = drpEstadoSolicitud.SelectedText.Value,
+                                        IsBlank(txtIDEmpleadoSolicitud.Text) || Codigo = txtIDEmpleadoSolicitud.Text,
+                                        Solicitud = dropTipo.SelectedText.Value || IsBlank(dropTipo.SelectedText.Value),
+                                        Departamento = "CALIDAD",
+                                        Puesto <> "GERENTE CALIDAD"
+                                    ),
+                            
+                            
+                                //Supervisor de Calidad
+                                    LookUp(
+                                        Empleados,
+                                        Codigo = VarName
+                                    ).Puesto = "SUPERVISOR DE CALIDAD",
+                                    Filter(
+                                        TramitesSolicitudes,
+                                        EstadoDeProceso = drpEstadoSolicitud.SelectedText.Value,
+                                        IsBlank(txtIDEmpleadoSolicitud.Text) || Codigo = txtIDEmpleadoSolicitud.Text,
+                                        Solicitud = dropTipo.SelectedText.Value || IsBlank(dropTipo.SelectedText.Value),
+                                        Departamento = "CALIDAD",
+                                        Puesto <> "GERENTE CALIDAD",
+                                        Puesto <> "SUPERVISOR DE CALIDAD"
+                                    ),
+                            
+                            
+                                //ENCARGADO DE IMPORTACION & EXPORTACIONES
+                                    LookUp(
+                                        Empleados,
+                                        Codigo = VarName
+                                    ).Puesto = "ENCARGADO DE IMPORTACION & EXPORTACIONES",
+                                    Filter(
+                                        TramitesSolicitudes,
+                                        EstadoDeProceso = drpEstadoSolicitud.SelectedText.Value,
+                                        IsBlank(txtIDEmpleadoSolicitud.Text) || Codigo = txtIDEmpleadoSolicitud.Text,
+                                        Solicitud = dropTipo.SelectedText.Value || IsBlank(dropTipo.SelectedText.Value),
+                                        Departamento = "IMPORTACION & EXPORTACIONES",
+                                        Puesto <> "ENCARGADO DE IMPORTACION & EXPORTACIONES"
+                                    ),
+                            
+                            
+                                //Jefe de mantenimiento
+                                    LookUp(
+                                        Empleados,
+                                        Codigo = VarName
+                                    ).Puesto = "JEFE DE MANTENIMIENTO",
+                                    Filter(
+                                        TramitesSolicitudes,
+                                        EstadoDeProceso = drpEstadoSolicitud.SelectedText.Value,
+                                        IsBlank(txtIDEmpleadoSolicitud.Text) || Codigo = txtIDEmpleadoSolicitud.Text,
+                                        Solicitud = dropTipo.SelectedText.Value || IsBlank(dropTipo.SelectedText.Value),
+                                        Departamento = "MANTENIMIENTO",
+                                        Puesto <> "JEFE DE MANTENIMIENTO"
+                                    ),
+                            
+                            
+                                //ING DE MEJORA CONTINUA
+                                    LookUp(
+                                        Empleados,
+                                        Codigo = VarName
+                                    ).Puesto = "ING DE MEJORA CONTINUA",
+                                    Filter(
+                                        TramitesSolicitudes,
+                                        EstadoDeProceso = drpEstadoSolicitud.SelectedText.Value,
+                                        IsBlank(txtIDEmpleadoSolicitud.Text) || Codigo = txtIDEmpleadoSolicitud.Text,
+                                        Solicitud = dropTipo.SelectedText.Value || IsBlank(dropTipo.SelectedText.Value),
+                                        Puesto = "CONTROLADOR DE PRODUCCION" || Puesto = "CONTROLADOR DE HERRAMIENTA",
+                                        Puesto <> "ING DE MEJORA CONTINUA"
+                                    ),
+                            
+                            
+                                //JEFE DE C.D.S
+                                    LookUp(
+                                        Empleados,
+                                        Codigo = VarName
+                                    ).Puesto = "JEFE DE C.D.S",
+                                    Filter(
+                                        TramitesSolicitudes,
+                                        EstadoDeProceso = drpEstadoSolicitud.SelectedText.Value,
+                                        IsBlank(txtIDEmpleadoSolicitud.Text) || Codigo = txtIDEmpleadoSolicitud.Text,
+                                        Solicitud = dropTipo.SelectedText.Value || IsBlank(dropTipo.SelectedText.Value),
+                                        Departamento = "C.D.S",
+                                        Puesto <> "JEFE DE C.D.S"
+                                    ),
+                            
+                            
+                                //JEFE DE PROGRAMACION
+                                    LookUp(
+                                        Empleados,
+                                        Codigo = VarName
+                                    ).Puesto = "JEFE DE PROGRAMACION",
+                                    Filter(
+                                        TramitesSolicitudes,
+                                        EstadoDeProceso = drpEstadoSolicitud.SelectedText.Value,
+                                        IsBlank(txtIDEmpleadoSolicitud.Text) || Codigo = txtIDEmpleadoSolicitud.Text,
+                                        Solicitud = dropTipo.SelectedText.Value || IsBlank(dropTipo.SelectedText.Value),
+                                        Departamento = "PROGRAMACION",
+                                        Puesto <> "JEFE DE PROGRAMACION"
+                                    ),
+                            
+                            
+                                //JEFE DE CONTABILIDAD
+                                    LookUp(
+                                        Empleados,
+                                        Codigo = VarName
+                                    ).Puesto = "JEFE DE CONTABILIDAD",
+                                    Filter(
+                                        TramitesSolicitudes,
+                                        EstadoDeProceso = drpEstadoSolicitud.SelectedText.Value,
+                                        IsBlank(txtIDEmpleadoSolicitud.Text) || Codigo = txtIDEmpleadoSolicitud.Text,
+                                        Solicitud = dropTipo.SelectedText.Value || IsBlank(dropTipo.SelectedText.Value),
+                                        Departamento = "CONTABILIDAD",
+                                        Puesto <> "JEFE DE CONTABILIDAD"
+                                    ),
+                            
+                            
+                                //JEFA DE TESORERIA
+                                    LookUp(
+                                        Empleados,
+                                        Codigo = VarName
+                                    ).Puesto = "JEFA DE TESORERIA",
+                                    Filter(
+                                        TramitesSolicitudes,
+                                        EstadoDeProceso = drpEstadoSolicitud.SelectedText.Value,
+                                        IsBlank(txtIDEmpleadoSolicitud.Text) || Codigo = txtIDEmpleadoSolicitud.Text,
+                                        Solicitud = dropTipo.SelectedText.Value || IsBlank(dropTipo.SelectedText.Value),
+                                        Departamento = "RECURSOS HUMANOS" || Solicitud = "Incapacidad",
+                                        Puesto <> "JEFA DE TESORERIA"
+                                    ),
+                            
+                            
+                                //JEFE DE DESARROLLO Y ANALISIS
+                                    LookUp(
+                                        Empleados,
+                                        Codigo = VarName
+                                    ).Puesto = "JEFE DE DESARROLLO Y ANALISIS",
+                                    Filter(
+                                        TramitesSolicitudes,
+                                        EstadoDeProceso = drpEstadoSolicitud.SelectedText.Value,
+                                        IsBlank(txtIDEmpleadoSolicitud.Text) || Codigo = txtIDEmpleadoSolicitud.Text,
+                                        Solicitud = dropTipo.SelectedText.Value || IsBlank(dropTipo.SelectedText.Value),
+                                        Departamento = "DESARROLLO Y ANALISIS",
+                                        Puesto <> "JEFE DE DESARROLLO Y ANALISIS"
+                                    ),
+                            
+                                    
+                                //GERENTE COMERCIAL Y GERENTE GENERAL
+                                    LookUp(
+                                        Empleados,
+                                        Codigo = VarName
+                                    ).Puesto = "GERENTE COMERCIAL" || LookUp(
+                                        Empleados,
+                                        Codigo = VarName
+                                    ).Puesto = "GERENTE GENERAL",
+                                    Filter(
+                                        TramitesSolicitudes,
+                                        EstadoDeProceso = drpEstadoSolicitud.SelectedText.Value,
+                                        IsBlank(txtIDEmpleadoSolicitud.Text) || Codigo = txtIDEmpleadoSolicitud.Text,
+                                        Solicitud = dropTipo.SelectedText.Value || IsBlank(dropTipo.SelectedText.Value),
+                                        Puesto in [
+                                            "GERENTE DE PRODUCCION",
+                                            "GERENTE CALIDAD",
+                                            "JEFE MANTENIMIENTO",
+                                            "JEFE DE C.D.S",
+                                            "JEFE DE CONTABILIDAD",
+                                            "JEFA DE TESORERIA",
+                                            "ENCARGADO DE FACTURACION",
+                                            "ENCARGADO DE IMPORTACION & EXPORTACIONES"
+                                        ]
+                                    )
+                                ),
+                                'Fecha de creación',
+                                SortOrder.Descending
                             )
                         Layout: =Layout.Vertical
                         LoadingSpinner: =LoadingSpinner.Data
@@ -455,8 +648,8 @@ EstadosPermisos As screen:
                             Text: |
                                 =DateDiff(Today(), ThisItem.Fecha_Inicio)
                             Visible: =drpEstadoSolicitud.SelectedText.Value = "En proceso"
-                            Width: =218
-                            X: =647
+                            Width: =264
+                            X: =601
                             Y: =37
                             ZIndex: =1
 
@@ -478,7 +671,7 @@ EstadosPermisos As screen:
                             Visible: =drpEstadoSolicitud.SelectedText.Value = "En proceso"
                             Weight: ='TextCanvas.Weight'.Semibold
                             Width: =83
-                            X: =554
+                            X: =507
                             Y: =37
                             ZIndex: =2
 
@@ -512,8 +705,8 @@ EstadosPermisos As screen:
                             PaddingTop: =0
                             Size: =12
                             Text: =ThisItem.Codigo
-                            Width: =241
-                            X: =301
+                            Width: =223
+                            X: =279
                             Y: =71
                             ZIndex: =4
 
@@ -534,7 +727,7 @@ EstadosPermisos As screen:
                             Fill: =RGBA(180, 214, 250, 1)
                             Font: =Font.Arial
                             FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
-                            Height: =27
+                            Height: =26
                             OnSelect: =Select(Parent)
                             PaddingBottom: =0
                             PaddingLeft: =0
@@ -542,8 +735,8 @@ EstadosPermisos As screen:
                             PaddingTop: =0
                             Size: =12
                             Text: =ThisItem.FechaTramite
-                            Width: =241
-                            X: =301
+                            Width: =223
+                            X: =279
                             Y: =5
                             ZIndex: =6
 
@@ -563,8 +756,8 @@ EstadosPermisos As screen:
                             PaddingTop: =0
                             Size: =12
                             Text: =ThisItem.Nombre
-                            Width: =241
-                            X: =301
+                            Width: =223
+                            X: =279
                             Y: =37
                             ZIndex: =7
 
@@ -577,16 +770,16 @@ EstadosPermisos As screen:
                             Fill: =RGBA(180, 214, 250, 1)
                             Font: =Font.Arial
                             FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
-                            Height: =27
+                            Height: =26
                             OnSelect: =Select(Parent)
                             PaddingBottom: =0
                             PaddingLeft: =0
                             PaddingRight: =0
                             PaddingTop: =0
                             Size: =12
-                            Text: =LookUp(Empleados,Codigo = ThisItem.Codigo,Puesto)
-                            Width: =218
-                            X: =647
+                            Text: =ThisItem.Puesto
+                            Width: =264
+                            X: =601
                             Y: =5
                             ZIndex: =8
 
@@ -599,13 +792,13 @@ EstadosPermisos As screen:
                             Fill: =
                             Font: =Font.Arial
                             FontColor: =RGBA(0, 0, 0, 1)
-                            Height: =27
+                            Height: =28
                             Size: =16
                             Text: |-
                                 ="FECHA TRAMITE:"
                             VerticalAlign: ='TextCanvas.VerticalAlign'.Middle
                             Weight: ='TextCanvas.Weight'.Semibold
-                            Width: =162
+                            Width: =148
                             X: =126
                             Y: =4
                             ZIndex: =9
@@ -619,13 +812,13 @@ EstadosPermisos As screen:
                             Fill: =
                             Font: =Font.Arial
                             FontColor: =RGBA(0, 0, 0, 1)
-                            Height: =28
+                            Height: =26
                             Size: =16
                             Text: |-
                                 ="CODIGO:"
                             VerticalAlign: ='TextCanvas.VerticalAlign'.Middle
                             Weight: ='TextCanvas.Weight'.Semibold
-                            Width: =162
+                            Width: =148
                             X: =126
                             Y: =70
                             ZIndex: =10
@@ -645,7 +838,7 @@ EstadosPermisos As screen:
                                 ="NOMBRE:"
                             VerticalAlign: ='TextCanvas.VerticalAlign'.Middle
                             Weight: ='TextCanvas.Weight'.Semibold
-                            Width: =161
+                            Width: =147
                             X: =127
                             Y: =37
                             ZIndex: =11
@@ -666,7 +859,7 @@ EstadosPermisos As screen:
                                 ="PUESTO:"
                             Weight: ='TextCanvas.Weight'.Semibold
                             Width: =83
-                            X: =554
+                            X: =507
                             Y: =5
                             ZIndex: =12
 
