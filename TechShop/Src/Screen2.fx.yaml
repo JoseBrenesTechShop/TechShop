@@ -138,10 +138,11 @@
                 HoverFill: =RGBA(40, 134, 222, 1)
                 Icon: =Icon.Home
                 OnSelect: |-
-                    =If(LookUp(Empleados, VarName = Codigo, Acceso),
-                        Navigate(MenuNew, ScreenTransition.Cover),
-                        Navigate(MenuEmpleado, ScreenTransition.Cover)   
-                    )
+                    =Back();
+                    UpdateContext({Guardar: false});
+                    Reset(glr_Maquinas_MO);
+                    Reset(txt_BuscaOrden_MO);
+                    Reset(txt_BuscaMaquina_MO)
                 PaddingBottom: =5
                 PaddingLeft: =5
                 PaddingRight: =5
@@ -222,7 +223,7 @@
                     Y: =39
                     ZIndex: =2
 
-                txt_Maquina_EM_1 As text:
+                txt_BuscaMaquina_MO As text:
                     Align: =Align.Center
                     BorderColor: =App.Theme.Colors.Darker40
                     BorderStyle: =BorderStyle.None
@@ -232,6 +233,7 @@
                     DisabledBorderColor: =RGBA(166, 166, 166, 1)
                     DisabledColor: =RGBA(166, 166, 166, 1)
                     DisabledFill: =RGBA(244, 244, 244, 1)
+                    DisplayMode: =If(Guardar, DisplayMode.View, DisplayMode.Edit)
                     FocusedBorderThickness: =4
                     Font: =App.Theme.Font
                     HintText: ="Nombre Maquina"
@@ -251,17 +253,18 @@
                     BorderColor: =App.Theme.Colors.Darker40
                     Default: ={}
                     DelayItemLoading: =true
+                    DisplayMode: =If(Guardar, DisplayMode.View, DisplayMode.Edit)
                     Fill: =RGBA(204, 231, 246, 0.7)
                     Height: =532
                     Items: |-
                         =If(
-                            IsBlank(txt_Maquina_EM_1.Text),
+                            IsBlank(txt_BuscaMaquina_MO.Text),
                             Filter(
                                 Maquinas,
                                 Status = drp_Estado_EM.SelectedText.Value
                             ),
                             Filter(
-                                Search(Maquinas, txt_Maquina_EM_1.Text, Maquina),
+                                Search(Maquinas, txt_BuscaMaquina_MO.Text, Maquina),
                                 Status = drp_Estado_EM.SelectedText.Value
                             )
                         )
@@ -326,7 +329,9 @@
                         Fill: =If(ThisItem.IsSelected, RGBA(0, 137, 250, 0.3), RGBA(0, 0, 0, 0))
                         Height: =49
                         Icon: =Icon.NextArrow
-                        OnSelect: =Select(Parent)
+                        OnSelect: |-
+                            =Select(Parent);
+                            Reset(glr_Info_MO)
                         Width: =300
                         ZIndex: =11
 
@@ -387,6 +392,7 @@
                         DisabledBorderColor: =RGBA(166, 166, 166, 1)
                         DisabledColor: =RGBA(166, 166, 166, 1)
                         DisabledFill: =RGBA(244, 244, 244, 1)
+                        DisplayMode: =If(Guardar, DisplayMode.View, DisplayMode.Edit)
                         FocusedBorderThickness: =4
                         HintText: ="Buscar Orden"
                         HoverBorderColor: =RGBA(204, 231, 246, 1)
@@ -446,6 +452,7 @@
                         BorderStyle: =BorderStyle.None
                         Default: ={}
                         DelayItemLoading: =true
+                        DisplayMode: =If(Guardar, DisplayMode.View, DisplayMode.Edit)
                         Fill: =RGBA(153, 207, 236, 1)
                         Height: =371
                         Items: =Filter(Orden_Ejecucion, Orden = txt_BuscaOrden_MO.Text && Estado_Orden = "Ejecucion")
@@ -624,6 +631,7 @@
                         DisabledBorderColor: =RGBA(244, 244, 244, 1)
                         DisabledColor: =RGBA(166, 166, 166, 1)
                         DisabledFill: =RGBA(244, 244, 244, 1)
+                        DisplayMode: =If(Guardar, DisplayMode.View, DisplayMode.Edit)
                         Fill: =RGBA(0, 134, 208, 1)
                         Font: =App.Theme.Font
                         FontWeight: =FontWeight.Semibold
@@ -633,114 +641,18 @@
                         HoverFill: =RGBA(102, 182, 227, 1)
                         OnSelect: |-
                             =If(
-                                IsBlank(drp_EstadoEdits_EM.SelectedText.Value),
+                                IsBlank(txt_Maquina_MO.Text) || IsBlank(txt_Orden_MO.Text) || IsBlank(txt_Operacion_MO.Text),
                                 Notify(
-                                    "Debe seleccionar el estado de la maquina",
+                                    "Debe de seleccionar una Maquina, su orden y la operacion",
                                     NotificationType.Error
                                 ),
-                                If(
-                                    IsBlank(txt_Descripcion_EM.Text),
-                                    Notify(
-                                        "Debe agreagar una descripcion/motivo del cambio de estado",
-                                        NotificationType.Error
-                                    ),
-                                    If(
-                                        drp_EstadoEdits_EM.SelectedText.Value = "Paro" && (IsBlank(drp_Causa_EM.SelectedText.Value) || IsBlank(drp_Comentario_EM.SelectedText.Value)),
-                                        Notify(
-                                            "Debe indiacar un comentario y una causa para realizar el cambio de estado",
-                                            NotificationType.Error
-                                        ),
-                                        If(
-                                            drp_Comentario_EM.SelectedText.Value = "MANTENIMIENTO ",
-                                            EnviarCorreo.Run(
-                                                "raraya@tsicr.com",
-                                                texto,
-                                                HtmlBody_EM.HtmlText
-                                            );
-                                            EnviarCorreo.Run(
-                                                "rpereira@tsicr.com",
-                                                texto,
-                                                HtmlBody_EM.HtmlText
-                                            ),
-                                            drp_Comentario_EM.SelectedText.Value = "PROGRAMACION",
-                                            EnviarCorreo.Run(
-                                                "raraya@tsicr.com",
-                                                texto,
-                                                HtmlBody_EM.HtmlText
-                                            );
-                                            EnviarCorreo.Run(
-                                                "wsequeira@tsicr.com",
-                                                texto,
-                                                HtmlBody_EM.HtmlText
-                                            ),
-                                            drp_Comentario_EM.SelectedText.Value = "PRODUCCION",
-                                            EnviarCorreo.Run(
-                                                "supervisoresTSI@tsicr.com",
-                                                texto,
-                                                HtmlBody_EM.HtmlText
-                                            );
-                                            EnviarCorreo.Run(
-                                                "lfernandez@tsicr.com",
-                                                texto,
-                                                HtmlBody_EM.HtmlText
-                                            ),
-                                            drp_Comentario_EM.SelectedText.Value = "CALIDAD ",
-                                            EnviarCorreo.Run(
-                                                "vguerrero@tsicr.com",
-                                                texto,
-                                                HtmlBody_EM.HtmlText
-                                            );
-                                            EnviarCorreo.Run(
-                                                "icespedes@tsicr.com",
-                                                texto,
-                                                HtmlBody_EM.HtmlText
-                                            )
-                                        );
-                                        Patch(
-                                            Historial_Maquinas,
-                                            Defaults(Historial_Maquinas),
-                                            {
-                                                Maquina: glr_Info_EM.Selected.Maquina,
-                                                Status: glr_Info_EM.Selected.Status,
-                                                Motivo_Estado: glr_Info_EM.Selected.Motivo_Estado,
-                                                Comentario: glr_Info_EM.Selected.Comentario,
-                                                Causa: glr_Info_EM.Selected.Causa,
-                                                Fecha_Estado:Text(glr_Info_EM.Selected.'Fecha de modificación', "dd/mmm/yyyy hh:mm AM/PM"),
-                                                Fecha_Inicio: glr_Info_EM.Selected.'Fecha de modificación',
-                                                Fecha_Fin: Now(),
-                                                Guns: glr_Info_EM.Selected.Guns,
-                                                User: glr_Info_EM.Selected.User
-                                            }
-                                        );
-                                        Patch(
-                                            Maquinas,
-                                            glr_Info_EM.Selected,
-                                            {
-                                                Status: drp_EstadoEdits_EM.SelectedText.Value,
-                                                Motivo_Estado: txt_Descripcion_EM.Text,
-                                                Comentario: drp_Comentario_EM.SelectedText.Value,
-                                                Causa: drp_Causa_EM.SelectedText.Value,
-                                                Guns: drp_Guns_EM.SelectedText.Value,
-                                                User: LookUp(
-                                                    Empleados,
-                                                    Codigo = VarName,
-                                                    Nombre
-                                                )
-                                            }
-                                        );
-                                        Notify(
-                                            "Cambios Guardados Exitosamente",
-                                            NotificationType.Success
-                                        );
-                                        Reset(txt_Descripcion_EM)
-                                    )
-                                )
+                                UpdateContext({Guardar: true})
                             )
                         PressedBorderColor: =App.Theme.Colors.Darker40
                         PressedColor: =Self.Color
                         PressedFill: =App.Theme.Colors.Darker40
                         Size: =15
-                        Text: ="Guardar Cambios"
+                        Text: ="Continuar"
                         Width: =201
                         X: =781
                         Y: =566
@@ -832,6 +744,7 @@
                         Color: =RGBA(255, 255, 255, 1)
                         DisabledBorderColor: =RGBA(166, 166, 166, 1)
                         DisabledColor: =RGBA(244, 244, 244, 1)
+                        DisplayMode: =If(Guardar, DisplayMode.View, DisplayMode.Edit)
                         Fill: =RGBA(153, 201, 238, 1)
                         FocusedBorderThickness: =20
                         Height: =50
@@ -848,4 +761,127 @@
                         X: =913
                         Y: =486
                         ZIndex: =30
+
+                    Container24 As groupContainer.manualLayoutContainer:
+                        BorderColor: =RGBA(15, 84, 140, 1)
+                        BorderThickness: =4
+                        DropShadow: =DropShadow.ExtraBold
+                        Fill: =RGBA(255, 255, 255, 1)
+                        Height: =295
+                        RadiusBottomLeft: =20
+                        RadiusBottomRight: =20
+                        RadiusTopLeft: =20
+                        RadiusTopRight: =20
+                        Visible: =Guardar
+                        Width: =533
+                        X: =240
+                        Y: =160
+                        ZIndex: =31
+
+                        btn_Guardar_EM_2 As button:
+                            BorderColor: =App.Theme.Colors.Primary
+                            BorderStyle: =BorderStyle.None
+                            DisabledBorderColor: =RGBA(244, 244, 244, 1)
+                            DisabledColor: =RGBA(166, 166, 166, 1)
+                            DisabledFill: =RGBA(244, 244, 244, 1)
+                            Fill: =RGBA(233, 79, 76, 1)
+                            Font: =App.Theme.Font
+                            FontWeight: =FontWeight.Semibold
+                            Height: =59
+                            HoverBorderColor: =App.Theme.Colors.Darker10
+                            HoverColor: =RGBA(255, 255, 255, 1)
+                            HoverFill: =RGBA(215, 58, 60, 1)
+                            OnSelect: |-
+                                =UpdateContext({Guardar: false});
+                            PressedBorderColor: =App.Theme.Colors.Darker40
+                            PressedColor: =Self.Color
+                            PressedFill: =App.Theme.Colors.Darker40
+                            Size: =15
+                            Text: ="Cancelar"
+                            Width: =201
+                            X: =35
+                            Y: =222
+                            ZIndex: =1
+
+                        btn_Guardar_EM_3 As button:
+                            BorderColor: =App.Theme.Colors.Primary
+                            BorderStyle: =BorderStyle.None
+                            DisabledBorderColor: =RGBA(244, 244, 244, 1)
+                            DisabledColor: =RGBA(166, 166, 166, 1)
+                            DisabledFill: =RGBA(244, 244, 244, 1)
+                            Fill: =RGBA(72, 163, 62, 1)
+                            Font: =App.Theme.Font
+                            FontWeight: =FontWeight.Semibold
+                            Height: =59
+                            HoverBorderColor: =App.Theme.Colors.Darker10
+                            HoverColor: =RGBA(255, 255, 255, 1)
+                            HoverFill: =RGBA(52, 152, 47, 1)
+                            OnSelect: |-
+                                =If(
+                                    IsBlank(
+                                        LookUp(
+                                            Maquina_Ordens,
+                                            Maquina = txt_Maquina_MO.Text
+                                        )
+                                    ),
+                                    Collect(
+                                        Maquina_Ordens,
+                                        {
+                                            Maquina: txt_Maquina_MO.Text,
+                                            Orden: txt_Orden_MO.Text,
+                                            Operacion: txt_Operacion_MO.Text
+                                        }
+                                    ),
+                                    Patch(
+                                        Maquina_Ordens,
+                                        LookUp(
+                                            Maquina_Ordens,
+                                            Maquina = txt_Maquina_MO.Text
+                                        ),
+                                        {
+                                            Orden: txt_Orden_MO.Text,
+                                            Operacion: txt_Operacion_MO.Text
+                                        }
+                                    )
+                                );
+                                UpdateContext({Guardar: false});
+                                Reset(glr_Maquinas_MO);Reset(txt_BuscaOrden_MO);Reset(txt_BuscaMaquina_MO)
+                            PressedBorderColor: =App.Theme.Colors.Darker40
+                            PressedColor: =Self.Color
+                            PressedFill: =App.Theme.Colors.Darker40
+                            Size: =15
+                            Text: ="Guardar"
+                            Width: =201
+                            X: =297
+                            Y: =222
+                            ZIndex: =2
+
+                        TextInput2 As text:
+                            Align: =Align.Center
+                            BorderColor: =App.Theme.Colors.Darker40
+                            BorderThickness: =2
+                            Color: =RGBA(0, 0, 0, 1)
+                            Default: |-
+                                ="Revise la informacion:
+                                Maquina: " & txt_Maquina_MO.Text & "
+                                Orden: " & txt_Orden_MO.Text & "
+                                Operacion: " & txt_Operacion_MO.Text & "
+                                
+                                ¿Desea continuar?"
+                            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                            DisabledColor: =RGBA(166, 166, 166, 1)
+                            DisabledFill: =RGBA(244, 244, 244, 1)
+                            DisplayMode: =DisplayMode.View
+                            FocusedBorderThickness: =4
+                            Font: =App.Theme.Font
+                            Height: =192
+                            HoverBorderColor: =App.Theme.Colors.Darker40
+                            HoverColor: =RGBA(0, 0, 0, 1)
+                            HoverFill: =App.Theme.Colors.Lighter70
+                            Mode: =TextMode.MultiLine
+                            Size: =18
+                            Width: =463
+                            X: =35
+                            Y: =15
+                            ZIndex: =3
 
