@@ -257,17 +257,9 @@
                     Fill: =RGBA(204, 231, 246, 0.7)
                     Height: =532
                     Items: |-
-                        =If(
-                            IsBlank(txt_BuscaMaquina_MO.Text),
-                            Filter(
-                                Maquinas,
-                                Status = drp_Estado_EM.SelectedText.Value
-                            ),
-                            Filter(
-                                Search(Maquinas, txt_BuscaMaquina_MO.Text, Maquina),
-                                Status = drp_Estado_EM.SelectedText.Value
+                        =    Filter(
+                                Maquinas, IsBlank(txt_BuscaMaquina_MO.Text) || txt_BuscaMaquina_MO.Text in Maquina
                             )
-                        )
                     Layout: =Layout.Vertical
                     LoadingSpinner: =LoadingSpinner.Data
                     OnSelect: |-
@@ -286,16 +278,7 @@
                         OnSelect: =Select(Parent)
                         Width: =Parent.TemplateWidth
                         Y: =38
-                        ZIndex: =5
-
-                    Rectangle1_7 As rectangle:
-                        BorderColor: =RGBA(0, 134, 208, 1)
-                        Fill: =RGBA(0, 121, 187, 1)
-                        Height: =76
-                        OnSelect: =Select(Parent)
-                        Visible: =ThisItem.IsSelected
-                        Width: =6
-                        ZIndex: =6
+                        ZIndex: =1
 
                     TextInput3_24 As text:
                         Align: =Align.Center
@@ -318,7 +301,16 @@
                         PaddingLeft: =5
                         Size: =15
                         Width: =300
-                        ZIndex: =8
+                        ZIndex: =2
+
+                    Rectangle1_7 As rectangle:
+                        BorderColor: =RGBA(0, 134, 208, 1)
+                        Fill: =RGBA(0, 121, 187, 1)
+                        Height: =38
+                        OnSelect: =Select(Parent)
+                        Visible: =ThisItem.IsSelected
+                        Width: =5
+                        ZIndex: =3
 
                     Icon2_3 As icon.NextArrow:
                         BorderColor: =RGBA(0, 0, 0, 0)
@@ -332,8 +324,8 @@
                         OnSelect: |-
                             =Select(Parent);
                             Reset(glr_Info_MO)
-                        Width: =300
-                        ZIndex: =11
+                        Width: =299
+                        ZIndex: =4
 
             MainContainer9 As groupContainer.verticalAutoLayoutContainer:
                 DropShadow: =DropShadow.Light
@@ -455,7 +447,7 @@
                         DisplayMode: =If(Guardar, DisplayMode.View, DisplayMode.Edit)
                         Fill: =RGBA(153, 207, 236, 1)
                         Height: =371
-                        Items: =Filter(Orden_Ejecucion, Orden = txt_BuscaOrden_MO.Text && Estado_Orden = "Ejecucion")
+                        Items: =Sort(Filter(Orden_Ejecucion, Orden = txt_BuscaOrden_MO.Text && Estado_Orden = "Ejecucion"),Operacion, SortOrder.Ascending)
                         Layout: =Layout.Vertical
                         LoadingSpinner: =LoadingSpinner.Data
                         TemplatePadding: =0
@@ -664,7 +656,7 @@
                         BorderStyle: =BorderStyle.None
                         BorderThickness: =2
                         Color: =RGBA(0, 0, 0, 1)
-                        Default: =If(IsBlank(glr_Info_MO.Selected),LookUp(Maquina_Ordens, Maquina = txt_Maquina_MO.Text).Orden, glr_Info_MO.Selected.Orden)
+                        Default: =If(IsBlank(glr_Info_MO.Selected),LookUp(Maquina_Ordens_1, Maquina = txt_Maquina_MO.Text).Orden, glr_Info_MO.Selected.Orden)
                         DisabledBorderColor: =RGBA(166, 166, 166, 1)
                         DisabledColor: =RGBA(166, 166, 166, 1)
                         DisabledFill: =RGBA(244, 244, 244, 1)
@@ -704,7 +696,7 @@
                         BorderStyle: =BorderStyle.None
                         BorderThickness: =2
                         Color: =RGBA(0, 0, 0, 1)
-                        Default: =If(IsBlank(glr_Info_MO.Selected),LookUp(Maquina_Ordens, Maquina = txt_Maquina_MO.Text).Operacion, glr_Info_MO.Selected.Operacion)
+                        Default: =If(IsBlank(glr_Info_MO.Selected),LookUp(Maquina_Ordens_1, Maquina = txt_Maquina_MO.Text).Operacion, glr_Info_MO.Selected.Operacion)
                         DisabledBorderColor: =RGBA(166, 166, 166, 1)
                         DisabledColor: =RGBA(166, 166, 166, 1)
                         DisabledFill: =RGBA(244, 244, 244, 1)
@@ -820,12 +812,12 @@
                                 =If(
                                     IsBlank(
                                         LookUp(
-                                            Maquina_Ordens,
+                                            Maquina_Ordens_1,
                                             Maquina = txt_Maquina_MO.Text
                                         )
                                     ),
                                     Collect(
-                                        Maquina_Ordens,
+                                        Maquina_Ordens_1,
                                         {
                                             Maquina: txt_Maquina_MO.Text,
                                             Orden: txt_Orden_MO.Text,
@@ -833,9 +825,9 @@
                                         }
                                     ),
                                     Patch(
-                                        Maquina_Ordens,
+                                        Maquina_Ordens_1,
                                         LookUp(
-                                            Maquina_Ordens,
+                                            Maquina_Ordens_1,
                                             Maquina = txt_Maquina_MO.Text
                                         ),
                                         {
@@ -845,7 +837,9 @@
                                     )
                                 );
                                 UpdateContext({Guardar: false});
-                                Reset(glr_Maquinas_MO);Reset(txt_BuscaOrden_MO);Reset(txt_BuscaMaquina_MO)
+                                Reset(glr_Maquinas_MO);
+                                Reset(txt_BuscaOrden_MO);
+                                Reset(txt_BuscaMaquina_MO)
                             PressedBorderColor: =App.Theme.Colors.Darker40
                             PressedColor: =Self.Color
                             PressedFill: =App.Theme.Colors.Darker40
