@@ -52,7 +52,7 @@
                 Width: =75
                 ZIndex: =1
 
-            txtEmpleadoHorarioView_18 As text:
+            txt_User_MO As text:
                 Align: =Align.Center
                 AlignInContainer: =AlignInContainer.Center
                 BorderColor: =RGBA(204, 231, 246, 1)
@@ -790,7 +790,7 @@
                             ZIndex: =4
 
                     Container24 As groupContainer.manualLayoutContainer:
-                        BorderColor: =RGBA(71, 158, 245, 1)
+                        BorderColor: =RGBA(40, 134, 222, 1)
                         BorderThickness: =4
                         DropShadow: =DropShadow.Semibold
                         Fill: =RGBA(255, 255, 255, 1)
@@ -820,14 +820,16 @@
                             HoverFill: =RGBA(215, 58, 60, 1)
                             OnSelect: |-
                                 =UpdateContext({Guardar: false});
+                                Refresh(Verificaciones);
+                                Clear(CheckList)
                             PressedBorderColor: =App.Theme.Colors.Darker40
                             PressedColor: =Self.Color
                             PressedFill: =App.Theme.Colors.Darker40
                             Size: =15
                             Text: ="Cancelar"
                             Width: =201
-                            X: =549
-                            Y: =381
+                            X: =446
+                            Y: =364
                             ZIndex: =1
 
                         btn_Guardar_EM_3 As button:
@@ -843,46 +845,63 @@
                             HoverBorderColor: =App.Theme.Colors.Darker10
                             HoverColor: =RGBA(255, 255, 255, 1)
                             HoverFill: =RGBA(52, 152, 47, 1)
-                            OnSelect: |-
+                            OnSelect: |
                                 =If(
-                                    IsBlank(
-                                        LookUp(
-                                            Maquina_Ordens,
-                                            Maquina = txt_Maquina_MO.Text
-                                        )
+                                    CountIf(
+                                        CheckList,
+                                        true
+                                    ) = CountIf(
+                                        Verificaciones,
+                                        true
                                     ),
-                                    Collect(
-                                        Maquina_Ordens,
-                                        {
-                                            Maquina: txt_Maquina_MO.Text,
-                                            Orden: txt_Orden_MO.Text,
-                                            Operacion: txt_Operacion_MO.Text
-                                        }
-                                    ),
-                                    Patch(
-                                        Maquina_Ordens,
-                                        LookUp(
-                                            Maquina_Ordens,
-                                            Maquina = txt_Maquina_MO.Text
+                                    If(
+                                        IsBlank(
+                                            LookUp(
+                                                Maquina_Ordens_1,
+                                                Maquina = txt_Maquina_MO.Text
+                                            )
                                         ),
-                                        {
-                                            Orden: txt_Orden_MO.Text,
-                                            Operacion: txt_Operacion_MO.Text
-                                        }
+                                        Collect(
+                                            Maquina_Ordens_1,
+                                            {
+                                                Maquina: txt_Maquina_MO.Text,
+                                                Orden: txt_Orden_MO.Text,
+                                                Operacion: txt_Operacion_MO.Text, 
+                                                User: txt_User_MO.Text
+                                            }
+                                        ),
+                                        Patch(
+                                            Maquina_Ordens_1,
+                                            LookUp(
+                                                Maquina_Ordens_1,
+                                                Maquina = txt_Maquina_MO.Text
+                                            ),
+                                            {
+                                                Orden: txt_Orden_MO.Text,
+                                                Operacion: txt_Operacion_MO.Text, 
+                                                User: txt_User_MO.Text
+                                            }
+                                        )
+                                    );
+                                    UpdateContext({Guardar: false});
+                                    Reset(glr_Maquinas_MO);
+                                    Reset(txt_BuscaOrden_MO);
+                                    Reset(txt_BuscaMaquina_MO);
+                                    Refresh(Verificaciones);
+                                    Clear(CheckList),
+                                    Notify(
+                                        "Debe completar la lista",
+                                        NotificationType.Error
                                     )
                                 );
-                                UpdateContext({Guardar: false});
-                                Reset(glr_Maquinas_MO);
-                                Reset(txt_BuscaOrden_MO);
-                                Reset(txt_BuscaMaquina_MO)
                             PressedBorderColor: =App.Theme.Colors.Darker40
                             PressedColor: =Self.Color
                             PressedFill: =App.Theme.Colors.Darker40
                             Size: =15
                             Text: ="Guardar"
                             Width: =201
-                            X: =750
-                            Y: =381
+                            X: =696
+                            Y: =364
                             ZIndex: =2
 
                         TextInput2 As text:
@@ -896,75 +915,122 @@
                                 Orden: " & txt_Orden_MO.Text & "
                                 Operacion: " & txt_Operacion_MO.Text & "
                                 
-                                ¿Desea continuar?"
+                                
+                                Para continuar primero debe completar la lista de tareas que se encuentra a la izquierda.
+                                Una vez todas las tareas esten completas puede guardar la Orden
+                                 "
                             DisabledBorderColor: =RGBA(166, 166, 166, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             DisabledFill: =RGBA(244, 244, 244, 1)
                             DisplayMode: =DisplayMode.View
                             FocusedBorderThickness: =4
                             Font: =App.Theme.Font
-                            Height: =192
+                            Height: =350
                             HoverBorderColor: =App.Theme.Colors.Darker40
                             HoverColor: =RGBA(0, 0, 0, 1)
                             HoverFill: =App.Theme.Colors.Lighter70
                             Mode: =TextMode.MultiLine
-                            Size: =18
-                            Width: =281
-                            X: =668
+                            Size: =17
+                            Width: =451
+                            X: =446
+                            Y: =14
                             ZIndex: =3
 
-                        "Gallery1 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
-                            BorderColor: =App.Theme.Colors.Darker40
-                            DelayItemLoading: =true
-                            Height: =358
-                            Items: =CustomGallerySample
-                            Layout: =Layout.Vertical
-                            LoadingSpinner: =LoadingSpinner.Data
-                            TemplatePadding: =0
-                            TemplateSize: =50
-                            Width: =468
-                            X: =40
-                            Y: =80
-                            ZIndex: =4
+                        Container31 As groupContainer.manualLayoutContainer:
+                            BorderColor: =RGBA(71, 158, 245, 1)
+                            BorderThickness: =4
+                            DropShadow: =DropShadow.Semibold
+                            Fill: =RGBA(71, 158, 245, 0.3)
+                            Height: =409
+                            RadiusBottomLeft: =10
+                            RadiusBottomRight: =10
+                            RadiusTopLeft: =10
+                            RadiusTopRight: =10
+                            Width: =376
+                            X: =14
+                            Y: =14
+                            ZIndex: =6
 
-                            Separator8 As rectangle:
+                            "Gallery1 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
                                 BorderColor: =App.Theme.Colors.Darker40
-                                Fill: =RGBA(255, 255, 255, 1)
-                                Height: =8
-                                OnSelect: =Select(Parent)
-                                Width: =Parent.TemplateWidth
-                                Y: =Parent.TemplateHeight - Self.Height
-                                ZIndex: =5
+                                DelayItemLoading: =true
+                                Height: =349
+                                Items: =Verificaciones
+                                Layout: =Layout.Vertical
+                                LoadingSpinner: =LoadingSpinner.Data
+                                TemplatePadding: =0
+                                TemplateSize: =50
+                                Width: =364
+                                X: =12
+                                Y: =52
+                                ZIndex: =1
 
-                            TextInput7 As text:
+                                TextInput7 As text:
+                                    BorderColor: =App.Theme.Colors.Darker40
+                                    BorderThickness: =2
+                                    Color: =RGBA(0, 0, 0, 1)
+                                    Default: =ThisItem.Descripcion
+                                    DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                                    DisabledColor: =RGBA(166, 166, 166, 1)
+                                    DisabledFill: =RGBA(244, 244, 244, 1)
+                                    FocusedBorderThickness: =4
+                                    Font: =App.Theme.Font
+                                    HoverBorderColor: =App.Theme.Colors.Darker40
+                                    HoverColor: =RGBA(0, 0, 0, 1)
+                                    HoverFill: =App.Theme.Colors.Lighter70
+                                    OnSelect: =Select(Parent)
+                                    Size: =13
+                                    Strikethrough: =ThisItem in CheckList
+                                    ZIndex: =1
+
+                                Checkbox1 As checkbox:
+                                    BorderColor: =
+                                    CheckboxBorderColor: =App.Theme.Colors.Primary
+                                    CheckmarkFill: =App.Theme.Colors.Primary
+                                    Color: =RGBA(0, 0, 0, 1)
+                                    DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                                    DisabledColor: =RGBA(0, 0, 0, 0)
+                                    Font: =App.Theme.Font
+                                    Height: =42
+                                    HoverColor: =App.Theme.Colors.Darker30
+                                    OnCheck: =Collect(CheckList, ThisItem)
+                                    OnSelect: =Select(Parent)
+                                    OnUncheck: =Remove(CheckList, ThisItem)
+                                    PressedBorderColor: =
+                                    PressedFill: =
+                                    Size: =13
+                                    Text: =
+                                    Width: =39
+                                    X: =318
+                                    ZIndex: =2
+
+                                Separator8 As rectangle:
+                                    BorderColor: =App.Theme.Colors.Darker40
+                                    Fill: =RGBA(0, 0, 0, 0)
+                                    Height: =50
+                                    OnSelect: =Select(Parent)
+                                    Width: =318
+                                    ZIndex: =3
+
+                            TextInput2_1 As text:
+                                Align: =Align.Center
                                 BorderColor: =App.Theme.Colors.Darker40
                                 BorderThickness: =2
-                                Color: =RGBA(0, 0, 0, 1)
-                                Default: ="Text input"
+                                Color: =RGBA(255, 255, 255, 1)
+                                Default: ="Limpieza de linea  " & CountIf(CheckList, true) & "/" & CountIf(Verificaciones, true)
                                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 DisabledFill: =RGBA(244, 244, 244, 1)
+                                DisplayMode: =DisplayMode.View
+                                Fill: =RGBA(71, 158, 245, 1)
                                 FocusedBorderThickness: =4
                                 Font: =App.Theme.Font
+                                FontWeight: =FontWeight.Bold
                                 HoverBorderColor: =App.Theme.Colors.Darker40
                                 HoverColor: =RGBA(0, 0, 0, 1)
                                 HoverFill: =App.Theme.Colors.Lighter70
-                                OnSelect: =Select(Parent)
-                                Size: =13
-                                ZIndex: =7
-
-                            Checkbox1 As checkbox:
-                                BorderColor: =App.Theme.Colors.Darker40
-                                CheckboxBorderColor: =App.Theme.Colors.Primary
-                                CheckmarkFill: =App.Theme.Colors.Primary
-                                Color: =RGBA(0, 0, 0, 1)
-                                Font: =App.Theme.Font
-                                Height: =42
-                                HoverColor: =App.Theme.Colors.Darker30
-                                OnSelect: =Select(Parent)
-                                Size: =13
-                                Text: =
-                                Width: =39
-                                X: =318
-                                ZIndex: =8
+                                Mode: =TextMode.MultiLine
+                                Size: =18
+                                Width: =376
+                                ZIndex: =2
 

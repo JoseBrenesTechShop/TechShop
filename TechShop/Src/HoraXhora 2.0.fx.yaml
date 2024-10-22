@@ -1332,7 +1332,6 @@
                         =UpdateContext({Efi: (Value(txt_CantProducida_HxH2.Text + txt_CantDañada_HxH2.Text) / Value(txt_Meta_HxH2.Text)) * 100});
                         UpdateContext({Disable: true});
                         If(
-                        
                           //Validacion de maquina
                             IsBlank(txt_Maquina_HxH2.Text),//Maquina en blanco?
                             UpdateContext({TextoAdvertencia: "Debe escanear la MAQUINA en la que esta trabajando"});
@@ -1351,8 +1350,6 @@
                             ).Status = "Paro",//Maquina en paro?
                             UpdateContext({TextoAdvertencia: "La maquina seleccionada esta en Paro"});
                             UpdateContext({Mostra: true}),
-                        
-                        
                           //Validacion de tarima
                             IsBlank(txt_Tarima_HxH2.Text),//Tarima en blanco?
                             UpdateContext({TextoAdvertencia: "Debe escanear la TARIMA que se esta llenando"});
@@ -1369,8 +1366,6 @@
                             ),//Formato valido?
                             UpdateContext({TextoAdvertencia: "El formato de la TARIMA es invalido"});
                             UpdateContext({Mostra: true}),
-                        
-                        
                           //Validacion Hora y operario
                             IsBlank(drp_Hora_HxH2.SelectedText),
                             UpdateContext({TextoAdvertencia: "Debe indicar la hora del registro"});
@@ -1378,18 +1373,14 @@
                             IsBlank(drp_Operario_HxH2.SelectedText),
                             UpdateContext({TextoAdvertencia: "Debe indicar al operario que se le esta haciendo el registro"});
                             UpdateContext({Mostra: true}),
-                        
-                        
                           //Validacion Turno
                             txt_Turno_HxH2.Text in [
                                 "LIBRE",
                                 "TV",
                                 "TF"
                             ],//Turno igual a LIBRE o TV o TF?
-                            UpdateContext({TextoAdvertencia: "No puede guardar registros en turno " & txt_Turno_HxH2.Text &"."});
+                            UpdateContext({TextoAdvertencia: "No puede guardar registros en turno " & txt_Turno_HxH2.Text & "."});
                             UpdateContext({Mostra: true}),
-                        
-                        
                           //Validacion Cantidad
                             !IsNumeric(txt_CantDañada_HxH2.Text) || !IsNumeric(txt_CantProducida_HxH2.Text),
                             UpdateContext({TextoAdvertencia: "Las cantidades deben ser numericas"});
@@ -1410,8 +1401,6 @@
                             ).Guns = "SI" && ((txt_CantProducida_HxH2.Text + txt_CantDañada_HxH2.Text) + txt_CantTarima_HxH2.Text) > 50,
                             UpdateContext({TextoAdvertencia: "La cantidad digitada supera la cantidad maxima (50) permitida por tarima. Por favor revisar la informacion digitada."});
                             UpdateContext({Mostra: true}),
-                        
-                        
                           //Validadcion de registros
                             CountRows(
                                 Filter(
@@ -1435,8 +1424,6 @@
                             ) >= 4,
                             UpdateContext({TextoAdvertencia: "Se llego al limite de 4 registros por hora del empleado"});
                             UpdateContext({Mostra: true}),
-                        
-                        
                           //lógica para establecer Cantidad_Por_Hora a 0 si ya existe un registro igual
                             If(
                                 CountRows(
@@ -1450,10 +1437,8 @@
                                 UpdateContext({CantidadPorHoraGuardar: 0}),//Si ya existe un registro, establece Cantidad_Por_Hora a 0
                                 UpdateContext({CantidadPorHoraGuardar: Value(txt_Meta_HxH2.Text)})//Si no existe un registro, establece Cantidad_Por_Hora a txtMetaHxH.Text
                             );
-                        
-                        
-                          //Aprovacion del 1.5
-                            (txt_CantProducida_HxH2.Text + txt_CantTotal_HxH2.Text) > (txt_CantMax_HxH2.Text + (txt_CantMax_HxH2.Text * 0.015)) && OrdenInfo.'Permiso_1.5' <> "Aprobado",
+                            //Aprovacion del 1.5
+                        (txt_CantProducida_HxH2.Text + txt_CantTotal_HxH2.Text) > (txt_CantMax_HxH2.Text + (txt_CantMax_HxH2.Text * 0.015)) && OrdenInfo.'Permiso_1.5' <> "Aprobado",
                             If(
                                 IsBlank(
                                     LookUp(
@@ -1488,14 +1473,20 @@
                                 )
                             );
                             UpdateContext({MostraBloqueo: true}),
-                        
-                        
                           //Guarda el registro
                             If(
                                 Efi = 0,
                                 UpdateContext({MostraCausa: true}),
-                                If(Efi > 0 && Efi < 80, 
-                                    UpdateContext({Comentarios: {Comentario: "PRODUCCION", Causa: "Bajo rendimiento de operario"}});
+                                If(
+                                    Efi > 0 && Efi < 80,
+                                    UpdateContext(
+                                        {
+                                            Comentarios: {
+                                                Comentario: "PRODUCCION",
+                                                Causa: "Bajo rendimiento de operario"
+                                            }
+                                        }
+                                    );
                                     Reset(drp_Comentario_HxH2);
                                     Reset(drp_Causas_HxH2);
                                 );
@@ -1535,6 +1526,19 @@
                                             "mm/dd/yyyy hh:mm AM/PM"
                                         ),
                                         Hora: drp_Hora_HxH2.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                                    }
+                                );
+                                Patch(
+                                    Maquina_Ordens_1,
+                                    LookUp(
+                                        Maquina_Ordens_1,
+                                        Maquina = txt_Maquina_HxH2.Text
+                                    ),
+                                    {
+                                        Cantidad: LookUp(
+                                            Maquina_Ordens_1,
+                                            Maquina = txt_Maquina_HxH2.Text
+                                        ).Cantidad + (txt_CantProducida_HxH2.Text + txt_CantDañada_HxH2.Text)
                                     }
                                 );
                                 Patch(
@@ -1645,7 +1649,14 @@
                                 );
                                 Reset(txt_Maquina_HxH2);
                                 Reset(txt_Tarima_HxH2);
-                                UpdateContext({Comentarios: {Comentario: "PRODUCION", Causa: "Bien"}});
+                                UpdateContext(
+                                    {
+                                        Comentarios: {
+                                            Comentario: "PRODUCION",
+                                            Causa: "Bien"
+                                        }
+                                    }
+                                );
                                 Reset(drp_Comentario_HxH2);
                                 Reset(drp_Causas_HxH2);
                                 Reset(drp_Fecha_HxH);
@@ -1904,6 +1915,19 @@
                             "mm/dd/yyyy hh:mm AM/PM"
                         ),
                         Hora: drp_Hora_HxH2.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                    }
+                );
+                Patch(
+                    Maquina_Ordens_1,
+                    LookUp(
+                        Maquina_Ordens_1,
+                        Maquina = txt_Maquina_HxH2.Text
+                    ),
+                    {
+                        Cantidad: LookUp(
+                            Maquina_Ordens_1,
+                            Maquina = txt_Maquina_HxH2.Text
+                        ).Cantidad + (txt_CantProducida_HxH2.Text + txt_CantDañada_HxH2.Text)
                     }
                 );
                 Patch(

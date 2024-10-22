@@ -278,7 +278,20 @@
                         HoverColor: =RGBA(0, 0, 0, 1)
                         HoverFill: =RGBA(204, 231, 246, 1)
                         OnChange: |-
-                            =
+                            =UpdateContext(
+                                {
+                                    OrdenInfo: LookUp(
+                                        Orden_Ejecucion,
+                                        Orden = LookUp(
+                                            Maquina_Ordens_1,
+                                            Maquina = Self.Text
+                                        ).Orden && Operacion = LookUp(
+                                            Maquina_Ordens_1,
+                                            Maquina = Self.Text
+                                        ).Operacion
+                                    )
+                                }
+                            );
                             Reset(txt_Tarima_HxHE);
                             SetFocus(txt_Tarima_HxHE)
                         OnSelect: =Reset(Self)
@@ -667,7 +680,7 @@
                     BorderStyle: =BorderStyle.None
                     BorderThickness: =2
                     Color: =RGBA(0, 0, 0, 1)
-                    Default: =Sum(Filter(Scrap_1, Orden = OrdenInfo.Orden), Cantidad)
+                    Default: =If(!IsBlank(txt_Maquina_HxHE.Text), Sum(Filter(Scrap_1, Orden = OrdenInfo.Orden), Cantidad), "")
                     DisabledBorderColor: =RGBA(166, 166, 166, 1)
                     DisabledColor: =RGBA(166, 166, 166, 1)
                     DisabledFill: =RGBA(244, 244, 244, 1)
@@ -1603,6 +1616,19 @@
                                     }
                                 );
                                 Patch(
+                                    Maquina_Ordens_1,
+                                    LookUp(
+                                        Maquina_Ordens_1,
+                                        Maquina = txt_Maquina_HxHE.Text
+                                    ),
+                                    {
+                                        Cantidad: LookUp(
+                                            Maquina_Ordens_1,
+                                            Maquina = txt_Maquina_HxHE.Text
+                                        ).Cantidad + txt_CantProducida_HxHE.Text
+                                    }
+                                );
+                                Patch(
                                     Orden_Ejecucion,
                                     OrdenInfo,
                                     {CantidadTotalProducida: txt_CantTotal_HxHE.Text + txt_CantProducida_HxHE.Text}
@@ -1903,6 +1929,19 @@
                     }
                 );
                 Patch(
+                    Maquina_Ordens_1,
+                    LookUp(
+                        Maquina_Ordens_1,
+                        Maquina = txt_Maquina_HxHE.Text
+                    ),
+                    {
+                        Cantidad: LookUp(
+                            Maquina_Ordens_1,
+                            Maquina = txt_Maquina_HxHE.Text
+                        ).Cantidad + txt_CantProducida_HxHE.Text
+                    }
+                );
+                Patch(
                     Orden_Ejecucion,
                     OrdenInfo,
                     {CantidadTotalProducida: txt_CantTotal_HxHE.Text + txt_CantProducida_HxHE.Text}
@@ -2080,7 +2119,7 @@
             Height: =47
             HoverColor: =RGBA(0, 0, 0, 1)
             HoverFill: =App.Theme.Colors.Lighter70
-            Items: =Distinct(Filter(Causas, Comentario = drp_Comentario_HxHE.SelectedText.Value), Causa)
+            Items: =Distinct(Filter(Causas, Comentario = drp_Comentario_HxHE.SelectedText.Value, Causa <> "Bien"), Causa)
             PressedColor: =RGBA(255, 255, 255, 1)
             PressedFill: =App.Theme.Colors.Darker30
             SelectionFill: =App.Theme.Colors.Primary
