@@ -551,12 +551,12 @@
                     Default: |-
                         =If(
                             (Hora = "10:00" && (txt_Turno_HxH2.Text = "TD" || txt_Turno_HxH2.Text = "T1")) || (Hora = "16:00" && (txt_Turno_HxH2.Text = "TD" || txt_Turno_HxH2.Text = "T2")) || (Hora = "04:00" && (txt_Turno_HxH2.Text = "TN" || txt_Turno_HxH2.Text = "T3")) || (Hora = "22:00" && txt_Turno_HxH2.Text = "TN"),
-                            OrdenInfo.Meta * 0.75,
+                            LookUp(Maquina_Ordens_1, Maquina = txt_Maquina_HxH2.Text).Meta * 0.75,
                             (Hora = "13:00" && (txt_Turno_HxH2.Text = "TD" || txt_Turno_HxH2.Text = "T1")) || (Hora = "01:00" && (txt_Turno_HxH2.Text = "TN" || txt_Turno_HxH2.Text = "T3")) || (Hora = "20:00" && txt_Turno_HxH2.Text = "T2"),
-                            OrdenInfo.Meta * 0.50,
-                            OrdenInfo.Meta = 0,
+                            LookUp(Maquina_Ordens_1, Maquina = txt_Maquina_HxH2.Text).Meta * 0.50,
+                            LookUp(Maquina_Ordens_1, Maquina = txt_Maquina_HxH2.Text).Meta = 0,
                             4,
-                            OrdenInfo.Meta
+                            LookUp(Maquina_Ordens_1, Maquina = txt_Maquina_HxH2.Text).Meta
                         )
                     DisabledBorderColor: =RGBA(166, 166, 166, 1)
                     DisabledColor: =RGBA(166, 166, 166, 1)
@@ -1417,7 +1417,7 @@
                             CountRows(
                                 Filter(
                                     'Hora X Hora',
-                                    CodigoEmpleado = VarName,
+                                    CodigoEmpleado = drp_Operario_HxH2.SelectedText.Codigo,
                                     FechaRegistro = FechaSup,
                                     Hora = HoraValor
                                 )
@@ -1493,8 +1493,8 @@
                                 Collect(
                                     'Hora X Hora',
                                     {
-                                        CodigoEmpleado: VarName,
-                                        Operario: txtEmpleadoEnUso_HxHE_1.Text,
+                                        CodigoEmpleado: drp_Operario_HxH2.SelectedText.Codigo,
+                                        Operario: drp_Operario_HxH2.SelectedText.Empleado,
                                         Maquina: txt_Maquina_HxH2.Text,
                                         Orden: OrdenInfo.Orden,
                                         Operacion: OrdenInfo.Operacion,
@@ -1526,19 +1526,6 @@
                                             "mm/dd/yyyy hh:mm AM/PM"
                                         ),
                                         Hora: drp_Hora_HxH2.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
-                                    }
-                                );
-                                Patch(
-                                    Maquina_Ordens_1,
-                                    LookUp(
-                                        Maquina_Ordens_1,
-                                        Maquina = txt_Maquina_HxH2.Text
-                                    ),
-                                    {
-                                        Meta: LookUp(
-                                            Maquina_Ordens_1,
-                                            Maquina = txt_Maquina_HxH2.Text
-                                        ).Meta + (txt_CantProducida_HxH2.Text + txt_CantDañada_HxH2.Text)
                                     }
                                 );
                                 Patch(
@@ -1588,7 +1575,7 @@
                                     colExistingRecord,
                                     LookUp(
                                         HoraxHoraFinals,
-                                        Codigo_Empleado = VarName && Hora = HoraValor && Fecha = Text(
+                                        Codigo_Empleado = drp_Operario_HxH2.SelectedText.Codigo && Hora = HoraValor && Fecha = Text(
                                             FechaSup,
                                             "dd/mm/yyyy"
                                         )
@@ -1603,7 +1590,7 @@
                                             Cantidad_Producida: Sum(
                                                 Filter(
                                                     'Hora X Hora',
-                                                    CodigoEmpleado = VarName,
+                                                    CodigoEmpleado = drp_Operario_HxH2.SelectedText.Codigo,
                                                     FechaRegistro = FechaSup,
                                                     Hora = drp_Hora_HxH2.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
                                                 ),
@@ -1612,7 +1599,7 @@
                                             Meta: Sum(
                                                 Filter(
                                                     'Hora X Hora',
-                                                    CodigoEmpleado = VarName,
+                                                    CodigoEmpleado = drp_Operario_HxH2.SelectedText.Codigo,
                                                     FechaRegistro = FechaSup,
                                                     Hora = drp_Hora_HxH2.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
                                                 ),
@@ -1630,11 +1617,11 @@
                                     Collect(
                                         HoraxHoraFinals,
                                         {
-                                            Codigo_Empleado: VarName,
+                                            Codigo_Empleado: drp_Operario_HxH2.SelectedText.Codigo,
                                             Cantidad_Producida: Sum(
                                                 Filter(
                                                     'Hora X Hora',
-                                                    CodigoEmpleado = VarName,
+                                                    CodigoEmpleado = drp_Operario_HxH2.SelectedText.Codigo,
                                                     FechaRegistro = FechaSup,
                                                     Hora = drp_Hora_HxH2.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
                                                 ),
@@ -1643,7 +1630,7 @@
                                             Meta: Sum(
                                                 Filter(
                                                     'Hora X Hora',
-                                                    CodigoEmpleado = VarName,
+                                                    CodigoEmpleado = drp_Operario_HxH2.SelectedText.Codigo,
                                                     FechaRegistro = FechaSup,
                                                     Hora = drp_Hora_HxH2.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
                                                 ),
@@ -1900,8 +1887,8 @@
                 =Collect(
                     'Hora X Hora',
                     {
-                        CodigoEmpleado: VarName,
-                        Operario: txtEmpleadoEnUso_HxHE_1.Text,
+                        CodigoEmpleado: drp_Operario_HxH2.SelectedText.Codigo,
+                        Operario: drp_Operario_HxH2.SelectedText.Empleado,
                         Maquina: txt_Maquina_HxH2.Text,
                         Orden: OrdenInfo.Orden,
                         Operacion: OrdenInfo.Operacion,
@@ -1933,19 +1920,6 @@
                             "mm/dd/yyyy hh:mm AM/PM"
                         ),
                         Hora: drp_Hora_HxH2.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
-                    }
-                );
-                Patch(
-                    Maquina_Ordens_1,
-                    LookUp(
-                        Maquina_Ordens_1,
-                        Maquina = txt_Maquina_HxH2.Text
-                    ),
-                    {
-                        Meta: LookUp(
-                            Maquina_Ordens_1,
-                            Maquina = txt_Maquina_HxH2.Text
-                        ).Meta + (txt_CantProducida_HxH2.Text + txt_CantDañada_HxH2.Text)
                     }
                 );
                 Patch(
@@ -1995,7 +1969,7 @@
                     colExistingRecord,
                     LookUp(
                         HoraxHoraFinals,
-                        Codigo_Empleado = VarName && Hora = HoraValor && Fecha = Text(
+                        Codigo_Empleado = drp_Operario_HxH2.SelectedText.Codigo && Hora = HoraValor && Fecha = Text(
                             FechaSup,
                             "dd/mm/yyyy"
                         )
@@ -2010,7 +1984,7 @@
                             Cantidad_Producida: Sum(
                                 Filter(
                                     'Hora X Hora',
-                                    CodigoEmpleado = VarName,
+                                    CodigoEmpleado = drp_Operario_HxH2.SelectedText.Codigo,
                                     FechaRegistro = FechaSup,
                                     Hora = drp_Hora_HxH2.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
                                 ),
@@ -2019,7 +1993,7 @@
                             Meta: Sum(
                                 Filter(
                                     'Hora X Hora',
-                                    CodigoEmpleado = VarName,
+                                    CodigoEmpleado = drp_Operario_HxH2.SelectedText.Codigo,
                                     FechaRegistro = FechaSup,
                                     Hora = drp_Hora_HxH2.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
                                 ),
@@ -2037,11 +2011,11 @@
                     Collect(
                         HoraxHoraFinals,
                         {
-                            Codigo_Empleado: VarName,
+                            Codigo_Empleado: drp_Operario_HxH2.SelectedText.Codigo,
                             Cantidad_Producida: Sum(
                                 Filter(
                                     'Hora X Hora',
-                                    CodigoEmpleado = VarName,
+                                    CodigoEmpleado = drp_Operario_HxH2.SelectedText.Codigo,
                                     FechaRegistro = FechaSup,
                                     Hora = drp_Hora_HxH2.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
                                 ),
@@ -2050,7 +2024,7 @@
                             Meta: Sum(
                                 Filter(
                                     'Hora X Hora',
-                                    CodigoEmpleado = VarName,
+                                    CodigoEmpleado = drp_Operario_HxH2.SelectedText.Codigo,
                                     FechaRegistro = FechaSup,
                                     Hora = drp_Hora_HxH2.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
                                 ),
