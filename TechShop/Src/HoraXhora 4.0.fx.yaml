@@ -283,10 +283,10 @@
                                     OrdenInfo: LookUp(
                                         Orden_Ejecucion,
                                         Orden = LookUp(
-                                            Maquina_Ordens_1,
+                                            Maquina_Ordens,
                                             Maquina = Self.Text
                                         ).Orden && Operacion = LookUp(
-                                            Maquina_Ordens_1,
+                                            Maquina_Ordens,
                                             Maquina = Self.Text
                                         ).Operacion
                                     )
@@ -1653,6 +1653,24 @@
                                         {CantidadTotalProducida: txt_CantTarima_HxHE.Text + txt_CantProducida_HxHE.Text}
                                     )
                                 );
+                                UpdateContext(
+                                    {
+                                        RecordHerramienta: Filter(
+                                            Herramientas,
+                                            Maquina = Upper(txt_Maquina_HxHE.Text),
+                                            Orden = OrdenInfo.Orden,
+                                            Operacion = OrdenInfo.Operacion
+                                        )
+                                    }
+                                );
+                                ForAll(
+                                    RecordHerramienta,
+                                    Patch(
+                                        Herramientas,
+                                        ThisRecord,
+                                        {Cant_Actual: Cant_Actual + Value(txt_CantProducida_HxHE.Text)}
+                                    )
+                                );
                                 ClearCollect(
                                     colExistingRecord,
                                     LookUp(
@@ -1964,6 +1982,24 @@
                             Orden = OrdenInfo.Orden && Operacion = OrdenInfo.Operacion && Tarima = txt_Tarima_HxHE.Text
                         ),
                         {CantidadTotalProducida: txt_CantTarima_HxHE.Text + txt_CantProducida_HxHE.Text}
+                    )
+                );
+                UpdateContext(
+                    {
+                        RecordHerramienta: Filter(
+                            Herramientas,
+                            Maquina = Upper(txt_Maquina_HxHE.Text),
+                            Orden = OrdenInfo.Orden,
+                            Operacion = OrdenInfo.Operacion
+                        )
+                    }
+                );
+                ForAll(
+                    RecordHerramienta,
+                    Patch(
+                        Herramientas,
+                        ThisRecord,
+                        {Cant_Actual: Cant_Actual + Value(txt_CantProducida_HxHE.Text)}
                     )
                 );
                 ClearCollect(
