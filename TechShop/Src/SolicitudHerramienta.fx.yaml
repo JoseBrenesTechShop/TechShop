@@ -199,7 +199,7 @@ SolicitudHerramienta As screen:
                     Y: =48
                     ZIndex: =1
 
-                lbl_Maquina_SH As Text:
+                lbl_Maquina_SH As Texto:
                     Align: ='TextCanvas.Align'.Center
                     DisplayMode: =DisplayMode.Edit
                     FontColor: =RGBA(0, 0, 0, 1)
@@ -243,7 +243,7 @@ SolicitudHerramienta As screen:
                     Y: =48
                     ZIndex: =3
 
-                lbl_NumeroPieza_SH As Text:
+                lbl_NumeroPieza_SH As Texto:
                     Align: ='TextCanvas.Align'.Center
                     DisplayMode: =DisplayMode.Edit
                     FontColor: =RGBA(0, 0, 0, 1)
@@ -262,7 +262,7 @@ SolicitudHerramienta As screen:
                     Y: =4
                     ZIndex: =4
 
-                btn_buscar_SH As Button:
+                btn_buscar_SH As Botón:
                     Align: =Align.Center
                     Appearance: ='ButtonCanvas.Appearance'.Secondary
                     BorderColor: =RGBA(9, 33, 98, 1)
@@ -357,7 +357,7 @@ SolicitudHerramienta As screen:
                     Y: =50
                     ZIndex: =7
 
-                    Dropdown2_1 As dropdown:
+                    drop_Operario_SH As dropdown:
                         AllowEmptySelection: =true
                         BorderColor: =RGBA(0, 18, 107, 1)
                         ChevronBackground: =RGBA(56, 96, 178, 1)
@@ -732,7 +732,7 @@ SolicitudHerramienta As screen:
                                     Y: =174
                                     ZIndex: =10
 
-                            Button2_7 As button:
+                            btn_agregar_sh As button:
                                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 DisabledFill: =RGBA(244, 244, 244, 1)
@@ -911,8 +911,7 @@ SolicitudHerramienta As screen:
                                     Text: |-
                                         = "Cantidad de Insertos: " 
                                     Width: =227
-                                    X: =13
-                                    Y: =108
+                                    Y: =110
                                     ZIndex: =4
 
                                 txt_BuscarPieza_SH_2 As text:
@@ -952,7 +951,7 @@ SolicitudHerramienta As screen:
                                     Y: =110
                                     ZIndex: =5
 
-                            Button2_8 As button:
+                            btn_eliminar_sh As button:
                                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 DisabledFill: =RGBA(244, 244, 244, 1)
@@ -969,7 +968,7 @@ SolicitudHerramienta As screen:
                                 Y: =116
                                 ZIndex: =3
 
-                    Button2_9 As button:
+                    btn_enviar_sh As button:
                         DisabledBorderColor: =RGBA(166, 166, 166, 1)
                         DisabledColor: =RGBA(166, 166, 166, 1)
                         DisabledFill: =RGBA(244, 244, 244, 1)
@@ -979,66 +978,103 @@ SolicitudHerramienta As screen:
                         HoverColor: =RGBA(255, 255, 255, 1)
                         HoverFill: =RGBA(15, 108, 189, 1)
                         OnSelect: |
-                            =Set(
-                                idSolicitud, 
-                                Patch(
-                                    SolicitudHerramientas, // Nombre de la tabla
-                                    Defaults(SolicitudHerramientas), 
-                                    {
-                                        Maquina: txt_Maquina.Text, // Nombre de la máquina (asegúrate de que esto sea un campo en tu formulario)
-                                        Orden: txt_Orden.Text, // Nombre de la orden (asegúrate de que esto sea un campo en tu formulario)
-                                        Operario: txt_Operario.Text, // Nombre del operario (asegúrate de que esto sea un campo en tu formulario)
-                                        Estado: If(rb_Estado.Selected.Value = "Aprobado", "Aprobado", "Revision") // Usa un control de radio o dropdown para seleccionar el estado
-                                    }
-                                ).ID // Guarda el ID de la solicitud creada
-                            ),
+                            =// Valida si el usuario pertenece a PRODUCCION o C.D.S
+                            If(
+                                LookUp(Empleados, Codigo = VarName, Departamento) = "PRODUCCION" || LookUp(Empleados, Codigo = VarName, Departamento ) = "C.D.S",
+                                
+                                // Crear solicitud en la tabla SolicitudHerramienta
+                                Set(
+                                    idSolicitud,
+                                    Patch(
+                                        SolicitudHerramientas,
+                                        Defaults(SolicitudHerramientas),
+                                        {
+                                            Maquina: "Maquina",               // Reemplaza con la máquina actual
+                                            Orden: "NombreOrden",              // Reemplaza con el nombre de la orden actual
+                                            Operario: drop_Operario_SH.SelectedText, 
+                                            User: VarName,
+                                            Operacion: "Operacion",           // Especifica la operación actual
+                                            Estado: "Aprobado",
+                                            Causa: txt_Causa_Input.Text       // Entrada de causa para los registros
+                                        }
+                                    ).ID
+                                ),
                             
-                            // Procesar cada elemento en Materiales
-                            ForAll(
-                                Materiales, // La colección de piezas seleccionadas
-                                If(
-                                    !IsBlank(LookUp(Herramientas, Maquina = ThisRecord.Maquina && Orden = ThisRecord.Orden && Operacion = ThisRecord.Operacion && ID_Inserto = ThisRecord.ID_Inserto)),
-                                    // Si existe un registro, se actualiza
-                                    Patch(
-                                        Herramientas, 
-                                        LookUp(Herramientas, Maquina = ThisRecord.Maquina && Orden = ThisRecord.Orden && Operacion = ThisRecord.Operacion && ID_Inserto = ThisRecord.ID_Inserto),
-                                        {
-                                            Descripcion: ThisRecord.Descripcion,
-                                            CantxInserto: ThisRecord.CantxInserto,
-                                            Cant_Inserto: ThisRecord.Cant_Inserto, // Puedes hacer tus cálculos aquí
-                                            Cant_Maxima: ThisRecord.Cant_Maxima,
-                                            Cant_Actual: ThisRecord.Cant_Actual, // Puedes hacer tus cálculos aquí
-                                            Insertos_Pasados: Coalesce(LookUp(Herramientas, Maquina = ThisRecord.Maquina && Orden = ThisRecord.Orden && Operacion = ThisRecord.Operacion && ID_Inserto = ThisRecord.ID_Inserto).Insertos_Pasados, 0),
-                                            User: User().Email, // Cambia esto si usas otro campo de usuario
-                                            Operario: ThisRecord.Operario, // Asumiendo que tienes este campo en Materiales
-                                            Causa: ThisRecord.Causa, // Asumiendo que tienes este campo en Materiales
-                                            Estado: ThisRecord.Estado, // Aprobado o Revision
-                                            ID_Solicitud: idSolicitud // Aquí debes poner el ID de la solicitud creada
-                                        }
-                                    ),
-                                    // Si no existe un registro, se crea uno nuevo
-                                    Patch(
-                                        Herramientas, 
-                                        Defaults(Herramientas),
-                                        {
-                                            Maquina: ThisRecord.Maquina,
-                                            Operacion: ThisRecord.Operacion,
-                                            Orden: ThisRecord.Orden,
-                                            ID_Inserto: ThisRecord.ID_Inserto,
-                                            Descripcion: ThisRecord.Descripcion,
-                                            CantxInserto: ThisRecord.CantxInserto,
-                                            Cant_Inserto: ThisRecord.Cant_Inserto, // Puedes hacer tus cálculos aquí
-                                            Cant_Maxima: ThisRecord.Cant_Maxima,
-                                            Cant_Actual: ThisRecord.Cant_Actual, // Puedes hacer tus cálculos aquí
-                                            Insertos_Pasados: 0, // O el valor que necesites aquí
-                                            User: User().Email, // Cambia esto si usas otro campo de usuario
-                                            Operario: ThisRecord.Operario, // Asumiendo que tienes este campo en Materiales
-                                            Causa: ThisRecord.Causa, // Asumiendo que tienes este campo en Materiales
-                                            Estado: ThisRecord.Estado, // Aprobado o Revision
-                                            ID_Solicitud: idSolicitud // Aquí debes poner el ID de la solicitud creada
-                                        }
+                                // Recorre cada registro en la galería de herramientas seleccionadas
+                                ForAll(
+                                    gl_HerramientasSeleccionadas_sh_1.AllItems,
+                            
+                                    // Verifica si ya existe un registro en Herramientas para esta pieza específica
+                                    If(
+                                        IsBlank(
+                                            LookUp(
+                                                Herramientas,
+                                                Maquina = ThisRecord.Maquina &&
+                                                Orden = ThisRecord.Orden &&
+                                                Operacion = ThisRecord.Operacion &&
+                                                ID_Inserto = ThisRecord.ID_Inserto
+                                            )
+                                        ),
+                            
+                                        // Si no existe, crea uno nuevo en Herramientas
+                                        Collect(
+                                            Herramientas,
+                                            {
+                                                Maquina: ThisRecord.Maquina,
+                                                Orden: ThisRecord.Orden,
+                                                Operacion: ThisRecord.Operacion,
+                                                ID_Inserto: ThisRecord.ID_Inserto,
+                                                Descripcion: ThisRecord.Descripcion,
+                                                CantxInserto: ThisRecord.CantxInserto,
+                                                Cant_Inserto: ThisRecord.Cant_Inserto,
+                                                Cant_Insertos: ThisRecord.Cant_Insertos,
+                                                Cant_Maxima: ThisRecord.Cant_Maxima,
+                                                Cant_Actual: ThisRecord.Cant_Actual,
+                                                User: VarName,
+                                                Estado: "Aprobado",
+                                                ID_Solicitud: idSolicitud,
+                                                InsertosPasados: 0,           // Nuevo registro, no hay inserto previo
+                                                Causa: txt_Causa_Input.Text    // Toma la causa del cuadro de entrada
+                                            }
+                                        ),
+                            
+                                        // Si el registro existe, realiza la actualización y verifica sobre/subconsumo
+                                        Patch(
+                                            Herramientas,
+                                            LookUp(
+                                                Herramientas,
+                                                Maquina = ThisRecord.Maquina &&
+                                                Orden = ThisRecord.Orden &&
+                                                Operacion = ThisRecord.Operacion &&
+                                                ID_Inserto = ThisRecord.ID_Inserto
+                                            ),
+                                            {
+                                                Cant_Actual: ThisRecord.Cant_Actual,
+                                                InsertosPasados: LookUp(Herramientas, Maquina = ThisRecord.Maquina && Orden = ThisRecord.Orden && Operacion = ThisRecord.Operacion && ID_Inserto = ThisRecord.ID_Inserto).Cant_Actual,
+                                                Estado: If(
+                                                    ThisRecord.Cant_Inserto > ThisRecord.Cant_Maxima,
+                                                    "Revision",
+                                                    "Aprobado"
+                                                ),
+                                                Causa: If(
+                                                    ThisRecord.Cant_Inserto > ThisRecord.Cant_Maxima,
+                                                    "Sobreconsumo",
+                                                    If(
+                                                        ThisRecord.Cant_Inserto < ThisRecord.Cant_Maxima,
+                                                        "Subconsumo",
+                                                        "Consumo normal"
+                                                    )
+                                                ),
+                                                ID_Solicitud: idSolicitud
+                                            }
+                                        )
                                     )
-                                )
+                                ),
+                            
+                                Notify("Solicitud enviada correctamente.", NotificationType.Success),
+                                
+                                // Si el usuario no pertenece a PRODUCCION o C.D.S, muestra un error
+                                Notify("Error: No tienes permiso para realizar esta solicitud.", NotificationType.Error)
                             ),
                         RadiusBottomLeft: =20
                         RadiusBottomRight: =20
@@ -1050,7 +1086,7 @@ SolicitudHerramienta As screen:
                         Y: =16
                         ZIndex: =5
 
-                    Button2_10 As button:
+                    btn_solicitudes_sh As button:
                         DisabledBorderColor: =RGBA(166, 166, 166, 1)
                         DisabledColor: =RGBA(166, 166, 166, 1)
                         DisabledFill: =RGBA(244, 244, 244, 1)
