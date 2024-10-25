@@ -654,8 +654,8 @@ SolicitudHerramienta As screen:
                                             0
                                         )
                                     Width: =293
-                                    X: =306
-                                    Y: =114
+                                    X: =320
+                                    Y: =107
                                     ZIndex: =7
 
                                 txt_Cant_Insertos_SH As label:
@@ -978,9 +978,10 @@ SolicitudHerramienta As screen:
                         HoverColor: =RGBA(255, 255, 255, 1)
                         HoverFill: =RGBA(15, 108, 189, 1)
                         OnSelect: |
-                            =// Valida si el usuario pertenece a PRODUCCION o C.D.S
+                            =// Validar si el usuario pertenece a PRODUCCION o C.D.S
                             If(
-                                LookUp(Empleados, Codigo = VarName, Departamento) = "PRODUCCION" || LookUp(Empleados, Codigo = VarName, Departamento ) = "C.D.S",
+                                LookUp(Empleados, Codigo = VarName, Departamento) = "PRODUCCION" || 
+                                LookUp(Empleados, Codigo = VarName, Departamento) = "C.D.S",
                                 
                                 // Crear solicitud en la tabla SolicitudHerramienta
                                 Set(
@@ -989,22 +990,23 @@ SolicitudHerramienta As screen:
                                         SolicitudHerramientas,
                                         Defaults(SolicitudHerramientas),
                                         {
-                                            Maquina: "Maquina",               // Reemplaza con la máquina actual
-                                            Orden: "NombreOrden",              // Reemplaza con el nombre de la orden actual
-                                            Operario: drop_Operario_SH.SelectedText, 
-                                            User: VarName,
-                                            Operacion: "Operacion",           // Especifica la operación actual
-                                            Estado: "Aprobado",
-                                            Causa: txt_Causa_Input.Text       // Entrada de causa para los registros
+                                            Maquina: txt_Maquina_SH.Text,
+                                            Orden: gl_HerramientasSeleccionadas_sh_1.Selected.job, 
+                                            Operario: drop_Operario_SH.Selected.Nombre,
+                                            User: LookUp(Empleados, Codigo = VarName, Nombre),
+                                            Operacion: gl_HerramientasSeleccionadas_sh_1.Selected.oper_num
+                                            
+                                            // Estado: "Aprobado"   
+                                            //Causa: txt_Causa_Input.Text 
                                         }
                                     ).ID
                                 ),
                             
-                                // Recorre cada registro en la galería de herramientas seleccionadas
+                                // Recorrer cada registro en la galería de herramientas seleccionadas
                                 ForAll(
                                     gl_HerramientasSeleccionadas_sh_1.AllItems,
-                            
-                                    // Verifica si ya existe un registro en Herramientas para esta pieza específica
+                                    
+                                    // Verificar si ya existe un registro en Herramientas para esta pieza específica
                                     If(
                                         IsBlank(
                                             LookUp(
@@ -1015,29 +1017,28 @@ SolicitudHerramienta As screen:
                                                 ID_Inserto = ThisRecord.ID_Inserto
                                             )
                                         ),
-                            
                                         // Si no existe, crea uno nuevo en Herramientas
                                         Collect(
                                             Herramientas,
                                             {
-                                                Maquina: ThisRecord.Maquina,
-                                                Orden: ThisRecord.Orden,
-                                                Operacion: ThisRecord.Operacion,
-                                                ID_Inserto: ThisRecord.ID_Inserto,
-                                                Descripcion: ThisRecord.Descripcion,
-                                                CantxInserto: ThisRecord.CantxInserto,
-                                                Cant_Inserto: ThisRecord.Cant_Inserto,
-                                                Cant_Insertos: ThisRecord.Cant_Insertos,
-                                                Cant_Maxima: ThisRecord.Cant_Maxima,
-                                                Cant_Actual: ThisRecord.Cant_Actual,
-                                                User: VarName,
-                                                Estado: "Aprobado",
-                                                ID_Solicitud: idSolicitud,
-                                                InsertosPasados: 0,           // Nuevo registro, no hay inserto previo
-                                                Causa: txt_Causa_Input.Text    // Toma la causa del cuadro de entrada
+                                                Maquina: txt_Maquina_SH.Text,
+                                                Orden: gl_HerramientasSeleccionadas_sh_1.Selected.job,
+                                                Operacion: Text(gl_HerramientasSeleccionadas_sh_1.Selected.oper_num),
+                                                ID_Inserto: gl_HerramientasSeleccionadas_sh_1.Selected.item,
+                                                Descripcion: gl_HerramientasSeleccionadas_sh_1.Selected.description,
+                                               // CantxInserto: Value(txt_CantxInserto_SH.Text);
+                                              //  Cant_Inserto: Value(txt_Cant_Insertos_SH.Text);
+                                              //  Cant_Insertos: Value( txt_Cant_Insertos_SH.Text);
+                                               // Cant_Maxima:Value( txt_Cant_Maxima_SH.Text);
+                                              //  Cant_Actual:Value( txt_Cant_Actual_SH.Text);
+                                                User: LookUp(Empleados, Codigo = VarName, Nombre)
+                                                
+                                                // Estado: "Aprobado";
+                                                // ID_Solicitud: ;
+                                                // InsertosPasados: 0, // Nuevo registro, no hay inserto previo
+                                                // Causa: txt_Causa_Input.Text // Toma la causa del cuadro de entrada
                                             }
                                         ),
-                            
                                         // Si el registro existe, realiza la actualización y verifica sobre/subconsumo
                                         Patch(
                                             Herramientas,
@@ -1073,7 +1074,8 @@ SolicitudHerramienta As screen:
                             
                                 Notify("Solicitud enviada correctamente.", NotificationType.Success),
                                 
-                                // Si el usuario no pertenece a PRODUCCION o C.D.S, muestra un error
+                                // Mensaje de error si el usuario no pertenece a PRODUCCION o C.D.S
+                                ,
                                 Notify("Error: No tienes permiso para realizar esta solicitud.", NotificationType.Error)
                             ),
                         RadiusBottomLeft: =20
