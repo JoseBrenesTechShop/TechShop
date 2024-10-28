@@ -234,6 +234,8 @@ EstadosPermisos As screen:
             ZIndex: =3
 
             SidebarContainer1 As groupContainer.verticalAutoLayoutContainer:
+                BorderColor: =RGBA(40, 134, 222, 1)
+                BorderThickness: =4
                 DropShadow: =DropShadow.Light
                 Fill: =RGBA(255, 255, 255, 1)
                 FillPortions: =3
@@ -354,6 +356,8 @@ EstadosPermisos As screen:
                         ZIndex: =10
 
             MainContainer2 As groupContainer.verticalAutoLayoutContainer:
+                BorderColor: =RGBA(40, 134, 222, 1)
+                BorderThickness: =4
                 DropShadow: =DropShadow.Light
                 FillPortions: =7
                 LayoutDirection: =LayoutDirection.Vertical
@@ -544,7 +548,7 @@ EstadosPermisos As screen:
                                     LookUp(
                                         Empleados,
                                         Codigo = VarName
-                                    ).Puesto = "JEFA DE TESORERIA",
+                                    ).Puesto in ["JEFA DE TESORERIA", "TESORERIA"],
                                     Filter(
                                         TramitesSolicitudes,
                                         EstadoDeProceso = drpEstadoSolicitud.SelectedText.Value,
@@ -607,6 +611,27 @@ EstadosPermisos As screen:
                         Y: =72
                         ZIndex: =5
 
+                        lbl_Nombreinf_EstadoPermiso As label:
+                            Align: =Align.Center
+                            BorderThickness: =2
+                            Color: =RGBA(0, 0, 0, 1)
+                            DisabledColor: =RGBA(166, 166, 166, 1)
+                            Fill: =RGBA(180, 214, 250, 1)
+                            Font: =Font.Arial
+                            FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
+                            Height: =26
+                            OnSelect: =Select(Parent)
+                            PaddingBottom: =0
+                            PaddingLeft: =0
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            Size: =12
+                            Text: =ThisItem.Nombre
+                            Width: =223
+                            X: =279
+                            Y: =37
+                            ZIndex: =1
+
                         lbl_Estado_EstadoPermisos_1 As label:
                             Align: =Align.Center
                             BorderThickness: =2
@@ -651,7 +676,7 @@ EstadosPermisos As screen:
                             Width: =264
                             X: =601
                             Y: =37
-                            ZIndex: =1
+                            ZIndex: =2
 
                         TextCanvas1_9 As Text:
                             Align: ='TextCanvas.Align'.Center
@@ -673,7 +698,7 @@ EstadosPermisos As screen:
                             Width: =83
                             X: =507
                             Y: =37
-                            ZIndex: =2
+                            ZIndex: =3
 
                         img_FirmaSolicitante_EstadoPermisos As image:
                             BorderColor: =App.Theme.Colors.Darker40
@@ -687,7 +712,7 @@ EstadosPermisos As screen:
                             Width: =99
                             X: =16
                             Y: =4
-                            ZIndex: =3
+                            ZIndex: =4
 
                         lbl_Codigoinf_EstadoPermisos As label:
                             Align: =Align.Center
@@ -708,7 +733,7 @@ EstadosPermisos As screen:
                             Width: =223
                             X: =279
                             Y: =71
-                            ZIndex: =4
+                            ZIndex: =5
 
                         Separator1_2 As rectangle:
                             BorderColor: =App.Theme.Colors.Darker40
@@ -717,7 +742,7 @@ EstadosPermisos As screen:
                             OnSelect: =Select(Parent)
                             Width: =Parent.TemplateWidth
                             Y: =Parent.TemplateHeight - Self.Height
-                            ZIndex: =5
+                            ZIndex: =6
 
                         lbl_FechaTramiteInf_EstadoPermiso As label:
                             Align: =Align.Center
@@ -738,27 +763,6 @@ EstadosPermisos As screen:
                             Width: =223
                             X: =279
                             Y: =5
-                            ZIndex: =6
-
-                        lbl_Nombreinf_EstadoPermiso As label:
-                            Align: =Align.Center
-                            BorderThickness: =2
-                            Color: =RGBA(0, 0, 0, 1)
-                            DisabledColor: =RGBA(166, 166, 166, 1)
-                            Fill: =RGBA(180, 214, 250, 1)
-                            Font: =Font.Arial
-                            FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
-                            Height: =26
-                            OnSelect: =Select(Parent)
-                            PaddingBottom: =0
-                            PaddingLeft: =0
-                            PaddingRight: =0
-                            PaddingTop: =0
-                            Size: =12
-                            Text: =ThisItem.Nombre
-                            Width: =223
-                            X: =279
-                            Y: =37
                             ZIndex: =7
 
                         Subtitle1_23 As label:
@@ -892,6 +896,49 @@ EstadosPermisos As screen:
                             X: =870
                             Y: =5
                             ZIndex: =14
+
+                        Button8 As button:
+                            BorderColor: =App.Theme.Colors.Primary
+                            Color: =App.Theme.Colors.PrimaryForeground
+                            DisabledBorderColor: =RGBA(244, 244, 244, 1)
+                            DisabledColor: =RGBA(166, 166, 166, 1)
+                            DisabledFill: =RGBA(244, 244, 244, 1)
+                            DisplayMode: =If(ThisItem.IsSelected, DisplayMode.Edit, DisplayMode.Disabled)
+                            Fill: =App.Theme.Colors.Primary
+                            Font: =App.Theme.Font
+                            FontWeight: =FontWeight.Semibold
+                            Height: =36
+                            HoverBorderColor: =App.Theme.Colors.Darker10
+                            HoverColor: =App.Theme.Colors.PrimaryForeground
+                            HoverFill: =App.Theme.Colors.Darker10
+                            OnSelect: |-
+                                =Select(Parent);
+                                Set(varFirmaJefeIncapacidad, JSON(Image1_10.Image, JSONFormat.IncludeBinaryData));
+                                CorreoConPDF.Run(
+                                PdfIncapacidad_1.HtmlText,
+                                    "yaraya@tsicr.com; respinoza@tsicr.com",
+                                     "Revisión de Solicitudes",
+                                        "Estimado/a,<br><br>" &
+                                        "Se ha aprobado la solicitud del colaborador " & ThisItem.Nombre & 
+                                        ", con el ID " & ThisItem.Codigo & 
+                                        ".<br><br>" &
+                                        "La solicitud aprobada comprende un total de " & ThisItem.DiasSolicitados & 
+                                        " días, con fecha de inicio " & ThisItem.Fecha_Inicio & 
+                                        " y fecha de fin " & ThisItem.Fecha_Fin & 
+                                        ".<br><br>" &
+                                        "Para obtener más detalles sobre la solicitud aceptada, por favor, consulte el PDF adjunto o revise la solicitud desde el módulo correspondiente.<br><br>" &
+                                        "Gracias,<br>"
+                                );
+                            PressedBorderColor: =App.Theme.Colors.Darker40
+                            PressedColor: =Self.Color
+                            PressedFill: =App.Theme.Colors.Darker40
+                            Size: =15
+                            Text: ="Reenviar Comprobante"
+                            Visible: =dropTipo.SelectedText.Value = "Incapacidad"
+                            Width: =250
+                            X: =561
+                            Y: =59
+                            ZIndex: =15
 
                     Container1_2 As groupContainer.manualLayoutContainer:
                         BorderThickness: =2
@@ -1150,7 +1197,7 @@ EstadosPermisos As screen:
                             DisplayMode: =DisplayMode.View
                             Fill: =RGBA(255, 255, 255, 1)
                             Height: =119
-                            Image: =GaleriaEstado.Selected.'Firma Solicitante '
+                            Image: =GaleriaEstado.Selected.FirmaJefes
                             OnSelect: |
                                 =
                             Width: =245
@@ -1166,7 +1213,7 @@ EstadosPermisos As screen:
                             Font: =App.Theme.Font
                             Height: =32
                             Size: =15
-                            Text: ="FIRMA"
+                            Text: ="FIRMA JEFE"
                             Width: =244
                             X: =520
                             Y: =54
@@ -1845,4 +1892,119 @@ EstadosPermisos As screen:
         X: =40
         Y: =40
         ZIndex: =4
+
+    PdfIncapacidad_1 As htmlViewer:
+        DisabledBorderColor: =RGBA(166, 166, 166, 1)
+        Font: =App.Theme.Font
+        HtmlText: |-
+            =Concatenate(
+                "<!DOCTYPE html>",
+                "<html lang='es'>",
+                "<head>",
+                "<meta charset='UTF-8'>",
+                "<meta name='viewport' content='width=device-width, initial-scale=1.0'>",
+                "<title>Trámite para Permisos y Solicitudes de Vacaciones</title>",
+                "<style>",
+                "body { font-family: Arial, sans-serif; margin: 20px; }",
+                "h1 { color: #333; font-weight: bold; margin-bottom: 10px; text-align: center; }",
+                "table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }",
+                "td { border: 1px solid #ddd; padding: 8px; text-align: left; }",
+                "th { background-color: #87CEFA; border: 1px solid #ddd; padding: 8px; text-align: left; }",
+                "</style>",
+                "</head>",
+                "<body>",
+                  "<table style='width: 100%; border: none;'>",
+               "<tr>",
+                "<td style='width: 50%; text-align: left; padding: 0;'>",
+                "<img src=", LogotipoTechShop, " style='width: 200px;'></img>",
+                "</td>",
+                "<td style='width: 50%; text-align: right; padding: 0;'>",
+                   "<div style='text-align: right; margin-right: 20px;'>",
+                        "<h3 style='margin: 0;'>FO-CH-01</h3>",
+                    "</div>",
+                "</td>",
+            "</tr>",
+                "</table>",
+                "<h1>TRAMITE PARA PERMISOS, VACACIONES E INCAPACIDADES</h1>",
+                "<table>",
+                "<tr>",
+                "<td>Fecha: ",
+                GaleriaEstado.Selected.FechaTramite,
+                "</td>",
+                "<td>Código de empleado: ",
+                GaleriaEstado.Selected.Codigo,
+                "</td>",
+                "</tr>",
+                "<tr>",
+                "<td colspan='2'>Estado: Aprobado",
+                "</td>",
+                "</tr>",
+                "</table>",
+                "<h1>Detalles de Solicitud</h1>",
+                "<table>",
+                "<tr>",
+                "<td><strong>Nombre completo:</strong> ",
+                GaleriaEstado.Selected.Nombre,
+                "</td>",
+                "<td><strong>Tipo de solicitud:</strong> ",
+                "Incapacidad",
+                "</td>",
+                "</tr>",
+                "<tr>",
+                "<td><strong>Fecha de inicio:</strong> ",
+                GaleriaEstado.Selected.Fecha_Inicio,
+                "</td>",
+                "<td><strong>Fecha de fin:</strong> ",
+                GaleriaEstado.Selected.Fecha_Fin,
+                "</td>",
+                "</tr>",
+                "<tr>",
+                "<td><strong>Días solicitados:</strong> ",
+                GaleriaEstado.Selected.DiasSolicitados,
+                "</td>",
+                "<td><strong>Remunerado:</strong> ",
+                 " ",
+                "</td>",
+                "</tr>",
+                "<tr>",
+               "<td><strong>Institución:</strong> ",
+                GaleriaEstado.Selected.Institucion,
+                If(
+                    GaleriaEstado.Selected.Institucion = "OTRO",
+                    Concatenate(
+                        "<br><strong>Otra Institución:</strong> ",
+                        GaleriaEstado.Selected.OtraInstitucion
+                    ),
+                    ""
+                ),
+                "</td>",
+                "<td><strong>Número de documento:</strong> ",
+                GaleriaEstado.Selected.NumDocumento,
+                "</td>",
+                "</tr>",
+                "<tr>",
+                "<td colspan='2'>",
+                "<h2>Motivo:</h2>",
+                "<p>",
+                GaleriaEstado.Selected.Motivo,
+                "</p>",
+                "</td>",
+                "</tr>",
+               "<tr>",
+                "<td colspan='2'>",
+                "<center>",
+                "<h3>Firma del jefe directo:</h3>",
+                "<img src=", varFirmaJefeIncapacidad, " style='width: 150px;'></img>",
+                "</center>",
+                "</td>",
+                "</tr>",
+                "</table>",
+                "</body>",
+                "</html>"
+            )
+        Size: =13
+        Visible: =false
+        X: =60
+        Y: =60
+        ZIndex: =5
 
