@@ -199,7 +199,7 @@ SolicitudHerramienta As screen:
                     Y: =48
                     ZIndex: =1
 
-                lbl_Maquina_SH As Text:
+                lbl_Maquina_SH As Texto:
                     Align: ='TextCanvas.Align'.Center
                     DisplayMode: =DisplayMode.Edit
                     FontColor: =RGBA(0, 0, 0, 1)
@@ -243,7 +243,7 @@ SolicitudHerramienta As screen:
                     Y: =48
                     ZIndex: =3
 
-                lbl_NumeroPieza_SH As Text:
+                lbl_NumeroPieza_SH As Texto:
                     Align: ='TextCanvas.Align'.Center
                     DisplayMode: =DisplayMode.Edit
                     FontColor: =RGBA(0, 0, 0, 1)
@@ -262,7 +262,7 @@ SolicitudHerramienta As screen:
                     Y: =4
                     ZIndex: =4
 
-                btn_buscar_SH As Button:
+                btn_buscar_SH As Botón:
                     Align: =Align.Center
                     Appearance: ='ButtonCanvas.Appearance'.Secondary
                     BorderColor: =RGBA(9, 33, 98, 1)
@@ -645,17 +645,29 @@ SolicitudHerramienta As screen:
                                     PaddingTop: =0
                                     Size: =16
                                     Text: |-
-                                        =RoundUp(
-                                            1 / If(
-                                                IsBlank(ThisItem.matl_qty) || ThisItem.matl_qty = 0, 
-                                                1, 
-                                                ThisItem.matl_qty
-                                            ), 
-                                            0
+                                        =If(
+                                            IsBlank(
+                                                LookUp(
+                                                    Herramientas,
+                                                    Maquina = txt_Maquina_SH.Text && Orden = ThisItem.job && Operacion = Text(ThisItem.oper_num) && ID_Inserto = ThisItem.item
+                                                )
+                                            ),
+                                            RoundUp(
+                                                1 / If(
+                                                    IsBlank(ThisItem.matl_qty) || ThisItem.matl_qty = 0,
+                                                    1,
+                                                    ThisItem.matl_qty
+                                                ),
+                                                0
+                                            ),
+                                            LookUp(
+                                                Herramientas,
+                                                Maquina = txt_Maquina_SH.Text && Orden = ThisItem.job && Operacion = Text(ThisItem.oper_num) && ID_Inserto = ThisItem.item
+                                            ).CantxInserto
                                         )
                                     Width: =293
-                                    X: =320
-                                    Y: =107
+                                    X: =306
+                                    Y: =114
                                     ZIndex: =7
 
                                 txt_Cant_Insertos_SH As label:
@@ -672,17 +684,24 @@ SolicitudHerramienta As screen:
                                     PaddingTop: =0
                                     Size: =16
                                     Text: |-
-                                        =RoundUp(
-                                            8 / 
-                                            If(
-                                                IsBlank(Value(txt_CantxInserto_SH.Text)) || 
-                                                Value(txt_CantxInserto_SH.Text) = 0 || 
-                                                IsBlank(LookUp(Orden_Ejecucion, Orden = ThisItem.job && Operacion = Text(ThisItem.oper_num)).Meta),
-                                                1,  // Evita división por cero con un valor predeterminado
-                                                Value(txt_CantxInserto_SH.Text) / 
-                                                LookUp(Orden_Ejecucion, Orden = ThisItem.job && Operacion = Text(ThisItem.oper_num)).Meta
+                                        =If(
+                                            IsBlank(
+                                                LookUp(
+                                                    Herramientas,
+                                                    Maquina = txt_Maquina_SH.Text && Orden = ThisItem.job && Operacion = Text(ThisItem.oper_num) && ID_Inserto = ThisItem.item
+                                                )
                                             ),
-                                            0
+                                            RoundUp(
+                                                8 / Value(txt_CantxInserto_SH.Text) / LookUp(
+                                                    Orden_Ejecucion,
+                                                    Orden = ThisItem.job && Operacion = Text(ThisItem.oper_num)
+                                                ).Meta,
+                                                0
+                                            ),
+                                            LookUp(
+                                                Herramientas,
+                                                Maquina = txt_Maquina_SH.Text && Orden = ThisItem.job && Operacion = Text(ThisItem.oper_num) && ID_Inserto = ThisItem.item
+                                            ).Cant_Insertos
                                         )
                                     Width: =293
                                     X: =240
@@ -723,7 +742,10 @@ SolicitudHerramienta As screen:
                                     Size: =16
                                     Text: |+
                                         =Coalesce(
-                                            LookUp(Herramientas, ID_Inserto = ThisItem.item, Cant_Actual),
+                                            LookUp(
+                                                    Herramientas,
+                                                    Maquina = txt_Maquina_SH.Text && Orden = ThisItem.job && Operacion = Text(ThisItem.oper_num) && ID_Inserto = ThisItem.item
+                                                ).Cant_Actual,
                                             0
                                         )
                                         
@@ -745,7 +767,17 @@ SolicitudHerramienta As screen:
                                 OnSelect: |-
                                     =Collect(
                                         Materiales,
-                                        ThisItem
+                                        {
+                                            item: ThisItem.item,
+                                            description: ThisItem.description,
+                                            Cant_x_Inserto: txt_CantxInserto_SH.Text,
+                                            Cant_Inserto: txt_Cant_Insertos_SH.Text,
+                                            Cant_Maxima:txt_Cant_Maxima_SH.Text,
+                                            Cant_Actual: txt_Cant_Actual_SH.Text,
+                                            QTY: ThisItem.matl_qty,
+                                            job: ThisItem.job,
+                                            oper_num: ThisItem.oper_num
+                                        }
                                     )
                                 Size: =15
                                 Text: ="Agregar"
@@ -919,16 +951,7 @@ SolicitudHerramienta As screen:
                                     BorderColor: =RGBA(0, 18, 107, 1)
                                     BorderThickness: =2
                                     Color: =RGBA(0, 0, 0, 1)
-                                    Default: |-
-                                        =RoundUp(
-                                            If(
-                                                ThisItem.matl_qty <> 0 && 
-                                                !IsBlank(LookUp(Orden_Ejecucion, Orden = ThisItem.job && Operacion = Text(ThisItem.oper_num)).Meta),
-                                                8 / (1 / ThisItem.matl_qty / LookUp(Orden_Ejecucion, Orden = ThisItem.job && Operacion = Text(ThisItem.oper_num)).Meta),
-                                                0 // Valor a retornar en caso de que haya división por cero
-                                            ),
-                                            0
-                                        )
+                                    Default: =ThisItem.Cant_Inserto
                                     DisabledBorderColor: =RGBA(166, 166, 166, 1)
                                     DisabledColor: =RGBA(166, 166, 166, 1)
                                     DisabledFill: =RGBA(244, 244, 244, 1)
@@ -973,111 +996,123 @@ SolicitudHerramienta As screen:
                         DisabledColor: =RGBA(166, 166, 166, 1)
                         DisabledFill: =RGBA(244, 244, 244, 1)
                         Fill: =RGBA(40, 134, 222, 1)
-                        FontWeight: =FontWeight.Bold
                         Height: =60
                         HoverColor: =RGBA(255, 255, 255, 1)
                         HoverFill: =RGBA(15, 108, 189, 1)
                         OnSelect: |
-                            =// Validar si el usuario pertenece a PRODUCCION o C.D.S
-                            If(
-                                LookUp(Empleados, Codigo = VarName, Departamento) = "PRODUCCION" || 
-                                LookUp(Empleados, Codigo = VarName, Departamento) = "C.D.S",
-                                
-                                // Crear solicitud en la tabla SolicitudHerramienta
-                                Set(
-                                    idSolicitud,
-                                    Patch(
-                                        SolicitudHerramientas,
-                                        Defaults(SolicitudHerramientas),
-                                        {
-                                            Maquina: txt_Maquina_SH.Text,
-                                            Orden: gl_HerramientasSeleccionadas_sh_1.Selected.job, 
-                                            Operario: drop_Operario_SH.Selected.Nombre,
-                                            User: LookUp(Empleados, Codigo = VarName, Nombre),
-                                            Operacion: gl_HerramientasSeleccionadas_sh_1.Selected.oper_num
-                                            
-                                            // Estado: "Aprobado"   
-                                            //Causa: txt_Causa_Input.Text 
-                                        }
-                                    ).ID
-                                ),
-                            
-                                // Recorrer cada registro en la galería de herramientas seleccionadas
-                                ForAll(
-                                    gl_HerramientasSeleccionadas_sh_1.AllItems,
-                                    
-                                    // Verificar si ya existe un registro en Herramientas para esta pieza específica
-                                    If(
-                                        IsBlank(
-                                            LookUp(
-                                                Herramientas,
-                                                Maquina = ThisRecord.Maquina &&
-                                                Orden = ThisRecord.Orden &&
-                                                Operacion = ThisRecord.Operacion &&
-                                                ID_Inserto = ThisRecord.ID_Inserto
-                                            )
-                                        ),
-                                        // Si no existe, crea uno nuevo en Herramientas
-                                        Collect(
-                                            Herramientas,
-                                            {
-                                                Maquina: txt_Maquina_SH.Text,
-                                                Orden: gl_HerramientasSeleccionadas_sh_1.Selected.job,
-                                                Operacion: Text(gl_HerramientasSeleccionadas_sh_1.Selected.oper_num),
-                                                ID_Inserto: gl_HerramientasSeleccionadas_sh_1.Selected.item,
-                                                Descripcion: gl_HerramientasSeleccionadas_sh_1.Selected.description,
-                                               // CantxInserto: Value(txt_CantxInserto_SH.Text);
-                                              //  Cant_Inserto: Value(txt_Cant_Insertos_SH.Text);
-                                              //  Cant_Insertos: Value( txt_Cant_Insertos_SH.Text);
-                                               // Cant_Maxima:Value( txt_Cant_Maxima_SH.Text);
-                                              //  Cant_Actual:Value( txt_Cant_Actual_SH.Text);
-                                                User: LookUp(Empleados, Codigo = VarName, Nombre)
-                                                
-                                                // Estado: "Aprobado";
-                                                // ID_Solicitud: ;
-                                                // InsertosPasados: 0, // Nuevo registro, no hay inserto previo
-                                                // Causa: txt_Causa_Input.Text // Toma la causa del cuadro de entrada
-                                            }
-                                        ),
-                                        // Si el registro existe, realiza la actualización y verifica sobre/subconsumo
-                                        Patch(
-                                            Herramientas,
-                                            LookUp(
-                                                Herramientas,
-                                                Maquina = ThisRecord.Maquina &&
-                                                Orden = ThisRecord.Orden &&
-                                                Operacion = ThisRecord.Operacion &&
-                                                ID_Inserto = ThisRecord.ID_Inserto
+                            =Collect(
+                                SolicitudHerramientas,
+                                {
+                                    Maquina: Upper(txt_Maquina_SH.Text),
+                                    Orden: gl_HerramientasSeleccionadas_sh_1.Selected.job,
+                                    Operario: drop_Operario_SH.Selected.Nombre,
+                                    User: LookUp(
+                                        Empleados,
+                                        Codigo = VarName,
+                                        Nombre
+                                    ),
+                                    Operacion: Text(gl_HerramientasSeleccionadas_sh_1.Selected.oper_num),
+                                    'Estado (crfb9_estado)': "Revision",
+                                    Causa: "Bien",
+                                    'P/N': LookUp(
+                                        Orden_Ejecucion,
+                                        Orden = LookUp(
+                                            Maquina_Ordens_1,
+                                            Maquina = txt_Maquina_SH.Text,
+                                            Orden
+                                        ) && Operacion = LookUp(
+                                            Maquina_Ordens_1,
+                                            Maquina = txt_Maquina_SH.Text,
+                                            Operacion
+                                        )
+                                    ).'P/N'
+                                }
+                            );
+                            UpdateContext(
+                                {
+                                    SoliHerramientas: First(
+                                        Sort(
+                                            Filter(
+                                                SolicitudHerramientas,
+                                                Maquina = txt_Maquina_SH.Text && Orden = LookUp(
+                                                    Maquina_Ordens_1,
+                                                    Maquina = Text(txt_Maquina_SH.Text),
+                                                    Orden
+                                                ) && Operacion = LookUp(
+                                                    Maquina_Ordens_1,
+                                                    Maquina = Text(txt_Maquina_SH.Text),
+                                                    Operacion
+                                                )
                                             ),
-                                            {
-                                                Cant_Actual: ThisRecord.Cant_Actual,
-                                                InsertosPasados: LookUp(Herramientas, Maquina = ThisRecord.Maquina && Orden = ThisRecord.Orden && Operacion = ThisRecord.Operacion && ID_Inserto = ThisRecord.ID_Inserto).Cant_Actual,
-                                                Estado: If(
-                                                    ThisRecord.Cant_Inserto > ThisRecord.Cant_Maxima,
-                                                    "Revision",
-                                                    "Aprobado"
-                                                ),
-                                                Causa: If(
-                                                    ThisRecord.Cant_Inserto > ThisRecord.Cant_Maxima,
-                                                    "Sobreconsumo",
-                                                    If(
-                                                        ThisRecord.Cant_Inserto < ThisRecord.Cant_Maxima,
-                                                        "Subconsumo",
-                                                        "Consumo normal"
-                                                    )
-                                                ),
-                                                ID_Solicitud: idSolicitud
-                                            }
+                                            'Fecha de creación',
+                                            SortOrder.Descending
                                         )
                                     )
-                                ),
+                                }
+                            );
+                            ForAll(
+                                Materiales,
                             
-                                Notify("Solicitud enviada correctamente.", NotificationType.Success),
+                                If(
+                                    IsBlank(
+                                        LookUp(
+                                            Herramientas,
+                                            Maquina = SoliHerramientas.Maquina && Orden = SoliHerramientas.Orden && Operacion = SoliHerramientas.Operacion && ID_Inserto = ThisRecord.ID_Inserto
+                                        )
+                                    ),
+                            
+                                      Collect(
+                                        Herramientas,
+                                        {
+                                             Insertos_Pasados: 0,
+                                            Cant_Actual: Value(ThisRecord.Cant_Actual),
+                                            CantxInserto: Value(ThisRecord.Cant_x_Inserto),
+                                            Cant_Insertos: Value(ThisRecord.Cant_Inserto),
+                                            Cant_Maxima: Value(ThisRecord.Cant_Maxima),
+                                            Causa: "Bien",
+                                            Orden: ThisRecord.job,
+                                            Operacion: Text(ThisRecord.oper_num),
+                                            Operario: drop_Operario_SH.Selected.Nombre,
+                                            ID_Inserto: ThisRecord.item,
+                                            ID_Solicitud: SoliHerramientas.ID,
+                                            Maquina: SoliHerramientas.Maquina,
+                                            User: txtEmpleadoHorarioView_18.Text,
+                                            'P/N': SoliHerramientas.'P/N',
+                                            qty: ThisRecord.matl_qty
+                                        }
+                                    ),
+                                   
+                                    Patch(
+                                        Herramientas,
+                                        LookUp(
+                                            Herramientas,
+                                            Maquina = SoliHerramientas.Maquina && Orden = SoliHerramientas.Orden && Operacion = SoliHerramientas.Operacion && ID_Inserto = ThisRecord.ID_Inserto
+                                        ),
+                                        {
+                                            Insertos_Pasados: LookUp(
+                                                Herramientas,
+                                                Maquina = SoliHerramientas.Maquina && Orden = SoliHerramientas.Orden && Operacion = SoliHerramientas.Operacion && ID_Inserto = ThisRecord.ID_Inserto
+                                            ).Cant_Insertos,
+                                            Cant_Actual: Value(ThisRecord.Cant_Actual),
+                                            CantxInserto: Value(ThisRecord.Cant_x_Inserto),
+                                            Cant_Insertos: Value(ThisRecord.Cant_Inserto),
+                                            Cant_Maxima: Value(ThisRecord.Cant_Maxima),
+                                            Causa: "Bien",
+                                            Orden: ThisRecord.job,
+                                            Operacion: Text(ThisRecord.oper_num),
+                                            Operario: drop_Operario_SH.Selected.Nombre,
+                                            ID_Inserto: ThisRecord.item,
+                                            ID_Solicitud: SoliHerramientas.ID,
+                                            Maquina: SoliHerramientas.Maquina,
+                                            User: txtEmpleadoHorarioView_18.Text,
+                                            'P/N': SoliHerramientas.'P/N',
+                                            qty: ThisRecord.matl_qty
+                               
+                                        }
+                                    )
                                 
-                                // Mensaje de error si el usuario no pertenece a PRODUCCION o C.D.S
-                                ,
-                                Notify("Error: No tienes permiso para realizar esta solicitud.", NotificationType.Error)
-                            ),
+                                )
+                            );
                         RadiusBottomLeft: =20
                         RadiusBottomRight: =20
                         RadiusTopLeft: =20
