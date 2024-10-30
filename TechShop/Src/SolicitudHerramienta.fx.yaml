@@ -647,20 +647,21 @@ SolicitudHerramienta As screen:
                                     PaddingTop: =0
                                     Size: =16
                                     Text: |-
-                                        =If(
+                                        =//Cantidad por Inserto
+                                        If(
                                             IsBlank(
                                                 LookUp(
                                                     Herramientas,
                                                     Maquina = txt_Maquina_SH.Text && Orden = ThisItem.job && Operacion = Text(ThisItem.oper_num) && ID_Inserto = ThisItem.item
                                                 )
                                             ),
-                                            RoundUp(
-                                                1 / If(
-                                                    IsBlank(ThisItem.matl_qty) || ThisItem.matl_qty = 0,
-                                                    1,
-                                                    ThisItem.matl_qty
-                                                ),
-                                                0
+                                            If(
+                                                IsBlank(ThisItem.matl_qty) || ThisItem.matl_qty = 0,
+                                                0,
+                                                RoundUp(
+                                                    1 / ThisItem.matl_qty,
+                                                    0
+                                                )
                                             ),
                                             LookUp(
                                                 Herramientas,
@@ -686,19 +687,24 @@ SolicitudHerramienta As screen:
                                     PaddingTop: =0
                                     Size: =16
                                     Text: |-
-                                        =If(
+                                        =//Cantidad de insertos
+                                        If(
                                             IsBlank(
                                                 LookUp(
                                                     Herramientas,
                                                     Maquina = txt_Maquina_SH.Text && Orden = ThisItem.job && Operacion = Text(ThisItem.oper_num) && ID_Inserto = ThisItem.item
                                                 )
                                             ),
-                                            RoundUp(
-                                                8 / Value(txt_CantxInserto_SH.Text) / LookUp(
-                                                    Orden_Ejecucion,
-                                                    Orden = ThisItem.job && Operacion = Text(ThisItem.oper_num)
-                                                ).Meta,
-                                                0
+                                            If(
+                                                txt_CantxInserto_SH.Text = "0",
+                                                0,
+                                                RoundUp(
+                                                    8 / Value(txt_CantxInserto_SH.Text) / LookUp(
+                                                        Orden_Ejecucion,
+                                                        Orden = ThisItem.job && Operacion = Text(ThisItem.oper_num)
+                                                    ).Meta,
+                                                    0
+                                                )
                                             ),
                                             LookUp(
                                                 Herramientas,
@@ -760,7 +766,7 @@ SolicitudHerramienta As screen:
                                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 DisabledFill: =RGBA(244, 244, 244, 1)
-                                DisplayMode: =If(IsBlank(LookUp(Materiales, item = ThisItem.item)) || Disable, DisplayMode.Disabled, DisplayMode.Edit)
+                                DisplayMode: =If(!IsBlank(LookUp(Materiales, item = ThisItem.item)) || Disable, DisplayMode.Disabled, DisplayMode.Edit)
                                 Fill: =RGBA(72, 163, 62, 1)
                                 FontWeight: =FontWeight.Semibold
                                 Height: =41
