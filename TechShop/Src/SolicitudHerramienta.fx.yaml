@@ -199,7 +199,7 @@ SolicitudHerramienta As screen:
                     Y: =48
                     ZIndex: =1
 
-                lbl_Maquina_SH As Text:
+                lbl_Maquina_SH As Texto:
                     Align: ='TextCanvas.Align'.Center
                     DisplayMode: =DisplayMode.Edit
                     FontColor: =RGBA(0, 0, 0, 1)
@@ -243,7 +243,7 @@ SolicitudHerramienta As screen:
                     Y: =48
                     ZIndex: =3
 
-                lbl_NumeroPieza_SH As Text:
+                lbl_NumeroPieza_SH As Texto:
                     Align: ='TextCanvas.Align'.Center
                     DisplayMode: =DisplayMode.Edit
                     FontColor: =RGBA(0, 0, 0, 1)
@@ -262,7 +262,7 @@ SolicitudHerramienta As screen:
                     Y: =4
                     ZIndex: =4
 
-                btn_buscar_SH As Button:
+                btn_buscar_SH As Botón:
                     Align: =Align.Center
                     Appearance: ='ButtonCanvas.Appearance'.Secondary
                     BorderColor: =RGBA(9, 33, 98, 1)
@@ -1061,126 +1061,162 @@ SolicitudHerramienta As screen:
                         HoverColor: =RGBA(255, 255, 255, 1)
                         HoverFill: =RGBA(15, 108, 189, 1)
                         OnSelect: |
-                            =Collect(
-                                SolicitudHerramientas,
-                                {
-                                    Maquina: Upper(txt_Maquina_SH.Text),
-                                    Orden: gl_HerramientasSeleccionadas_sh_1.Selected.job,
-                                    Operario: drop_Operario_SH.Selected.Nombre,
-                                    User: LookUp(
-                                        Empleados,
-                                        Codigo = VarName,
-                                        Nombre
-                                    ),
-                                    Operacion: Text(gl_HerramientasSeleccionadas_sh_1.Selected.oper_num),
-                                    'Estado (crfb9_estado)': "Revision",
-                                    Causa: "Bien",
-                                    'P/N': LookUp(
-                                        Orden_Ejecucion,
-                                        Orden = LookUp(
-                                            Maquina_Ordens_1,
-                                            Maquina = txt_Maquina_SH.Text,
-                                            Orden
-                                        ) && Operacion = LookUp(
-                                            Maquina_Ordens_1,
-                                            Maquina = txt_Maquina_SH.Text,
-                                            Operacion
-                                        )
-                                    ).'P/N'
-                                }
-                            );
+                            =// Inicializar variables
                             UpdateContext(
                                 {
-                                    SoliHerramientas: First(
-                                        Sort(
-                                            Filter(
-                                                SolicitudHerramientas,
-                                                Maquina = txt_Maquina_SH.Text && Orden = LookUp(
-                                                    Maquina_Ordens_1,
-                                                    Maquina = Text(txt_Maquina_SH.Text),
-                                                    Orden
-                                                ) && Operacion = LookUp(
-                                                    Maquina_Ordens_1,
-                                                    Maquina = Text(txt_Maquina_SH.Text),
-                                                    Operacion
-                                                )
-                                            ),
-                                            'Fecha de creación',
-                                            SortOrder.Descending
-                                        )
-                                    )
+                                    Causa: false,
+                                    estado: "Aprobado",
+                                    Disable: false
                                 }
                             );
-                            ForAll(
-                                Materiales,
-                                If(
-                                    IsBlank(
-                                        With(
-                                            {item: ThisRecord.item},
-                                            LookUp(
-                                                Herramientas,
-                                                Maquina = SoliHerramientas.Maquina && Orden = SoliHerramientas.Orden && Operacion = SoliHerramientas.Operacion && ID_Inserto = item
+                            // Recorrer la colección Materiales y hacer validaciones
+                            ClearCollect(
+                                Verificacion,
+                                ForAll(
+                                    Materiales,
+                                    With(
+                                        {
+                                            subconsumo: Value(ThisRecord.Cant_Actual) < ThisRecord.Cant_Maxima - (ThisRecord.Cant_Maxima * 0.1),
+                                            sobreconsumo: Value(ThisRecord.Cant_Actual) > Value(ThisRecord.Cant_Maxima)
+                                        },
+                                        {veri: subconsumo || sobreconsumo}
+                                    )
+                                )
+                            );
+                            If(
+                                CountRows(
+                                    Filter(
+                                        Verificacion,
+                                        veri
+                                    )
+                                ) = 0,
+                                Collect(
+                                    SolicitudHerramientas,
+                                    {
+                                        Maquina: Upper(txt_Maquina_SH.Text),
+                                        Orden: gl_HerramientasSeleccionadas_sh_1.Selected.job,
+                                        Operario: drop_Operario_SH.Selected.Nombre,
+                                        User: LookUp(
+                                            Empleados,
+                                            Codigo = VarName,
+                                            Nombre
+                                        ),
+                                        Operacion: Text(gl_HerramientasSeleccionadas_sh_1.Selected.oper_num),
+                                        'Estado (crfb9_estado)': "Revision",
+                                        Causa: "Bien",
+                                        'P/N': LookUp(
+                                            Orden_Ejecucion,
+                                            Orden = LookUp(
+                                                Maquina_Ordens_1,
+                                                Maquina = txt_Maquina_SH.Text,
+                                                Orden
+                                            ) && Operacion = LookUp(
+                                                Maquina_Ordens_1,
+                                                Maquina = txt_Maquina_SH.Text,
+                                                Operacion
+                                            )
+                                        ).'P/N'
+                                    }
+                                );
+                                UpdateContext(
+                                    {
+                                        SoliHerramientas: First(
+                                            Sort(
+                                                Filter(
+                                                    SolicitudHerramientas,
+                                                    Maquina = txt_Maquina_SH.Text && Orden = LookUp(
+                                                        Maquina_Ordens_1,
+                                                        Maquina = Text(txt_Maquina_SH.Text),
+                                                        Orden
+                                                    ) && Operacion = LookUp(
+                                                        Maquina_Ordens_1,
+                                                        Maquina = Text(txt_Maquina_SH.Text),
+                                                        Operacion
+                                                    )
+                                                ),
+                                                'Fecha de creación',
+                                                SortOrder.Descending
                                             )
                                         )
-                                    ),
-                                    Collect(
-                                        Herramientas,
-                                        {
-                                            Insertos_Pasados: 0,
-                                            Cant_Actual: Value(ThisRecord.Cant_Actual),
-                                            CantxInserto: Value(ThisRecord.Cant_x_Inserto),
-                                            Cant_Insertos: Value(ThisRecord.Cant_Inserto),
-                                            Cant_Maxima: Value(ThisRecord.Cant_Maxima),
-                                            Causa: "Bien",
-                                            Orden: ThisRecord.job,
-                                            Operacion: Text(ThisRecord.oper_num),
-                                            Operario: drop_Operario_SH.Selected.Nombre,
-                                            ID_Inserto: ThisRecord.item,
-                                            ID_Solicitud: SoliHerramientas.ID,
-                                            Maquina: SoliHerramientas.Maquina,
-                                            User: txtEmpleadoHorarioView_18.Text,
-                                            'P/N': SoliHerramientas.'P/N',
-                                            qty: ThisRecord.QTY,
-                                            Descripcion: ThisRecord.description
-                            
-                                        }
-                                    ),
-                                    Patch(
-                                        Herramientas,
-                                        With(
-                                            {item: ThisRecord.item},
-                                            LookUp(
-                                                Herramientas,
-                                                Maquina = SoliHerramientas.Maquina && Orden = SoliHerramientas.Orden && Operacion = SoliHerramientas.Operacion && ID_Inserto = item
-                                            )
-                                        ),
-                                        {
-                                            Insertos_Pasados: With(
+                                    }
+                                );
+                                ForAll(
+                                    Materiales,
+                                    If(
+                                        IsBlank(
+                                            With(
                                                 {item: ThisRecord.item},
                                                 LookUp(
                                                     Herramientas,
                                                     Maquina = SoliHerramientas.Maquina && Orden = SoliHerramientas.Orden && Operacion = SoliHerramientas.Operacion && ID_Inserto = item
                                                 )
-                                            ).Cant_Insertos,
-                                            Cant_Actual: Value(ThisRecord.Cant_Actual),
-                                            CantxInserto: Value(ThisRecord.Cant_x_Inserto),
-                                            Cant_Insertos: Value(ThisRecord.Cant_Inserto),
-                                            Cant_Maxima: Value(ThisRecord.Cant_Maxima),
-                                            Causa: "Bien",
-                                            Orden: ThisRecord.job,
-                                            Operacion: Text(ThisRecord.oper_num),
-                                            Operario: drop_Operario_SH.Selected.Nombre,
-                                            ID_Inserto: ThisRecord.item,
-                                            ID_Solicitud: SoliHerramientas.ID,
-                                            Maquina: SoliHerramientas.Maquina,
-                                            User: txtEmpleadoHorarioView_18.Text,
-                                            'P/N': SoliHerramientas.'P/N',
-                                              qty: ThisRecord.QTY,
-                                            Descripcion: ThisRecord.description
-                                        }
+                                            )
+                                        ),
+                                        Collect(
+                                            Herramientas,
+                                            {
+                                                Insertos_Pasados: 0,
+                                                Cant_Actual: Value(ThisRecord.Cant_Actual),
+                                                CantxInserto: Value(ThisRecord.Cant_x_Inserto),
+                                                Cant_Insertos: Value(ThisRecord.Cant_Inserto),
+                                                Cant_Maxima: Value(ThisRecord.Cant_Maxima),
+                                                Causa: "Bien",
+                                                Orden: ThisRecord.job,
+                                                Operacion: Text(ThisRecord.oper_num),
+                                                Operario: drop_Operario_SH.Selected.Nombre,
+                                                ID_Inserto: ThisRecord.item,
+                                                ID_Solicitud: SoliHerramientas.ID,
+                                                Maquina: SoliHerramientas.Maquina,
+                                                User: txtEmpleadoHorarioView_18.Text,
+                                                'P/N': SoliHerramientas.'P/N',
+                                                qty: ThisRecord.QTY,
+                                                Descripcion: ThisRecord.description
+                                            }
+                                        ),
+                                        Patch(
+                                            Herramientas,
+                                            With(
+                                                {item: ThisRecord.item},
+                                                LookUp(
+                                                    Herramientas,
+                                                    Maquina = SoliHerramientas.Maquina && Orden = SoliHerramientas.Orden && Operacion = SoliHerramientas.Operacion && ID_Inserto = item
+                                                )
+                                            ),
+                                            {
+                                                Insertos_Pasados: With(
+                                                    {item: ThisRecord.item},
+                                                    LookUp(
+                                                        Herramientas,
+                                                        Maquina = SoliHerramientas.Maquina && Orden = SoliHerramientas.Orden && Operacion = SoliHerramientas.Operacion && ID_Inserto = item
+                                                    )
+                                                ).Cant_Insertos,
+                                                Cant_Actual: Value(ThisRecord.Cant_Actual),
+                                                CantxInserto: Value(ThisRecord.Cant_x_Inserto),
+                                                Cant_Insertos: Value(ThisRecord.Cant_Inserto),
+                                                Cant_Maxima: Value(ThisRecord.Cant_Maxima),
+                                                Causa: "Bien",
+                                                Orden: ThisRecord.job,
+                                                Operacion: Text(ThisRecord.oper_num),
+                                                Operario: drop_Operario_SH.Selected.Nombre,
+                                                ID_Inserto: ThisRecord.item,
+                                                ID_Solicitud: SoliHerramientas.ID,
+                                                Maquina: SoliHerramientas.Maquina,
+                                                User: txtEmpleadoHorarioView_18.Text,
+                                                'P/N': SoliHerramientas.'P/N',
+                                                qty: ThisRecord.QTY,
+                                                Descripcion: ThisRecord.description
+                                            }
+                                        )
                                     )
+                                ),
+                                UpdateContext(
+                                    {
+                                        Causa: true,
+                                        estado: "Revision",
+                                        Disable: true
+                                    }
                                 )
-                            );
+                            )
                         RadiusBottomLeft: =20
                         RadiusBottomRight: =20
                         RadiusTopLeft: =20
