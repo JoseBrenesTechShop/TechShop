@@ -1179,61 +1179,20 @@
                             DisabledBorderColor: =RGBA(166, 166, 166, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             DisabledFill: =RGBA(244, 244, 244, 1)
+                            DisplayMode: =
                             Fill: =RGBA(233, 79, 76, 1)
                             FontWeight: =FontWeight.Semibold
                             Height: =60
                             HoverColor: =RGBA(255, 255, 255, 1)
                             HoverFill: =RGBA(215, 58, 60, 1)
                             OnSelect: |-
-                                =Set(
-                                    varSolicitudID,
-                                    glr_Solicitudes_AH_1.Selected.ID
+                                =UpdateContext(
+                                    {
+                                        MotivoRechazo: true,
+                                        Disable: false
+                                    }
                                 );
-                                ForAll(
-                                    Gallery2_1.AllItems,
-                                    Patch(
-                                        RegistroHerramientas,
-                                        Defaults(RegistroHerramientas),
-                                        {
-                                            Cant_Inserto: Cant_Insertos,
-                                            Causa: Causa,
-                                            Descripcion: Descripcion,
-                                            ID_Inserto: ID_Inserto,
-                                            id_Solicitud: varSolicitudID,
-                                            Maquina: glr_Solicitudes_AH_1.Selected.Maquina,
-                                            Operario: glr_Solicitudes_AH_1.Selected.Operario,
-                                            Operacion: glr_Solicitudes_AH_1.Selected.Operacion,
-                                            Orden: glr_Solicitudes_AH_1.Selected.Orden,
-                                            Piezas_Hechas: Cant_Actual,
-                                            Piezas_Meta: Cant_Maxima,
-                                            User: LookUp(
-                                                Empleados,
-                                                Codigo = VarName,
-                                                Nombre
-                                            ),
-                                            RazonCausa: glr_Solicitudes_AH_1.Selected.RazonCausa
-                                        }
-                                    )
-                                );
-                                ForAll(
-                                    Gallery2_1.AllItems,
-                                    Patch(
-                                        Herramientas,
-                                        ThisRecord,
-                                        {
-                                            Cant_Actual: 0,
-                                            Cant_Insertos: 1
-                                        }
-                                    )
-                                );
-                                
-                                Patch(
-                                    SolicitudHerramientas,
-                                    glr_Solicitudes_AH_1.Selected,
-                                    {'Estado (crfb9_estado)': "Rechazado"}
-                                );
-                                UpdateContext({Disable: false});
-                                UpdateContext({Mostrar: false})
+                                 
                             Size: =20
                             Text: ="Rechazar"
                             Visible: =drp_Estado_DH.SelectedText.Value = "Aprobado"
@@ -1246,6 +1205,7 @@
                             DisabledBorderColor: =RGBA(166, 166, 166, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             DisabledFill: =RGBA(244, 244, 244, 1)
+                            DisplayMode: =
                             Fill: =RGBA(72, 163, 62, 1)
                             FontWeight: =FontWeight.Semibold
                             Height: =60
@@ -1278,7 +1238,8 @@
                                                 Codigo = VarName,
                                                 Nombre
                                             ),
-                                            RazonCausa: glr_Solicitudes_AH_1.Selected.RazonCausa
+                                            RazonCausa: glr_Solicitudes_AH_1.Selected.RazonCausa,
+                                            idSolicitud: varSolicitudID
                                         }
                                     )
                                 );
@@ -1297,7 +1258,7 @@
                                 Patch(
                                     SolicitudHerramientas,
                                     glr_Solicitudes_AH_1.Selected,
-                                    {'Estado (crfb9_estado)': "Despacho"}
+                                    {'Estado (crfb9_estado)': "Despachado"}
                                 );
                                 UpdateContext({Disable: false});
                                 UpdateContext({Mostrar: false})
@@ -1350,4 +1311,142 @@
                         X: =1096
                         Y: =7
                         ZIndex: =5
+
+    cnt_Motivo_Rechazo_DH As groupContainer.manualLayoutContainer:
+        BorderColor: =RGBA(15, 84, 140, 1)
+        BorderThickness: =5
+        DropShadow: =DropShadow.ExtraBold
+        Fill: =RGBA(255, 255, 255, 1)
+        Height: =272
+        RadiusBottomLeft: =20
+        RadiusBottomRight: =20
+        RadiusTopLeft: =20
+        RadiusTopRight: =20
+        Visible: =MotivoRechazo
+        Width: =631
+        X: =351
+        Y: =317
+        ZIndex: =2
+
+        btn_Aceptar_DH As button:
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            Fill: =RGBA(72, 163, 62, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =50
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(52, 152, 47, 1)
+            OnSelect: |-
+                =Set(
+                    varSolicitudID,
+                    glr_Solicitudes_AH_1.Selected.ID
+                );
+                ForAll(
+                    Gallery2_1.AllItems,
+                    Patch(
+                        RegistroHerramientas,
+                        Defaults(RegistroHerramientas),
+                        {
+                            Cant_Inserto: Cant_Insertos,
+                            Causa: Causa,
+                            Descripcion: Descripcion,
+                            ID_Inserto: ID_Inserto,
+                            id_Solicitud: varSolicitudID,
+                            Maquina: glr_Solicitudes_AH_1.Selected.Maquina,
+                            Operario: glr_Solicitudes_AH_1.Selected.Operario,
+                            Operacion: glr_Solicitudes_AH_1.Selected.Operacion,
+                            Orden: glr_Solicitudes_AH_1.Selected.Orden,
+                            Piezas_Hechas: Cant_Actual,
+                            Piezas_Meta: Cant_Maxima,
+                            User: LookUp(
+                                Empleados,
+                                Codigo = VarName,
+                                Nombre
+                            ),
+                            RazonCausa: glr_Solicitudes_AH_1.Selected.RazonCausa,
+                            idSolicitud: varSolicitudID,
+                            MotivoRechazo: txt_Motivo_Rechazo_DH.Text
+                        }
+                    )
+                );
+                ForAll(
+                    Gallery2_1.AllItems,
+                    Patch(
+                        Herramientas,
+                        ThisRecord,
+                        {
+                            Cant_Actual: 0,
+                            Cant_Insertos: 1
+                        }
+                    )
+                );
+                Patch(
+                    SolicitudHerramientas,
+                    glr_Solicitudes_AH_1.Selected,
+                    {'Estado (crfb9_estado)': "Rechazado"}
+                );
+                UpdateContext({Disable: false});
+                UpdateContext({Mostrar: false});
+                UpdateContext({MotivoRechazo: false})
+            Size: =15
+            Text: ="Aceptar"
+            Width: =180
+            X: =350
+            Y: =190
+            ZIndex: =2
+
+        Btn_Cancelar_DH As button:
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            Fill: =RGBA(233, 79, 76, 1)
+            FontWeight: =FontWeight.Semibold
+            Height: =50
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(215, 58, 60, 1)
+            OnSelect: |-
+                =UpdateContext(
+                    {
+                        MotivoRechazo: false,
+                        Disable:false
+                    }
+                );
+                 
+            Size: =15
+            Text: ="Cancelar"
+            Width: =180
+            X: =101
+            Y: =190
+            ZIndex: =8
+
+        lb_Motivo_rechazo As label:
+            Align: =Align.Center
+            BorderColor: =App.Theme.Colors.Darker40
+            Color: =RGBA(0, 0, 0, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            Font: =App.Theme.Font
+            Height: =61
+            Size: =18
+            Text: ="Escriba el motivo del rechazo"
+            Width: =569
+            X: =33
+            Y: =5
+            ZIndex: =9
+
+        "txt_motivo_rechazo_DH As 'Entrada de texto'":
+            Appearance: ='TextInputCanvas.Appearance'.Outline
+            BorderColor: =RGBA(12, 59, 94, 1)
+            BorderStyle: =BorderStyle.Solid
+            BorderThickness: =2
+            DisplayMode: =DisplayMode.Edit
+            Font: =Font.Arial
+            FontSize: =20
+            Height: =109
+            Mode: ='TextInputCanvas.Mode'.Multiline
+            TriggerOutput: ='TextInputCanvas.TriggerOutput'.Delayed
+            Width: =569
+            X: =33
+            Y: =66
+            ZIndex: =10
 
