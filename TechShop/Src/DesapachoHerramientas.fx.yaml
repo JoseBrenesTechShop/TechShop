@@ -232,7 +232,7 @@
                             Y: =24
                             ZIndex: =53
 
-                        TextCanvas1_20 As Text:
+                        TextCanvas1_20 As Texto:
                             Align: ='TextCanvas.Align'.Center
                             DisplayMode: =DisplayMode.Edit
                             Height: =40
@@ -245,7 +245,7 @@
                             Y: =7
                             ZIndex: =54
 
-                        TextCanvas1_22 As Text:
+                        TextCanvas1_22 As Texto:
                             Align: ='TextCanvas.Align'.Center
                             DisplayMode: =DisplayMode.Edit
                             Height: =40
@@ -311,7 +311,7 @@
                             Y: =7
                             ZIndex: =57
 
-                        TextCanvas1_23 As Text:
+                        TextCanvas1_23 As Texto:
                             Align: ='TextCanvas.Align'.Center
                             DisplayMode: =DisplayMode.Edit
                             Height: =40
@@ -323,7 +323,7 @@
                             Y: =7
                             ZIndex: =58
 
-                        TextCanvas1_24 As Text:
+                        TextCanvas1_24 As Texto:
                             Align: ='TextCanvas.Align'.Center
                             DisplayMode: =DisplayMode.Edit
                             Height: =40
@@ -363,7 +363,7 @@
                             Y: =54
                             ZIndex: =60
 
-                        TextCanvas1_25 As Text:
+                        TextCanvas1_25 As Texto:
                             Align: ='TextCanvas.Align'.Center
                             DisplayMode: =DisplayMode.Edit
                             Height: =40
@@ -1337,58 +1337,63 @@
             Height: =50
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(52, 152, 47, 1)
-            OnSelect: |-
-                =Set(
-                    varSolicitudID,
-                    glr_Solicitudes_AH_1.Selected.ID
-                );
-                ForAll(
-                    Gallery2_1.AllItems,
+            OnSelect: |
+                =If(
+                    IsBlank(txt_motivo_rechazo_DH.Value), 
+                    Notify("Por favor escribe la razón del rechazo", NotificationType.Error), 
+                    Set(varSolicitudID, glr_Solicitudes_AH_1.Selected.ID);
+                    
+                    ForAll(
+                        Gallery2_1.AllItems,
+                        Patch(
+                            RegistroHerramientas,
+                            Defaults(RegistroHerramientas),
+                            {
+                                Cant_Inserto: Cant_Insertos,
+                                Causa: Causa,
+                                Descripcion: Descripcion,
+                                ID_Inserto: ID_Inserto,
+                                id_Solicitud: varSolicitudID,
+                                Maquina: glr_Solicitudes_AH_1.Selected.Maquina,
+                                Operario: glr_Solicitudes_AH_1.Selected.Operario,
+                                Operacion: glr_Solicitudes_AH_1.Selected.Operacion,
+                                Orden: glr_Solicitudes_AH_1.Selected.Orden,
+                                Piezas_Hechas: Cant_Actual,
+                                Piezas_Meta: Cant_Maxima,
+                                User: LookUp(
+                                    Empleados,
+                                    Codigo = VarName,
+                                    Nombre
+                                ),
+                                RazonCausa: glr_Solicitudes_AH_1.Selected.RazonCausa,
+                                idSolicitud: varSolicitudID,
+                                MotivoRechazo: txt_motivo_rechazo_DH.Value
+                            }
+                        )
+                    );
+                    
+                    ForAll(
+                        Gallery2_1.AllItems,
+                        Patch(
+                            Herramientas,
+                            ThisRecord,
+                            {
+                                Cant_Actual: 0,
+                                Cant_Insertos: 1
+                            }
+                        )
+                    );
+                
                     Patch(
-                        RegistroHerramientas,
-                        Defaults(RegistroHerramientas),
-                        {
-                            Cant_Inserto: Cant_Insertos,
-                            Causa: Causa,
-                            Descripcion: Descripcion,
-                            ID_Inserto: ID_Inserto,
-                            id_Solicitud: varSolicitudID,
-                            Maquina: glr_Solicitudes_AH_1.Selected.Maquina,
-                            Operario: glr_Solicitudes_AH_1.Selected.Operario,
-                            Operacion: glr_Solicitudes_AH_1.Selected.Operacion,
-                            Orden: glr_Solicitudes_AH_1.Selected.Orden,
-                            Piezas_Hechas: Cant_Actual,
-                            Piezas_Meta: Cant_Maxima,
-                            User: LookUp(
-                                Empleados,
-                                Codigo = VarName,
-                                Nombre
-                            ),
-                            RazonCausa: glr_Solicitudes_AH_1.Selected.RazonCausa,
-                            idSolicitud: varSolicitudID,
-                            MotivoRechazo: txt_Motivo_Rechazo_DH.Text
-                        }
-                    )
-                );
-                ForAll(
-                    Gallery2_1.AllItems,
-                    Patch(
-                        Herramientas,
-                        ThisRecord,
-                        {
-                            Cant_Actual: 0,
-                            Cant_Insertos: 1
-                        }
-                    )
-                );
-                Patch(
-                    SolicitudHerramientas,
-                    glr_Solicitudes_AH_1.Selected,
-                    {'Estado (crfb9_estado)': "Rechazado"}
-                );
-                UpdateContext({Disable: false});
-                UpdateContext({Mostrar: false});
-                UpdateContext({MotivoRechazo: false})
+                        SolicitudHerramientas,
+                        glr_Solicitudes_AH_1.Selected,
+                        {'Estado (crfb9_estado)': "Rechazado"}
+                    );
+                
+                    UpdateContext({Disable: false});
+                    UpdateContext({Mostrar: false});
+                    UpdateContext({MotivoRechazo: false});
+                )
             Size: =15
             Text: ="Aceptar"
             Width: =180
