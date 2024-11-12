@@ -2480,13 +2480,18 @@ HoraXhoraRegistro As screen:
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(215, 58, 60, 1)
             OnSelect: |-
-                =If(
-                    tbl_Info_HxHR.Selected.FechaRegistro <= Today() && tbl_Info_HxHR.Selected.FechaRegistro - 2 <= Today(),
+                =
+                If(
+                    Set(
+                    fechax,
+                     tbl_Info_HxHR.Selected.FechaRegistro <= Today() && (tbl_Info_HxHR.Selected.FechaRegistro >= Fecha1 && tbl_Info_HxHR.Selected.FechaRegistro <= Fecha2 ) - 2 <= Today()
+                )
+                    ,
                     UpdateContext(
-                        {
+                        {   
                             InfoVieja: {
                                 codigo: tbl_Info_HxHR.Selected.CodigoEmpleado,
-                                fecha: tbl_Info_HxHR.Selected.FechaRegistro,
+                                fecha:  tbl_Info_HxHR.Selected.FechaRegistro,
                                 hour: tbl_Info_HxHR.Selected.Hora,
                                 semana: tbl_Info_HxHR.Selected.Semana,
                                 maquina: tbl_Info_HxHR.Selected.Maquina,
@@ -2542,7 +2547,7 @@ HoraXhoraRegistro As screen:
                         !IsBlank(
                             LookUp(
                                 'Hora X Hora',
-                                CodigoEmpleado = InfoVieja.codigo && Hora = InfoVieja.hour && FechaRegistro = InfoVieja.fecha
+                                CodigoEmpleado = InfoVieja.codigo && Hora = InfoVieja.hour && fechax = InfoVieja.fecha
                             )
                         ),
                         Patch(
