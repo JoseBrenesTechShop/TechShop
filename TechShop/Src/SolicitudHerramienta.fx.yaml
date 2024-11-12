@@ -1187,6 +1187,21 @@ SolicitudHerramienta As screen:
                         HoverFill: =RGBA(15, 108, 189, 1)
                         OnSelect: |-
                             =If(
+                                // Verificar si la solicitud ya está aprobada o rechazada
+                                !IsBlank(
+                                    LookUp(
+                                        SolicitudHerramientas,
+                                        Maquina = txt_Maquina_SH_1.Text &&
+                                        Orden = gl_HerramientasSeleccionadas_sh_2.Selected.job &&
+                                        Operacion = Text(gl_HerramientasSeleccionadas_sh_2.Selected.oper_num) &&
+                                        ('Estado (crfb9_estado)' = "Aprobado" || 'Estado (crfb9_estado)' = "Rechazado")
+                                    )
+                                ),
+                                Notify(
+                                    "No se puede enviar la solicitud, ya está en estado Aprobado o Rechazado.",
+                                    NotificationType.Error
+                                ),
+                            If(
                                 IsEmpty(Materiales),
                                 Notify(
                                     "No hay ítems en la tabla Materiales",
@@ -1424,6 +1439,7 @@ SolicitudHerramienta As screen:
                                     )
                                 )
                             )
+                            )
                         RadiusBottomLeft: =20
                         RadiusBottomRight: =20
                         RadiusTopLeft: =20
@@ -1517,7 +1533,7 @@ SolicitudHerramienta As screen:
         Y: =345
         ZIndex: =2
 
-    VerifiacionEstado As groupContainer.manualLayoutContainer:
+    CTN_VerifiacionInsertoSolicituad0_SH As groupContainer.manualLayoutContainer:
         BorderColor: =RGBA(15, 84, 140, 1)
         BorderThickness: =5
         DropShadow: =DropShadow.ExtraBold
@@ -1532,7 +1548,7 @@ SolicitudHerramienta As screen:
         Y: =309
         ZIndex: =3
 
-        Aceptar As button:
+        btn_Aceptar_SH As button:
             DisabledBorderColor: =RGBA(166, 166, 166, 1)
             DisabledColor: =RGBA(166, 166, 166, 1)
             DisabledFill: =RGBA(244, 244, 244, 1)
@@ -1549,7 +1565,7 @@ SolicitudHerramienta As screen:
             Y: =137
             ZIndex: =2
 
-        Verifiacion_SH As label:
+        lbl_Verifiacion_SH As label:
             Align: =Align.Center
             BorderColor: =App.Theme.Colors.Darker40
             Color: =RGBA(0, 0, 0, 1)
@@ -1557,7 +1573,7 @@ SolicitudHerramienta As screen:
             Font: =App.Theme.Font
             Height: =85
             Size: =20
-            Text: ="Seleccione la causa "
+            Text: =
             Width: =597
             X: =12
             Y: =20
