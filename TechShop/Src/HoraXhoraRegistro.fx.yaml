@@ -1681,7 +1681,7 @@ HoraXhoraRegistro As screen:
                     HoverFill: =RGBA(15, 108, 189, 1)
                     OnSelect: |-
                         =If(
-                            tbl_Info_HxHR.Selected.FechaRegistro <= DateTimeValue(Text(Today(), "[$-en-US]yyyy-mm-dd") & " 23:59") && tbl_Info_HxHR.Selected.FechaRegistro >= DateTimeValue(Text(Today() - 2, "[$-en-US]yyyy-mm-dd") & " 00:00"),
+                            tbl_Info_HxHR.Selected.FechaRegistro <= DateTimeValue(Text(Today(), "[$-en-US]yyyy-mm-dd") & " 23:59") && tbl_Info_HxHR.Selected.FechaRegistro >= DateTimeValue(Text(Today() - 3, "[$-en-US]yyyy-mm-dd") & " 00:00"),
                             UpdateContext(
                                 {
                                     InfoVieja: {
@@ -1976,7 +1976,8 @@ HoraXhoraRegistro As screen:
                                         )
                                     )
                                 )
-                            )
+                            ),
+                            Notify("No se pueden editar registros de mas de 3 dias", NotificationType.Error)
                         )
                     PressedBorderColor: =App.Theme.Colors.Darker40
                     PressedColor: =Self.Color
@@ -2500,18 +2501,34 @@ HoraXhoraRegistro As screen:
             HoverFill: =RGBA(215, 58, 60, 1)
             OnSelect: |-
                 =If(
-                    Set(
-                    fechax,
-                     tbl_Info_HxHR.Selected.FechaRegistro <= Today() && (tbl_Info_HxHR.Selected.FechaRegistro >= Fecha1 && tbl_Info_HxHR.Selected.FechaRegistro <= Fecha2 ) - 2 <= Today()
-                )
-                    ,
+                    tbl_Info_HxHR.Selected.FechaRegistro <= DateTimeValue(
+                        Text(
+                            Today(),
+                            "[$-en-US]yyyy-mm-dd"
+                        ) & " 23:59"
+                    ) && tbl_Info_HxHR.Selected.FechaRegistro >= DateTimeValue(
+                        Text(
+                            Today() - 3,
+                            "[$-en-US]yyyy-mm-dd"
+                        ) & " 00:00"
+                    ),
                     UpdateContext(
-                        {   
+                        {
                             InfoVieja: {
                                 codigo: tbl_Info_HxHR.Selected.CodigoEmpleado,
-                                fecha:  tbl_Info_HxHR.Selected.FechaRegistro,
-                                fecha1: DateTimeValue(Text(tbl_Info_HxHR.Selected.FechaRegistro, "[$-en-US]yyyy-mm-dd") & " 00:00"),
-                                fecha2: DateTimeValue(Text(tbl_Info_HxHR.Selected.FechaRegistro, "[$-en-US]yyyy-mm-dd") & " 23:59"),
+                                fecha: tbl_Info_HxHR.Selected.FechaRegistro,
+                                fecha1: DateTimeValue(
+                                    Text(
+                                        tbl_Info_HxHR.Selected.FechaRegistro,
+                                        "[$-en-US]yyyy-mm-dd"
+                                    ) & " 00:00"
+                                ),
+                                fecha2: DateTimeValue(
+                                    Text(
+                                        tbl_Info_HxHR.Selected.FechaRegistro,
+                                        "[$-en-US]yyyy-mm-dd"
+                                    ) & " 23:59"
+                                ),
                                 hour: tbl_Info_HxHR.Selected.Hora,
                                 semana: tbl_Info_HxHR.Selected.Semana,
                                 maquina: tbl_Info_HxHR.Selected.Maquina,
@@ -2619,8 +2636,7 @@ HoraXhoraRegistro As screen:
                         )
                     );
                     Refresh('Hora X Hora');
-                    UpdateContext({Mostra: false});
-                    ,
+                    UpdateContext({Mostra: false}),
                     Notify(
                         "No se pueden eliminar registros de mas de 3 dias",
                         NotificationType.Error
