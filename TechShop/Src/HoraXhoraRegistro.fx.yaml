@@ -288,7 +288,7 @@ HoraXhoraRegistro As screen:
                                         'Hora X Hora',
                                         (IsBlank(txt_Tarima_HxHR.Text) || Tarima = txt_Tarima_HxHR.Text),
                                         (IsBlank(drp_Turno_HxHR.Selected.Turno_Op) || Turno = drp_Turno_HxHR.Selected.Turno_Op),
-                                        FechaRegistro = dp_Fecha_HxHR.SelectedDate, 
+                                    FechaRegistro >= Fecha1 && FechaRegistro <= Fecha2, 
                                         (IsBlank(drp_User_HxHR.SelectedText.Value) || User = drp_User_HxHR.SelectedText.Value)
                                     ),
                                     Orden
@@ -349,7 +349,7 @@ HoraXhoraRegistro As screen:
                                         (IsBlank(drp_Orden_HxHR.Selected.Value) || Orden = drp_Orden_HxHR.Selected.Value),
                                         (IsBlank(txt_Tarima_HxHR.Text) || Tarima = txt_Tarima_HxHR.Text),
                                         (IsBlank(drp_Turno_HxHR.Selected.Turno_Op) || Turno = drp_Turno_HxHR.Selected.Turno_Op),
-                                        FechaRegistro = dp_Fecha_HxHR.SelectedDate,
+                                    FechaRegistro >= Fecha1 && FechaRegistro <= Fecha2,
                                         (IsBlank(drp_User_HxHR.SelectedText.Value) || User = drp_User_HxHR.SelectedText.Value)
                                     ),
                                     Operacion
@@ -457,7 +457,7 @@ HoraXhoraRegistro As screen:
                             PressedColor: =RGBA(255, 255, 255, 1)
                             PressedFill: =RGBA(0, 18, 107, 1)
                             SelectionFill: =RGBA(15, 108, 189, 1)
-                            Size: =15
+                            Size: =13
                             Width: =158
                             X: =1167
                             Y: =14
@@ -572,7 +572,8 @@ HoraXhoraRegistro As screen:
                                             tbl_Info_HxHR.Selected.FechaRegistro,
                                             "[$-en-US]yyyy-mm-dd"
                                         ) & " 23:59:59"
-                                    )
+                                    ),
+                                    FechaSimple: DateValue(tbl_Info_HxHR.Selected.FechaRegistro)
                                 }
                             );
                             UpdateContext({Dia: Weekday(FechaSup)});
@@ -923,7 +924,7 @@ HoraXhoraRegistro As screen:
                                         "mm/dd/yyyy"
                                     )
                                 ]
-                            OnChange: |-
+                            OnChange: |
                                 =UpdateContext(
                                     {
                                         FechaSup: DateTimeValue(
@@ -943,7 +944,8 @@ HoraXhoraRegistro As screen:
                                                 Self.SelectedText.Value,
                                                 "[$-en-US]yyyy-mm-dd"
                                             ) & " 23:59:59"
-                                        )
+                                        ),
+                                        FechaSimple: DateValue(Self.SelectedText.Value)
                                     }
                                 );
                                 UpdateContext({Dia: Weekday(FechaSup)});
@@ -2480,8 +2482,7 @@ HoraXhoraRegistro As screen:
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(215, 58, 60, 1)
             OnSelect: |-
-                =
-                If(
+                =If(
                     Set(
                     fechax,
                      tbl_Info_HxHR.Selected.FechaRegistro <= Today() && (tbl_Info_HxHR.Selected.FechaRegistro >= Fecha1 && tbl_Info_HxHR.Selected.FechaRegistro <= Fecha2 ) - 2 <= Today()
