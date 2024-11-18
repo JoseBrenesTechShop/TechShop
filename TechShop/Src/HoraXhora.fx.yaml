@@ -23,7 +23,8 @@ HoraXhora As screen:
                         Today(),
                         "[$-en-US]yyyy-mm-dd"
                     ) & " 23:59:59"
-                )
+                ),
+                FechaHorario: DateValue(Today())
             }
         );
         UpdateContext({Dia: Weekday(FechaSup)});
@@ -372,7 +373,7 @@ HoraXhora As screen:
                     Default: ={}
                     DelayItemLoading: =true
                     Fill: =RGBA(153, 207, 236, 1)
-                    Items: =Filter(Orden_Ejecucion, Orden = txt_Orden_HxH.Text && Estado_Orden = "Ejecucion")
+                    Items: =Sort(Filter(Orden_Ejecucion, Orden = txt_Orden_HxH.Text && Estado_Orden = "Ejecucion"),Operacion, SortOrder.Ascending)
                     Layout: =Layout.Vertical
                     LayoutMinHeight: =100
                     LayoutMinWidth: =320
@@ -1009,13 +1010,13 @@ HoraXhora As screen:
                                 HoraValor >= 0 && HoraValor <= 6 && Dia = 2,
                                 Filter(
                                     HorarioSemanals,
-                                    (Fecha_Fin = DateAdd(FechaSup, -1, TimeUnit.Days)),
+                                    (Fecha_Fin = DateAdd(FechaHorario, -1, TimeUnit.Days)),
                                     (Maquina = txt_Maquina_HxH.Text || 'Maquina 2' = txt_Maquina_HxH.Text || 'Maquina 3' = txt_Maquina_HxH.Text || 'Maquina 4' = txt_Maquina_HxH.Text),
                                     !IsBlank(txt_Maquina_HxH.Text)
                                 ),
                                 Filter(
                                     HorarioSemanals,
-                                    (Fecha_Inicio <= FechaSup && Fecha_Fin >= FechaSup),
+                                    (Fecha_Inicio <= FechaHorario && Fecha_Fin >= FechaHorario),
                                     (Maquina = txt_Maquina_HxH.Text || 'Maquina 2' = txt_Maquina_HxH.Text || 'Maquina 3' = txt_Maquina_HxH.Text || 'Maquina 4' = txt_Maquina_HxH.Text),
                                     !IsBlank(txt_Maquina_HxH.Text)
                                 )
@@ -1913,7 +1914,8 @@ HoraXhora As screen:
                                             Self.SelectedText.Value,
                                             "[$-en-US]yyyy-mm-dd"
                                         ) & " 23:59:59"
-                                    )
+                                    ),
+                                    FechaHorario: DateValue(Self.SelectedText.Value)
                                 }
                             );
                             UpdateContext({Dia: Weekday(FechaSup)});
