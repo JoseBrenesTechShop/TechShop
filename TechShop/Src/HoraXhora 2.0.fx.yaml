@@ -257,7 +257,7 @@
                         BorderStyle: =BorderStyle.None
                         BorderThickness: =2
                         Color: =RGBA(0, 0, 0, 1)
-                        Default: =glr_Info_HxH.Selected.Orden
+                        Default: =
                         DisabledBorderColor: =RGBA(166, 166, 166, 1)
                         DisabledColor: =RGBA(166, 166, 166, 1)
                         DisabledFill: =RGBA(244, 244, 244, 1)
@@ -1476,7 +1476,7 @@
                                     'Hora X Hora',
                                     Orden = txt_Orden_HxH2.Text,
                                     Operacion = txt_OP_HxH2.Text,
-                                    Maquina = txt_Maquina_HxH2.Text,
+                                    Maquina = Upper(txt_Maquina_HxH2.Text),
                                     FechaRegistro >= Fecha1 && FechaRegistro <= Fecha2,
                                     Hora = drp_Hora_HxH2.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
                                 )
@@ -1498,7 +1498,7 @@
                                 CountRows(
                                     Filter(
                                         'Hora X Hora',
-                                        Maquina = txt_Maquina_HxH2.Text,
+                                        Maquina = Upper(txt_Maquina_HxH2.Text),
                                         FechaRegistro >= Fecha1 && FechaRegistro <= Fecha2,
                                         Hora = HoraValor
                                     )
@@ -1564,7 +1564,7 @@
                                     {
                                         CodigoEmpleado: drp_Operario_HxH2.SelectedText.Codigo,
                                         Operario: drp_Operario_HxH2.SelectedText.Empleado,
-                                        Maquina: txt_Maquina_HxH2.Text,
+                                        Maquina: Upper(txt_Maquina_HxH2.Text),
                                         Orden: OrdenInfo.Orden,
                                         Operacion: OrdenInfo.Operacion,
                                         'P/N': OrdenInfo.'P/N',
@@ -1592,7 +1592,7 @@
                                         Descripcion: txt_Descripcion_HxH2.Text,
                                         Ubicacion_Bono: LookUp(
                                             Maquinas,
-                                            Maquina = txt_Maquina_HxH2.Text,
+                                            Maquina = Upper(txt_Maquina_HxH2.Text),
                                             Ubicacion_Bono
                                         ),
                                         Fecha_Hora: Text(
@@ -1758,7 +1758,33 @@
                     Height: =63
                     HoverColor: =RGBA(255, 255, 255, 1)
                     HoverFill: =RGBA(102, 182, 227, 1)
-                    OnSelect: =Navigate('HoraXhoraRegistro 2.0', ScreenTransition.Fade)
+                    OnSelect: |
+                        =Navigate(
+                            'HoraXhoraRegistro 2.0',
+                            ScreenTransition.Fade
+                        );
+                        UpdateContext({FechaSup: Today()});
+                        UpdateContext({Dia: Weekday(FechaSup)});
+                        UpdateContext({Hora: Blank()});
+                        UpdateContext({turnoFinal: Blank()});
+                        UpdateContext({turnoSeleccionado: Blank()});
+                        UpdateContext({HoraValor: Blank()});
+                        UpdateContext({OrdenInfo: Blank()});
+                        UpdateContext({Disable: false});
+                        UpdateContext(
+                            {
+                                Comentarios: {
+                                    Comentario: "PRODUCION",
+                                    Causa: "Bien"
+                                }
+                            }
+                        );
+                        Reset(drp_Comentario_HxH2);
+                        Reset(drp_Causas_HxH2);
+                        Reset(txt_Maquina_HxH2);
+                        Reset(txt_Tarima_HxH2);
+                        Reset(drp_Fecha_HxH2);
+                        Reset(drp_Hora_HxH2);
                     Size: =15
                     Text: ="Ver Registros"
                     Width: =200
