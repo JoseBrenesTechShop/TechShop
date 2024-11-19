@@ -4,10 +4,41 @@
     ImagePosition: =ImagePosition.Fill
     LoadingSpinnerColor: =App.Theme.Colors.Primary
     OnVisible: |
-        =UpdateContext({HoraActual: Value(Text(Now(), "[$-en-US]HH"))});
+        =UpdateContext(
+            {
+                HoraActual: Value(
+                    Text(
+                        Now(),
+                        "[$-en-US]HH"
+                    )
+                )
+            }
+        );
         UpdateContext({Hora: drp_Hora_HxHE.SelectedText.Value});
         UpdateContext({HoraValor: drp_Hora_HxHE.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'});
-        UpdateContext({FechaSup: Today()});
+        UpdateContext(
+            {
+                FechaSup: DateTimeValue(
+                    Text(
+                        Today(),
+                        "[$-en-US]yyyy-mm-dd"
+                    ) & " 12:00:00"
+                ),
+                Fecha1: DateTimeValue(
+                    Text(
+                        Today(),
+                        "[$-en-US]yyyy-mm-dd"
+                    ) & " 00:00:00"
+                ),
+                Fecha2: DateTimeValue(
+                    Text(
+                        Today(),
+                        "[$-en-US]yyyy-mm-dd"
+                    ) & " 23:59:59"
+                ),
+                FechaHorario: DateValue(Today())
+            }
+        );
         UpdateContext({Dia: Weekday(FechaSup)});
 
     ScreenContainer11_1 As groupContainer.verticalAutoLayoutContainer:
@@ -985,9 +1016,15 @@
                         HoverColor: =RGBA(0, 0, 0, 1)
                         HoverFill: =RGBA(180, 214, 250, 1)
                         Items: =Horas
-                        OnChange: |-
-                            =UpdateContext({Hora: drp_Hora_HxH2.SelectedText.Value});
-                            UpdateContext({HoraValor: drp_Hora_HxH2.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'});
+                        OnChange: |
+                            =UpdateContext(
+                                {
+                                    Hora: drp_Hora_HxH2.SelectedText.Value,
+                                    HoraValor: drp_Hora_HxH2.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor',
+                                    turnoFinal: Blank()
+                                }
+                            );
+                            Reset(drp_Operario_HxH2);
                         PressedColor: =RGBA(255, 255, 255, 1)
                         PressedFill: =App.Theme.Colors.Darker30
                         SelectionFill: =RGBA(40, 134, 222, 1)
@@ -1097,14 +1134,14 @@
                                 HoraValor >= 0 && HoraValor <= 6 && Dia = 2,
                                 Filter(
                                     HorarioSemanals,
-                                    (Fecha_Fin = DateAdd(FechaSup, -1, TimeUnit.Days)),
+                                    (Fecha_Fin = DateAdd(FechaHorario, -1, TimeUnit.Days)),
                                     (Maquina = txt_Maquina_HxH2.Text || 'Maquina 2' = txt_Maquina_HxH2.Text || 'Maquina 3' = txt_Maquina_HxH2.Text || 'Maquina 4' = txt_Maquina_HxH2.Text),
                                     !IsBlank(txt_Maquina_HxH2.Text),
                                     !IsBlank(drp_Hora_HxH2.SelectedText)
                                 ),
                                 Filter(
                                     HorarioSemanals,
-                                    (Fecha_Inicio <= FechaSup && Fecha_Fin >= FechaSup),
+                                    (Fecha_Inicio <= FechaHorario && Fecha_Fin >= FechaHorario),
                                     (Maquina = txt_Maquina_HxH2.Text || 'Maquina 2' = txt_Maquina_HxH2.Text || 'Maquina 3' = txt_Maquina_HxH2.Text || 'Maquina 4' = txt_Maquina_HxH2.Text),
                                     !IsBlank(txt_Maquina_HxH2.Text),
                                     !IsBlank(drp_Hora_HxH2.SelectedText)
@@ -1173,29 +1210,56 @@
                             =[
                                 Text(
                                     Now(),
-                                    "mm/dd/yyyy"
+                                    "dd/mmm/yyyy",
+                                    "es-ES"
                                 ),
                                 Text(
-                                    Now()-1,
-                                    "mm/dd/yyyy"
+                                    Now() - 1,
+                                    "dd/mmm/yyyy",
+                                    "es-ES"
                                 ),
                                 Text(
-                                    Now()-2,
-                                    "mm/dd/yyyy"
+                                    Now() - 2,
+                                    "dd/mmm/yyyy",
+                                    "es-ES"
                                 ),
                                 Text(
-                                    Now()-3,
-                                    "mm/dd/yyyy"
+                                    Now() - 3,
+                                    "dd/mmm/yyyy",
+                                    "es-ES"
                                 ),
                                 Text(
-                                    Now()-4,
-                                    "mm/dd/yyyy"
+                                    Now() - 4,
+                                    "dd/mmm/yyyy",
+                                    "es-ES"
                                 )
                             ]
                         OnChange: |-
-                            =UpdateContext({FechaSup: DateValue(drp_Fecha_HxH2.SelectedText.Value)});
-                            UpdateContext({Dia: Weekday(FechaSup)});
-                            UpdateContext({turnoFinal: Blank()});
+                            =UpdateContext(
+                                {
+                                    FechaSup: DateTimeValue(
+                                        Text(
+                                            Self.SelectedText.Value,
+                                            "[$-en-US]yyyy-mm-dd"
+                                        ) & " 12:00:00"
+                                    ),
+                                    Fecha1: DateTimeValue(
+                                        Text(
+                                            Self.SelectedText.Value,
+                                            "[$-en-US]yyyy-mm-dd"
+                                        ) & " 00:00:00"
+                                    ),
+                                    Fecha2: DateTimeValue(
+                                        Text(
+                                            Self.SelectedText.Value,
+                                            "[$-en-US]yyyy-mm-dd"
+                                        ) & " 23:59:59"
+                                    ),
+                                    FechaHorario: DateValue(Self.SelectedText.Value),
+                                    Dia: Weekday(FechaSup),
+                                    turnoFinal: Blank()
+                                }
+                            );
                             Reset(drp_Hora_HxH2);
                             Reset(drp_Operario_HxH2);
                         PressedColor: =RGBA(255, 255, 255, 1)
@@ -1334,7 +1398,7 @@
                         If(
                           //Validacion de maquina
                             IsBlank(txt_Maquina_HxH2.Text),//Maquina en blanco?
-                            UpdateContext({TextoAdvertencia: "Debe escanear la MAQUINA en la que esta trabajando"});
+                            UpdateContext({TextoAdvertencia: "Debe indicar la MAQUINA con la que esta trabajando"});
                             UpdateContext({Mostra: true}),
                             IsBlank(
                                 LookUp(
@@ -1348,19 +1412,21 @@
                                 Maquinas,
                                 Maquina = Upper(txt_Maquina_HxH2.Text)
                             ).Status = "Paro",//Maquina en paro?
-                            UpdateContext({TextoAdvertencia: "La maquina seleccionada esta en Paro"});
+                            UpdateContext({TextoAdvertencia: "La MAQUINA seleccionada esta en Paro"});
                             UpdateContext({Mostra: true}),
                           //Validacion de tarima
                             IsBlank(txt_Tarima_HxH2.Text),//Tarima en blanco?
-                            UpdateContext({TextoAdvertencia: "Debe escanear la TARIMA que se esta llenando"});
+                            UpdateContext({TextoAdvertencia: "Debe indicar la TARIMA que se esta llenando"});
                             UpdateContext({Mostra: true}),
-                            (Len(txt_Tarima_HxH2.Text) < 3 || Left(
-                                txt_Tarima_HxH2.Text,
-                                1
-                            ) <> "T" && Len(txt_Tarima_HxH2.Text) < 3 || Left(
-                                txt_Tarima_HxH2.Text,
-                                1
-                            ) <> "t") || !IsNumeric(
+                            (Len(txt_Tarima_HxH2.Text) < 3 || Not(
+                                Left(
+                                    txt_Tarima_HxH2.Text,
+                                    1
+                                ) in [
+                                    "T",
+                                    "t"
+                                ]
+                            )) || !IsNumeric(
                                 Mid(
                                     txt_Tarima_HxH2.Text,
                                     2,
@@ -1371,10 +1437,10 @@
                             UpdateContext({Mostra: true}),
                           //Validacion Hora y operario
                             IsBlank(drp_Hora_HxH2.SelectedText),
-                            UpdateContext({TextoAdvertencia: "Debe indicar la hora del registro"});
+                            UpdateContext({TextoAdvertencia: "Debe indicar la HORA del registro"});
                             UpdateContext({Mostra: true}),
                             IsBlank(drp_Operario_HxH2.SelectedText),
-                            UpdateContext({TextoAdvertencia: "Debe indicar al operario que se le esta haciendo el registro"});
+                            UpdateContext({TextoAdvertencia: "Debe indicar al OPERARIO que se le esta haciendo el registro"});
                             UpdateContext({Mostra: true}),
                           //Validacion Turno
                             txt_Turno_HxH2.Text in [
@@ -1386,10 +1452,10 @@
                             UpdateContext({Mostra: true}),
                           //Validacion Cantidad
                             !IsNumeric(txt_CantDañada_HxH2.Text) || !IsNumeric(txt_CantProducida_HxH2.Text),
-                            UpdateContext({TextoAdvertencia: "Las cantidades deben ser numericas"});
+                            UpdateContext({TextoAdvertencia: "Las cantidades deben ser NÚMERICAS"});
                             UpdateContext({Mostra: true}),
                             Value(txt_CantDañada_HxH2.Text) < 0 || Value(txt_CantProducida_HxH2.Text) < 0,
-                            UpdateContext({TextoAdvertencia: "Las cantidades NO pueden ser negativas"});
+                            UpdateContext({TextoAdvertencia: "Las cantidades NO pueden ser NEGATIVAS"});
                             UpdateContext({Mostra: true}),
                             If(
                                 ((txt_CantProducida_HxH2.Text + txt_CantDañada_HxH2.Text) + txt_CantTotal_HxH2.Text) >= Value(txt_CantMax_HxH2.Text),
@@ -1411,7 +1477,7 @@
                                     Orden = txt_Orden_HxH2.Text,
                                     Operacion = txt_OP_HxH2.Text,
                                     Maquina = txt_Maquina_HxH2.Text,
-                                    FechaRegistro = FechaSup,
+                                    FechaRegistro >= Fecha1 && FechaRegistro <= Fecha2,
                                     Hora = drp_Hora_HxH2.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
                                 )
                             ) >= 2,
@@ -1421,7 +1487,7 @@
                                 Filter(
                                     'Hora X Hora',
                                     CodigoEmpleado = drp_Operario_HxH2.SelectedText.Codigo,
-                                    FechaRegistro = FechaSup,
+                                    FechaRegistro >= Fecha1 && FechaRegistro <= Fecha2,
                                     Hora = HoraValor
                                 )
                             ) >= 4,
@@ -1433,7 +1499,7 @@
                                     Filter(
                                         'Hora X Hora',
                                         Maquina = txt_Maquina_HxH2.Text,
-                                        FechaRegistro = FechaSup,
+                                        FechaRegistro >= Fecha1 && FechaRegistro <= Fecha2,
                                         Hora = HoraValor
                                     )
                                 ) > 0,
@@ -1514,7 +1580,12 @@
                                                 "mm/dd/yyyy"
                                             ) & " " & drp_Hora_HxH2.SelectedText.Value
                                         ),
-                                        FechaRegistro: FechaSup,
+                                        FechaRegistro: DateTimeValue(
+                                            Text(
+                                                FechaSup,
+                                                "[$-en-US]yyyy-mm-dd"
+                                            ) & " 12:00:00"
+                                        ),
                                         Tarima: Upper(txt_Tarima_HxH2.Text),
                                         Comentario: drp_Comentario_HxH2.SelectedText.Value,
                                         Causa: drp_Causas_HxH2.SelectedText.Value,
@@ -1574,112 +1645,48 @@
                                         {Cant_Actual: Cant_Actual + Value(txt_CantProducida_HxH2.Text + txt_CantDañada_HxH2.Text)}
                                     )
                                 );
-                                
-                                ClearCollect(
-                                    colExistingRecord,
-                                    LookUp(
-                                        HoraxHoraFinals,
-                                        Codigo_Empleado = drp_Operario_HxH2.SelectedText.Codigo && Hora = HoraValor && Fecha = Text(
-                                            FechaSup,
-                                            "dd/mm/yyyy"
-                                        )
-                                    )
-                                );
-                                If(
-                                    !IsEmpty(colExistingRecord),
-                                    Patch(
-                                        HoraxHoraFinals,
-                                        First(colExistingRecord),
-                                        {
-                                            Cantidad_Producida: Sum(
-                                                Filter(
-                                                    'Hora X Hora',
-                                                    CodigoEmpleado = drp_Operario_HxH2.SelectedText.Codigo,
-                                                    FechaRegistro = FechaSup,
-                                                    Hora = drp_Hora_HxH2.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
-                                                ),
-                                                Cantidad
-                                            ),
-                                            Meta: Sum(
-                                                Filter(
-                                                    'Hora X Hora',
-                                                    CodigoEmpleado = drp_Operario_HxH2.SelectedText.Codigo,
-                                                    FechaRegistro = FechaSup,
-                                                    Hora = drp_Hora_HxH2.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
-                                                ),
-                                                Cantidad_Por_Hora
-                                            ),
-                                            Turno: txt_Turno_HxH2.Text,
-                                            Ubicacion_Bono: LookUp(
-                                                Maquinas,
-                                                Maquina = txt_Maquina_HxH2.Text,
-                                                Ubicacion_Bono
-                                            ),
-                                            Semana: Value(txt_Semana_HxH2.Text)
-                                        }
-                                    ),
-                                    Collect(
-                                        HoraxHoraFinals,
-                                        {
-                                            Codigo_Empleado: drp_Operario_HxH2.SelectedText.Codigo,
-                                            Cantidad_Producida: Sum(
-                                                Filter(
-                                                    'Hora X Hora',
-                                                    CodigoEmpleado = drp_Operario_HxH2.SelectedText.Codigo,
-                                                    FechaRegistro = FechaSup,
-                                                    Hora = drp_Hora_HxH2.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
-                                                ),
-                                                Cantidad
-                                            ),
-                                            Meta: Sum(
-                                                Filter(
-                                                    'Hora X Hora',
-                                                    CodigoEmpleado = drp_Operario_HxH2.SelectedText.Codigo,
-                                                    FechaRegistro = FechaSup,
-                                                    Hora = drp_Hora_HxH2.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
-                                                ),
-                                                Cantidad_Por_Hora
-                                            ),
-                                            Fecha_Registro: FechaSup,
-                                            Turno: txt_Turno_HxH2.Text,
-                                            Hora: drp_Hora_HxH2.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor',
-                                            Ubicacion_Bono: LookUp(
-                                                Maquinas,
-                                                Maquina = txt_Maquina_HxH2.Text,
-                                                Ubicacion_Bono
-                                            ),
-                                            Semana: Value(txt_Semana_HxH2.Text),
-                                            Fecha: Text(
-                                                FechaSup,
-                                                "dd/mm/yyyy"
-                                            )
-                                        }
-                                    )
-                                );
                                 Reset(txt_Maquina_HxH2);
                                 Reset(txt_Tarima_HxH2);
-                                UpdateContext(
-                                    {
-                                        Comentarios: {
-                                            Comentario: "PRODUCION",
-                                            Causa: "Bien"
-                                        }
-                                    }
-                                );
                                 Reset(drp_Comentario_HxH2);
                                 Reset(drp_Causas_HxH2);
                                 Reset(drp_Fecha_HxH);
                                 Reset(txt_CantDañada_HxH2);
                                 Reset(txt_CantProducida_HxH2);
-                                UpdateContext({FechaSup: Today()});
-                                UpdateContext({Dia: Weekday(FechaSup)});
-                                UpdateContext({Hora: Blank()});
-                                UpdateContext({turnoFinal: Blank()});
-                                UpdateContext({turnoSeleccionado: Blank()});
-                                UpdateContext({HoraValor: Blank()});
-                                UpdateContext({OrdenInfo: Blank()});
-                                UpdateContext({Disable: false});
-                                UpdateContext({CantidadPorHoraGuardar: Blank()});
+                                UpdateContext(
+                                    {
+                                        FechaSup: DateTimeValue(
+                                            Text(
+                                                Today(),
+                                                "[$-en-US]yyyy-mm-dd"
+                                            ) & " 12:00:00"
+                                        ),
+                                        Fecha1: DateTimeValue(
+                                            Text(
+                                                Today(),
+                                                "[$-en-US]yyyy-mm-dd"
+                                            ) & " 00:00:00"
+                                        ),
+                                        Fecha2: DateTimeValue(
+                                            Text(
+                                                Today(),
+                                                "[$-en-US]yyyy-mm-dd"
+                                            ) & " 23:59:59"
+                                        ),
+                                        Comentarios: {
+                                            Comentario: "PRODUCION",
+                                            Causa: "Bien"
+                                        },
+                                        FechaHorario: DateValue(Today()),
+                                        Dia: Weekday(FechaSup),
+                                        Hora: Blank(),
+                                        turnoFinal: Blank(),
+                                        turnoSeleccionado: Blank(),
+                                        HoraValor: Blank(),
+                                        OrdenInfo: Blank(),
+                                        Disable: false,
+                                        CantidadPorHoraGuardar: Blank()
+                                    }
+                                );
                                 Notify(
                                     "Se ha Guardado exitosamente",
                                     NotificationType.Success
@@ -1779,10 +1786,10 @@
             DisabledBorderColor: =RGBA(166, 166, 166, 1)
             DisabledColor: =RGBA(166, 166, 166, 1)
             DisabledFill: =RGBA(244, 244, 244, 1)
-            Fill: =RGBA(72, 163, 62, 1)
+            Fill: =RGBA(255, 191, 0, 1)
             FontWeight: =FontWeight.Semibold
             HoverColor: =RGBA(255, 255, 255, 1)
-            HoverFill: =RGBA(52, 152, 47, 1)
+            HoverFill: =RGBA(171, 129, 5, 1)
             OnSelect: |-
                 =UpdateContext({Mostra: false});
                 UpdateContext({TextoAdvertencia:""});
@@ -1898,7 +1905,7 @@
                         Operacion: OrdenInfo.Operacion,
                         'P/N': OrdenInfo.'P/N',
                         Cantidad_Por_Hora: CantidadPorHoraGuardar,
-                        Cantidad: Value(txt_CantProducida_HxH2.Text),
+                        Cantidad: Value(txt_CantProducida_HxH2.Text + txt_CantDañada_HxH2.Text),
                         Scrap: Value(txt_CantDañada_HxH2.Text),
                         Semana: Value(txt_Semana_HxH2.Text),
                         Turno: txt_Turno_HxH2.Text,
@@ -1909,7 +1916,12 @@
                                 "mm/dd/yyyy"
                             ) & " " & drp_Hora_HxH2.SelectedText.Value
                         ),
-                        FechaRegistro: FechaSup,
+                        FechaRegistro: DateTimeValue(
+                            Text(
+                                FechaSup,
+                                "[$-en-US]yyyy-mm-dd"
+                            ) & " 12:00:00"
+                        ),
                         Tarima: Upper(txt_Tarima_HxH2.Text),
                         Comentario: drp_Comentario_HxH2.SelectedText.Value,
                         Causa: drp_Causas_HxH2.SelectedText.Value,
@@ -1969,110 +1981,49 @@
                         {Cant_Actual: Cant_Actual + Value(txt_CantProducida_HxH2.Text + txt_CantDañada_HxH2.Text)}
                     )
                 );
-                ClearCollect(
-                    colExistingRecord,
-                    LookUp(
-                        HoraxHoraFinals,
-                        Codigo_Empleado = drp_Operario_HxH2.SelectedText.Codigo && Hora = HoraValor && Fecha = Text(
-                            FechaSup,
-                            "dd/mm/yyyy"
-                        )
-                    )
-                );
-                If(
-                    !IsEmpty(colExistingRecord),
-                    Patch(
-                        HoraxHoraFinals,
-                        First(colExistingRecord),
-                        {
-                            Cantidad_Producida: Sum(
-                                Filter(
-                                    'Hora X Hora',
-                                    CodigoEmpleado = drp_Operario_HxH2.SelectedText.Codigo,
-                                    FechaRegistro = FechaSup,
-                                    Hora = drp_Hora_HxH2.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
-                                ),
-                                Cantidad
-                            ),
-                            Meta: Sum(
-                                Filter(
-                                    'Hora X Hora',
-                                    CodigoEmpleado = drp_Operario_HxH2.SelectedText.Codigo,
-                                    FechaRegistro = FechaSup,
-                                    Hora = drp_Hora_HxH2.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
-                                ),
-                                Cantidad_Por_Hora
-                            ),
-                            Turno: txt_Turno_HxH2.Text,
-                            Ubicacion_Bono: LookUp(
-                                Maquinas,
-                                Maquina = txt_Maquina_HxH2.Text,
-                                Ubicacion_Bono
-                            ),
-                            Semana: Value(txt_Semana_HxH2.Text)
-                        }
-                    ),
-                    Collect(
-                        HoraxHoraFinals,
-                        {
-                            Codigo_Empleado: drp_Operario_HxH2.SelectedText.Codigo,
-                            Cantidad_Producida: Sum(
-                                Filter(
-                                    'Hora X Hora',
-                                    CodigoEmpleado = drp_Operario_HxH2.SelectedText.Codigo,
-                                    FechaRegistro = FechaSup,
-                                    Hora = drp_Hora_HxH2.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
-                                ),
-                                Cantidad
-                            ),
-                            Meta: Sum(
-                                Filter(
-                                    'Hora X Hora',
-                                    CodigoEmpleado = drp_Operario_HxH2.SelectedText.Codigo,
-                                    FechaRegistro = FechaSup,
-                                    Hora = drp_Hora_HxH2.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
-                                ),
-                                Cantidad_Por_Hora
-                            ),
-                            Fecha_Registro: FechaSup,
-                            Turno: txt_Turno_HxH2.Text,
-                            Hora: drp_Hora_HxH2.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor',
-                            Ubicacion_Bono: LookUp(
-                                Maquinas,
-                                Maquina = txt_Maquina_HxH2.Text,
-                                Ubicacion_Bono
-                            ),
-                            Semana: Value(txt_Semana_HxH2.Text),
-                            Fecha: Text(
-                                FechaSup,
-                                "dd/mm/yyyy"
-                            )
-                        }
-                    )
-                );
                 Reset(txt_Maquina_HxH2);
                 Reset(txt_Tarima_HxH2);
+                Reset(drp_Comentario_HxH2);
+                Reset(drp_Causas_HxH2);
+                Reset(drp_Fecha_HxH);
+                Reset(txt_CantDañada_HxH2);
+                Reset(txt_CantProducida_HxH2);
                 UpdateContext(
                     {
+                        FechaSup: DateTimeValue(
+                            Text(
+                                Today(),
+                                "[$-en-US]yyyy-mm-dd"
+                            ) & " 12:00:00"
+                        ),
+                        Fecha1: DateTimeValue(
+                            Text(
+                                Today(),
+                                "[$-en-US]yyyy-mm-dd"
+                            ) & " 00:00:00"
+                        ),
+                        Fecha2: DateTimeValue(
+                            Text(
+                                Today(),
+                                "[$-en-US]yyyy-mm-dd"
+                            ) & " 23:59:59"
+                        ),
                         Comentarios: {
                             Comentario: "PRODUCION",
                             Causa: "Bien"
-                        }
+                        },
+                        FechaHorario: DateValue(Today()),
+                        Dia: Weekday(FechaSup),
+                        Hora: Blank(),
+                        turnoFinal: Blank(),
+                        turnoSeleccionado: Blank(),
+                        HoraValor: Blank(),
+                        OrdenInfo: Blank(),
+                        Disable: false,
+                        CantidadPorHoraGuardar: Blank(),
+                        MostraCausa: false
                     }
                 );
-                Reset(drp_Comentario_HxH2);
-                Reset(drp_Causas_HxH2);
-                UpdateContext({FechaSup: Today()});
-                UpdateContext({Dia: Weekday(FechaSup)});
-                UpdateContext({Hora: Blank()});
-                UpdateContext({turnoFinal: Blank()});
-                UpdateContext({turnoSeleccionado: Blank()});
-                UpdateContext({HoraValor: Blank()});
-                UpdateContext({OrdenInfo: Blank()});
-                Clear(Piezas);
-                UpdateContext({Disable: false});
-                UpdateContext({CantidadPorHoraGuardar: Blank()});
-                UpdateContext({MostraCausa: false});
                 Notify(
                     "Se ha Guardado exitosamente",
                     NotificationType.Success
@@ -2143,10 +2094,17 @@
             HoverFill: =RGBA(215, 58, 60, 1)
             OnSelect: |-
                 =UpdateContext({MostraCausa: false});
-                UpdateContext({Comentarios: {Comentario: "PRODUCCION", Causa: "Bien"}});
+                UpdateContext(
+                    {
+                        Comentarios: {
+                            Comentario: "PRODUCCION",
+                            Causa: "Bien"
+                        }
+                    }
+                );
                 Reset(drp_Comentario_HxH2);
                 Reset(drp_Causas_HxH2);
-                UpdateContext({Disable:false})
+                UpdateContext({Disable: false})
             Size: =15
             Text: ="Cancelar"
             X: =135

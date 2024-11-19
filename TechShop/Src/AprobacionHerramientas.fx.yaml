@@ -54,7 +54,7 @@
                 Width: =75
                 ZIndex: =2
 
-            txtEmpleadoEnUso_4 As text:
+            txtEmpleadoEnUso_AH As text:
                 Align: =Align.Center
                 AlignInContainer: =AlignInContainer.Center
                 BorderColor: =RGBA(204, 231, 246, 1)
@@ -140,7 +140,17 @@
                 HoverColor: =RGBA(255, 255, 255, 1)
                 HoverFill: =RGBA(0, 134, 208, 1)
                 Icon: =Icon.Home
-                OnSelect: =Back()
+                OnSelect: |-
+                    =Back();
+                    UpdateContext(
+                        {
+                            Disable: false,
+                            Aviso: false,
+                            Mostrar: false,
+                            rechazo: false
+                        }
+                    );
+                    Reset(txt_MotivoRechazo_AH)
                 PaddingBottom: =5
                 PaddingLeft: =5
                 PaddingRight: =5
@@ -482,12 +492,13 @@
                             DisabledBorderColor: =RGBA(166, 166, 166, 1)
                             DisabledColor: =RGBA(244, 244, 244, 1)
                             DisabledFill: =RGBA(214, 221, 224, 1)
+                            DisplayMode: =If(Aviso || rechazo, DisplayMode.Disabled, DisplayMode.Edit)
                             Fill: =RGBA(71, 158, 245, 1)
                             FocusedBorderThickness: =20
                             Height: =50
                             HoverBorderColor: =RGBA(0, 134, 208, 1)
-                            HoverColor: =RGBA(255, 255, 255, 1)
-                            HoverFill: =RGBA(0, 134, 208, 1)
+                            HoverColor: =RGBA(0, 0, 0, 1)
+                            HoverFill: =RGBA(71, 158, 245, 1)
                             Icon: =Icon.Cancel
                             OnSelect: |-
                                 =UpdateContext({Disable: false});
@@ -546,9 +557,10 @@
                                 Width: =500
                                 ZIndex: =1
 
-                            Gallery2 As gallery.galleryVertical:
+                            glr_Herramientas_AH As gallery.galleryVertical:
                                 BorderColor: =App.Theme.Colors.Darker40
                                 DelayItemLoading: =true
+                                DisplayMode: =If(Aviso || rechazo, DisplayMode.View, DisplayMode.Edit)
                                 Height: =426
                                 Items: =Filter(Herramientas, ID_Solicitud = glr_Solicitudes_AH.Selected.ID)
                                 Layout: =Layout.Vertical
@@ -561,7 +573,7 @@
                                 Container34 As groupContainer.manualLayoutContainer:
                                     BorderThickness: =1
                                     DropShadow: =DropShadow.Light
-                                    Fill: =RGBA(255, 255, 255, 1)
+                                    Fill: =If(ThisItem.CantxInserto = 0, RGBA(255, 80, 80, 1), RGBA(255, 255, 255, 1))
                                     Height: =191
                                     RadiusBottomLeft: =10
                                     RadiusBottomRight: =10
@@ -756,6 +768,7 @@
                                         DisabledBorderColor: =RGBA(166, 166, 166, 1)
                                         DisabledColor: =RGBA(166, 166, 166, 1)
                                         DisabledFill: =RGBA(244, 244, 244, 1)
+                                        Fill: =RGBA(0, 0, 0, 0)
                                         FocusedBorderThickness: =4
                                         Font: =App.Theme.Font
                                         FontWeight: =FontWeight.Bold
@@ -832,12 +845,13 @@
                                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                                 DisabledColor: =RGBA(244, 244, 244, 1)
                                 DisabledFill: =RGBA(214, 221, 224, 1)
+                                DisplayMode: =If(Aviso || rechazo, DisplayMode.Disabled, DisplayMode.Edit)
                                 Fill: =RGBA(180, 214, 250, 1)
                                 FocusedBorderThickness: =20
                                 Height: =40
                                 HoverBorderColor: =RGBA(0, 134, 208, 1)
                                 HoverColor: =RGBA(255, 255, 255, 1)
-                                HoverFill: =RGBA(71, 158, 245, 1)
+                                HoverFill: =RGBA(180, 214, 250, 1)
                                 Icon: =Icon.Reload
                                 OnSelect: |-
                                     =Refresh(Herramientas);
@@ -1097,7 +1111,7 @@
                             BorderStyle: =BorderStyle.None
                             BorderThickness: =2
                             Color: =RGBA(0, 0, 0, 1)
-                            Default: =glr_Solicitudes_AH.Selected.Causa
+                            Default: =glr_Solicitudes_AH.Selected.RazonCausa
                             DisabledBorderColor: =RGBA(166, 166, 166, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             DisabledFill: =RGBA(244, 244, 244, 1)
@@ -1118,7 +1132,7 @@
                             RadiusTopLeft: =20
                             RadiusTopRight: =20
                             Size: =16
-                            Width: =640
+                            Width: =315
                             X: =571
                             Y: =340
                             ZIndex: =15
@@ -1131,8 +1145,8 @@
                             Font: =App.Theme.Font
                             Height: =30
                             Size: =16
-                            Text: ="Causa"
-                            Width: =640
+                            Text: ="Razon Causa"
+                            Width: =315
                             X: =571
                             Y: =310
                             ZIndex: =16
@@ -1141,15 +1155,56 @@
                             DisabledBorderColor: =RGBA(166, 166, 166, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             DisabledFill: =RGBA(244, 244, 244, 1)
+                            DisplayMode: =If(Aviso || rechazo, DisplayMode.Disabled, DisplayMode.Edit)
                             Fill: =RGBA(72, 163, 62, 1)
                             FontWeight: =FontWeight.Semibold
                             Height: =60
                             HoverColor: =RGBA(255, 255, 255, 1)
                             HoverFill: =RGBA(52, 152, 47, 1)
                             OnSelect: |-
-                                =Patch(SolicitudHerramientas, glr_Solicitudes_AH.Selected, {'Estado (crfb9_estado)': "Aprobado"});
-                                UpdateContext({Disable: false});
-                                UpdateContext({Mostrar: false})
+                                =ClearCollect(
+                                    Verificacion2,
+                                    ForAll(
+                                        glr_Herramientas_AH.AllItems,
+                                        With(
+                                            {item: ThisRecord},
+                                            {err: item.CantxInserto = 0}
+                                        )
+                                    )
+                                );
+                                If(
+                                    CountRows(
+                                        Filter(
+                                            Verificacion2,
+                                            err
+                                        )
+                                    ) = 0,
+                                    Patch(
+                                        SolicitudHerramientas,
+                                        glr_Solicitudes_AH.Selected,
+                                        {'Estado (crfb9_estado)': "Aprobado"}
+                                    );
+                                    ForAll(
+                                        glr_Herramientas_AH.AllItems,
+                                        Patch(
+                                            Herramientas,
+                                            ThisRecord,
+                                            {'Estado (crfb9_estado)': "Aprobado"}
+                                        )
+                                    );
+                                    UpdateContext(
+                                        {
+                                            Disable: false,
+                                            Mostrar: false
+                                        }
+                                    ),
+                                    UpdateContext(
+                                        {
+                                            Aviso: true,
+                                            TextoAdvertencia: "Asegúrese de que todos los datos de la lista a la izquierda estén completos. Llene la cantidad de piezas por inserto. Una vez que todos los materiales estén en blanco, puede continuar."
+                                        }
+                                    )
+                                )
                             Size: =20
                             Text: ="Aprobar"
                             Width: =200
@@ -1161,15 +1216,14 @@
                             DisabledBorderColor: =RGBA(166, 166, 166, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             DisabledFill: =RGBA(244, 244, 244, 1)
+                            DisplayMode: =If(Aviso || rechazo, DisplayMode.Disabled, DisplayMode.Edit)
                             Fill: =RGBA(233, 79, 76, 1)
                             FontWeight: =FontWeight.Semibold
                             Height: =60
                             HoverColor: =RGBA(255, 255, 255, 1)
                             HoverFill: =RGBA(215, 58, 60, 1)
                             OnSelect: |-
-                                =Patch(SolicitudHerramientas, glr_Solicitudes_AH.Selected, {'Estado (crfb9_estado)': "Rechazado"});
-                                UpdateContext({Disable: false});
-                                UpdateContext({Mostrar: false})
+                                =UpdateContext({rechazo: true})
                             Size: =20
                             Text: ="Rechazar"
                             Width: =200
@@ -1223,6 +1277,52 @@
                             Y: =146
                             ZIndex: =20
 
+                        CantxInserto_SH_22 As text:
+                            Align: =Align.Center
+                            BorderColor: =App.Theme.Colors.Darker40
+                            BorderStyle: =BorderStyle.None
+                            BorderThickness: =2
+                            Color: =RGBA(0, 0, 0, 1)
+                            Default: =glr_Solicitudes_AH.Selected.Causa
+                            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                            DisabledColor: =RGBA(166, 166, 166, 1)
+                            DisabledFill: =RGBA(244, 244, 244, 1)
+                            DisplayMode: =DisplayMode.View
+                            Fill: =RGBA(180, 214, 250, 0.3)
+                            FocusedBorderThickness: =4
+                            Font: =App.Theme.Font
+                            FontWeight: =FontWeight.Semibold
+                            HoverBorderColor: =App.Theme.Colors.Darker40
+                            HoverColor: =RGBA(0, 0, 0, 1)
+                            HoverFill: =App.Theme.Colors.Lighter70
+                            PaddingBottom: =2
+                            PaddingLeft: =2
+                            PaddingRight: =2
+                            PaddingTop: =2
+                            RadiusBottomLeft: =20
+                            RadiusBottomRight: =20
+                            RadiusTopLeft: =20
+                            RadiusTopRight: =20
+                            Size: =16
+                            Width: =315
+                            X: =895
+                            Y: =340
+                            ZIndex: =21
+
+                        Label29_21 As label:
+                            Align: =Align.Center
+                            BorderColor: =App.Theme.Colors.Darker40
+                            Color: =RGBA(0, 0, 0, 1)
+                            DisabledColor: =RGBA(166, 166, 166, 1)
+                            Font: =App.Theme.Font
+                            Height: =30
+                            Size: =16
+                            Text: ="Causa"
+                            Width: =315
+                            X: =895
+                            Y: =310
+                            ZIndex: =22
+
                     txt_OrdenView_HxH_7 As text:
                         Align: =Align.Center
                         BorderColor: =RGBA(0, 18, 107, 1)
@@ -1252,4 +1352,241 @@
                         Size: =18
                         Width: =1352
                         ZIndex: =3
+
+                    icn_Home_HxH_17 As icon.Erase:
+                        BorderColor: =App.Theme.Colors.Primary
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =2
+                        DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                        DisabledColor: =RGBA(244, 244, 244, 1)
+                        DisabledFill: =RGBA(214, 221, 224, 1)
+                        DisplayMode: =If(Disable, DisplayMode.Disabled, DisplayMode.Edit)
+                        Fill: =RGBA(40, 134, 222, 1)
+                        FocusedBorderThickness: =20
+                        Height: =50
+                        HoverBorderColor: =RGBA(0, 134, 208, 1)
+                        HoverColor: =RGBA(255, 255, 255, 1)
+                        HoverFill: =RGBA(40, 134, 222, 1)
+                        Icon: =Icon.Reload
+                        OnSelect: =Refresh(SolicitudHerramientas);
+                        PaddingBottom: =5
+                        PaddingLeft: =5
+                        PaddingRight: =5
+                        PaddingTop: =5
+                        Width: =55
+                        X: =1297
+                        ZIndex: =4
+
+    cnt_Aviso_HxH_4 As groupContainer.manualLayoutContainer:
+        BorderColor: =RGBA(215, 58, 60, 1)
+        BorderThickness: =5
+        DropShadow: =DropShadow.ExtraBold
+        Fill: =RGBA(255, 255, 255, 1)
+        Height: =304
+        RadiusBottomLeft: =20
+        RadiusBottomRight: =20
+        RadiusTopLeft: =20
+        RadiusTopRight: =20
+        Visible: =rechazo
+        X: =433
+        Y: =283
+        ZIndex: =2
+
+        btn_ContinuarAviso_HxH_4 As button:
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            Fill: =RGBA(233, 79, 76, 1)
+            FontWeight: =FontWeight.Semibold
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(184, 36, 33, 1)
+            OnSelect: |-
+                =If(
+                    IsBlank(txt_MotivoRechazo_AH.Text),
+                    UpdateContext(
+                        {
+                            Aviso: true,
+                            TextoAdvertencia: "Debe indicar el motivo del rechazo para poder continuar."
+                        }
+                    ),
+                    Patch(
+                        SolicitudHerramientas,
+                        glr_Solicitudes_AH.Selected,
+                        {
+                            'Estado (crfb9_estado)': "Rechazado",
+                            MotivoRechazo: txt_MotivoRechazo_AH.Text
+                        }
+                    );
+                    ForAll(
+                        glr_Herramientas_AH.AllItems,
+                        Patch(
+                            Herramientas,
+                            ThisRecord,
+                            {'Estado (crfb9_estado)': "Rechazado"}
+                        );
+                        Collect(
+                            RegistroHerramientas,
+                            {
+                                id_Solicitud: ThisRecord.ID_Solicitud,
+                                Maquina: ThisRecord.Maquina,
+                                Orden: ThisRecord.Orden,
+                                Operacion: ThisRecord.Operacion,
+                                'P/N': ThisRecord.'P/N',
+                                ID_Inserto: ThisRecord.ID_Inserto,
+                                Descripcion: ThisRecord.Descripcion,
+                                qty: ThisRecord.qty,
+                                Cant_Inserto: ThisRecord.Cant_Insertos,
+                                Piezas_Meta: ThisRecord.Cant_Maxima,
+                                Piezas_Hechas: ThisRecord.Cant_Actual,
+                                RazonCausa: glr_Solicitudes_AH.Selected.RazonCausa,
+                                Causa: ThisRecord.Causa,
+                                //MotivoRechazo:
+                                Operario: ThisRecord.Operario,
+                                User: txtEmpleadoEnUso_AH.Text
+                            }
+                        )
+                    );
+                    UpdateContext(
+                        {
+                            Disable: false,
+                            Aviso: false,
+                            Mostrar: false,
+                            rechazo: false
+                        }
+                    );
+                    Reset(txt_MotivoRechazo_AH)
+                )
+            Size: =15
+            Text: ="Guardar"
+            Width: =130
+            X: =264
+            Y: =246
+            ZIndex: =2
+
+        Label15_9 As label:
+            Align: =Align.Center
+            BorderColor: =App.Theme.Colors.Darker40
+            Color: =RGBA(0, 0, 0, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            Font: =App.Theme.Font
+            Height: =67
+            Size: =20
+            Text: ="Indique el motivo del rechazo"
+            Width: =480
+            X: =10
+            Y: =10
+            ZIndex: =3
+
+        btn_ContinuarAviso_HxH_5 As button:
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            Fill: =RGBA(233, 79, 76, 1)
+            FontWeight: =FontWeight.Bold
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(184, 36, 33, 1)
+            OnSelect: |-
+                =UpdateContext({rechazo: false}); 
+                Reset(txt_MotivoRechazo_AH)
+            Size: =15
+            Text: ="Cancelar"
+            Width: =130
+            X: =106
+            Y: =246
+            ZIndex: =4
+
+        txt_MotivoRechazo_AH As text:
+            Align: =Align.Center
+            BorderColor: =App.Theme.Colors.Darker40
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =2
+            Color: =RGBA(0, 0, 0, 1)
+            Default: =glr_Solicitudes_AH.Selected.User
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            Fill: =RGBA(180, 214, 250, 0.3)
+            FocusedBorderThickness: =4
+            Font: =App.Theme.Font
+            Height: =167
+            HoverBorderColor: =App.Theme.Colors.Darker40
+            HoverColor: =RGBA(0, 0, 0, 1)
+            HoverFill: =App.Theme.Colors.Lighter70
+            MaxLength: =200
+            Mode: =TextMode.MultiLine
+            PaddingLeft: =5
+            RadiusBottomLeft: =20
+            RadiusBottomRight: =20
+            RadiusTopLeft: =20
+            RadiusTopRight: =20
+            Size: =16
+            Width: =414
+            X: =43
+            Y: =65
+            ZIndex: =5
+
+        Label15_10 As label:
+            Align: =Align.Center
+            BorderColor: =App.Theme.Colors.Darker40
+            Color: =RGBA(0, 0, 0, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            Font: =App.Theme.Font
+            Height: =25
+            Size: =10
+            Text: =Len(txt_MotivoRechazo_AH.Text) & " / 200"
+            Width: =71
+            X: =386
+            Y: =207
+            ZIndex: =6
+
+    cnt_Aviso_HxH_3 As groupContainer.manualLayoutContainer:
+        BorderColor: =RGBA(255, 191, 0, 1)
+        BorderThickness: =5
+        DropShadow: =DropShadow.ExtraBold
+        Fill: =RGBA(255, 255, 255, 1)
+        Height: =273
+        RadiusBottomLeft: =20
+        RadiusBottomRight: =20
+        RadiusTopLeft: =20
+        RadiusTopRight: =20
+        Visible: =Aviso
+        Width: =581
+        X: =392
+        Y: =299
+        ZIndex: =3
+
+        btn_ContinuarAviso_HxH_3 As button:
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            Fill: =RGBA(255, 191, 0, 1)
+            FontWeight: =FontWeight.Semibold
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(173, 130, 0, 1)
+            OnSelect: |
+                =UpdateContext(
+                    {
+                        Aviso: false,
+                        TextoAdvertencia: ""
+                    }
+                );
+            Size: =15
+            Text: ="OK"
+            X: =208
+            Y: =216
+            ZIndex: =2
+
+        Label15_8 As label:
+            Align: =Align.Center
+            BorderColor: =App.Theme.Colors.Darker40
+            Color: =RGBA(0, 0, 0, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            Font: =App.Theme.Font
+            Height: =155
+            Size: =20
+            Text: =TextoAdvertencia
+            Width: =505
+            X: =35
+            Y: =30
+            ZIndex: =3
 
