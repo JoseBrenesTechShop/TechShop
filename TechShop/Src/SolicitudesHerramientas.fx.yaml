@@ -1,0 +1,346 @@
+SolicitudesHerramientas As screen:
+    Fill: =Color.White
+    LoadingSpinnerColor: =App.Theme.Colors.Primary
+
+    cnt_Comentario_HxH_3 As groupContainer.manualLayoutContainer:
+        BorderColor: =RGBA(15, 84, 140, 1)
+        BorderThickness: =5
+        DropShadow: =DropShadow.ExtraBold
+        Fill: =RGBA(255, 255, 255, 1)
+        Height: =272
+        RadiusBottomLeft: =20
+        RadiusBottomRight: =20
+        RadiusTopLeft: =20
+        RadiusTopRight: =20
+        Visible: =Causa
+        Width: =631
+        X: =407
+        Y: =345
+        ZIndex: =2
+
+        btn_GuardarComent_HxH2_1 As button:
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            Fill: =RGBA(72, 163, 62, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =50
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(52, 152, 47, 1)
+            OnSelect: |
+                =Collect(
+                    SolicitudHerramientas,
+                    {
+                        Maquina: Upper(txt_Maquina_SH_1.Text),
+                        Orden: info.Orden,
+                        Operario: drop_Operario_SH_2.Selected.Nombre,
+                        User: LookUp(
+                            Empleados,
+                            Codigo = VarName,
+                            Nombre
+                        ),
+                        Operacion: info.Operacion,
+                        'Estado (crfb9_estado)': estado,
+                        Causa: drp_Causas_SH.SelectedText.Value,
+                        'P/N': LookUp(
+                            Maquina_Ordens_1,
+                            Maquina = txt_Maquina_SH_1.Text,
+                            'P/N'
+                        ),
+                        RazonCausa: RazonCausa,
+                        FechaSoli: Text(Today())
+                    }
+                );
+                
+                If(
+                    !IsBlank(RazonCausa),
+                    With(
+                        {
+                            CuerpoCorreo:
+                                "<p>Estimado equipo;</p>" &
+                                "<p>Se ha enviado una solicitud de herramientas que requiere su revisión para aprobación. A continuación se detallan los datos de la solicitud:</p>" &
+                                "<table border='1' cellpadding='5' cellspacing='0'>" &
+                                "<tr><td><strong>Máquina</strong></td><td>" & Upper(txt_Maquina_SH_1.Text) & "</td></tr>" &
+                                "<tr><td><strong>Orden</strong></td><td>" & info.Orden & "</td></tr>" &
+                                "<tr><td><strong>Operario</strong></td><td>" & drop_Operario_SH_2.Selected.Nombre & "</td></tr>" &
+                                "<tr><td><strong>Usuario</strong></td><td>" & LookUp(Empleados, Codigo = VarName, Nombre) & "</td></tr>" &
+                                "<tr><td><strong>Operación</strong></td><td>" & info.Operacion & "</td></tr>" &
+                                "<tr><td><strong>Causa</strong></td><td>" & drp_Causas_SH.SelectedText.Value & "</td></tr>" &
+                                "<tr><td><strong>Razón de la causa</strong></td><td>" & RazonCausa & "</td></tr>" &
+                                "<tr><td><strong>Fecha de Solicitud</strong></td><td>" & Text(Today()) & "</td></tr>" &
+                                "</table>" &
+                                "<p>Por favor, revise los detalles y proceda con la aprobación o el rechazo de la solicitud según corresponda.</p>" &
+                                "<p>Saludos cordiales;</p>" &
+                                "<p>El equipo de desarrollo</p>" &
+                                 "<p><em>Nota: Por favor, no responda a este correo.</em></p>"
+                        },
+                        EnviarCorreo.Run(
+                            "desarrollo02@tsicr.com",
+                            "Revisión de Solicitud de Herramientas",
+                            CuerpoCorreo
+                        )
+                    )
+                );
+                With(
+                    {
+                        Id: First(
+                            Sort(
+                                Filter(
+                                    SolicitudHerramientas,
+                                    Maquina = txt_Maquina_SH_1.Text && Orden = info.Orden && Operacion = info.Operacion
+                                ),
+                                'Fecha de creación',
+                                SortOrder.Descending
+                            )
+                        ).ID
+                    },
+                    UpdateContext(
+                        {
+                            herra: {
+                                id: Id,
+                                maquina: LookUp(
+                                    SolicitudHerramientas,
+                                    ID = Id,
+                                    Maquina
+                                ),
+                                operacion: LookUp(
+                                    SolicitudHerramientas,
+                                    ID = Id,
+                                    Operacion
+                                ),
+                                orden: LookUp(
+                                    SolicitudHerramientas,
+                                    ID = Id,
+                                    Orden
+                                ),
+                                PN: LookUp(
+                                    SolicitudHerramientas,
+                                    ID = Id,
+                                    'P/N'
+                                )
+                            }
+                        }
+                    )
+                );
+                
+                ForAll(
+                    Materiales,
+                    If(
+                        IsBlank(
+                            With(
+                                {item: ThisRecord.item},
+                                LookUp(
+                                    Herramientas,
+                                    Maquina = herra.maquina && Orden = herra.orden && Operacion = herra.operacion && ID_Inserto = item
+                                )
+                            )
+                        ),
+                        Collect(
+                            Herramientas,
+                            {
+                                Insertos_Pasados: 0,
+                                Cant_Actual: Value(ThisRecord.Cant_Actual),
+                                CantxInserto: Value(ThisRecord.Cant_x_Inserto),
+                                Cant_Insertos: Value(ThisRecord.Cant_Inserto),
+                                Cant_Maxima: Value(ThisRecord.Cant_Maxima),
+                                Causa: "Bien",
+                                Orden: ThisRecord.job,
+                                Operacion: Text(ThisRecord.oper_num),
+                                Operario: drop_Operario_SH_2.Selected.Nombre,
+                                ID_Inserto: ThisRecord.item,
+                                ID_Solicitud: herra.id,
+                                Maquina: herra.maquina,
+                                User: txtEmpleadoHorarioView_18.Text,
+                                'P/N': herra.PN,
+                                qty: ThisRecord.QTY,
+                                Descripcion: ThisRecord.description,
+                                'Estado (crfb9_estado)': estado,
+                                Requerido: ThisRecord.Requerido,
+                                Surtido: ThisRecord.Surtido,
+                                'Cantidad Inventario': ThisRecord.CantidadInventario,
+                                Ubicacion: ThisRecord.Ubicacion
+                            }
+                        ),
+                        Patch(
+                            Herramientas,
+                            With(
+                                {item: ThisRecord.item},
+                                LookUp(
+                                    Herramientas,
+                                    Maquina = herra.maquina && Orden = herra.orden && Operacion = herra.operacion && ID_Inserto = item
+                                )
+                            ),
+                            {
+                                Insertos_Pasados: With(
+                                    {item: ThisRecord.item},
+                                    LookUp(
+                                        Herramientas,
+                                        Maquina = herra.maquina && Orden = herra.orden && Operacion = herra.operacion && ID_Inserto = item,
+                                        Value(Cant_Insertos)
+                                    )
+                                ),
+                                Cant_Actual: Value(ThisRecord.Cant_Actual),
+                                CantxInserto: Value(ThisRecord.Cant_x_Inserto),
+                                Cant_Insertos: Value(ThisRecord.Cant_Inserto),
+                                Cant_Maxima: Value(ThisRecord.Cant_Maxima),
+                                Causa: "Bien",
+                                Orden: ThisRecord.job,
+                                Operacion: Text(ThisRecord.oper_num),
+                                Operario: drop_Operario_SH_2.Selected.Nombre,
+                                ID_Inserto: ThisRecord.item,
+                                ID_Solicitud: herra.id,
+                                Maquina: herra.maquina,
+                                User: txtEmpleadoHorarioView_18.Text,
+                                'P/N': herra.PN,
+                                qty: ThisRecord.QTY,
+                                Descripcion: ThisRecord.description,
+                                'Estado (crfb9_estado)': estado,
+                                Requerido: ThisRecord.Requerido,
+                                Surtido: ThisRecord.Surtido,
+                                'Cantidad Inventario': ThisRecord.CantidadInventario,
+                                Ubicacion: ThisRecord.Ubicacion
+                            }
+                        )
+                    )
+                );
+                
+                UpdateContext(
+                    {
+                        Causa: false,
+                        estado: "Aprobado",
+                        Disable: false
+                    }
+                );
+                
+                ClearCollect(
+                    Verificacion,
+                    Blank()
+                );
+                
+                ClearCollect(
+                    Materiales,
+                    Blank()
+                );
+            Size: =15
+            Text: ="Guardar"
+            Width: =180
+            X: =350
+            Y: =190
+            ZIndex: =2
+
+        drp_Causas_SH As dropdown:
+            BorderColor: =App.Theme.Colors.Darker40
+            ChevronBackground: =App.Theme.Colors.Primary
+            ChevronDisabledBackground: =RGBA(166, 166, 166, 1)
+            ChevronDisabledFill: =RGBA(244, 244, 244, 1)
+            ChevronHoverBackground: =App.Theme.Colors.Darker10
+            ChevronHoverFill: =RGBA(255, 255, 255, 1)
+            Default: =
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            Font: =App.Theme.Font
+            Height: =47
+            HoverColor: =RGBA(0, 0, 0, 1)
+            HoverFill: =App.Theme.Colors.Lighter70
+            Items: =CausaHerramienta
+            PressedColor: =RGBA(255, 255, 255, 1)
+            PressedFill: =App.Theme.Colors.Darker30
+            SelectionFill: =App.Theme.Colors.Primary
+            Size: =13
+            Width: =466
+            X: =85
+            Y: =109
+            ZIndex: =4
+
+        btn_CancelarComent_HxH2_1 As button:
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            Fill: =RGBA(233, 79, 76, 1)
+            FontWeight: =FontWeight.Semibold
+            Height: =50
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(215, 58, 60, 1)
+            OnSelect: |-
+                =UpdateContext(
+                    {
+                        Causa: false,
+                        estado: "Aprobado",
+                        Disable: false
+                    }
+                );
+                 
+            Size: =15
+            Text: ="Cancelar"
+            Width: =180
+            X: =101
+            Y: =190
+            ZIndex: =8
+
+        "'Seleccione la causa' As label":
+            Align: =Align.Center
+            BorderColor: =App.Theme.Colors.Darker40
+            Color: =RGBA(0, 0, 0, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            Font: =App.Theme.Font
+            Height: =86
+            Size: =18
+            Text: ="Seleccione la causa "
+            Width: =556
+            X: =40
+            ZIndex: =9
+
+    cnt_Comentario_HxH_4 As groupContainer.manualLayoutContainer:
+        BorderColor: =RGBA(15, 84, 140, 1)
+        BorderThickness: =5
+        DropShadow: =DropShadow.ExtraBold
+        Fill: =RGBA(255, 255, 255, 1)
+        Height: =218
+        RadiusBottomLeft: =20
+        RadiusBottomRight: =20
+        RadiusTopLeft: =20
+        RadiusTopRight: =20
+        Visible: =InsertoExiste
+        Width: =631
+        X: =427
+        Y: =365
+        ZIndex: =3
+
+        btn_GuardarComent_HxH2_2 As button:
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            Fill: =RGBA(72, 163, 62, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =50
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(52, 152, 47, 1)
+            OnSelect: |-
+                =UpdateContext({InsertoExiste: false});
+                            ClearCollect(Verificacion, Blank());
+                            ClearCollect(
+                                Materiales,
+                                Blank()
+                            )
+            Size: =15
+            Text: ="Aceptar"
+            Width: =180
+            X: =228
+            Y: =143
+            ZIndex: =2
+
+        "'Seleccione la causa_1' As label":
+            Align: =Align.Center
+            BorderColor: =App.Theme.Colors.Darker40
+            Color: =RGBA(0, 0, 0, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            Font: =App.Theme.Font
+            Height: =121
+            Size: =18
+            Text: =
+            Width: =556
+            X: =40
+            Y: =8
+            ZIndex: =9
+
