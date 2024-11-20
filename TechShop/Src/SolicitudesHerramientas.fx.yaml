@@ -1319,7 +1319,6 @@ SolicitudesHerramientas As screen:
                                                     InfoInserto: ThisRecord,
                                                     sinStock: ThisRecord.CantidadInventario <= 0,
                                                     excedidoRuta: ThisRecord.Surtido > ThisRecord.Requerido
-                                                    
                                                 },
                                                 {
                                                     veri: subconsumo || insertosEditados || insertosEn0 || insertoFueraDeRuta || sinStock || excedidoRuta,
@@ -1329,12 +1328,11 @@ SolicitudesHerramientas As screen:
                                                     rutaOut: insertosEditados || insertosEn0 || insertoFueraDeRuta,
                                                     stockInvalido: sinStock,
                                                     excedidoRuta: excedidoRuta,
-                                                    InsertoEditado:insertosEditados
+                                                    InsertoEditado: insertosEditados
                                                 }
                                             )
                                         )
                                     );
-                                    
                                     If(
                                         CountRows(
                                             Filter(
@@ -1482,38 +1480,24 @@ SolicitudesHerramientas As screen:
                                                         Surtido: ThisRecord.Surtido,
                                                         'Cantidad Inventario': ThisRecord.CantidadInventario,
                                                         Ubicacion: ThisRecord.Ubicacion
-                                                        
                                                     }
                                                 )
                                             )
                                         );
-                                        If(
-                                !IsBlank(RazonCausa),
-                                With(
-                                    {
-                                        CuerpoCorreo:
-                                            "<p>Estimado equipo;</p>" &
-                                            "<p>Se ha enviado una solicitud de herramientas que requiere su revisión para aprobación. A continuación se detallan los datos de la solicitud:</p>" &
-                                            "<table border='1' cellpadding='5' cellspacing='0'>" &
-                                            "<tr><td><strong>Máquina</strong></td><td>" & Upper(txt_Maquina_SH_1.Text) & "</td></tr>" &
-                                            "<tr><td><strong>Orden</strong></td><td>" & info.Orden & "</td></tr>" &
-                                            "<tr><td><strong>Operario</strong></td><td>" & drop_Operario_SH_2.Selected.Nombre & "</td></tr>" &
-                                            "<tr><td><strong>Usuario</strong></td><td>" & LookUp(Empleados, Codigo = VarName, Nombre) & "</td></tr>" &
-                                            "<tr><td><strong>Operación</strong></td><td>" & info.Operacion & "</td></tr>" &
-                                            "<tr><td><strong>Fecha de Solicitud</strong></td><td>" & Text(Today()) & "</td></tr>" &
-                                            "</table>" &
-                                            "<p>Por favor, revise los detalles y proceda con la aprobación o el rechazo de la solicitud según corresponda.</p>" &
-                                            "<p>Saludos cordiales;</p>" &
-                                            "<p>El equipo de desarrollo</p>" &
-                                             "<p><em>Nota: Por favor, no responda a este correo.</em></p>"
-                                    },
-                                    EnviarCorreo.Run(
-                                        "desarrollo02@tsicr.com",
-                                        "Revisión de Solicitud de Herramientas",
-                                        CuerpoCorreo
-                                    )
-                                )
-                            );
+                                        With(
+                                            {
+                                                CuerpoCorreo: "<p>Estimado equipo;</p>" & "<p>Se ha enviado una solicitud de herramientas que requiere su revisión para aprobación. A continuación se detallan los datos de la solicitud:</p>" & "<table border='1' cellpadding='5' cellspacing='0'>" & "<tr><td><strong>Máquina</strong></td><td>" & Upper(txt_Maquina_SH_1.Text) & "</td></tr>" & "<tr><td><strong>Orden</strong></td><td>" & info.Orden & "</td></tr>" & "<tr><td><strong>Operario</strong></td><td>" & drop_Operario_SH_2.Selected.Nombre & "</td></tr>" & "<tr><td><strong>Usuario</strong></td><td>" & LookUp(
+                                                    Empleados,
+                                                    Codigo = VarName,
+                                                    Nombre
+                                                ) & "</td></tr>" & "<tr><td><strong>Operación</strong></td><td>" & info.Operacion & "</td></tr>" & "<tr><td><strong>Fecha de Solicitud</strong></td><td>" & Text(Today()) & "</td></tr>" & "</table>" & "<p>Por favor, revise los detalles y proceda con la aprobación o el rechazo de la solicitud según corresponda.</p>" & "<p>Saludos cordiales;</p>" & "<p>El equipo de desarrollo</p>" & "<p><em>Nota: Por favor, no responda a este correo.</em></p>"
+                                            },
+                                            EnviarCorreo.Run(
+                                                "desarrollo02@tsicr.com",
+                                                "Revisión de Solicitud de Herramientas",
+                                                CuerpoCorreo
+                                            )
+                                        );
                                         ClearCollect(
                                             Verificacion,
                                             Blank()
@@ -1547,13 +1531,69 @@ SolicitudesHerramientas As screen:
                                                     RazonCausa: Concat(
                                                         Filter(
                                                             [
-                                                                {razon: "Subconsumo", valor: CountRows(Filter(Verificacion, sub)) > 0},
-                                                                {razon: "Sobreconsumo", valor:CountRows(Filter(Verificacion, sobre)) > 0},
-                                                                {razon: "Insertos editados", valor: CountRows(Filter(Verificacion, InsertoEditado)) > 0},
-                                                                {razon: "Insertos en 0", valor: CountRows(Filter(Verificacion, Inserto0)) > 0},
-                                                                {razon: "Inserto fuera de ruta", valor: CountRows(Filter(Verificacion, rutaOut)) > 0},
-                                                                {razon: "Sin stock", valor: CountRows(Filter(Verificacion, stockInvalido)) > 0},
-                                                                {razon: "Excedido en ruta", valor: CountRows(Filter(Verificacion, excedidoRuta)) > 0}
+                                                                {
+                                                                    razon: "Subconsumo",
+                                                                    valor: CountRows(
+                                                                        Filter(
+                                                                            Verificacion,
+                                                                            sub
+                                                                        )
+                                                                    ) > 0
+                                                                },
+                                                                {
+                                                                    razon: "Sobreconsumo",
+                                                                    valor: CountRows(
+                                                                        Filter(
+                                                                            Verificacion,
+                                                                            sobre
+                                                                        )
+                                                                    ) > 0
+                                                                },
+                                                                {
+                                                                    razon: "Insertos editados",
+                                                                    valor: CountRows(
+                                                                        Filter(
+                                                                            Verificacion,
+                                                                            InsertoEditado
+                                                                        )
+                                                                    ) > 0
+                                                                },
+                                                                {
+                                                                    razon: "Insertos en 0",
+                                                                    valor: CountRows(
+                                                                        Filter(
+                                                                            Verificacion,
+                                                                            Inserto0
+                                                                        )
+                                                                    ) > 0
+                                                                },
+                                                                {
+                                                                    razon: "Inserto fuera de ruta",
+                                                                    valor: CountRows(
+                                                                        Filter(
+                                                                            Verificacion,
+                                                                            rutaOut
+                                                                        )
+                                                                    ) > 0
+                                                                },
+                                                                {
+                                                                    razon: "Sin stock",
+                                                                    valor: CountRows(
+                                                                        Filter(
+                                                                            Verificacion,
+                                                                            stockInvalido
+                                                                        )
+                                                                    ) > 0
+                                                                },
+                                                                {
+                                                                    razon: "Excedido en ruta",
+                                                                    valor: CountRows(
+                                                                        Filter(
+                                                                            Verificacion,
+                                                                            excedidoRuta
+                                                                        )
+                                                                    ) > 0
+                                                                }
                                                             ],
                                                             valor
                                                         ),
@@ -1569,7 +1609,7 @@ SolicitudesHerramientas As screen:
                                         )
                                     )
                                 )
-                            ) 
+                            )
                         RadiusBottomLeft: =20
                         RadiusBottomRight: =20
                         RadiusTopLeft: =20
