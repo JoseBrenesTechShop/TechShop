@@ -136,7 +136,15 @@ SolicitudesHerramientas As screen:
                 HoverColor: =RGBA(255, 255, 255, 1)
                 HoverFill: =RGBA(0, 134, 208, 1)
                 Icon: =Icon.Home
-                OnSelect: =Back()
+                OnSelect: |
+                    =Back();
+                    Reset(txt_Maquina_SH_1);
+                    Reset(txt_DescripcionMatSum_SH);
+                    Reset(lbl_operacion_SH);
+                    Reset(lbl_orden_SH);
+                    Reset(gl_HerramientasSeleccionadas_sh_2);
+                    UpdateContext({info: Blank()});
+                    ClearCollect(Materiales, Blank())
                 PaddingBottom: =5
                 PaddingLeft: =5
                 PaddingRight: =5
@@ -436,7 +444,7 @@ SolicitudesHerramientas As screen:
                     Y: =8
                     ZIndex: =9
 
-                txt_Maquina_SH_2 As text:
+                lbl_orden_SH As text:
                     Align: =Align.Center
                     BorderColor: =RGBA(0, 18, 107, 1)
                     BorderThickness: =2
@@ -474,7 +482,7 @@ SolicitudesHerramientas As screen:
                     Y: =0
                     ZIndex: =14
 
-                txt_Maquina_SH_3 As text:
+                lbl_operacion_SH As text:
                     Align: =Align.Center
                     BorderColor: =RGBA(12, 59, 94, 1)
                     BorderThickness: =2
@@ -1064,7 +1072,7 @@ SolicitudesHerramientas As screen:
                             Container7_4 As groupContainer.manualLayoutContainer:
                                 BorderThickness: =1
                                 DropShadow: =DropShadow.Light
-                                Fill: =If(ThisItem.Cant_Inserto = "0",  RGBA(255, 184, 174, 1),  RGBA(255, 255, 255, 1))
+                                Fill: =If(ThisItem.Cant_Inserto = "0", RGBA(255, 80, 80, 1),  RGBA(255, 255, 255, 1))
                                 Height: =130
                                 RadiusBottomLeft: =20
                                 RadiusBottomRight: =20
@@ -1320,7 +1328,6 @@ SolicitudesHerramientas As screen:
                                                     InfoInserto: ThisRecord,
                                                     sinStock: ThisRecord.CantidadInventario <= 0,
                                                     excedidoRuta: ThisRecord.Surtido > ThisRecord.Requerido
-                                                    
                                                 },
                                                 {
                                                     veri: subconsumo || insertosEditados || insertosEn0 || insertoFueraDeRuta || sinStock || excedidoRuta,
@@ -1330,12 +1337,12 @@ SolicitudesHerramientas As screen:
                                                     rutaOut: insertosEditados || insertosEn0 || insertoFueraDeRuta,
                                                     stockInvalido: sinStock,
                                                     excedidoRuta: excedidoRuta,
-                                                    InsertoEditado:insertosEditados
+                                                    InsertoEditado: insertosEditados
                                                 }
                                             )
                                         )
                                     );
-                                     UpdateContext(
+                                    UpdateContext(
                                         {
                                             HaySobreconsumo: CountRows(
                                                 Filter(
@@ -1349,7 +1356,7 @@ SolicitudesHerramientas As screen:
                                         CountRows(
                                             Filter(
                                                 Verificacion,
-                                                veri 
+                                                veri
                                             )
                                         ) = 0,
                                         Collect(
@@ -1371,7 +1378,11 @@ SolicitudesHerramientas As screen:
                                                     Maquina = txt_Maquina_SH_1.Text,
                                                     'P/N'
                                                 ),
-                                                RazonCausa: If(HaySobreconsumo, "Bien, Sobreconsumo", "Bien"),
+                                                RazonCausa: If(
+                                                    HaySobreconsumo,
+                                                    "Bien, Sobreconsumo",
+                                                    "Bien"
+                                                ),
                                                 FechaSoli: Text(Today())
                                             }
                                         );
@@ -1492,38 +1503,27 @@ SolicitudesHerramientas As screen:
                                                         Surtido: ThisRecord.Surtido,
                                                         'Cantidad Inventario': ThisRecord.CantidadInventario,
                                                         Ubicacion: ThisRecord.Ubicacion
-                                                        
                                                     }
                                                 )
                                             )
                                         );
                                         If(
-                                !IsBlank(RazonCausa),
-                                With(
-                                    {
-                                        CuerpoCorreo:
-                                            "<p>Estimado equipo;</p>" &
-                                            "<p>Se ha enviado una solicitud de herramientas que requiere su revisión para aprobación. A continuación se detallan los datos de la solicitud:</p>" &
-                                            "<table border='1' cellpadding='5' cellspacing='0'>" &
-                                            "<tr><td><strong>Máquina</strong></td><td>" & Upper(txt_Maquina_SH_1.Text) & "</td></tr>" &
-                                            "<tr><td><strong>Orden</strong></td><td>" & info.Orden & "</td></tr>" &
-                                            "<tr><td><strong>Operario</strong></td><td>" & drop_Operario_SH_2.Selected.Nombre & "</td></tr>" &
-                                            "<tr><td><strong>Usuario</strong></td><td>" & LookUp(Empleados, Codigo = VarName, Nombre) & "</td></tr>" &
-                                            "<tr><td><strong>Operación</strong></td><td>" & info.Operacion & "</td></tr>" &
-                                            "<tr><td><strong>Fecha de Solicitud</strong></td><td>" & Text(Today()) & "</td></tr>" &
-                                            "</table>" &
-                                            "<p>Por favor, revise los detalles y proceda con la aprobación o el rechazo de la solicitud según corresponda.</p>" &
-                                            "<p>Saludos cordiales;</p>" &
-                                            "<p>El equipo de desarrollo</p>" &
-                                             "<p><em>Nota: Por favor, no responda a este correo.</em></p>"
-                                    },
-                                    EnviarCorreo.Run(
-                                        "desarrollo02@tsicr.com",
-                                        "Revisión de Solicitud de Herramientas",
-                                        CuerpoCorreo
-                                    )
-                                )
-                            );
+                                            !IsBlank(RazonCausa),
+                                            With(
+                                                {
+                                                    CuerpoCorreo: "<p>Estimado equipo;</p>" & "<p>Se ha enviado una solicitud de herramientas que requiere su revisión para aprobación. A continuación se detallan los datos de la solicitud:</p>" & "<table border='1' cellpadding='5' cellspacing='0'>" & "<tr><td><strong>Máquina</strong></td><td>" & Upper(txt_Maquina_SH_1.Text) & "</td></tr>" & "<tr><td><strong>Orden</strong></td><td>" & info.Orden & "</td></tr>" & "<tr><td><strong>Operario</strong></td><td>" & drop_Operario_SH_2.Selected.Nombre & "</td></tr>" & "<tr><td><strong>Usuario</strong></td><td>" & LookUp(
+                                                        Empleados,
+                                                        Codigo = VarName,
+                                                        Nombre
+                                                    ) & "</td></tr>" & "<tr><td><strong>Operación</strong></td><td>" & info.Operacion & "</td></tr>" & "<tr><td><strong>Fecha de Solicitud</strong></td><td>" & Text(Today()) & "</td></tr>" & "</table>" & "<p>Por favor, revise los detalles y proceda con la aprobación o el rechazo de la solicitud según corresponda.</p>" & "<p>Saludos cordiales;</p>" & "<p>El equipo de desarrollo</p>" & "<p><em>Nota: Por favor, no responda a este correo.</em></p>"
+                                                },
+                                                EnviarCorreo.Run(
+                                                    "desarrollo02@tsicr.com",
+                                                    "Revisión de Solicitud de Herramientas",
+                                                    CuerpoCorreo
+                                                )
+                                            )
+                                        );
                                         ClearCollect(
                                             Verificacion,
                                             Blank()
@@ -1557,13 +1557,69 @@ SolicitudesHerramientas As screen:
                                                     RazonCausa: Concat(
                                                         Filter(
                                                             [
-                                                                {razon: "Subconsumo", valor: CountRows(Filter(Verificacion, sub)) > 0},
-                                                                {razon: "Sobreconsumo", valor:CountRows(Filter(Verificacion, sobre)) > 0},
-                                                                {razon: "Insertos editados", valor: CountRows(Filter(Verificacion, InsertoEditado)) > 0},
-                                                                {razon: "Insertos en 0", valor: CountRows(Filter(Verificacion, Inserto0)) > 0},
-                                                                {razon: "Inserto fuera de ruta", valor: CountRows(Filter(Verificacion, rutaOut)) > 0},
-                                                                {razon: "Sin stock", valor: CountRows(Filter(Verificacion, stockInvalido)) > 0},
-                                                                {razon: "Excedido en ruta", valor: CountRows(Filter(Verificacion, excedidoRuta)) > 0}
+                                                                {
+                                                                    razon: "Subconsumo",
+                                                                    valor: CountRows(
+                                                                        Filter(
+                                                                            Verificacion,
+                                                                            sub
+                                                                        )
+                                                                    ) > 0
+                                                                },
+                                                                {
+                                                                    razon: "Sobreconsumo",
+                                                                    valor: CountRows(
+                                                                        Filter(
+                                                                            Verificacion,
+                                                                            sobre
+                                                                        )
+                                                                    ) > 0
+                                                                },
+                                                                {
+                                                                    razon: "Insertos editados",
+                                                                    valor: CountRows(
+                                                                        Filter(
+                                                                            Verificacion,
+                                                                            InsertoEditado
+                                                                        )
+                                                                    ) > 0
+                                                                },
+                                                                {
+                                                                    razon: "Insertos en 0",
+                                                                    valor: CountRows(
+                                                                        Filter(
+                                                                            Verificacion,
+                                                                            Inserto0
+                                                                        )
+                                                                    ) > 0
+                                                                },
+                                                                {
+                                                                    razon: "Inserto fuera de ruta",
+                                                                    valor: CountRows(
+                                                                        Filter(
+                                                                            Verificacion,
+                                                                            rutaOut
+                                                                        )
+                                                                    ) > 0
+                                                                },
+                                                                {
+                                                                    razon: "Sin stock",
+                                                                    valor: CountRows(
+                                                                        Filter(
+                                                                            Verificacion,
+                                                                            stockInvalido
+                                                                        )
+                                                                    ) > 0
+                                                                },
+                                                                {
+                                                                    razon: "Excedido en ruta",
+                                                                    valor: CountRows(
+                                                                        Filter(
+                                                                            Verificacion,
+                                                                            excedidoRuta
+                                                                        )
+                                                                    ) > 0
+                                                                }
                                                             ],
                                                             valor
                                                         ),
@@ -1579,7 +1635,7 @@ SolicitudesHerramientas As screen:
                                         )
                                     )
                                 )
-                            ) 
+                            )
                         RadiusBottomLeft: =20
                         RadiusBottomRight: =20
                         RadiusTopLeft: =20
@@ -1945,6 +2001,7 @@ SolicitudesHerramientas As screen:
                                                             }
                                                         )
                                                     );
+                                                    Reset(txt_DescripcionMatSum_SH);
                                                     Notify(
                                                         "Material agregado correctamente a la ruta.",
                                                         NotificationType.Success
@@ -2016,28 +2073,15 @@ SolicitudesHerramientas As screen:
                         FechaSoli: Text(Today())
                     }
                 );
-                
                 If(
                     !IsBlank(RazonCausa),
                     With(
                         {
-                            CuerpoCorreo:
-                                "<p>Estimado equipo;</p>" &
-                                "<p>Se ha enviado una solicitud de herramientas que requiere su revisión para aprobación. A continuación se detallan los datos de la solicitud:</p>" &
-                                "<table border='1' cellpadding='5' cellspacing='0'>" &
-                                "<tr><td><strong>Máquina</strong></td><td>" & Upper(txt_Maquina_SH_1.Text) & "</td></tr>" &
-                                "<tr><td><strong>Orden</strong></td><td>" & info.Orden & "</td></tr>" &
-                                "<tr><td><strong>Operario</strong></td><td>" & drop_Operario_SH_2.Selected.Nombre & "</td></tr>" &
-                                "<tr><td><strong>Usuario</strong></td><td>" & LookUp(Empleados, Codigo = VarName, Nombre) & "</td></tr>" &
-                                "<tr><td><strong>Operación</strong></td><td>" & info.Operacion & "</td></tr>" &
-                                "<tr><td><strong>Causa</strong></td><td>" & drp_Causas_SH.SelectedText.Value & "</td></tr>" &
-                                "<tr><td><strong>Razón de la causa</strong></td><td>" & RazonCausa & "</td></tr>" &
-                                "<tr><td><strong>Fecha de Solicitud</strong></td><td>" & Text(Today()) & "</td></tr>" &
-                                "</table>" &
-                                "<p>Por favor, revise los detalles y proceda con la aprobación o el rechazo de la solicitud según corresponda.</p>" &
-                                "<p>Saludos cordiales;</p>" &
-                                "<p>El equipo de desarrollo</p>" &
-                                 "<p><em>Nota: Por favor, no responda a este correo.</em></p>"
+                            CuerpoCorreo: "<p>Estimado equipo;</p>" & "<p>Se ha enviado una solicitud de herramientas que requiere su revisión para aprobación. A continuación se detallan los datos de la solicitud:</p>" & "<table border='1' cellpadding='5' cellspacing='0'>" & "<tr><td><strong>Máquina</strong></td><td>" & Upper(txt_Maquina_SH_1.Text) & "</td></tr>" & "<tr><td><strong>Orden</strong></td><td>" & info.Orden & "</td></tr>" & "<tr><td><strong>Operario</strong></td><td>" & drop_Operario_SH_2.Selected.Nombre & "</td></tr>" & "<tr><td><strong>Usuario</strong></td><td>" & LookUp(
+                                Empleados,
+                                Codigo = VarName,
+                                Nombre
+                            ) & "</td></tr>" & "<tr><td><strong>Operación</strong></td><td>" & info.Operacion & "</td></tr>" & "<tr><td><strong>Causa</strong></td><td>" & drp_Causas_SH.SelectedText.Value & "</td></tr>" & "<tr><td><strong>Razón de la causa</strong></td><td>" & RazonCausa & "</td></tr>" & "<tr><td><strong>Fecha de Solicitud</strong></td><td>" & Text(Today()) & "</td></tr>" & "</table>" & "<p>Por favor, revise los detalles y proceda con la aprobación o el rechazo de la solicitud según corresponda.</p>" & "<p>Saludos cordiales;</p>" & "<p>El equipo de desarrollo</p>" & "<p><em>Nota: Por favor, no responda a este correo.</em></p>"
                         },
                         EnviarCorreo.Run(
                             "desarrollo02@tsicr.com",
@@ -2087,7 +2131,6 @@ SolicitudesHerramientas As screen:
                         }
                     )
                 );
-                
                 ForAll(
                     Materiales,
                     If(
@@ -2148,7 +2191,7 @@ SolicitudesHerramientas As screen:
                                 CantxInserto: Value(ThisRecord.Cant_x_Inserto),
                                 Cant_Insertos: Value(ThisRecord.Cant_Inserto),
                                 Cant_Maxima: Value(ThisRecord.Cant_Maxima),
-                                Causa:  drp_Causas_SH.SelectedText.Causa,
+                                Causa: drp_Causas_SH.SelectedText.Causa,
                                 Orden: ThisRecord.job,
                                 Operacion: Text(ThisRecord.oper_num),
                                 Operario: drop_Operario_SH_2.Selected.Nombre,
@@ -2168,7 +2211,6 @@ SolicitudesHerramientas As screen:
                         )
                     )
                 );
-                
                 UpdateContext(
                     {
                         Causa: false,
@@ -2176,12 +2218,10 @@ SolicitudesHerramientas As screen:
                         Disable: false
                     }
                 );
-                
                 ClearCollect(
                     Verificacion,
                     Blank()
                 );
-                
                 ClearCollect(
                     Materiales,
                     Blank()
