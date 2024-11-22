@@ -143,7 +143,8 @@
                 OnSelect: |-
                     =Back();
                     Reset(txt_FiltroID_DH);
-                    Reset(drp_Estado_DH)
+                    Reset(drp_Estado_DH);
+                    Reset(txt_motivo_rechazo_DH)
                 PaddingBottom: =5
                 PaddingLeft: =5
                 PaddingRight: =5
@@ -244,7 +245,7 @@
                             Y: =28
                             ZIndex: =53
 
-                        TextCanvas1_20 As Text:
+                        TextCanvas1_20 As Texto:
                             Align: ='TextCanvas.Align'.Center
                             DisplayMode: =DisplayMode.Edit
                             Height: =40
@@ -257,7 +258,7 @@
                             Y: =7
                             ZIndex: =54
 
-                        TextCanvas1_22 As Text:
+                        TextCanvas1_22 As Texto:
                             Align: ='TextCanvas.Align'.Center
                             DisplayMode: =DisplayMode.Edit
                             Height: =40
@@ -323,7 +324,7 @@
                             Y: =7
                             ZIndex: =57
 
-                        TextCanvas1_23 As Text:
+                        TextCanvas1_23 As Texto:
                             Align: ='TextCanvas.Align'.Center
                             DisplayMode: =DisplayMode.Edit
                             Height: =40
@@ -335,7 +336,7 @@
                             Y: =7
                             ZIndex: =58
 
-                        TextCanvas1_24 As Text:
+                        TextCanvas1_24 As Texto:
                             Align: ='TextCanvas.Align'.Center
                             DisplayMode: =DisplayMode.Edit
                             Height: =40
@@ -375,7 +376,7 @@
                             Y: =54
                             ZIndex: =60
 
-                        TextCanvas1_25 As Text:
+                        TextCanvas1_25 As Texto:
                             Align: ='TextCanvas.Align'.Center
                             DisplayMode: =DisplayMode.Edit
                             Height: =40
@@ -450,7 +451,7 @@
                             Y: =105
                             ZIndex: =64
 
-                        TextCanvas1_34 As Text:
+                        TextCanvas1_34 As Texto:
                             Align: ='TextCanvas.Align'.Center
                             DisplayMode: =DisplayMode.Edit
                             Height: =38
@@ -999,7 +1000,8 @@
                                         ThisRecord,
                                         {
                                             Cant_Actual: 0,
-                                            Cant_Insertos: 1
+                                            Cant_Insertos: 1,
+                                            'Estado (crfb9_estado)': "Despachado"
                                         }
                                     )
                                 );
@@ -1575,12 +1577,18 @@
             Height: =50
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(52, 152, 47, 1)
-            OnSelect: |
+            OnSelect: |-
                 =If(
-                    IsBlank(txt_motivo_rechazo_DH.Value), 
-                    Notify("Por favor escribe la razón del rechazo", NotificationType.Error), 
-                    Set(varSolicitudID, glr_Solicitudes_AH_1.Selected.ID);
-                
+                    IsBlank(txt_motivo_rechazo_DH.Value),
+                    Notify(
+                        "Por favor escribe la razón del rechazo",
+                        NotificationType.Error
+                    ),
+                    
+                    Set(
+                        varSolicitudID,
+                        glr_Solicitudes_AH_1.Selected.ID
+                    );
                     ForAll(
                         Gallery2_1.AllItems,
                         Patch(
@@ -1609,34 +1617,18 @@
                             }
                         )
                     );
-                
                     Patch(
                         SolicitudHerramientas,
                         glr_Solicitudes_AH_1.Selected,
                         {'Estado (crfb9_estado)': "Rechazado"}
                     );
-                
                     With(
                         {
-                            CuerpoCorreo:
-                                "<p>Estimado equipo;</p>" &
-                                "<p>Se informa que la solicitud de herramientas con los siguientes detalles ha sido <strong>rechazada</strong>:</p>" &
-                                "<table border='1' cellpadding='5' cellspacing='0'>" &
-                                "<tr><td><strong>Solicitud ID</strong></td><td>" & varSolicitudID & "</td></tr>" &
-                                "<tr><td><strong>Máquina</strong></td><td>" & glr_Solicitudes_AH_1.Selected.Maquina & "</td></tr>" &
-                                "<tr><td><strong>Orden</strong></td><td>" & glr_Solicitudes_AH_1.Selected.Orden & "</td></tr>" &
-                                "<tr><td><strong>Operario</strong></td><td>" & glr_Solicitudes_AH_1.Selected.Operario & "</td></tr>" &
-                                "<tr><td><strong>Usuario</strong></td><td>" & LookUp(Empleados, Codigo = VarName, Nombre) & "</td></tr>" &
-                                "<tr><td><strong>Operación</strong></td><td>" & glr_Solicitudes_AH_1.Selected.Operacion & "</td></tr>" &
-                                "<tr><td><strong>Causa</strong></td><td>" & glr_Solicitudes_AH_1.Selected.Causa & "</td></tr>" &
-                                "<tr><td><strong>Razón de la causa</strong></td><td>" & glr_Solicitudes_AH_1.Selected.RazonCausa & "</td></tr>" &
-                                "<tr><td><strong>Motivo del rechazo</strong></td><td>" & txt_motivo_rechazo_DH.Value & "</td></tr>" &
-                                "<tr><td><strong>Fecha de Solicitud</strong></td><td>" & Text(Today()) & "</td></tr>" &
-                                "</table>" &
-                                "<p>Por favor, tome las medidas necesarias según el motivo del rechazo.</p>" &
-                                "<p>Saludos cordiales;</p>" &
-                                "<p>El equipo de desarrollo</p>" &
-                                "<p><em>Nota: Por favor, no responda a este correo.</em></p>"
+                            CuerpoCorreo: "<p>Estimado equipo;</p>" & "<p>Se informa que la solicitud de herramientas con los siguientes detalles ha sido <strong>rechazada</strong>:</p>" & "<table border='1' cellpadding='5' cellspacing='0'>" & "<tr><td><strong>Solicitud ID</strong></td><td>" & varSolicitudID & "</td></tr>" & "<tr><td><strong>Máquina</strong></td><td>" & glr_Solicitudes_AH_1.Selected.Maquina & "</td></tr>" & "<tr><td><strong>Orden</strong></td><td>" & glr_Solicitudes_AH_1.Selected.Orden & "</td></tr>" & "<tr><td><strong>Operario</strong></td><td>" & glr_Solicitudes_AH_1.Selected.Operario & "</td></tr>" & "<tr><td><strong>Usuario</strong></td><td>" & LookUp(
+                                Empleados,
+                                Codigo = VarName,
+                                Nombre
+                            ) & "</td></tr>" & "<tr><td><strong>Operación</strong></td><td>" & glr_Solicitudes_AH_1.Selected.Operacion & "</td></tr>" & "<tr><td><strong>Causa</strong></td><td>" & glr_Solicitudes_AH_1.Selected.Causa & "</td></tr>" & "<tr><td><strong>Razón de la causa</strong></td><td>" & glr_Solicitudes_AH_1.Selected.RazonCausa & "</td></tr>" & "<tr><td><strong>Motivo del rechazo</strong></td><td>" & txt_motivo_rechazo_DH.Value & "</td></tr>" & "<tr><td><strong>Fecha de Solicitud</strong></td><td>" & Text(Today()) & "</td></tr>" & "</table>" & "<p>Por favor, tome las medidas necesarias según el motivo del rechazo.</p>" & "<p>Saludos cordiales;</p>" & "<p>El equipo de desarrollo</p>" & "<p><em>Nota: Por favor, no responda a este correo.</em></p>"
                         },
                         EnviarCorreo.Run(
                             "desarrollo02@tsicr.com",
@@ -1644,10 +1636,19 @@
                             CuerpoCorreo
                         )
                     );
-                
+                     ForAll(
+                        Gallery2_1.AllItems,
+                        Patch(
+                            Herramientas,
+                            ThisRecord,
+                            {'Estado (crfb9_estado)': "Rechazado"}
+                        )
+                    );
+                    Reset(txt_motivo_rechazo_DH);
                     UpdateContext({Disable: false});
                     UpdateContext({Mostrar: false});
                     UpdateContext({MotivoRechazo: false});
+                    
                 )
             Size: =15
             Text: ="Aceptar"
@@ -1690,7 +1691,8 @@
             Y: =5
             ZIndex: =9
 
-        "txt_motivo_rechazo_DH As 'Text input'":
+        "txt_motivo_rechazo_DH As 'Entrada de texto'":
+            AccessibleLabel: =
             Appearance: ='TextInputCanvas.Appearance'.Outline
             BorderColor: =RGBA(12, 59, 94, 1)
             BorderStyle: =BorderStyle.Solid
@@ -1700,6 +1702,7 @@
             FontSize: =20
             Height: =109
             Mode: ='TextInputCanvas.Mode'.Multiline
+            OnChange: =false
             TriggerOutput: ='TextInputCanvas.TriggerOutput'.Delayed
             Width: =569
             X: =33

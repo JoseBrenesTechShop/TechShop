@@ -144,7 +144,10 @@ SolicitudesHerramientas As screen:
                     Reset(lbl_orden_SH);
                     Reset(gl_HerramientasSeleccionadas_sh_2);
                     UpdateContext({info: Blank()});
-                    ClearCollect(Materiales, Blank())
+                    ClearCollect(Materiales, Blank());
+                    Reset(drop_Operario_SH_2);
+                    Reset(txt_FiltroOperario_SH);
+                    Reset(Drop_SeleccionMaterialesSumDescripcion_SH)
                 PaddingBottom: =5
                 PaddingLeft: =5
                 PaddingRight: =5
@@ -289,7 +292,7 @@ SolicitudesHerramientas As screen:
                     Y: =52
                     ZIndex: =1
 
-                lbl_Maquina_SH_1 As Text:
+                lbl_Maquina_SH_1 As Texto:
                     Align: ='TextCanvas.Align'.Center
                     DisplayMode: =DisplayMode.Edit
                     FontColor: =RGBA(0, 0, 0, 1)
@@ -469,7 +472,7 @@ SolicitudesHerramientas As screen:
                     Y: =52
                     ZIndex: =13
 
-                lbl_Maquina_SH_2 As Text:
+                lbl_Maquina_SH_2 As Texto:
                     Align: ='TextCanvas.Align'.Center
                     DisplayMode: =DisplayMode.Edit
                     FontColor: =RGBA(0, 0, 0, 1)
@@ -507,7 +510,7 @@ SolicitudesHerramientas As screen:
                     Y: =52
                     ZIndex: =15
 
-                lbl_Maquina_SH_3 As Text:
+                lbl_Maquina_SH_3 As Texto:
                     Align: ='TextCanvas.Align'.Center
                     DisplayMode: =DisplayMode.Edit
                     FontColor: =RGBA(0, 0, 0, 1)
@@ -687,7 +690,7 @@ SolicitudesHerramientas As screen:
                                     Text: |-
                                         = "Cantidad x Inserto:"
                                     Width: =155
-                                    X: =589
+                                    X: =575
                                     Y: =37
                                     ZIndex: =3
 
@@ -706,7 +709,7 @@ SolicitudesHerramientas As screen:
                                     Text: |-
                                         = "Insertos:" 
                                     Width: =70
-                                    X: =589
+                                    X: =575
                                     Y: =7
                                     ZIndex: =4
 
@@ -780,8 +783,8 @@ SolicitudesHerramientas As screen:
                                                 Maquina = txt_Maquina_SH_1.Text && Orden = ThisItem.job && Operacion = Text(ThisItem.oper_num) && ID_Inserto = ThisItem.item
                                             ).CantxInserto
                                         )
-                                    Width: =37
-                                    X: =750
+                                    Width: =57
+                                    X: =732
                                     Y: =37
                                     ZIndex: =7
 
@@ -822,8 +825,8 @@ SolicitudesHerramientas As screen:
                                                 Maquina = txt_Maquina_SH_1.Text && Orden = ThisItem.job && Operacion = Text(ThisItem.oper_num) && ID_Inserto = ThisItem.item
                                             ).Cant_Insertos
                                         )
-                                    Width: =30
-                                    X: =668
+                                    Width: =53
+                                    X: =654
                                     Y: =7
                                     ZIndex: =8
 
@@ -875,7 +878,7 @@ SolicitudesHerramientas As screen:
                                     Y: =95
                                     ZIndex: =10
 
-                                "Progress1_1 As 'Progress Bar'":
+                                "Progress1_1 As 'Barra de progreso'":
                                     AccessibleLabel: ="Hola"
                                     DisplayMode: =DisplayMode.Edit
                                     Height: =30
@@ -922,7 +925,7 @@ SolicitudesHerramientas As screen:
                                 Height: =41
                                 HoverColor: =RGBA(255, 255, 255, 1)
                                 HoverFill: =RGBA(45, 128, 40, 1)
-                                OnSelect: |-
+                                OnSelect: |
                                     =If(
                                         !IsBlank(
                                             LookUp(
@@ -957,18 +960,41 @@ SolicitudesHerramientas As screen:
                                                     Cantidad
                                                 ) * ThisItem.matl_qty,
                                                 Surtido: ThisItem.qty_issued,
-                                                CantidadInventario: LookUp(
-                                                    itemloc,
-                                                    item = ThisItem.item && qty_on_hand > 0,
-                                                    qty_on_hand
-                                                ),
-                                                Ubicacion: Concat(
-                                                    Filter(
-                                                        itemloc,
-                                                        item = ThisItem.item && qty_on_hand > 0
+                                                CantidadInventario: If(
+                                                    IsBlank(
+                                                        LookUp(
+                                                            itemloc,
+                                                            item = ThisItem.item && qty_on_hand > 0,
+                                                            qty_on_hand
+                                                        )
                                                     ),
-                                                    loc,
-                                                    ", "
+                                                    0, 
+                                                    LookUp(
+                                                        itemloc,
+                                                        item = ThisItem.item && qty_on_hand > 0,
+                                                        qty_on_hand
+                                                    )
+                                                ),
+                                                Ubicacion: If(
+                                                    IsBlank(
+                                                        Concat(
+                                                            Filter(
+                                                                itemloc,
+                                                                item = ThisItem.item && qty_on_hand > 0
+                                                            ),
+                                                            loc,
+                                                            ", "
+                                                        )
+                                                    ),
+                                                    "N/A", 
+                                                    Concat(
+                                                        Filter(
+                                                            itemloc,
+                                                            item = ThisItem.item && qty_on_hand > 0
+                                                        ),
+                                                        loc,
+                                                        ", "
+                                                    )
                                                 )
                                             }
                                         )
@@ -1448,8 +1474,8 @@ SolicitudesHerramientas As screen:
                                                         Cant_Insertos: Value(ThisRecord.Cant_Inserto),
                                                         Cant_Maxima: Value(ThisRecord.Cant_Maxima),
                                                         Causa: "Bien",
-                                                        Orden: ThisRecord.job,
-                                                        Operacion: Text(ThisRecord.oper_num),
+                                                        Orden: info.Orden,
+                                                        Operacion: info.Operacion,
                                                         Operario: drop_Operario_SH_2.Selected.Nombre,
                                                         ID_Inserto: ThisRecord.item,
                                                         ID_Solicitud: herra.id,
@@ -1488,8 +1514,8 @@ SolicitudesHerramientas As screen:
                                                         Cant_Insertos: Value(ThisRecord.Cant_Inserto),
                                                         Cant_Maxima: Value(ThisRecord.Cant_Maxima),
                                                         Causa: "Bien",
-                                                        Orden: ThisRecord.job,
-                                                        Operacion: Text(ThisRecord.oper_num),
+                                                        Orden: info.Orden,
+                                                        Operacion: info.Operacion,
                                                         Operario: drop_Operario_SH_2.Selected.Nombre,
                                                         ID_Inserto: ThisRecord.item,
                                                         ID_Solicitud: herra.id,
@@ -1681,7 +1707,7 @@ SolicitudesHerramientas As screen:
                         Y: =162
                         ZIndex: =7
 
-                        TextCanvas2 As Text:
+                        TextCanvas2 As Texto:
                             Align: ='TextCanvas.Align'.Center
                             AutoHeight: =false
                             DisplayMode: =DisplayMode.Edit
@@ -1752,7 +1778,7 @@ SolicitudesHerramientas As screen:
                             Width: =151
                             ZIndex: =1
 
-                    Seleccione As Text:
+                    Seleccione As Texto:
                         Align: ='TextCanvas.Align'.Center
                         DisplayMode: =DisplayMode.Edit
                         FontColor: =RGBA(0, 0, 0, 1)
@@ -1843,7 +1869,7 @@ SolicitudesHerramientas As screen:
                             Width: =258
                             ZIndex: =2
 
-                    btn_buscar_SH_1 As Button:
+                    btn_buscar_SH_1 As Botón:
                         Align: =Align.Center
                         Appearance: ='ButtonCanvas.Appearance'.Secondary
                         BorderColor: =RGBA(9, 33, 98, 1)
@@ -2152,8 +2178,8 @@ SolicitudesHerramientas As screen:
                                 Cant_Insertos: Value(ThisRecord.Cant_Inserto),
                                 Cant_Maxima: Value(ThisRecord.Cant_Maxima),
                                 Causa: drp_Causas_SH.SelectedText.Causa,
-                                Orden: ThisRecord.job,
-                                Operacion: Text(ThisRecord.oper_num),
+                                Orden: info.Orden,
+                                Operacion: info.Operacion,
                                 Operario: drop_Operario_SH_2.Selected.Nombre,
                                 ID_Inserto: ThisRecord.item,
                                 ID_Solicitud: herra.id,
@@ -2192,8 +2218,8 @@ SolicitudesHerramientas As screen:
                                 Cant_Insertos: Value(ThisRecord.Cant_Inserto),
                                 Cant_Maxima: Value(ThisRecord.Cant_Maxima),
                                 Causa: drp_Causas_SH.SelectedText.Causa,
-                                Orden: ThisRecord.job,
-                                Operacion: Text(ThisRecord.oper_num),
+                                Orden: info.Orden,
+                                Operacion: info.Operacion,
                                 Operario: drop_Operario_SH_2.Selected.Nombre,
                                 ID_Inserto: ThisRecord.item,
                                 ID_Solicitud: herra.id,
