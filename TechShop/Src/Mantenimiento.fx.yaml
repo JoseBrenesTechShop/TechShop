@@ -52,7 +52,7 @@
                 Width: =75
                 ZIndex: =2
 
-            txt_User_MO_1 As text:
+            txt_User_MM As text:
                 Align: =Align.Center
                 AlignInContainer: =AlignInContainer.Center
                 BorderColor: =RGBA(204, 231, 246, 1)
@@ -268,8 +268,7 @@
                         )
                     Layout: =Layout.Vertical
                     LoadingSpinner: =LoadingSpinner.Data
-                    OnSelect: |-
-                        =UpdateContext({Historial: false})
+                    OnSelect: =Clear(CheckListMant)
                     TemplatePadding: =0
                     TemplateSize: =47
                     Transition: =Transition.Push
@@ -443,7 +442,7 @@
                             BorderColor: =App.Theme.Colors.Darker40
                             BorderThickness: =2
                             Color: =RGBA(255, 255, 255, 1)
-                            Default: ="Mantenimientos  " & CountIf(CheckListMant, true) & "/" & CountIf(Filter(Mantenimiento_1, Mantenimiento_Ejecutado = drp_MantEjecucion_MM.SelectedText.Value), true)
+                            Default: ="Mantenimientos  " & CountIf(Filter(CheckListMant, Mantenimiento_Ejecutado = drp_MantEjecucion_MM.SelectedText.Value), true) & "/" & CountIf(Filter(Mantenimiento_1, Mantenimiento_Ejecutado = drp_MantEjecucion_MM.SelectedText.Value), true)
                             DisabledBorderColor: =RGBA(166, 166, 166, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             DisabledFill: =RGBA(244, 244, 244, 1)
@@ -503,6 +502,7 @@
                                 CheckboxBorderColor: =If(Self.Value, RGBA(52, 152, 47, 1), App.Theme.Colors.Primary)
                                 CheckmarkFill: =RGBA(52, 152, 47, 1)
                                 Color: =RGBA(0, 0, 0, 1)
+                                Default: =ThisItem in CheckListMant
                                 DisabledBorderColor: =RGBA(0, 0, 0, 0)
                                 DisabledColor: =RGBA(0, 0, 0, 0)
                                 Font: =App.Theme.Font
@@ -589,7 +589,7 @@
                         HoverColor: =RGBA(0, 0, 0, 1)
                         HoverFill: =App.Theme.Colors.Lighter70
                         Items: =Distinct(Mantenimiento_1, 'Mantenimiento (crfb9_mantenimiento)')
-                        OnChange: =Clear(CheckListMant)
+                        OnChange: =
                         PressedColor: =App.Theme.Colors.PrimaryForeground
                         PressedFill: =App.Theme.Colors.Darker30
                         SelectionColor: =App.Theme.Colors.PrimaryForeground
@@ -629,7 +629,7 @@
                         HoverColor: =RGBA(0, 0, 0, 1)
                         HoverFill: =App.Theme.Colors.Lighter70
                         Items: =Distinct(Filter(Mantenimiento_1, 'Mantenimiento (crfb9_mantenimiento)' = drp_Mantenimineto_MM.SelectedText.Value), Mantenimiento_Ejecutado)
-                        OnChange: =Clear(CheckListMant)
+                        OnChange: =
                         PressedColor: =App.Theme.Colors.PrimaryForeground
                         PressedFill: =App.Theme.Colors.Darker30
                         SelectionColor: =App.Theme.Colors.PrimaryForeground
@@ -653,30 +653,45 @@
                         HoverBorderColor: =App.Theme.Colors.Darker10
                         HoverColor: =RGBA(255, 255, 255, 1)
                         HoverFill: =RGBA(52, 152, 47, 1)
-                        OnSelect: |+
+                        OnSelect: |-
                             =If(
                                 CountIf(
-                                    CheckList,
+                                    CheckListMant,
                                     true
-                                ) <> CountIf(
-                                    Verificaciones_1,
-                                    true
-                                ),
+                                ) = 0,
                                 Notify(
-                                    "Debe completar la lista",
+                                    "mensaje advertencia",
                                     NotificationType.Error
+                                ),
+                                With(
+                                    {IdUnico: GUID()},
+                                    ForAll(
+                                        CheckListMant,
+                                        Collect(
+                                            MantenimientoRegistros,
+                                            {
+                                                Mant_Numero: IdUnico,
+                                                Mantenimiento: ThisRecord.'Mantenimiento (crfb9_mantenimiento)',
+                                                Mantenimiento_Ejecutado: ThisRecord.Mantenimiento_Ejecutado,
+                                                Tipo_Mantenimiento: ThisRecord.Tipo_Mantenimiento,
+                                                Mecanico: txt_User_MM.Text
+                                            }
+                                        )
+                                    )
                                 )
                             );
-                                Reset(glr_Maquinas_MO_1);
-                                Reset(txt_BuscaMaquina_MO_1);
-                                Reset(txt_Maquina_MO_1);
-                                Clear(CheckListMant)
-                            
+                            Reset(glr_Maquinas_MO_1);
+                            Reset(txt_BuscaMaquina_MO_1);
+                            Reset(txt_Maquina_MO_1);
+                            Reset(drp_MantEjecucion_MM);
+                            Reset(drp_Mantenimineto_MM);
+                            Clear(CheckListMant)
                         PressedBorderColor: =App.Theme.Colors.Darker40
                         PressedColor: =Self.Color
                         PressedFill: =App.Theme.Colors.Darker40
                         Size: =15
                         Text: ="Guardar"
+                        Visible: =!IsBlank(glr_Maquinas_MO_1.Selected)
                         Width: =175
                         X: =87
                         Y: =501
