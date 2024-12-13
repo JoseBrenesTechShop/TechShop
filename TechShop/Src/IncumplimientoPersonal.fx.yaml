@@ -22,7 +22,17 @@ IncumplimientoPersonal As screen:
         HoverFill: =App.Theme.Colors.Lighter80
         InputFill: =RGBA(255, 255, 255, 1)
         InvertedColor: =RGBA(255, 255, 255, 1)
-        Items: =Filter(Incumplimiento_Personal, DateValue('Fecha de creación') = Today())
+        Items: |-
+            =Filter(
+                Incumplimiento_Personal,
+                Fecha_Text = Text(
+                    Today(),
+                    "mm/dd/yyyy"
+                ) || Fecha_Text = Text(
+                    Today() - 1,
+                    "mm/dd/yyyy"
+                )
+            )
         LinkColor: =App.Theme.Colors.Lighter10
         PrimaryColor1: =App.Theme.Colors.Primary
         PrimaryColor2: =App.Theme.Colors.Darker30
@@ -137,6 +147,98 @@ IncumplimientoPersonal As screen:
         Width: =1366
         Y: =75
         ZIndex: =8
+
+        Fecha_Text_DataCard1 As typedDataCard.textualEditCard:
+            BorderColor: =App.Theme.Colors.Darker40
+            BorderStyle: =BorderStyle.Solid
+            DataField: ="crfb9_fecha_text"
+            Default: =ThisItem.Fecha_Text
+            DisplayMode: =Parent.DisplayMode
+            DisplayName: =DataSourceInfo([@Incumplimiento_Personal],DataSourceInfo.DisplayName,'crfb9_fecha_text')
+            Fill: =RGBA(0, 0, 0, 0)
+            Height: =50
+            MaxLength: =DataSourceInfo([@Incumplimiento_Personal], DataSourceInfo.MaxLength, 'crfb9_fecha_text')
+            Required: =false
+            Update: =DataCardValue71.Text
+            Width: =455
+            X: =3
+            Y: =4
+            ZIndex: =1
+
+            DataCardKey170 As label:
+                AutoHeight: =true
+                Color: =App.Theme.Colors.Darker30
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                Font: =App.Theme.Font
+                Height: =34
+                Size: =13
+                Text: =Parent.DisplayName
+                Width: =Parent.Width - 60
+                Wrap: =false
+                X: =30
+                Y: =10
+                ZIndex: =1
+
+            DataCardValue71 As text:
+                BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                BorderThickness: =2
+                Color: =RGBA(0, 0, 0, 1)
+                Default: =Text(DateValue1.SelectedDate, "[$-en-US]mm/dd/yyyy")
+                DelayOutput: =true
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                DisabledFill: =RGBA(244, 244, 244, 1)
+                DisplayMode: =Parent.DisplayMode
+                FocusedBorderThickness: =4
+                Font: =App.Theme.Font
+                HoverBorderColor: =App.Theme.Colors.Darker40
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =App.Theme.Colors.Lighter70
+                MaxLength: =Parent.MaxLength
+                PaddingLeft: =5
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =13
+                Tooltip: =Parent.DisplayName
+                Width: =Parent.Width - 60
+                X: =30
+                Y: =DataCardKey170.Y + DataCardKey170.Height + 5
+                ZIndex: =2
+
+            ErrorMessage156 As label:
+                AutoHeight: =true
+                Color: =RGBA(168, 0, 0, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                Font: =App.Theme.Font
+                FontWeight: =FontWeight.Semibold
+                Height: =10
+                Live: =Live.Assertive
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Text: =Parent.Error
+                Visible: =Parent.DisplayMode=DisplayMode.Edit
+                Width: =Parent.Width - 60
+                X: =30
+                Y: =DataCardValue71.Y + DataCardValue71.Height
+                ZIndex: =3
+
+            StarVisible156 As label:
+                Align: =Align.Center
+                Color: =App.Theme.Colors.Darker30
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                Font: =App.Theme.Font
+                Height: =DataCardKey170.Height
+                Size: =13
+                Text: ="*"
+                Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                Width: =30
+                Wrap: =false
+                Y: =DataCardKey170.Y
+                ZIndex: =4
 
         Fecha_DataCard1 As typedDataCard.dateTimeEditCard:
             BorderColor: =App.Theme.Colors.Darker40
@@ -930,7 +1032,7 @@ IncumplimientoPersonal As screen:
         Icon: ="Add"
         OnSelect: |
             =If(
-                IsBlank(txtEmployeeID.Text) || IsBlank(DataCardValue12.Text) || IsBlank(DateValue1.SelectedDate) || IsBlank(Dropdown3.SelectedText.Incumplimiento_Op) || IsBlank(Dropdown4.SelectedText.Turno_Op) || IsBlank(DataCardValue41.Text)|| IsBlank(DataCardValue42.Text),
+                IsBlank(txtEmployeeID.Text) || IsBlank(DataCardValue12.Text) || IsBlank(DateValue1.SelectedDate) || IsBlank(Dropdown3.SelectedText.Incumplimiento_Op) || IsBlank(Dropdown4.SelectedText.Turno_Op) || IsBlank(DataCardValue41.Text),
                 Notify(
                     "Debe completar todos los campos del formulario",
                     NotificationType.Error
