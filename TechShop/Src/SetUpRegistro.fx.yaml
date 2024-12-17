@@ -1,6 +1,52 @@
 SetUpRegistro As screen:
     Fill: =Color.White
     LoadingSpinnerColor: =App.Theme.Colors.Primary
+    OnVisible: |
+        =UpdateContext({Info: glr_Maquinas_PM.Selected});
+        UpdateContext(
+            {
+                info: {
+                    Maquina: Info.Maquina,
+                    Orden: LookUp(
+                        Orden_MaquinasLists_1,
+                        Maquina = Info.Maquina,
+                        Orden
+                    ),
+                    Operacion: LookUp(
+                        Orden_MaquinasLists_1,
+                        Maquina = Info.Maquina,
+                        Operacion
+                    ),
+                    Maquinado: LookUp(
+                        CorPJobOper,
+                        job = LookUp(
+                            Orden_MaquinasLists_1,
+                            Maquina = Info.Maquina,
+                            Orden
+                        ) && oper_numFrom = Value(LookUp(
+                        Orden_MaquinasLists_1,
+                        Maquina = Info.Maquina,
+                        Operacion
+                    )),
+                        TMaquinado
+                    ),
+                    Descripcion: LookUp(
+                        CorPJobOper,
+                        job = LookUp(
+                            Orden_MaquinasLists_1,
+                            Maquina = Info.Maquina,
+                            Orden
+                        )&& oper_numFrom = Value(LookUp(
+                        Orden_MaquinasLists_1,
+                        Maquina = Info.Maquina,
+                        Operacion
+                    )),
+                        description
+                    )
+                }
+            }
+        );
+        Reset(gl_Herramientas_sh_1)
 
     ScreenContainer6_3 As groupContainer.verticalAutoLayoutContainer:
         DropShadow: =DropShadow.Light
@@ -1548,7 +1594,7 @@ SetUpRegistro As screen:
                             Height: =40
                             Icon: ="ArrowClockwise"
                             IconStyle: ='ButtonCanvas.IconStyle'.Filled
-                            OnSelect: =Refresh(SetUp_Registros_1)
+                            OnSelect: =Refresh(SetUp_Registros)
                             Text: =
                             Width: =60
                             X: =378
