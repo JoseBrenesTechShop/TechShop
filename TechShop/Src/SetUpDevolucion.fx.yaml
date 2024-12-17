@@ -301,7 +301,7 @@ SetUpDevolucion As screen:
                             Height: =512
                             Items: |-
                                 =Filter(
-                                    SetUp_Registros_1,
+                                    SetUp_Registros,
                                     Maquina = Info.Maquina && Orden = Info.Orden && OperacionNum = Value(Info.Operacion)
                                 )
                             Layout: =Layout.Vertical
@@ -491,7 +491,7 @@ SetUpDevolucion As screen:
                         Color: =RGBA(0, 0, 0, 1)
                         Default: |-
                             =LookUp(
-                                Estado_SetUps_1,
+                                Estado_SetUps,
                                 Orden = Info.Orden && OperacionNum = Value(Info.Operacion) && Maquina = Info.Maquina,
                                 UbicacionSetUp
                             )
@@ -524,13 +524,22 @@ SetUpDevolucion As screen:
                             =If(
                                 !IsBlank(
                                     LookUp(
-                                        Estado_SetUps_1,
+                                        Estado_SetUps,
                                         Maquina = Info.Maquina && 
                                         Orden = Info.Orden && 
                                         OperacionNum = Value(Info.Operacion) && 
                                         EstadoSetUp = "Incompleto"
                                     )
                                 ) ||
+                                 !IsBlank(
+                                    LookUp(
+                                        Estado_SetUps,
+                                        Maquina = Info.Maquina && 
+                                        Orden = Info.Orden && 
+                                        OperacionNum = Value(Info.Operacion) && 
+                                        EstadoSetUp = "Recibido"
+                                    )
+                                )||
                                 CountRows(
                                     Filter(
                                         Gallery1_2.AllItems,
@@ -549,16 +558,16 @@ SetUpDevolucion As screen:
                             =If(
                                 !IsBlank(
                                     LookUp(
-                                        Estado_SetUps_1,
+                                        Estado_SetUps,
                                         Maquina = Info.Maquina && 
                                         Orden = Info.Orden && 
                                         OperacionNum = Value(Info.Operacion)
                                     )
                                 ),
                                 Patch(
-                                    Estado_SetUps_1,
+                                    Estado_SetUps,
                                     LookUp(
-                                        Estado_SetUps_1,
+                                        Estado_SetUps,
                                        Maquina = Info.Maquina && 
                                         Orden = Info.Orden && 
                                         OperacionNum = Value(Info.Operacion)
@@ -570,7 +579,7 @@ SetUpDevolucion As screen:
                                  ClearCollect(
                                     MaterialesU,
                                     Filter(
-                                        SetUp_Registros_1,
+                                        SetUp_Registros,
                                         Orden = Info.Orden && OperacionNum = Value(Info.Operacion) && Maquina = Info.Maquina && Estado_SetUp in [
                                             "Incompleto",
                                             "Completo"
@@ -580,7 +589,7 @@ SetUpDevolucion As screen:
                                   ForAll(
                                    MaterialesU,
                                     Patch(
-                                        SetUp_Registros_1,
+                                        SetUp_Registros,
                                         ThisRecord, 
                                         {
                                             Estado_SetUp: "Recibido"  
