@@ -448,40 +448,40 @@ OrdenMaquinas As screen:
                                     info: Self.Selected,
                                     info2: {
                                         Orden: LookUp(
-                                            Orden_Maquinas_1,
+                                            Orden_Maquinas,
                                             Orden = Self.SelectedText.Orden && Operacion = Self.SelectedText.Operacion
                                         ).Orden,
                                         Operacion: LookUp(
-                                            Orden_Maquinas_1,
+                                            Orden_Maquinas,
                                             Orden = Self.SelectedText.Orden && Operacion = Self.SelectedText.Operacion
                                         ).Operacion,
                                         Prioridad: LookUp(
-                                            Orden_Maquinas_1,
+                                            Orden_Maquinas,
                                             Orden = Self.SelectedText.Orden && Operacion = Self.SelectedText.Operacion
                                         ).Prioridad,
                                         Zona: LookUp(
-                                            Orden_Maquinas_1,
+                                            Orden_Maquinas,
                                             Orden = Self.SelectedText.Orden && Operacion = Self.SelectedText.Operacion
                                         ).Zona,
                                         Meta: LookUp(
-                                            Orden_Maquinas_1,
+                                            Orden_Maquinas,
                                             Orden = Self.SelectedText.Orden && Operacion = Self.SelectedText.Operacion
                                         ).Meta,
                                         Jornada: LookUp(
-                                            Orden_Maquinas_1,
+                                            Orden_Maquinas,
                                             Orden = Self.SelectedText.Orden && Operacion = Self.SelectedText.Operacion
                                         ).Jornada,
                                         User: LookUp(
-                                            Orden_Maquinas_1,
+                                            Orden_Maquinas,
                                             Orden = Self.SelectedText.Orden && Operacion = Self.SelectedText.Operacion
                                         ).User,
                                         Fecha: LookUp(
-                                            Orden_Maquinas_1,
+                                            Orden_Maquinas,
                                             Orden = Self.SelectedText.Orden && Operacion = Self.SelectedText.Operacion
                                         ).'Fecha de modificación'
                                     },
                                     MaquinasOrigin: Filter(
-                                        Orden_MaquinasLists,
+                                        Orden_MaquinasLists_1,
                                         Orden = Self.SelectedText.Orden && Operacion = Self.SelectedText.Operacion
                                     )
                                 }
@@ -569,10 +569,10 @@ OrdenMaquinas As screen:
                                     BorderColor: =
                                     BorderStyle: =BorderStyle.None
                                     CheckboxBackgroundFill: =RGBA(0, 0, 0, 0)
-                                    CheckboxBorderColor: =If(!(ThisItem in MaquinasList), RGBA(71, 158, 245, 1), RGBA(52, 152, 47, 1))
+                                    CheckboxBorderColor: =If(IsBlank(LookUp(MaquinasList, Maquina = ThisItem.Maquina)), RGBA(71, 158, 245, 1), RGBA(52, 152, 47, 1))
                                     CheckmarkFill: =RGBA(52, 152, 47, 1)
                                     Color: =RGBA(0, 0, 0, 1)
-                                    Default: =ThisItem in MaquinasList
+                                    Default: =!IsBlank(LookUp(MaquinasList, Maquina = ThisItem.Maquina))
                                     DisabledBorderColor: =RGBA(0, 0, 0, 0)
                                     Height: =40
                                     HoverBorderColor: =RGBA(54, 176, 75, 1)
@@ -580,7 +580,7 @@ OrdenMaquinas As screen:
                                     HoverFill: =RGBA(0, 0, 0, 0)
                                     OnCheck: =Collect(MaquinasList, ThisItem)
                                     OnSelect: =
-                                    OnUncheck: =Remove(MaquinasList, ThisItem)
+                                    OnUncheck: =Remove(MaquinasList, LookUp(MaquinasList, Maquina = ThisItem.Maquina))
                                     PaddingLeft: =40
                                     PressedBorderColor: =
                                     PressedColor: =RGBA(52, 152, 47, 1)
@@ -724,7 +724,7 @@ OrdenMaquinas As screen:
                                     BorderColor: =RGBA(0, 18, 107, 1)
                                     DelayItemLoading: =true
                                     Height: =(glr_HistorialMaquina_OM.TemplateHeight * CountRows(glr_HistorialMaquina_OM.AllItems))
-                                    Items: =Sort(Filter(Orden_MaquinasLists, ThisItem.Maquina = Maquina), Prioridad, SortOrder.Ascending)
+                                    Items: =Sort(Filter(Orden_MaquinasLists_1, ThisItem.Maquina = Maquina), Prioridad, SortOrder.Ascending)
                                     Layout: =Layout.Vertical
                                     LoadingSpinner: =LoadingSpinner.Data
                                     TemplatePadding: =0
@@ -959,7 +959,7 @@ OrdenMaquinas As screen:
                                                         Not(
                                                             IsBlank(
                                                                 LookUp(
-                                                                    Orden_MaquinasLists,
+                                                                    Orden_MaquinasLists_1,
                                                                     Maquina = thisMaquina && Prioridad = Value(drp_Pri_OM.SelectedText.Value) && Orden <> info.Orden && Operacion <> info.Operacion
                                                                 )
                                                             )
@@ -1228,7 +1228,7 @@ OrdenMaquinas As screen:
                         Y: =42
                         ZIndex: =65
 
-                    "dp_Fecha_OM As 'Selector de fecha'":
+                    "dp_Fecha_OM As 'Date picker'":
                         BorderRadius: =15
                         DisplayMode: =DisplayMode.Edit
                         Fill: =RGBA(255, 255, 255, 1)
@@ -1483,7 +1483,7 @@ OrdenMaquinas As screen:
                         Y: =488
                         ZIndex: =77
 
-                    ButtonCanvas1 As Botón:
+                    ButtonCanvas1 As Button:
                         DisplayMode: =If(Guardar || Aviso, DisplayMode.View, DisplayMode.Edit)
                         FontSize: =20
                         Height: =42
@@ -1559,12 +1559,12 @@ OrdenMaquinas As screen:
                 =If(
                     IsBlank(
                         LookUp(
-                            Orden_Maquinas_1,
+                            Orden_Maquinas,
                             Orden = info.Orden && Operacion = info.Operacion
                         )
                     ),
                     Collect(
-                        Orden_Maquinas_1,
+                        Orden_Maquinas,
                         {
                             Orden: info.Orden,
                             Operacion: info.Operacion,
@@ -1587,9 +1587,9 @@ OrdenMaquinas As screen:
                         }
                     ),
                     Patch(
-                        Orden_Maquinas_1,
+                        Orden_Maquinas,
                         LookUp(
-                            Orden_Maquinas_1,
+                            Orden_Maquinas,
                             Orden = info.Orden && Operacion = info.Operacion
                         ),
                         {
@@ -1617,7 +1617,7 @@ OrdenMaquinas As screen:
                 ForAll(
                     MaquinasOrigin,
                     Remove(
-                        Orden_MaquinasLists,
+                        Orden_MaquinasLists_1,
                         ThisRecord
                     )
                 );
@@ -1628,12 +1628,12 @@ OrdenMaquinas As screen:
                         If(
                             IsBlank(
                                 LookUp(
-                                    Orden_MaquinasLists,
+                                    Orden_MaquinasLists_1,
                                     Maquina = thisMaquina && Prioridad = Value(drp_Pri_OM.SelectedText.Value)
                                 )
                             ),
                             Collect(
-                                Orden_MaquinasLists,
+                                Orden_MaquinasLists_1,
                                 {
                                     Maquina: thisMaquina,
                                     Orden: info.Orden,
@@ -1642,9 +1642,9 @@ OrdenMaquinas As screen:
                                 }
                             ),
                             Patch(
-                                Orden_MaquinasLists,
+                                Orden_MaquinasLists_1,
                                 LookUp(
-                                    Orden_MaquinasLists,
+                                    Orden_MaquinasLists_1,
                                     Maquina = thisMaquina && Prioridad = Value(drp_Pri_OM.SelectedText.Value)
                                 ),
                                 {
