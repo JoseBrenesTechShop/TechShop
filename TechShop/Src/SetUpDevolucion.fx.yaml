@@ -301,7 +301,7 @@ SetUpDevolucion As screen:
                             Height: =512
                             Items: |-
                                 =Filter(
-                                    SetUp_Registros,
+                                    SetUp_Registros_1,
                                     Maquina = Info.Maquina && Orden = Info.Orden && OperacionNum = Value(Info.Operacion)
                                 )
                             Layout: =Layout.Vertical
@@ -331,7 +331,7 @@ SetUpDevolucion As screen:
                                 Mode: =TextMode.MultiLine
                                 OnSelect: =Select(Parent)
                                 Size: =13
-                                Strikethrough: =ThisItem in CheckListMant
+                                Strikethrough: =ThisItem in CheckListSetUp
                                 Width: =872
                                 X: =5
                                 Y: =8
@@ -342,15 +342,15 @@ SetUpDevolucion As screen:
                                 CheckboxBorderColor: =If(Self.Value, RGBA(52, 152, 47, 1), App.Theme.Colors.Primary)
                                 CheckmarkFill: =RGBA(52, 152, 47, 1)
                                 Color: =RGBA(0, 0, 0, 1)
-                                Default: =ThisItem in CheckListMant
+                                Default: =ThisItem in CheckListSetUp
                                 DisabledBorderColor: =RGBA(0, 0, 0, 0)
                                 DisabledColor: =RGBA(0, 0, 0, 0)
                                 Font: =App.Theme.Font
                                 Height: =42
                                 HoverColor: =App.Theme.Colors.Darker30
-                                OnCheck: =Collect(CheckListMant, ThisItem)
+                                OnCheck: =Collect(CheckListSetUp, ThisItem)
                                 OnSelect: =Select(Parent)
-                                OnUncheck: =Remove(CheckListMant, ThisItem)
+                                OnUncheck: =Remove(CheckListSetUp, ThisItem)
                                 PressedBorderColor: =
                                 PressedFill: =
                                 Size: =13
@@ -491,7 +491,7 @@ SetUpDevolucion As screen:
                         Color: =RGBA(0, 0, 0, 1)
                         Default: |-
                             =LookUp(
-                                Estado_SetUps,
+                                Estado_SetUps_1,
                                 Orden = Info.Orden && OperacionNum = Value(Info.Operacion) && Maquina = Info.Maquina,
                                 UbicacionSetUp
                             )
@@ -524,29 +524,22 @@ SetUpDevolucion As screen:
                             =If(
                                 !IsBlank(
                                     LookUp(
-                                        Estado_SetUps,
-                                        Maquina = Info.Maquina && 
-                                        Orden = Info.Orden && 
-                                        OperacionNum = Value(Info.Operacion) && 
-                                        EstadoSetUp = "Incompleto"
+                                        Estado_SetUps_1,
+                                        Maquina = Info.Maquina && Orden = Info.Orden && OperacionNum = Value(Info.Operacion) && EstadoSetUp = "Incompleto"
                                     )
-                                ) ||
-                                 !IsBlank(
+                                ) || !IsBlank(
                                     LookUp(
-                                        Estado_SetUps,
-                                        Maquina = Info.Maquina && 
-                                        Orden = Info.Orden && 
-                                        OperacionNum = Value(Info.Operacion) && 
-                                        EstadoSetUp = "Recibido"
+                                        Estado_SetUps_1,
+                                        Maquina = Info.Maquina && Orden = Info.Orden && OperacionNum = Value(Info.Operacion) && EstadoSetUp = "Recibido"
                                     )
-                                )||
-                                CountRows(
-                                    Filter(
-                                        Gallery1_2.AllItems,
-                                        Checkbox1_1.Value = false 
-                                    )
-                                ) > 0,
-                                DisplayMode.Disabled, 
+                                ) || CountIf(
+                                    CheckListSetUp,
+                                    true
+                                ) <> CountIf(
+                                    Gallery1_2.AllItems,
+                                    true
+                                ),
+                                DisplayMode.Disabled,
                                 DisplayMode.Edit
                             )
                         Fill: =RGBA(72, 163, 62, 1)
@@ -558,16 +551,16 @@ SetUpDevolucion As screen:
                             =If(
                                 !IsBlank(
                                     LookUp(
-                                        Estado_SetUps,
+                                        Estado_SetUps_1,
                                         Maquina = Info.Maquina && 
                                         Orden = Info.Orden && 
                                         OperacionNum = Value(Info.Operacion)
                                     )
                                 ),
                                 Patch(
-                                    Estado_SetUps,
+                                    Estado_SetUps_1,
                                     LookUp(
-                                        Estado_SetUps,
+                                        Estado_SetUps_1,
                                        Maquina = Info.Maquina && 
                                         Orden = Info.Orden && 
                                         OperacionNum = Value(Info.Operacion)
@@ -579,7 +572,7 @@ SetUpDevolucion As screen:
                                  ClearCollect(
                                     MaterialesU,
                                     Filter(
-                                        SetUp_Registros,
+                                        SetUp_Registros_1,
                                         Orden = Info.Orden && OperacionNum = Value(Info.Operacion) && Maquina = Info.Maquina && Estado_SetUp in [
                                             "Incompleto",
                                             "Completo"
@@ -589,7 +582,7 @@ SetUpDevolucion As screen:
                                   ForAll(
                                    MaterialesU,
                                     Patch(
-                                        SetUp_Registros,
+                                        SetUp_Registros_1,
                                         ThisRecord, 
                                         {
                                             Estado_SetUp: "Recibido"  
