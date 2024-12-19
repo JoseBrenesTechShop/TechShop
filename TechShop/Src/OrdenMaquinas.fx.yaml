@@ -578,7 +578,9 @@ OrdenMaquinas As screen:
                                     HoverBorderColor: =RGBA(54, 176, 75, 1)
                                     HoverColor: =RGBA(52, 152, 47, 1)
                                     HoverFill: =RGBA(0, 0, 0, 0)
-                                    OnCheck: =Collect(MaquinasList, ThisItem)
+                                    OnCheck: |-
+                                        =If(ThisItem.Maquina in ["SIERRABHERINGER1",
+                                                    "SIERRABHERINGER2"] && info.Operacion <> "10", UpdateContext({Aviso: true, TextoAdvertencia: ThisItem.Maquina & " solo se puede seleccionar en operacion 10"}); Reset(Self), Collect(MaquinasList, ThisItem))
                                     OnSelect: =
                                     OnUncheck: =Remove(MaquinasList, LookUp(MaquinasList, Maquina = ThisItem.Maquina))
                                     PaddingLeft: =40
@@ -938,7 +940,10 @@ OrdenMaquinas As screen:
                                         TextoAdvertencia: "Debe seleccionar la fecha de inico"
                                     }
                                 ),
-                                CountIf(MaquinasList, true) = 0,
+                                CountIf(
+                                    MaquinasList,
+                                    true
+                                ) = 0,
                                 UpdateContext(
                                     {
                                         Aviso: true,
@@ -963,6 +968,11 @@ OrdenMaquinas As screen:
                                                                     Maquina = thisMaquina && Prioridad = Value(drp_Pri_OM.SelectedText.Value) && Orden <> info.Orden && Operacion <> info.Operacion
                                                                 )
                                                             )
+                                                        ) && Not(
+                                                            thisMaquina in [
+                                                                "SIERRABHERINGER1",
+                                                                "SIERRABHERINGER2"
+                                                            ]
                                                         ),
                                                         item.Maquina & ", ",
                                                         ""
@@ -970,11 +980,11 @@ OrdenMaquinas As screen:
                                                 )
                                             ),
                                             ThisRecord.Value
-                                        ), 
+                                        ),
                                         Guardar: true
                                     }
                                 );
-                            
+                                
                             )
                         PressedBorderColor: =App.Theme.Colors.Darker40
                         PressedColor: =Self.Color
@@ -1192,7 +1202,6 @@ OrdenMaquinas As screen:
                             Items: =MaquinasList
                             Layout: =Layout.Vertical
                             LoadingSpinner: =LoadingSpinner.Data
-                            TemplatePadding: =10
                             TemplateSize: =41
                             Width: =300
                             Y: =29
@@ -1214,7 +1223,8 @@ OrdenMaquinas As screen:
                                 OnSelect: =Select(Parent)
                                 Size: =13
                                 Width: =270
-                                X: =5
+                                X: =10
+                                Y: =1
                                 ZIndex: =1
 
                     Label2_134 As label:
@@ -1633,14 +1643,29 @@ OrdenMaquinas As screen:
                                     Orden_MaquinasLists_1,
                                     Maquina = thisMaquina && Prioridad = Value(drp_Pri_OM.SelectedText.Value)
                                 )
-                            ),
+                            ) || thisMaquina in [
+                                "SIERRABHERINGER1",
+                                "SIERRABHERINGER2"
+                            ],
                             Collect(
                                 Orden_MaquinasLists_1,
                                 {
                                     Maquina: thisMaquina,
                                     Orden: info.Orden,
                                     Operacion: info.Operacion,
-                                    Prioridad: Value(drp_Pri_OM.SelectedText.Value)
+                                    Prioridad: Value(drp_Pri_OM.SelectedText.Value),
+                                    Meta: If(
+                                        thisMaquina in [
+                                            "MORI1",
+                                            "MORI2",
+                                            "MORI12",
+                                            "MORI13",
+                                            "MORI14",
+                                            "MORI15"
+                                        ],
+                                        Value(txt_Meta_OM.Text) + (Value(txt_Meta_OM.Text) * 0.1),
+                                        Value(txt_Meta_OM.Text)
+                                    )
                                 }
                             ),
                             Patch(
@@ -1653,7 +1678,19 @@ OrdenMaquinas As screen:
                                     Maquina: thisMaquina,
                                     Orden: info.Orden,
                                     Operacion: info.Operacion,
-                                    Prioridad: Value(drp_Pri_OM.SelectedText.Value)
+                                    Prioridad: Value(drp_Pri_OM.SelectedText.Value),
+                                    Meta: If(
+                                        thisMaquina in [
+                                            "MORI1",
+                                            "MORI2",
+                                            "MORI12",
+                                            "MORI13",
+                                            "MORI14",
+                                            "MORI15"
+                                        ],
+                                        Value(txt_Meta_OM.Text) + (Value(txt_Meta_OM.Text) * 0.1),
+                                        Value(txt_Meta_OM.Text)
+                                    )
                                 }
                             )
                         )
@@ -1661,7 +1698,12 @@ OrdenMaquinas As screen:
                 );
                 Clear(MaquinasList);
                 Refresh(Maquinas);
-                UpdateContext({info: Blank(), MaquinasOrigin: Blank()});
+                UpdateContext(
+                    {
+                        info: Blank(),
+                        MaquinasOrigin: Blank()
+                    }
+                );
                 Reset(txt_BuscaMaquina_OM);
                 Reset(drp_Pri_OM);
                 Reset(glr_Ordenes_OM);

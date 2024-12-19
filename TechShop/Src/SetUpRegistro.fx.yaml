@@ -2,49 +2,21 @@ SetUpRegistro As screen:
     Fill: =Color.White
     LoadingSpinnerColor: =App.Theme.Colors.Primary
     OnVisible: |-
-        =UpdateContext({Info: glr_Maquinas_PM.Selected});
+        =UpdateContext({infoMaquina: glr_Maquinas_PM.Selected});
         UpdateContext(
             {
                 info: {
-                    Maquina: Info.Maquina,
-                    Orden: LookUp(
-                        Orden_MaquinasLists_1,
-                        Maquina = Info.Maquina,
-                        Orden
-                    ),
-                    Operacion: LookUp(
-                        Orden_MaquinasLists_1,
-                        Maquina = Info.Maquina,
-                        Operacion
-                    ),
+                    Maquina: infoMaquina.Maquina,
+                    Orden: infoMaquina.Orden,
+                    Operacion: infoMaquina.Operacion,
                     Maquinado: LookUp(
                         CorPJobOper,
-                        job = LookUp(
-                            Orden_MaquinasLists_1,
-                            Maquina = Info.Maquina,
-                            Orden
-                        ) && oper_numFrom = Value(
-                            LookUp(
-                                Orden_MaquinasLists_1,
-                                Maquina = Info.Maquina,
-                                Operacion
-                            )
-                        ),
+                        job = infoMaquina.Orden && oper_numFrom = Value(infoMaquina.Operacion),
                         TMaquinado
                     ),
                     Descripcion: LookUp(
                         CorPJobOper,
-                        job = LookUp(
-                            Orden_MaquinasLists_1,
-                            Maquina = Info.Maquina,
-                            Orden
-                        ) && oper_numFrom = Value(
-                            LookUp(
-                                Orden_MaquinasLists_1,
-                                Maquina = Info.Maquina,
-                                Operacion
-                            )
-                        ),
+                        job = infoMaquina.Orden && oper_numFrom = Value(infoMaquina.Operacion),
                         description
                     )
                 }
@@ -100,7 +72,7 @@ SetUpRegistro As screen:
                 Width: =75
                 ZIndex: =2
 
-            txtEmpleadoHorarioView_20 As text:
+            txt_User_SU As text:
                 Align: =Align.Center
                 AlignInContainer: =AlignInContainer.Center
                 BorderColor: =RGBA(204, 231, 246, 1)
@@ -192,9 +164,9 @@ SetUpRegistro As screen:
                     Clear(Materiales_SetUp);
                     Reset(drop_SeleccionSetUp_1);
                     Reset(txt_DescripcionMatSum_SH_2);
-                    Reset(gl_SetUp_Guardado_US_1);
-                    Reset(gl_Materiales_SU_1);
-                    UpdateContext({AvisoSetUp:false, TextoAvisoSetUp:"", info:Blank(), Info:Blank()})
+                    Reset(glr_SetUpGuardado_SU);
+                    Reset(glr_Materiales_SU);
+                    UpdateContext({AvisoSetUp:false, TextoAvisoSetUp:"", info:Blank(), infoMaquina: Blank()})
                 PaddingBottom: =5
                 PaddingLeft: =5
                 PaddingRight: =5
@@ -302,7 +274,7 @@ SetUpRegistro As screen:
                     BorderColor: =RGBA(0, 18, 107, 1)
                     BorderThickness: =2
                     Color: =RGBA(0, 0, 0, 1)
-                    Default: =Info.Maquina
+                    Default: =infoMaquina.Maquina
                     DisabledBorderColor: =RGBA(166, 166, 166, 1)
                     DisabledColor: =RGBA(166, 166, 166, 1)
                     DisabledFill: =RGBA(244, 244, 244, 1)
@@ -828,7 +800,7 @@ SetUpRegistro As screen:
                             Width: =422
                             ZIndex: =33
 
-                        "gl_Materiales_SU_1 As gallery.'BrowseLayout_Vertical_TwoTextVariant_ver5.0'":
+                        "glr_Materiales_SU As gallery.'BrowseLayout_Vertical_TwoTextVariant_ver5.0'":
                             BorderColor: =RGBA(0, 18, 107, 1)
                             DelayItemLoading: =true
                             Height: =410
@@ -1058,7 +1030,7 @@ SetUpRegistro As screen:
                             Width: =441
                             ZIndex: =51
 
-                        "gl_ListadoSetUp_US_1 As gallery.'BrowseLayout_Vertical_TwoTextVariant_ver5.0'":
+                        "glr_ListadoSetUp_SU As gallery.'BrowseLayout_Vertical_TwoTextVariant_ver5.0'":
                             BorderColor: =RGBA(0, 18, 107, 1)
                             DelayItemLoading: =true
                             Height: =410
@@ -1338,7 +1310,7 @@ SetUpRegistro As screen:
                             Width: =441
                             ZIndex: =51
 
-                        "gl_SetUp_Guardado_US_1 As gallery.'BrowseLayout_Vertical_TwoTextVariant_ver5.0'":
+                        "glr_SetUpGuardado_SU As gallery.'BrowseLayout_Vertical_TwoTextVariant_ver5.0'":
                             BorderColor: =RGBA(0, 18, 107, 1)
                             DelayItemLoading: =true
                             Height: =410
@@ -1636,10 +1608,11 @@ SetUpRegistro As screen:
                                 MaterialesFiltrados,
                                 Filter(
                                     SetUp_Registros_1,
-                                    Orden = info.Orden &&
-                                    OperacionNum = Value(info.Operacion) &&
-                                    Maquina = Text(info.Maquina) &&
-                                    Estado_SetUp in ["Incompleto", "Completo", "Recibido"]
+                                    Orden = info.Orden && OperacionNum = Value(info.Operacion) && Maquina = Text(info.Maquina) && Estado_SetUp in [
+                                        "Incompleto",
+                                        "Completo",
+                                        "Recibido"
+                                    ]
                                 )
                             );
                             ForAll(
@@ -1650,16 +1623,17 @@ SetUpRegistro As screen:
                                     {Estado_SetUp: "Incompleto"}
                                 )
                             );
-                             Patch(
+                            Patch(
+                                Estado_SetUps_1,
+                                LookUp(
                                     Estado_SetUps_1,
-                                    LookUp(
-                                        Estado_SetUps_1, 
-                                        Orden = info.Orden && OperacionNum = Value(info.Operacion) && Maquina = Text(info.Maquina)
-                                    ),
-                                    {
-                                        EstadoSetUp: "Incompleto"
-                                    }
-                                )
+                                    Orden = info.Orden && OperacionNum = Value(info.Operacion) && Maquina = Text(info.Maquina)
+                                ),
+                                {
+                                    EstadoSetUp: "Incompleto",
+                                    User: txt_User_SU.Text
+                                }
+                            )
                         RadiusBottomLeft: =18
                         RadiusBottomRight: =18
                         RadiusTopLeft: =18
@@ -1692,7 +1666,7 @@ SetUpRegistro As screen:
                         HoverColor: =RGBA(255, 255, 255, 1)
                         HoverFill: =RGBA(15, 108, 189, 1)
                         OnSelect: |-
-                            =If( IsEmpty(gl_SetUp_Guardado_US_1.AllItems),
+                            =If( IsEmpty(glr_SetUpGuardado_SU.AllItems),
                                 UpdateContext(
                                     {
                                         TextoAvisoSetUp:"Debe de guardar los materiales primero antes de continuar.", 
@@ -1789,7 +1763,7 @@ SetUpRegistro As screen:
             HoverFill: =RGBA(52, 152, 47, 1)
             OnSelect: |-
                 =If(
-                    IsEmpty(gl_SetUp_Guardado_US_1.AllItems),
+                    IsEmpty(glr_SetUpGuardado_SU.AllItems),
                     UpdateContext(
                         {
                             TextoAvisoSetUp:"Debe de guardar los materiales primero antes de continuar.", 
