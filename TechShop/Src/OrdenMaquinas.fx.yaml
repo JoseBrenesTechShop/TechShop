@@ -750,109 +750,27 @@ OrdenMaquinas As screen:
                                         ZIndex: =3
 
                                 btn_Guardar_EM_12 As button:
-                                    BorderColor: =App.Theme.Colors.Primary
-                                    BorderStyle: =BorderStyle.None
-                                    Color: =RGBA(166, 215, 153, 1)
+                                    BorderColor: =RGBA(166, 215, 153, 1)
                                     DisabledBorderColor: =RGBA(244, 244, 244, 1)
                                     DisabledColor: =RGBA(166, 166, 166, 1)
                                     DisabledFill: =RGBA(244, 244, 244, 1)
-                                    DisplayMode: =If(Guardar || Aviso, DisplayMode.Disabled, DisplayMode.Edit)
-                                    Fill: =RGBA(0, 0, 0, 0)
+                                    DisplayMode: =If(Guardar || Aviso || !IsBlank(LookUp(MaquinasList, Maquina = ThisItem.Maquina)), DisplayMode.Disabled, DisplayMode.Edit)
+                                    Fill: =RGBA(166, 215, 153, 1)
                                     Font: =App.Theme.Font
                                     FontWeight: =FontWeight.Semibold
                                     Height: =20
-                                    HoverBorderColor: =App.Theme.Colors.Darker10
+                                    HoverBorderColor: =RGBA(45, 128, 40, 1)
                                     HoverColor: =RGBA(255, 255, 255, 1)
-                                    HoverFill: =RGBA(102, 182, 227, 1)
+                                    HoverFill: =RGBA(45, 128, 40, 1)
                                     OnSelect: |-
-                                        =If(
-                                            IsBlank(glr_Ordenes_OM.Selected),
-                                            UpdateContext(
-                                                {
-                                                    Aviso: true,
-                                                    TextoAdvertencia: "Debe selecionar una Orden"
-                                                }
-                                            ),
-                                            IsBlank(drp_Op_OM.SelectedText.Value),
-                                            UpdateContext(
-                                                {
-                                                    Aviso: true,
-                                                    TextoAdvertencia: "Debe selecionar la Operacion"
-                                                }
-                                            ),
-                                            IsBlank(txt_Meta_OM.Text) || txt_Meta_OM.Text = "0",
-                                            UpdateContext(
-                                                {
-                                                    Aviso: true,
-                                                    TextoAdvertencia: "La meta debe ser mayor a 0"
-                                                }
-                                            ),
-                                            IsBlank(drp_Pri_OM.SelectedText.Value),
-                                            UpdateContext(
-                                                {
-                                                    Aviso: true,
-                                                    TextoAdvertencia: "Debe seleccionar la prioridad de la Orden"
-                                                }
-                                            ),
-                                            drp_Pri_OM.SelectedText.Value = "1" && IsBlank(dp_Fecha_OM.SelectedDate),
-                                            UpdateContext(
-                                                {
-                                                    Aviso: true,
-                                                    TextoAdvertencia: "Debe seleccionar la fecha de inico"
-                                                }
-                                            ),
-                                            CountIf(
-                                                MaquinasList,
-                                                true
-                                            ) = 0,
-                                            UpdateContext(
-                                                {
-                                                    Aviso: true,
-                                                    TextoAdvertencia: "Debe seleccionar al menos una maquina"
-                                                }
-                                            ),
-                                            UpdateContext(
-                                                {
-                                                    StringMaquinas: Concat(
-                                                        ForAll(
-                                                            MaquinasList,
-                                                            With(
-                                                                {
-                                                                    item: ThisRecord,
-                                                                    thisMaquina: ThisRecord.Maquina
-                                                                },
-                                                                If(
-                                                                    Not(
-                                                                        IsBlank(
-                                                                            LookUp(
-                                                                                Orden_MaquinasLists_1,
-                                                                                Maquina = thisMaquina && Prioridad = Value(drp_Pri_OM.SelectedText.Value) && Orden <> info.Orden && Operacion <> info.Operacion
-                                                                            )
-                                                                        )
-                                                                    ) && Not(
-                                                                        thisMaquina in [
-                                                                            "SIERRABHERINGER1",
-                                                                            "SIERRABHERINGER2"
-                                                                        ]
-                                                                    ),
-                                                                    item.Maquina & ", ",
-                                                                    ""
-                                                                )
-                                                            )
-                                                        ),
-                                                        ThisRecord.Value
-                                                    ),
-                                                    Guardar: true
-                                                }
-                                            );
-                                            
-                                        )
+                                        =If(ThisItem.Maquina in ["SIERRABHERINGER1",
+                                                    "SIERRABHERINGER2"] && info.Operacion <> "10", UpdateContext({Aviso: true, TextoAdvertencia: ThisItem.Maquina & " solo se puede seleccionar en operacion 10"}), Collect(MaquinasList, ThisItem))
                                     PaddingBottom: =2
                                     PaddingLeft: =0
                                     PaddingRight: =0
                                     PaddingTop: =0
                                     PressedBorderColor: =RGBA(45, 128, 40, 1)
-                                    PressedColor: =Self.Color
+                                    PressedColor: =RGBA(45, 128, 40, 1)
                                     PressedFill: =RGBA(255, 255, 255, 1)
                                     RadiusBottomLeft: =5
                                     RadiusBottomRight: =5
@@ -861,6 +779,7 @@ OrdenMaquinas As screen:
                                     Size: =10
                                     Text: ="Add"
                                     Tooltip: =
+                                    Visible: =!IsBlank(drp_Op_OM.SelectedText.Value)
                                     Width: =60
                                     X: =210
                                     Y: =10
