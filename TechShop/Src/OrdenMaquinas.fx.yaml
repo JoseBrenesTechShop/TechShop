@@ -441,7 +441,7 @@ OrdenMaquinas As screen:
                         HoverBorderColor: =RGBA(214, 221, 224, 1)
                         HoverColor: =RGBA(0, 0, 0, 1)
                         HoverFill: =RGBA(214, 221, 224, 1)
-                        Items: =Sort(Filter(Orden_Ejecucion, Orden = txt_Orden_OM.Text, Estado_Orden = "Ejecucion"), Operacion, SortOrder.Ascending)
+                        Items: =Sort(Filter(Orden_Ejecucion, Orden = txt_Orden_OM.Text, Estado_Orden = "Ejecucion"), Value(Operacion), SortOrder.Ascending)
                         OnChange: |-
                             =UpdateContext(
                                 {
@@ -478,7 +478,11 @@ OrdenMaquinas As screen:
                                         Fecha: LookUp(
                                             Orden_Maquinas,
                                             Orden = Self.SelectedText.Orden && Operacion = Self.SelectedText.Operacion
-                                        ).'Fecha de modificación'
+                                        ).'Fecha de modificación', 
+                                        FechaInicio: LookUp(
+                                            Orden_Maquinas,
+                                            Orden = Self.SelectedText.Orden && Operacion = Self.SelectedText.Operacion
+                                        ).Fecha_Inicio
                                     },
                                     MaquinasOrigin: Filter(
                                         Orden_MaquinasLists_1,
@@ -869,7 +873,15 @@ OrdenMaquinas As screen:
                         DisabledBorderColor: =RGBA(166, 166, 166, 1)
                         DisabledColor: =RGBA(166, 166, 166, 1)
                         DisabledFill: =RGBA(244, 244, 244, 1)
-                        DisplayMode: =If(Guardar || Aviso, DisplayMode.Disabled, DisplayMode.Edit)
+                        DisplayMode: |-
+                            =If(
+                                (VarName in [
+                                    "2328",
+                                    "2388"
+                                ] || LookUp(Empleados, Codigo = VarName).Rol = "ADMIN") && !(Aviso || Disable),
+                                DisplayMode.Edit,
+                                DisplayMode.View
+                            )
                         FocusedBorderThickness: =4
                         Format: =TextFormat.Number
                         HintText: ="Meta"
@@ -1252,6 +1264,7 @@ OrdenMaquinas As screen:
                         PaddingRight: =5
                         PaddingTop: =5
                         Placeholder: ="Fecha Inicio"
+                        SelectedDate: =info2.FechaInicio
                         StartDate: =Today()
                         Visible: =drp_Pri_OM.SelectedText.Value = "1"
                         Width: =140
@@ -1337,7 +1350,7 @@ OrdenMaquinas As screen:
                             =If(
                                 Value(txt_Meta_OM.Text) > 0,
                                 RoundUp(
-                                    (info.Cantidad / (txt_Meta_OM.Text * drp_Zona_OM.Selected.value)) / If(
+                                    ((info.Cantidad / (txt_Meta_OM.Text * drp_Zona_OM.Selected.value)) + info.TiempoSetup) / If(
                                         CountIf(MaquinasList, true) = 0,
                                         1,
                                         CountIf(MaquinasList, true)

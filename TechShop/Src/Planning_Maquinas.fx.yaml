@@ -502,7 +502,7 @@ Planning_Maquinas As screen:
                         =If(
                             Value(txt_Meta_PM.Text) > 0,
                             RoundUp(
-                                (LookUp(
+                                ((LookUp(
                                     Orden_Ejecucion,
                                     Orden = OrdenPlanning.Orden && Operacion = OrdenPlanning.Operacion
                                 ).Cantidad / (txt_Meta_PM.Text * If(
@@ -511,7 +511,10 @@ Planning_Maquinas As screen:
                                     txt_Zona_PM.Text = "TSI",
                                     0.65,
                                     0.85
-                                ))) / If(
+                                ))) + LookUp(
+                                    Orden_Ejecucion,
+                                    Orden = OrdenPlanning.Orden && Operacion = OrdenPlanning.Operacion
+                                ).TiempoSetup) / If(
                                     CountRows(
                                         Filter(
                                             Orden_MaquinasLists_1,
@@ -834,13 +837,22 @@ Planning_Maquinas As screen:
                             =If(
                                 Value(OrdenPlanning.Meta) > 0,
                                 RoundUp(
-                                    ((LookUp(Orden_Ejecucion, Orden = OrdenPlanning.Orden && Operacion = OrdenPlanning.Operacion).Cantidad - (LookUp(Orden_Ejecucion, Orden = OrdenPlanning.Orden && Operacion = OrdenPlanning.Operacion).CantidadTotalProducida - txt_CantDañada_PO.Text)) / (OrdenPlanning.Meta * If(
+                                    (((LookUp(
+                                        Orden_Ejecucion,
+                                        Orden = OrdenPlanning.Orden && Operacion = OrdenPlanning.Operacion
+                                    ).Cantidad - (LookUp(
+                                        Orden_Ejecucion,
+                                        Orden = OrdenPlanning.Orden && Operacion = OrdenPlanning.Operacion
+                                    ).CantidadTotalProducida - txt_CantDañada_PO.Text)) / (OrdenPlanning.Meta * If(
                                         txt_Zona_PO.Text = "GH",
                                         0.85,
                                         txt_Zona_PO.Text = "TSI",
                                         0.65,
                                         0.85
-                                    ))) / If(
+                                    ))) + LookUp(
+                                        Orden_Ejecucion,
+                                        Orden = OrdenPlanning.Orden && Operacion = OrdenPlanning.Operacion
+                                    ).TiempoSetup) / If(
                                         CountRows(
                                             Filter(
                                                 Orden_MaquinasLists_1,
@@ -1150,7 +1162,7 @@ Planning_Maquinas As screen:
                         BorderColor: =RGBA(0, 18, 107, 1)
                         DelayItemLoading: =true
                         DisplayMode: =If(Limpieza || Aviso, DisplayMode.Disabled, DisplayMode.Edit)
-                        Height: =589
+                        Height: =600
                         Items: =Sort(Filter(Orden_MaquinasLists_1, Orden = OrdenPlanning.Orden, Operacion = OrdenPlanning.Operacion), Maquina, SortOrder.Ascending)
                         Layout: =Layout.Vertical
                         LoadingSpinner: =LoadingSpinner.Data
@@ -1770,9 +1782,9 @@ Planning_Maquinas As screen:
                                 Font: =App.Theme.Font
                                 Format: =TextFormat.Number
                                 Height: =25
-                                HoverBorderColor: =App.Theme.Colors.Darker40
+                                HoverBorderColor: =RGBA(40, 134, 222, 1)
                                 HoverColor: =RGBA(0, 0, 0, 1)
-                                HoverFill: =App.Theme.Colors.Lighter70
+                                HoverFill: =RGBA(40, 134, 222, 0.3)
                                 PaddingBottom: =2
                                 PaddingLeft: =2
                                 PaddingRight: =2
