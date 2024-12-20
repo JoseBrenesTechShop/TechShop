@@ -141,11 +141,15 @@ OrdenMaquinas As screen:
                     =Navigate(MenuPlanning);
                     Clear(MaquinasList);
                     Refresh(Maquinas);
-                    UpdateContext({info: Blank(),info2: Blank(), MaquinasOrigin: Blank(), Aviso: false, TextoAdvertencia:"", Guardar: false, StringMaquinas: ""});
+                    UpdateContext({info: Blank(),info2: Blank(), MaquinasOrigin: Blank(), Aviso: false, TextoAdvertencia:"", Guardar: false, StringMaquinas: "", Eliminar: false, edit: false});
                     Reset(txt_BuscaMaquina_OM);
                     Reset(drp_Pri_OM);
                     Reset(txt_BuscaOrdenes_OM);
                     Reset(glr_Ordenes_OM);
+                    Reset(txt_Jornada_OM);
+                    Reset(txt_Zona_OM);
+                    Reset(txt_Valor_OM);
+                    Reset(txt_Efi_OM);
                 PaddingBottom: =5
                 PaddingLeft: =5
                 PaddingRight: =5
@@ -216,7 +220,7 @@ OrdenMaquinas As screen:
                     DisabledBorderColor: =RGBA(166, 166, 166, 1)
                     DisabledColor: =RGBA(166, 166, 166, 1)
                     DisabledFill: =RGBA(244, 244, 244, 1)
-                    DisplayMode: =If(Guardar || Aviso, DisplayMode.Disabled, DisplayMode.Edit)
+                    DisplayMode: =If(Guardar || Aviso || edit, DisplayMode.Disabled, DisplayMode.Edit)
                     FocusedBorderThickness: =4
                     Font: =App.Theme.Font
                     HintText: ="Buscar Orden"
@@ -235,7 +239,7 @@ OrdenMaquinas As screen:
                     BorderColor: =App.Theme.Colors.Darker40
                     Default: ={}
                     DelayItemLoading: =true
-                    DisplayMode: =If(Guardar || Aviso, DisplayMode.Disabled, DisplayMode.Edit)
+                    DisplayMode: =If(Guardar || Aviso || edit, DisplayMode.Disabled, DisplayMode.Edit)
                     Fill: =RGBA(204, 231, 246, 0.7)
                     Height: =560
                     Items: |-
@@ -528,7 +532,7 @@ OrdenMaquinas As screen:
                         "glr_Maquinas_OM As gallery.'BrowseLayout_Flexible_NewsFeed_ver5.0'":
                             BorderColor: =RGBA(0, 18, 107, 1)
                             DelayItemLoading: =true
-                            DisplayMode: =If(Guardar || Aviso, DisplayMode.Disabled, DisplayMode.Edit)
+                            DisplayMode: =If(Guardar || Aviso || edit, DisplayMode.Disabled, DisplayMode.Edit)
                             Height: =499
                             Items: =Sort(Filter(Maquinas, IsBlank(txt_BuscaMaquina_OM.Text) || txt_BuscaMaquina_OM.Text in Maquina), Maquina, SortOrder.Ascending)
                             Layout: =Layout.Vertical
@@ -817,7 +821,7 @@ OrdenMaquinas As screen:
                             DisabledBorderColor: =RGBA(166, 166, 166, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             DisabledFill: =RGBA(244, 244, 244, 1)
-                            DisplayMode: =If(Guardar || Aviso, DisplayMode.Disabled, DisplayMode.Edit)
+                            DisplayMode: =If(Guardar || Aviso || edit, DisplayMode.Disabled, DisplayMode.Edit)
                             FocusedBorderThickness: =4
                             Height: =30
                             HintText: ="Buscar Maquina"
@@ -839,7 +843,7 @@ OrdenMaquinas As screen:
                             Color: =RGBA(255, 255, 255, 1)
                             DisabledBorderColor: =RGBA(166, 166, 166, 1)
                             DisabledColor: =RGBA(244, 244, 244, 1)
-                            DisplayMode: =If(Guardar || Aviso, DisplayMode.Disabled, DisplayMode.Edit)
+                            DisplayMode: =If(Guardar || Aviso || edit, DisplayMode.Disabled, DisplayMode.Edit)
                             FocusedBorderThickness: =20
                             Height: =29
                             HoverBorderColor: =
@@ -915,7 +919,7 @@ OrdenMaquinas As screen:
                         DisabledBorderColor: =RGBA(244, 244, 244, 1)
                         DisabledColor: =RGBA(166, 166, 166, 1)
                         DisabledFill: =RGBA(244, 244, 244, 1)
-                        DisplayMode: =If(Guardar || Aviso, DisplayMode.Disabled, DisplayMode.Edit)
+                        DisplayMode: =If(Guardar || Aviso || edit, DisplayMode.Disabled, DisplayMode.Edit)
                         Fill: =RGBA(0, 134, 208, 1)
                         Font: =App.Theme.Font
                         FontWeight: =FontWeight.Semibold
@@ -1218,6 +1222,7 @@ OrdenMaquinas As screen:
                         "Gallery5 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
                             BorderColor: =RGBA(0, 18, 107, 1)
                             DelayItemLoading: =true
+                            DisplayMode: =If(Guardar || Aviso || edit, DisplayMode.Disabled, DisplayMode.Edit)
                             Height: =532
                             Items: =MaquinasList
                             Layout: =Layout.Vertical
@@ -1486,7 +1491,7 @@ OrdenMaquinas As screen:
                         DisabledBorderColor: =RGBA(166, 166, 166, 1)
                         DisabledColor: =RGBA(166, 166, 166, 1)
                         DisabledFill: =RGBA(244, 244, 244, 1)
-                        DisplayMode: =If(Guardar || Aviso, DisplayMode.Disabled, DisplayMode.Edit)
+                        DisplayMode: =If(Guardar || Aviso || edit, DisplayMode.Disabled, DisplayMode.Edit)
                         HoverBorderColor: =RGBA(214, 221, 224, 1)
                         HoverColor: =RGBA(0, 0, 0, 1)
                         HoverFill: =RGBA(214, 221, 224, 1)
@@ -1532,7 +1537,7 @@ OrdenMaquinas As screen:
                         ZIndex: =77
 
                     ButtonCanvas1 As Button:
-                        DisplayMode: =If(Guardar || Aviso, DisplayMode.View, DisplayMode.Edit)
+                        DisplayMode: =If(Guardar || Aviso || edit, DisplayMode.Disabled, DisplayMode.Edit)
                         FontSize: =20
                         Height: =42
                         Icon: ="ArrowRight"
@@ -1896,7 +1901,7 @@ OrdenMaquinas As screen:
         Container40 As groupContainer.manualLayoutContainer:
             BorderColor: =RGBA(54, 176, 75, 1)
             BorderThickness: =1
-            DropShadow: =DropShadow.Light
+            DropShadow: =DropShadow.Semibold
             Fill: =RGBA(52, 152, 47, 0.3)
             Height: =205
             RadiusBottomLeft: =15
@@ -1941,8 +1946,9 @@ OrdenMaquinas As screen:
             "glr_Jornada_OM As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
                 BorderColor: =App.Theme.Colors.Darker40
                 DelayItemLoading: =true
+                DisplayMode: =If(Aviso || Eliminar, DisplayMode.Disabled, DisplayMode.Edit)
                 Height: =170
-                Items: =JornadaPlannings
+                Items: =//JornadaPlannings
                 Layout: =Layout.Vertical
                 LoadingSpinner: =LoadingSpinner.Data
                 TemplateSize: =50
@@ -2026,6 +2032,7 @@ OrdenMaquinas As screen:
                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                 DisabledColor: =RGBA(166, 166, 166, 1)
                 DisabledFill: =RGBA(244, 244, 244, 1)
+                DisplayMode: =If(Aviso || Eliminar, DisplayMode.Disabled, DisplayMode.Edit)
                 FocusedBorderThickness: =4
                 Font: =App.Theme.Font
                 Format: =TextFormat.Number
@@ -2070,10 +2077,11 @@ OrdenMaquinas As screen:
                 BorderColor: =RGBA(54, 176, 75, 1)
                 BorderThickness: =2
                 Color: =RGBA(0, 0, 0, 1)
-                Default: =LookUp(JornadaPlannings, Texto = txt_Jornada_OM.Text).Valor
+                Default: =//LookUp(JornadaPlannings, Texto = txt_Jornada_OM.Text).Valor * 1
                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                 DisabledColor: =RGBA(166, 166, 166, 1)
                 DisabledFill: =RGBA(244, 244, 244, 1)
+                DisplayMode: =If(Aviso || Eliminar, DisplayMode.Disabled, DisplayMode.Edit)
                 FocusedBorderThickness: =4
                 Font: =App.Theme.Font
                 Format: =TextFormat.Number
@@ -2092,13 +2100,14 @@ OrdenMaquinas As screen:
                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                 DisabledColor: =RGBA(166, 166, 166, 1)
                 DisabledFill: =RGBA(244, 244, 244, 1)
+                DisplayMode: =If(Aviso || Eliminar, DisplayMode.Disabled, DisplayMode.Edit)
                 Fill: =RGBA(72, 163, 62, 1)
                 FontWeight: =FontWeight.Semibold
                 Height: =30
                 HoverColor: =RGBA(255, 255, 255, 1)
                 HoverFill: =RGBA(21, 68, 18, 1)
                 OnSelect: |-
-                    =If(
+                    =/*If(
                         IsBlank(txt_Jornada_OM.Text) || IsBlank(txt_Valor_OM.Text),
                         UpdateContext(
                             {
@@ -2130,7 +2139,7 @@ OrdenMaquinas As screen:
                                 Valor: Value(txt_Valor_OM.Text)
                             }
                         )
-                    );
+                    );*/
                     //Refresh(JornadaPlannings);
                     Reset(txt_Jornada_OM);
                     Reset(txt_Valor_OM);
@@ -2145,6 +2154,7 @@ OrdenMaquinas As screen:
                 Color: =RGBA(255, 255, 255, 1)
                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                 DisabledColor: =RGBA(244, 244, 244, 1)
+                DisplayMode: =If(Aviso || Eliminar, DisplayMode.Disabled, DisplayMode.Edit)
                 Height: =35
                 HoverColor: =RGBA(0, 0, 0, 1)
                 Icon: =Icon.Reload
@@ -2165,11 +2175,16 @@ OrdenMaquinas As screen:
             Color: =RGBA(255, 255, 255, 1)
             DisabledBorderColor: =RGBA(166, 166, 166, 1)
             DisabledColor: =RGBA(244, 244, 244, 1)
+            DisplayMode: =If(Aviso || Eliminar, DisplayMode.Disabled, DisplayMode.Edit)
             Height: =35
             HoverColor: =RGBA(0, 0, 0, 1)
             Icon: =Icon.Cancel
             OnSelect: |-
-                =UpdateContext({edit: false})
+                =UpdateContext({edit: false});
+                Reset(txt_Jornada_OM);
+                Reset(txt_Zona_OM);
+                Reset(txt_Valor_OM);
+                Reset(txt_Efi_OM);
             PaddingBottom: =3
             PaddingLeft: =3
             PaddingRight: =3
@@ -2177,6 +2192,352 @@ OrdenMaquinas As screen:
             Width: =40
             X: =810
             ZIndex: =61
+
+        Container40_1 As groupContainer.manualLayoutContainer:
+            BorderColor: =RGBA(54, 176, 75, 1)
+            BorderThickness: =1
+            DropShadow: =DropShadow.Semibold
+            Fill: =RGBA(52, 152, 47, 0.3)
+            Height: =205
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Width: =400
+            X: =436
+            Y: =45
+            ZIndex: =62
+
+            txt_Orden_OM_4 As text:
+                Align: =Align.Center
+                BorderColor: =RGBA(0, 18, 107, 1)
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =2
+                Color: =RGBA(255, 255, 255, 1)
+                Default: ="Zonas"
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                DisabledFill: =RGBA(244, 244, 244, 1)
+                DisplayMode: =DisplayMode.View
+                Fill: =RGBA(54, 176, 75, 1)
+                FocusedBorderThickness: =4
+                FontWeight: =FontWeight.Semibold
+                Height: =35
+                HintText: ="Orden"
+                HoverBorderColor: =RGBA(204, 231, 246, 1)
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =RGBA(204, 231, 246, 1)
+                OnChange: =
+                OnSelect: =
+                PaddingLeft: =5
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =16
+                Width: =400
+                ZIndex: =1
+
+            "glr_Jornada_OM_1 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+                BorderColor: =App.Theme.Colors.Darker40
+                DelayItemLoading: =true
+                DisplayMode: =If(Aviso || Eliminar, DisplayMode.Disabled, DisplayMode.Edit)
+                Height: =170
+                Items: =//ZonaPlannings
+                Layout: =Layout.Vertical
+                LoadingSpinner: =LoadingSpinner.Data
+                TemplateSize: =50
+                Width: =160
+                Y: =35
+                ZIndex: =2
+
+                TextInput8_1 As text:
+                    BorderColor: =App.Theme.Colors.Darker40
+                    BorderThickness: =2
+                    Color: =
+                    Default: |-
+                        ="Zona: " & ThisItem.Texto & "
+                        Eficiencia: " & ThisItem.Valor * 100 & "%"
+                    DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                    DisabledColor: =RGBA(166, 166, 166, 1)
+                    DisabledFill: =RGBA(244, 244, 244, 1)
+                    DisplayMode: =DisplayMode.View
+                    FocusedBorderThickness: =4
+                    Font: =App.Theme.Font
+                    Height: =50
+                    HoverBorderColor: =App.Theme.Colors.Darker40
+                    HoverColor: =RGBA(0, 0, 0, 1)
+                    HoverFill: =App.Theme.Colors.Lighter70
+                    Mode: =TextMode.MultiLine
+                    PaddingLeft: =5
+                    Size: =12
+                    Width: =140
+                    ZIndex: =1
+
+                Icon3_36 As icon.Trash:
+                    BorderColor: =App.Theme.Colors.Darker40
+                    Color: =RGBA(255, 184, 174, 1)
+                    DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                    DisabledColor: =RGBA(244, 244, 244, 1)
+                    Height: =50
+                    HoverColor: =RGBA(189, 49, 51, 1)
+                    Icon: =Icon.Trash
+                    OnSelect: |-
+                        =Select(Parent);
+                        UpdateContext({JornadaEliminar: Blank(), ZonaEliminar: ThisItem, Eliminar: true})
+                    PaddingBottom: =10
+                    PaddingLeft: =10
+                    PaddingRight: =2
+                    PaddingTop: =10
+                    Width: =28
+                    X: =110
+                    ZIndex: =2
+
+            TextInput9_1 As text:
+                Align: =Align.Center
+                BorderColor: =App.Theme.Colors.Darker40
+                BorderThickness: =2
+                Color: =RGBA(0, 0, 0, 1)
+                Default: ="Zona"
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                DisabledFill: =RGBA(244, 244, 244, 1)
+                DisplayMode: =DisplayMode.View
+                Fill: =RGBA(0, 0, 0, 0)
+                FocusedBorderThickness: =4
+                Font: =App.Theme.Font
+                Height: =20
+                HoverBorderColor: =App.Theme.Colors.Darker40
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =App.Theme.Colors.Lighter70
+                PaddingBottom: =10
+                PaddingLeft: =5
+                Size: =13
+                Width: =240
+                X: =160
+                Y: =39
+                ZIndex: =3
+
+            txt_Zona_OM As text:
+                Align: =Align.Center
+                BorderColor: =RGBA(54, 176, 75, 1)
+                BorderThickness: =2
+                Color: =RGBA(0, 0, 0, 1)
+                Default: =
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                DisabledFill: =RGBA(244, 244, 244, 1)
+                DisplayMode: =If(Aviso || Eliminar, DisplayMode.Disabled, DisplayMode.Edit)
+                FocusedBorderThickness: =4
+                Font: =App.Theme.Font
+                Height: =30
+                HoverBorderColor: =RGBA(54, 176, 75, 1)
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =RGBA(166, 215, 153, 1)
+                PaddingLeft: =5
+                Size: =15
+                Width: =200
+                X: =180
+                Y: =59
+                ZIndex: =4
+
+            TextInput9_3 As text:
+                Align: =Align.Center
+                BorderColor: =App.Theme.Colors.Darker40
+                BorderThickness: =2
+                Color: =RGBA(0, 0, 0, 1)
+                Default: ="Eficiencia"
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                DisabledFill: =RGBA(244, 244, 244, 1)
+                DisplayMode: =DisplayMode.View
+                Fill: =RGBA(0, 0, 0, 0)
+                FocusedBorderThickness: =4
+                Font: =App.Theme.Font
+                Height: =20
+                HoverBorderColor: =App.Theme.Colors.Darker40
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =App.Theme.Colors.Lighter70
+                PaddingBottom: =10
+                PaddingLeft: =5
+                Size: =13
+                Width: =240
+                X: =160
+                Y: =93
+                ZIndex: =5
+
+            txt_Efi_OM As text:
+                Align: =Align.Center
+                BorderColor: =RGBA(54, 176, 75, 1)
+                BorderThickness: =2
+                Color: =RGBA(0, 0, 0, 1)
+                Default: =//LookUp(ZonaPlannings, Texto = Upper(txt_Zona_OM.Text)).Valor * 100
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                DisabledFill: =RGBA(244, 244, 244, 1)
+                DisplayMode: =If(Aviso || Eliminar, DisplayMode.Disabled, DisplayMode.Edit)
+                FocusedBorderThickness: =4
+                Font: =App.Theme.Font
+                Format: =TextFormat.Number
+                Height: =30
+                HoverBorderColor: =RGBA(54, 176, 75, 1)
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =RGBA(166, 215, 153, 1)
+                PaddingLeft: =5
+                Size: =15
+                Width: =200
+                X: =180
+                Y: =113
+                ZIndex: =6
+
+            btn_ContinuarAviso_HxH_16 As button:
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                DisabledFill: =RGBA(244, 244, 244, 1)
+                DisplayMode: =If(Aviso || Eliminar, DisplayMode.Disabled, DisplayMode.Edit)
+                Fill: =RGBA(72, 163, 62, 1)
+                FontWeight: =FontWeight.Semibold
+                Height: =30
+                HoverColor: =RGBA(255, 255, 255, 1)
+                HoverFill: =RGBA(21, 68, 18, 1)
+                OnSelect: |
+                    =/*If(
+                        IsBlank(txt_Zona_OM.Text) || IsBlank(txt_Efi_OM.Text),
+                        UpdateContext(
+                            {
+                                Aviso: true,
+                                TextoAdvertencia: "Los campos no pueden estar vacios"
+                            }
+                        ),
+                        IsBlank(
+                            LookUp(
+                                ZonaPlannings,
+                                Texto = Upper(txt_Zona_OM.Text)
+                            )
+                        ),
+                        Collect(
+                            ZonaPlannings,
+                            {
+                                Texto: Upper(txt_Zona_OM.Text),
+                                Valor: Value(txt_Efi_OM.Text) / 100
+                            }
+                        ),
+                        Patch(
+                            ZonaPlannings,
+                            LookUp(
+                                ZonaPlannings,
+                                Texto = Upper(txt_Zona_OM.Text)
+                            ),
+                            {
+                                Texto: Upper(txt_Zona_OM.Text),
+                                Valor: Value(txt_Efi_OM.Text) / 100
+                            }
+                        )
+                    );*/
+                    //Refresh(ZonaPlannings);
+                    Reset(txt_Zona_OM);
+                    Reset(txt_Efi_OM);
+                Size: =15
+                Text: ="Guardar"
+                X: =200
+                Y: =158
+                ZIndex: =7
+
+            Icon3_32 As icon.Trash:
+                BorderColor: =App.Theme.Colors.Darker40
+                Color: =RGBA(255, 255, 255, 1)
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                DisabledColor: =RGBA(244, 244, 244, 1)
+                DisplayMode: =If(Aviso || Eliminar, DisplayMode.Disabled, DisplayMode.Edit)
+                Height: =35
+                HoverColor: =RGBA(0, 0, 0, 1)
+                Icon: =Icon.Reload
+                OnSelect: |-
+                    =//Refresh(JornadaPlannings);
+                    Reset(txt_Zona_OM);
+                    Reset(txt_Efi_OM);
+                PaddingBottom: =5
+                PaddingLeft: =5
+                PaddingRight: =5
+                PaddingTop: =5
+                Width: =40
+                X: =360
+                ZIndex: =8
+
+        Container40_2 As groupContainer.manualLayoutContainer:
+            BorderColor: =RGBA(215, 58, 60, 1)
+            BorderThickness: =3
+            DropShadow: =DropShadow.ExtraBold
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =152
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Visible: =Eliminar
+            Width: =400
+            X: =225
+            Y: =71
+            ZIndex: =63
+
+            TextInput9_4 As text:
+                Align: =Align.Center
+                BorderColor: =App.Theme.Colors.Darker40
+                BorderThickness: =2
+                Color: =RGBA(0, 0, 0, 1)
+                Default: |-
+                    ="¿Esta seguro/a de eliminar la " & If(IsBlank(JornadaEliminar), "zona: " & ZonaEliminar.Texto & "?", "jornada de " /*& JornadaEliminar.Texto & "h?"*/)
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                DisabledFill: =RGBA(244, 244, 244, 1)
+                DisplayMode: =DisplayMode.View
+                Fill: =RGBA(0, 0, 0, 0)
+                FocusedBorderThickness: =4
+                Font: =App.Theme.Font
+                Height: =109
+                HoverBorderColor: =App.Theme.Colors.Darker40
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =App.Theme.Colors.Lighter70
+                PaddingBottom: =10
+                PaddingLeft: =10
+                PaddingRight: =10
+                PaddingTop: =10
+                Size: =13
+                Width: =400
+                ZIndex: =3
+
+            btn_ContinuarAviso_HxH_17 As button:
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                DisabledFill: =RGBA(244, 244, 244, 1)
+                Fill: =RGBA(215, 58, 60, 1)
+                FontWeight: =FontWeight.Semibold
+                Height: =30
+                HoverColor: =RGBA(255, 255, 255, 1)
+                HoverFill: =RGBA(132, 40, 38, 1)
+                OnSelect: =
+                Size: =15
+                Text: ="Eliminar"
+                X: =210
+                Y: =109
+                ZIndex: =7
+
+            btn_ContinuarAviso_HxH_18 As button:
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                DisabledFill: =RGBA(244, 244, 244, 1)
+                Fill: =RGBA(215, 58, 60, 1)
+                FontWeight: =FontWeight.Semibold
+                Height: =30
+                HoverColor: =RGBA(255, 255, 255, 1)
+                HoverFill: =RGBA(132, 40, 38, 1)
+                OnSelect: |-
+                    =UpdateContext({JornadaEliminar: Blank(), ZonaEliminar: Blank(), Eliminar: false})
+                Size: =15
+                Text: ="Cancelar"
+                X: =30
+                Y: =109
+                ZIndex: =9
 
     cnt_Aviso_HxH_7 As groupContainer.manualLayoutContainer:
         BorderColor: =RGBA(255, 191, 0, 1)
