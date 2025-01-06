@@ -696,7 +696,7 @@ Planning_Orden As screen:
                                 BorderColor: =App.Theme.Colors.Darker40
                                 BorderThickness: =2
                                 Color: =RGBA(0, 0, 0, 1)
-                                Default: =If(ThisItem.Jornada = 22, "24", ThisItem.Jornada = 14.50, "16", "8")
+                                Default: =LookUp(JornadaPlannings, Valor = ThisItem.Jornada).Texto
                                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 DisabledFill: =RGBA(244, 244, 244, 1)
@@ -786,13 +786,7 @@ Planning_Orden As screen:
                                     =If(
                                         Value(txt_Meta_PO.Text) > 0,
                                         RoundUp(
-                                            ((txt_CantMax_PO.Text / (txt_Meta_PO.Text * If(
-                                                txt_Zona_PO.Text = "GH",
-                                                0.85,
-                                                txt_Zona_PO.Text = "TSI",
-                                                0.65,
-                                                0.85
-                                            ))) + LookUp(Orden_Ejecucion, Orden = ThisItem.Orden && Operacion = ThisItem.Operacion).TiempoSetup) / If(
+                                            ((txt_CantMax_PO.Text / (txt_Meta_PO.Text * LookUp(ZonaPlannings, Texto = ThisItem.Zona, Valor))) + LookUp(Orden_Ejecucion, Orden = ThisItem.Orden && Operacion = ThisItem.Operacion).TiempoSetup) / If(
                                                 CountRows(
                                                     Filter(
                                                         Orden_MaquinasLists_1,
@@ -937,7 +931,7 @@ Planning_Orden As screen:
                                 Y: =132
                                 ZIndex: =25
 
-                            ButtonCanvas1_2 As Button:
+                            ButtonCanvas1_2 As Botón:
                                 DisplayMode: =DisplayMode.Edit
                                 FontSize: =15
                                 Height: =30
@@ -1183,13 +1177,14 @@ Planning_Orden As screen:
                                         =If(
                                             Value(ThisItem.Meta) > 0,
                                             RoundUp(
-                                                (((txt_CantMax_PO.Text - (txt_CantPro_PO.Text - txt_CantDañada_PO.Text)) / (ThisItem.Meta * If(
-                                                    txt_Zona_PO.Text = "GH",
-                                                    0.85,
-                                                    txt_Zona_PO.Text = "TSI",
-                                                    0.65,
-                                                    0.85
-                                                ))) + LookUp(Orden_Ejecucion, Orden = ThisItem.Orden && Operacion = ThisItem.Operacion).TiempoSetup) / If(
+                                                (((txt_CantMax_PO.Text - (txt_CantPro_PO.Text - txt_CantDañada_PO.Text)) / (ThisItem.Meta * (txt_Meta_PO.Text * LookUp(
+                                                    ZonaPlannings,
+                                                    Texto = ThisItem.Zona,
+                                                    Valor
+                                                )))) + LookUp(
+                                                    Orden_Ejecucion,
+                                                    Orden = ThisItem.Orden && Operacion = ThisItem.Operacion
+                                                ).TiempoSetup) / If(
                                                     CountRows(
                                                         Filter(
                                                             Orden_MaquinasLists_1,
@@ -1401,7 +1396,7 @@ Planning_Orden As screen:
                                     Width: =392
                                     ZIndex: =8
 
-                                "DatePickerCanvas3 As 'Date picker'":
+                                "DatePickerCanvas3 As 'Selector de fecha'":
                                     DisplayMode: =If(ThisItem.Prioridad = 1, DisplayMode.Edit, DisplayMode.View)
                                     Fill: =RGBA(255, 255, 255, 1)
                                     Format: ='DatePickerCanvas.Format'.Short
@@ -1588,7 +1583,7 @@ Planning_Orden As screen:
                                 Y: =132
                                 ZIndex: =39
 
-                    ButtonCanvas1_1 As Button:
+                    ButtonCanvas1_1 As Botón:
                         DisplayMode: =DisplayMode.Edit
                         FontSize: =20
                         Height: =42
