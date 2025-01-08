@@ -387,6 +387,20 @@ Planning_Orden As screen:
                                     ) = 0,
                                     RGBA(
                                         255,
+                                        240,
+                                        0,
+                                        1
+                                    ),
+                                    (Sum(
+                                        Filter(
+                                            Orden_MaquinasLists_1,
+                                            Orden = OrdenPlanning.Orden,
+                                            Operacion = OrdenPlanning.Operacion
+                                        ),
+                                        Horas
+                                    ) <> Value(txt_Horas_PO_2.Text)),
+                                    RGBA(
+                                        255,
                                         58,
                                         60,
                                         1
@@ -402,6 +416,20 @@ Planning_Orden As screen:
                             DropShadow: =DropShadow.Semibold
                             Fill: |-
                                 =If(
+                                    (Sum(
+                                        Filter(
+                                            Orden_MaquinasLists_1,
+                                            Orden = OrdenPlanning.Orden,
+                                            Operacion = OrdenPlanning.Operacion
+                                        ),
+                                        Horas
+                                    ) <> Value(txt_Horas_PO_2.Text)),
+                                    RGBA(
+                                        255,
+                                        184,
+                                        174,
+                                        1
+                                    ),
                                     CountRows(
                                         Filter(
                                             Orden_MaquinasLists_1,
@@ -411,9 +439,9 @@ Planning_Orden As screen:
                                     ) = 0,
                                     RGBA(
                                         255,
-                                        184,
-                                        174,
-                                        1
+                                        191,
+                                        0,
+                                        0.6
                                     ),
                                     RGBA(
                                         180,
@@ -931,7 +959,7 @@ Planning_Orden As screen:
                                 Y: =132
                                 ZIndex: =25
 
-                            ButtonCanvas1_2 As Botón:
+                            ButtonCanvas1_2 As Button:
                                 DisplayMode: =DisplayMode.Edit
                                 FontSize: =15
                                 Height: =30
@@ -1177,7 +1205,7 @@ Planning_Orden As screen:
                                         =If(
                                             Value(ThisItem.Meta) > 0,
                                             RoundUp(
-                                                (((txt_CantMax_PO.Text - (txt_CantPro_PO.Text - txt_CantDañada_PO.Text)) / (ThisItem.Meta * (txt_Meta_PO.Text * LookUp(
+                                                (((txt_CantMax_PO.Text - (txt_CantPro_PO.Text - txt_CantDañada_PO.Text)) / (ThisItem.Meta * (LookUp(
                                                     ZonaPlannings,
                                                     Texto = ThisItem.Zona,
                                                     Valor
@@ -1396,7 +1424,7 @@ Planning_Orden As screen:
                                     Width: =392
                                     ZIndex: =8
 
-                                "DatePickerCanvas3 As 'Selector de fecha'":
+                                "DatePickerCanvas3 As 'Date picker'":
                                     DisplayMode: =If(ThisItem.Prioridad = 1, DisplayMode.Edit, DisplayMode.View)
                                     Fill: =RGBA(255, 255, 255, 1)
                                     Format: ='DatePickerCanvas.Format'.Short
@@ -1583,7 +1611,60 @@ Planning_Orden As screen:
                                 Y: =132
                                 ZIndex: =39
 
-                    ButtonCanvas1_1 As Botón:
+                            "InfoButtonCanvas3 As 'Information button'":
+                                BasePaletteColor: =RGBA(249, 83, 109, 1)
+                                Content: |-
+                                    =If(
+                                        CountRows(
+                                            Filter(
+                                                Orden_MaquinasLists_1,
+                                                Orden = txt_Orden_PO.Text,
+                                                Operacion = txt_OP_PO.Text
+                                            )
+                                        ) = 0,
+                                        "",
+                                        "El tiempo de producción meta de las máquinas no coincide con el tiempo estimado para la operación.
+                                    Tiempo de producción en máquinas: " & Sum(
+                                            Filter(
+                                                Orden_MaquinasLists_1,
+                                                Orden = OrdenPlanning.Orden,
+                                                Operacion = OrdenPlanning.Operacion
+                                            ),
+                                            Horas
+                                        ) & " horas
+                                    Tiempo estimado de la operación: " & Value(txt_Horas_PO_2.Text) & " horas
+                                    Tiempo restante por asignar: " & Value(txt_Horas_PO_2.Text) - Sum(
+                                            Filter(
+                                                Orden_MaquinasLists_1,
+                                                Orden = OrdenPlanning.Orden,
+                                                Operacion = OrdenPlanning.Operacion
+                                            ),
+                                            Horas
+                                        ) & " horas"
+                                    )
+                                DisplayMode: =DisplayMode.Edit
+                                Height: =29
+                                Visible: |-
+                                    =CountRows(
+                                            Filter(
+                                                Orden_MaquinasLists_1,
+                                                Orden = txt_Orden_PO.Text,
+                                                Operacion = txt_OP_PO.Text
+                                            )
+                                        ) = 0 || (Sum(
+                                            Filter(
+                                                Orden_MaquinasLists_1,
+                                                Orden = OrdenPlanning.Orden,
+                                                Operacion = OrdenPlanning.Operacion
+                                            ),
+                                            Horas
+                                        ) <> Value(txt_Horas_PO_2.Text))
+                                Width: =29
+                                X: =85
+                                Y: =0
+                                ZIndex: =40
+
+                    ButtonCanvas1_1 As Button:
                         DisplayMode: =DisplayMode.Edit
                         FontSize: =20
                         Height: =42
