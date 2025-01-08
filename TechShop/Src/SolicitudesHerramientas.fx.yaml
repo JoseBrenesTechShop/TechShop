@@ -615,8 +615,8 @@ SolicitudesHerramientas As screen:
                                             With(
                                                 {
                                                     subconsumo: Value(ThisRecord.Cant_Actual) < ThisRecord.Cant_Maxima - (ThisRecord.Cant_Maxima * 0.1),
-                                                    sobreconsumo: Value(ThisRecord.Cant_Actual) > Value(ThisRecord.Cant_Maxima),
-                                                    insertosEditados: Value(ThisRecord.Cant_Inserto) <> Value(ThisRecord.VerificacionInserto),
+                                                    sobreconsumo: Value(ThisRecord.Cant_Actual) > Value(ThisRecord.Cant_Maxima) + (ThisRecord.Cant_Maxima * 0.1),
+                                                    insertosEditados: Value(ThisRecord.Cant_Inserto) <> Value(ThisRecord.VerificacionInserto) ,
                                                     insertosEn0: Text(ThisRecord.Cant_Inserto) = "0",
                                                     insertoFueraDeRuta: ThisRecord.esFueraDeRuta,
                                                     InfoInserto: ThisRecord,
@@ -624,7 +624,7 @@ SolicitudesHerramientas As screen:
                                                     excedidoRuta: ThisRecord.Surtido > ThisRecord.Requerido
                                                 },
                                                 {
-                                                    veri: subconsumo || insertosEditados || insertosEn0 || insertoFueraDeRuta || sinStock || excedidoRuta,
+                                                    veri: subconsumo || insertosEditados || insertosEn0 || insertoFueraDeRuta || sinStock || excedidoRuta || sobreconsumo,
                                                     Inserto0: insertosEn0,
                                                     sobre: sobreconsumo,
                                                     sub: subconsumo,
@@ -1379,7 +1379,11 @@ SolicitudesHerramientas As screen:
                                     PaddingTop: =0
                                     Size: =13
                                     Text: |-
-                                        = "ID Referencia: " & ThisItem.item
+                                        ="ID Referencia: " & LookUp(
+                                            job_ref,
+                                            job = info.Orden && oper_num = Value(info.Operacion) && suffix = ThisItem.suffix && sequence = ThisItem.sequence,
+                                            ref_des
+                                        )
                                     Width: =487
                                     X: =7
                                     Y: =30
