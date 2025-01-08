@@ -989,7 +989,7 @@ OrdenMaquinas As screen:
                                                             IsBlank(
                                                                 LookUp(
                                                                     Orden_MaquinasLists_1,
-                                                                    Maquina = thisMaquina && Prioridad = Value(drp_Pri_OM.SelectedText.Value) && Orden <> info.Orden && Operacion <> info.Operacion
+                                                                    Maquina = thisMaquina && Prioridad = Value(drp_Pri_OM.SelectedText.Value) && (Orden <> info.Orden || Operacion <> info.Operacion)
                                                                 )
                                                             )
                                                         ) && Not(
@@ -1764,31 +1764,140 @@ OrdenMaquinas As screen:
                                     Horas: H
                                 }
                             ),
-                            Patch(
-                                Orden_MaquinasLists_1,
-                                LookUp(
-                                    Orden_MaquinasLists_1,
-                                    Maquina = thisMaquina && Prioridad = Value(drp_Pri_OM.SelectedText.Value)
-                                ),
+                            With(
                                 {
-                                    Maquina: thisMaquina,
-                                    Orden: info.Orden,
-                                    Operacion: info.Operacion,
-                                    Prioridad: Value(drp_Pri_OM.SelectedText.Value),
-                                    Meta: If(
-                                        thisMaquina in [
-                                            "MORI1",
-                                            "MORI2",
-                                            "MORI12",
-                                            "MORI13",
-                                            "MORI14",
-                                            "MORI15"
-                                        ],
-                                        Value(txt_Meta_OM.Text) + (Value(txt_Meta_OM.Text) * 0.1),
-                                        Value(txt_Meta_OM.Text)
+                                    MaquinaOrden: LookUp(
+                                        Orden_MaquinasLists_1,
+                                        Maquina = thisMaquina && Prioridad = Value(drp_Pri_OM.SelectedText.Value)
+                                    ).Orden,
+                                    MaquinaOperacion: LookUp(
+                                        Orden_MaquinasLists_1,
+                                        Maquina = thisMaquina && Prioridad = Value(drp_Pri_OM.SelectedText.Value)
+                                    ).Operacion,
+                                    MaquinaPrioridad: LookUp(
+                                        Orden_MaquinasLists_1,
+                                        Maquina = thisMaquina && Prioridad = Value(drp_Pri_OM.SelectedText.Value)
+                                    ).Prioridad
+                                },
+                                Patch(
+                                    Orden_MaquinasLists_1,
+                                    LookUp(
+                                        Orden_MaquinasLists_1,
+                                        Maquina = thisMaquina && Prioridad = Value(drp_Pri_OM.SelectedText.Value)
                                     ),
-                                    Horas: H
-                                }
+                                    {
+                                        Maquina: thisMaquina,
+                                        Orden: info.Orden,
+                                        Operacion: info.Operacion,
+                                        Prioridad: Value(drp_Pri_OM.SelectedText.Value),
+                                        Meta: If(
+                                            thisMaquina in [
+                                                "MORI1",
+                                                "MORI2",
+                                                "MORI12",
+                                                "MORI13",
+                                                "MORI14",
+                                                "MORI15"
+                                            ],
+                                            Value(txt_Meta_OM.Text) + (Value(txt_Meta_OM.Text) * 0.1),
+                                            Value(txt_Meta_OM.Text)
+                                        ),
+                                        Horas: H
+                                    }
+                                );
+                                With(
+                                    {
+                                        OrdenMaquina: LookUp(
+                                            Orden_Maquinas,
+                                            Orden = MaquinaOrden && Operacion = MaquinaOperacion
+                                        ),
+                                        OrdenEjecucion: LookUp(
+                                            Orden_Ejecucion,
+                                            Orden = MaquinaOrden && Operacion = MaquinaOperacion
+                                        ),
+                                        countMaquina: CountIf(
+                                            Filter(
+                                                Orden_MaquinasLists_1,
+                                                Orden = MaquinaOrden,
+                                                Operacion = MaquinaOperacion
+                                            ),
+                                            true
+                                        )
+                                    },
+                                    ForAll(
+                                        Filter(
+                                            Orden_MaquinasLists_1,
+                                            Orden = MaquinaOrden,
+                                            Operacion = MaquinaOperacion
+                                        ).Maquina,
+                                        With(
+                                            {MaquinaEdit: ThisRecord.Maquina},
+                                            Patch(
+                                                Orden_MaquinasLists_1,
+                                                LookUp(
+                                                    Orden_MaquinasLists_1,
+                                                    Maquina = MaquinaEdit && Prioridad = MaquinaPrioridad
+                                                ),
+                                                {
+                                                    Horas: (If(
+                                                        OrdenMaquina.Meta > 0,
+                                                        RoundUp(
+                                                            ((OrdenEjecucion.Cantidad / (OrdenMaquina.Meta * LookUp(
+                                                                ZonaPlannings,
+                                                                OrdenMaquina.Zona = Texto
+                                                            ).Valor)) + OrdenEjecucion.TiempoSetup) / If(
+                                                                countMaquina = 0,
+                                                                1,
+                                                                countMaquina
+                                                            ),
+                                                            0
+                                                        ),
+                                                        0
+                                                    )) / countMaquina
+                                                }
+                                            )
+                                        )
+                                    );
+                                    Patch(
+                                        Orden_Maquinas,
+                                        LookUp(
+                                            Orden_Maquinas,
+                                            Orden = MaquinaOrden && Operacion = MaquinaOperacion
+                                        ),
+                                        {
+                                            Horas: If(
+                                                OrdenMaquina.Meta > 0,
+                                                RoundUp(
+                                                    ((OrdenEjecucion.Cantidad / (OrdenMaquina.Meta * LookUp(
+                                                        ZonaPlannings,
+                                                        OrdenMaquina.Zona = Texto
+                                                    ).Valor)) + OrdenEjecucion.TiempoSetup) / If(
+                                                        countMaquina = 0,
+                                                        1,
+                                                        countMaquina
+                                                    ),
+                                                    0
+                                                ),
+                                                0
+                                            ), Dias: RoundUp(If(
+                                                OrdenMaquina.Meta > 0,
+                                                RoundUp(
+                                                    ((OrdenEjecucion.Cantidad / (OrdenMaquina.Meta * LookUp(
+                                                        ZonaPlannings,
+                                                        OrdenMaquina.Zona = Texto
+                                                    ).Valor)) + OrdenEjecucion.TiempoSetup) / If(
+                                                        countMaquina = 0,
+                                                        1,
+                                                        countMaquina
+                                                    ),
+                                                    0
+                                                ),
+                                                0
+                                            ) / OrdenMaquina.Jornada, 0)
+                                            
+                                        }
+                                    )
+                                )
                             )
                         )
                     )
