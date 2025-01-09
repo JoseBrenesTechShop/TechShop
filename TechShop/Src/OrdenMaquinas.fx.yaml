@@ -1687,6 +1687,15 @@ OrdenMaquinas As screen:
                             Zona: drp_Zona_OM.SelectedText.Texto
                         }
                     ),
+                    UpdateContext(
+                        {
+                            RegistroOrden: LookUp(
+                                Orden_Maquinas,
+                                Orden = info.Orden && Operacion = info.Operacion
+                            ),
+                            PriOrden: Value(drp_Pri_OM.SelectedText.Value)
+                        }
+                    );
                     Patch(
                         Orden_Maquinas,
                         LookUp(
@@ -1714,6 +1723,12 @@ OrdenMaquinas As screen:
                             Zona: drp_Zona_OM.SelectedText.Texto
                         }
                     )
+                );
+                UpdateContext(
+                    {
+                        RegistroMaquinasOrigen: MaquinasOrigin,
+                        RegistroMaquinas: MaquinasList
+                    }
                 );
                 ForAll(
                     MaquinasOrigin,
@@ -1879,22 +1894,25 @@ OrdenMaquinas As screen:
                                                     0
                                                 ),
                                                 0
-                                            ), Dias: RoundUp(If(
-                                                OrdenMaquina.Meta > 0,
-                                                RoundUp(
-                                                    ((OrdenEjecucion.Cantidad / (OrdenMaquina.Meta * LookUp(
-                                                        ZonaPlannings,
-                                                        OrdenMaquina.Zona = Texto
-                                                    ).Valor)) + OrdenEjecucion.TiempoSetup) / If(
-                                                        countMaquina = 0,
-                                                        1,
-                                                        countMaquina
+                                            ),
+                                            Dias: RoundUp(
+                                                If(
+                                                    OrdenMaquina.Meta > 0,
+                                                    RoundUp(
+                                                        ((OrdenEjecucion.Cantidad / (OrdenMaquina.Meta * LookUp(
+                                                            ZonaPlannings,
+                                                            OrdenMaquina.Zona = Texto
+                                                        ).Valor)) + OrdenEjecucion.TiempoSetup) / If(
+                                                            countMaquina = 0,
+                                                            1,
+                                                            countMaquina
+                                                        ),
+                                                        0
                                                     ),
                                                     0
-                                                ),
+                                                ) / OrdenMaquina.Jornada,
                                                 0
-                                            ) / OrdenMaquina.Jornada, 0)
-                                            
+                                            )
                                         }
                                     )
                                 )
@@ -1902,6 +1920,7 @@ OrdenMaquinas As screen:
                         )
                     )
                 );
+                Select(btn_Registro_EM);
                 Clear(MaquinasList);
                 Refresh(Maquinas);
                 UpdateContext(
@@ -1968,6 +1987,30 @@ OrdenMaquinas As screen:
             X: =265
             Y: =5
             ZIndex: =59
+
+        btn_Registro_EM As button:
+            BorderColor: =App.Theme.Colors.Primary
+            BorderStyle: =BorderStyle.None
+            DisabledBorderColor: =RGBA(244, 244, 244, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            Fill: =RGBA(0, 134, 208, 1)
+            Font: =App.Theme.Font
+            FontWeight: =FontWeight.Semibold
+            Height: =43
+            HoverBorderColor: =App.Theme.Colors.Darker10
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(102, 182, 227, 1)
+            OnSelect: =
+            PressedBorderColor: =App.Theme.Colors.Darker40
+            PressedColor: =Self.Color
+            PressedFill: =App.Theme.Colors.Darker40
+            Size: =15
+            Text: ="Continuar"
+            Tooltip: =
+            Width: =84
+            Y: =518
+            ZIndex: =60
 
     cnt_Aviso_HxH_9 As groupContainer.manualLayoutContainer:
         BorderColor: =RGBA(52, 152, 47, 1)
