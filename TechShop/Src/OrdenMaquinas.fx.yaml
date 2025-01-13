@@ -1008,7 +1008,34 @@ OrdenMaquinas As screen:
                                         Guardar: true
                                     }
                                 );
-                                
+                                Collect(
+                                    MaquinaRemplazo,
+                                    ForAll(
+                                        MaquinasList,
+                                        With(
+                                            {thisMaquina: ThisRecord.Maquina},
+                                            If(
+                                                Not(
+                                                    IsBlank(
+                                                        LookUp(
+                                                            Orden_MaquinasLists_1,
+                                                            Maquina = thisMaquina && Prioridad = Value(drp_Pri_OM.SelectedText.Value) && (Orden <> info.Orden || Operacion <> info.Operacion)
+                                                        )
+                                                    )
+                                                ) && Not(
+                                                    thisMaquina in [
+                                                        "SIERRABHERINGER1",
+                                                        "SIERRABHERINGER2"
+                                                    ]
+                                                ),
+                                                LookUp(
+                                                    Orden_MaquinasLists_1,
+                                                    Maquina = thisMaquina && Prioridad = Value(drp_Pri_OM.SelectedText.Value) && (Orden <> info.Orden || Operacion <> info.Operacion)
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
                             )
                         PressedBorderColor: =App.Theme.Colors.Darker40
                         PressedColor: =Self.Color
@@ -1282,7 +1309,7 @@ OrdenMaquinas As screen:
                         Y: =42
                         ZIndex: =65
 
-                    "dp_Fecha_OM As 'Selector de fecha'":
+                    "dp_Fecha_OM As 'Date picker'":
                         BorderRadius: =15
                         DisplayMode: =DisplayMode.Edit
                         Fill: =RGBA(255, 255, 255, 1)
@@ -1536,7 +1563,7 @@ OrdenMaquinas As screen:
                         Y: =488
                         ZIndex: =77
 
-                    ButtonCanvas1 As Botón:
+                    ButtonCanvas1 As Button:
                         DisplayMode: =If(Guardar || Aviso || edit, DisplayMode.Disabled, DisplayMode.Edit)
                         FontSize: =20
                         Height: =42
@@ -1953,7 +1980,8 @@ OrdenMaquinas As screen:
             HoverFill: =RGBA(132, 40, 38, 1)
             OnSelect: |-
                 =UpdateContext({Guardar: false});
-                UpdateContext({Disable: false})
+                UpdateContext({Disable: false});
+                Clear(MaquinaRemplazo)
             Size: =15
             Text: ="Cancelar"
             X: =244
@@ -2160,7 +2188,12 @@ OrdenMaquinas As screen:
                                 m: ThisRecord.Maquina
                             },
                             If(
-                                (m in RegistroMaquinas.Maquina),
+                                IsBlank(
+                                    LookUp(
+                                        Orden_MaquinasLists_1,
+                                        Maquina = m && Orden = RegistroOrden.Orden && Operacion = RegistroOrden.Operacion
+                                    )
+                                ),
                                 Collect(
                                     Registro_Orden_MaquinasLists,
                                     {
@@ -2219,7 +2252,73 @@ OrdenMaquinas As screen:
                             )
                         )
                     )
-                )
+                );
+                ForAll(
+                    MaquinaRemplazo,
+                    With(
+                        {
+                            RegMaquina: ThisRecord,
+                            m: ThisRecord.Maquina, 
+                            RegOrden: ThisRecord.Orden, 
+                            RegOP: ThisRecord.Operacion
+                        },
+                        Collect(
+                            Registro_Orden_MaquinasLists,
+                            {
+                                Maquina: RegMaquina.Maquina,
+                                Orden: RegMaquina.Orden,
+                                Operacion: RegMaquina.Operacion,
+                                Prioridad: RegMaquina.Prioridad,
+                                'P/N': LookUp(Orden_Maquinas, Orden = RegOrden && Operacion = RegOP).'P/N',
+                                Meta: RegMaquina.Meta,
+                                Horas: RegMaquina.Horas,
+                                HorasProducidas: CountIf(
+                                    Distinct(
+                                        Filter(
+                                            'Hora X Hora',
+                                            Orden = RegOrden,
+                                            Operacion = RegOP,
+                                            Maquina = m
+                                        ),
+                                        'Fecha_Registro_Supervisor '
+                                    ),
+                                    true
+                                ),
+                                HorasRes: RegMaquina.Horas - CountIf(
+                                    Distinct(
+                                        Filter(
+                                            'Hora X Hora',
+                                            Orden = RegOrden,
+                                            Operacion = RegOP,
+                                            Maquina = m
+                                        ),
+                                        'Fecha_Registro_Supervisor '
+                                    ),
+                                    true
+                                ),
+                                CantPro: Sum(
+                                    Filter(
+                                        'Hora X Hora',
+                                        Orden = RegOrden,
+                                        Operacion = RegOP,
+                                        Maquina = m
+                                    ),
+                                    Cantidad
+                                ),
+                                CantDañada: Sum(
+                                    Filter(
+                                        Scrap_1,
+                                        Orden = RegOrden,
+                                        Maquina = m
+                                    ),
+                                    Cantidad
+                                ),
+                                Creacion_Fecha: RegMaquina.Fecha
+                            }
+                        )
+                    )
+                );
+                Clear(MaquinaRemplazo)
             PressedBorderColor: =App.Theme.Colors.Darker40
             PressedColor: =Self.Color
             PressedFill: =App.Theme.Colors.Darker40
