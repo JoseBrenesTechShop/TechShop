@@ -1035,7 +1035,8 @@ OrdenMaquinas As screen:
                                             )
                                         )
                                     )
-                                )
+                                );
+                                Collect(OrdenRemplazo, ForAll)
                             )
                         PressedBorderColor: =App.Theme.Colors.Darker40
                         PressedColor: =Self.Color
@@ -1633,6 +1634,140 @@ OrdenMaquinas As screen:
                         X: =173
                         Y: =380
                         ZIndex: =80
+
+                    btn_Guardar_EM_13 As button:
+                        BorderColor: =App.Theme.Colors.Primary
+                        BorderStyle: =BorderStyle.None
+                        DisabledBorderColor: =RGBA(244, 244, 244, 1)
+                        DisabledColor: =RGBA(166, 166, 166, 1)
+                        DisabledFill: =RGBA(244, 244, 244, 1)
+                        DisplayMode: =If(Guardar || Aviso || edit, DisplayMode.Disabled, DisplayMode.Edit)
+                        Fill: =RGBA(0, 134, 208, 1)
+                        Font: =App.Theme.Font
+                        FontWeight: =FontWeight.Semibold
+                        Height: =44
+                        HoverBorderColor: =App.Theme.Colors.Darker10
+                        HoverColor: =RGBA(255, 255, 255, 1)
+                        HoverFill: =RGBA(102, 182, 227, 1)
+                        OnSelect: |-
+                            =If(
+                                IsBlank(glr_Ordenes_OM.Selected),
+                                UpdateContext(
+                                    {
+                                        Aviso: true,
+                                        TextoAdvertencia: "Debe selecionar una Orden"
+                                    }
+                                ),
+                                IsBlank(drp_Op_OM.SelectedText.Value),
+                                UpdateContext(
+                                    {
+                                        Aviso: true,
+                                        TextoAdvertencia: "Debe selecionar la Operacion"
+                                    }
+                                ),
+                                IsBlank(txt_Meta_OM.Text) || txt_Meta_OM.Text = "0",
+                                UpdateContext(
+                                    {
+                                        Aviso: true,
+                                        TextoAdvertencia: "La meta debe ser mayor a 0"
+                                    }
+                                ),
+                                IsBlank(drp_Pri_OM.SelectedText.Value),
+                                UpdateContext(
+                                    {
+                                        Aviso: true,
+                                        TextoAdvertencia: "Debe seleccionar la prioridad de la Orden"
+                                    }
+                                ),
+                                drp_Pri_OM.SelectedText.Value = "1" && IsBlank(dp_Fecha_OM.SelectedDate),
+                                UpdateContext(
+                                    {
+                                        Aviso: true,
+                                        TextoAdvertencia: "Debe seleccionar la fecha de inico"
+                                    }
+                                ),
+                                CountIf(
+                                    MaquinasList,
+                                    true
+                                ) = 0,
+                                UpdateContext(
+                                    {
+                                        Aviso: true,
+                                        TextoAdvertencia: "Debe seleccionar al menos una maquina"
+                                    }
+                                ),
+                                UpdateContext(
+                                    {
+                                        StringMaquinas: Concat(
+                                            ForAll(
+                                                MaquinasList,
+                                                With(
+                                                    {
+                                                        item: ThisRecord,
+                                                        thisMaquina: ThisRecord.Maquina
+                                                    },
+                                                    If(
+                                                        Not(
+                                                            IsBlank(
+                                                                LookUp(
+                                                                    Orden_MaquinasLists_1,
+                                                                    Maquina = thisMaquina && Prioridad = Value(drp_Pri_OM.SelectedText.Value) && (Orden <> info.Orden || Operacion <> info.Operacion)
+                                                                )
+                                                            )
+                                                        ) && Not(
+                                                            thisMaquina in [
+                                                                "SIERRABHERINGER1",
+                                                                "SIERRABHERINGER2"
+                                                            ]
+                                                        ),
+                                                        item.Maquina & ", ",
+                                                        ""
+                                                    )
+                                                )
+                                            ),
+                                            ThisRecord.Value
+                                        ),
+                                        Guardar: true
+                                    }
+                                );
+                                Collect(
+                                    MaquinaRemplazo,
+                                    ForAll(
+                                        MaquinasList,
+                                        With(
+                                            {thisMaquina: ThisRecord.Maquina},
+                                            If(
+                                                Not(
+                                                    IsBlank(
+                                                        LookUp(
+                                                            Orden_MaquinasLists_1,
+                                                            Maquina = thisMaquina && Prioridad = Value(drp_Pri_OM.SelectedText.Value) && (Orden <> info.Orden || Operacion <> info.Operacion)
+                                                        )
+                                                    )
+                                                ) && Not(
+                                                    thisMaquina in [
+                                                        "SIERRABHERINGER1",
+                                                        "SIERRABHERINGER2"
+                                                    ]
+                                                ),
+                                                LookUp(
+                                                    Orden_MaquinasLists_1,
+                                                    Maquina = thisMaquina && Prioridad = Value(drp_Pri_OM.SelectedText.Value) && (Orden <> info.Orden || Operacion <> info.Operacion)
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        PressedBorderColor: =App.Theme.Colors.Darker40
+                        PressedColor: =Self.Color
+                        PressedFill: =App.Theme.Colors.Darker40
+                        Size: =15
+                        Text: ="Continuar"
+                        Tooltip: =
+                        Width: =52
+                        Y: =541
+                        ZIndex: =81
 
     cnt_Aviso_HxH_8 As groupContainer.manualLayoutContainer:
         BorderColor: =RGBA(52, 152, 47, 1)
@@ -2326,6 +2461,7 @@ OrdenMaquinas As screen:
             Size: =15
             Text: ="Continuar"
             Tooltip: =
+            Visible: =false
             Width: =84
             Y: =518
             ZIndex: =60
