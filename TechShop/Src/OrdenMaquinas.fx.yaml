@@ -3,6 +3,7 @@ OrdenMaquinas As screen:
     Fill: =Color.White
     ImagePosition: =ImagePosition.Fill
     LoadingSpinnerColor: =App.Theme.Colors.Primary
+    OnVisible: =ClearCollect(Prioridades, [1,2,3,4,5,6]);
 
     ScreenContainer10_2 As groupContainer.verticalAutoLayoutContainer:
         DropShadow: =DropShadow.Light
@@ -890,7 +891,7 @@ OrdenMaquinas As screen:
                                 (VarName in [
                                     "2328",
                                     "2388"
-                                ] || LookUp(Empleados, Codigo = VarName).Rol = "ADMIN") && !(Aviso || Disable),
+                                ] || LookUp(Empleados, Codigo = VarName).Rol = "ADMIN") && !(Guardar || Aviso || edit || Disable),
                                 DisplayMode.Edit,
                                 DisplayMode.View
                             )
@@ -974,11 +975,6 @@ OrdenMaquinas As screen:
                                         TextoAdvertencia: "Debe seleccionar al menos una maquina"
                                     }
                                 ),
-                                UpdateContext(
-                                    {
-                                        Guardar: true
-                                    }
-                                );
                                 Collect(
                                     MaquinaRemplazo,
                                     ForAll(
@@ -1031,6 +1027,11 @@ OrdenMaquinas As screen:
                                             )
                                         )
                                     )
+                                );
+                                UpdateContext(
+                                    {
+                                        Guardar: true
+                                    }
                                 )
                             )
                         PressedBorderColor: =App.Theme.Colors.Darker40
@@ -1157,10 +1158,11 @@ OrdenMaquinas As screen:
                         DisabledBorderColor: =RGBA(166, 166, 166, 1)
                         DisabledColor: =RGBA(166, 166, 166, 1)
                         DisabledFill: =RGBA(244, 244, 244, 1)
+                        DisplayMode: =If(Guardar || Aviso || edit, DisplayMode.Disabled, DisplayMode.Edit)
                         HoverBorderColor: =RGBA(214, 221, 224, 1)
                         HoverColor: =RGBA(0, 0, 0, 1)
                         HoverFill: =RGBA(214, 221, 224, 1)
-                        Items: =[1,2,3,4,5]
+                        Items: =Prioridades
                         OnChange: =Reset(dp_Fecha_OM)
                         PressedBorderColor: =RGBA(40, 134, 222, 1)
                         PressedColor: =RGBA(255, 255, 255, 1)
@@ -1464,6 +1466,7 @@ OrdenMaquinas As screen:
                         DisabledBorderColor: =RGBA(166, 166, 166, 1)
                         DisabledColor: =RGBA(166, 166, 166, 1)
                         DisabledFill: =RGBA(244, 244, 244, 1)
+                        DisplayMode: =If(Guardar || Aviso || edit, DisplayMode.Disabled, DisplayMode.Edit)
                         HoverBorderColor: =RGBA(214, 221, 224, 1)
                         HoverColor: =RGBA(0, 0, 0, 1)
                         HoverFill: =RGBA(214, 221, 224, 1)
@@ -1775,9 +1778,9 @@ OrdenMaquinas As screen:
         RadiusTopLeft: =20
         RadiusTopRight: =20
         Visible: =Guardar
-        Width: =1001
-        X: =287
-        Y: =151
+        Width: =If(IsEmpty(MaquinaRemplazo), 367, 1000)
+        X: =If(IsEmpty(MaquinaRemplazo), 608, 291)
+        Y: =252
         ZIndex: =2
 
         Label15_15 As label:
@@ -1799,7 +1802,7 @@ OrdenMaquinas As screen:
                 Horas: " & txt_Horas_OM.Text & " horas"
             Width: =341
             X: =16
-            Y: =43
+            Y: =48
             ZIndex: =56
 
         btn_ContinuarAviso_HxH_10 As button:
@@ -2095,7 +2098,7 @@ OrdenMaquinas As screen:
             Size: =15
             Text: ="Guardar"
             X: =187
-            Y: =299
+            Y: =307
             ZIndex: =57
 
         btn_ContinuarAviso_HxH_11 As button:
@@ -2113,7 +2116,7 @@ OrdenMaquinas As screen:
             Size: =15
             Text: ="Cancelar"
             X: =17
-            Y: =299
+            Y: =307
             ZIndex: =58
 
         txt_Orden_OM_1 As text:
@@ -2512,7 +2515,7 @@ OrdenMaquinas As screen:
                 TemplatePadding: =0
                 TemplateSize: =155
                 Width: =620
-                Y: =38
+                Y: =40
                 ZIndex: =3
 
                 TextInput10_12 As text:
@@ -2526,6 +2529,7 @@ OrdenMaquinas As screen:
                     DisplayMode: =DisplayMode.Disabled
                     FocusedBorderThickness: =4
                     Font: =App.Theme.Font
+                    Height: =38
                     HoverBorderColor: =App.Theme.Colors.Darker40
                     HoverColor: =RGBA(0, 0, 0, 1)
                     HoverFill: =App.Theme.Colors.Lighter70
@@ -2726,7 +2730,32 @@ OrdenMaquinas As screen:
                     BorderColor: =RGBA(166, 215, 153, 1)
                     BorderThickness: =2
                     Color: =RGBA(0, 0, 0, 1)
-                    Default: =
+                    Default: |-
+                        =With(
+                            {
+                                //Busca todas las maquinas de una orden y operacion
+                                thisMaquinas: ForAll(
+                                    Filter(
+                                        Orden_MaquinasLists_1,
+                                        Orden = ThisItem.Orden,
+                                        Operacion = ThisItem.Operacion
+                                    ),
+                                    Maquina
+                                )
+                            },
+                            Text(
+                                //Busca la prioridades disponibles
+                                First(
+                                    Filter(
+                                        Prioridades,
+                                        !(Value in Filter(//Filtra todos los registros de las maquinas filtradas anteriormente
+                                            Orden_MaquinasLists_1,
+                                            Maquina in thisMaquinas
+                                        ).Prioridad) && Value <> 1
+                                    )
+                                ).Value
+                            )
+                        )
                     DisabledBorderColor: =RGBA(166, 215, 153, 1)
                     DisabledColor: =RGBA(0, 0, 0, 1)
                     DisabledFill: =RGBA(0, 0, 0, 0)
