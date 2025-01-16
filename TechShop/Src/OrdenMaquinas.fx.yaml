@@ -3,7 +3,41 @@ OrdenMaquinas As screen:
     Fill: =Color.White
     ImagePosition: =ImagePosition.Fill
     LoadingSpinnerColor: =App.Theme.Colors.Primary
-    OnVisible: =ClearCollect(Prioridades, [1,2,3,4,5,6]);
+    OnVisible: |
+        =// Inicializa la colección de prioridades con los valores mínimos
+        ClearCollect(
+            Prioridades,
+            [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+            ]
+        );
+        // Obtiene la prioridad más alta actualmente asignada en la tabla de órdenes
+        Set(
+            MaxPriority,
+            Max(
+                Orden_Maquinas_1,
+                Prioridad
+            )
+        );
+        // Si la prioridad más alta es mayor que 6, agrega las prioridades adicionales a la colección
+        If(
+            MaxPriority > 6,
+            ForAll(
+                Sequence(
+                    MaxPriority - 6,
+                    7
+                ),// Crea una secuencia de números desde 7 hasta MaxPriority
+                Collect(
+                    Prioridades,
+                    Value
+                )
+            )
+        );
 
     ScreenContainer10_2 As groupContainer.verticalAutoLayoutContainer:
         DropShadow: =DropShadow.Light
@@ -1822,117 +1856,83 @@ OrdenMaquinas As screen:
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(21, 68, 18, 1)
             OnSelect: |-
-                =// Colección temporal para verificar si todas las órdenes tienen prioridad disponible
-                ClearCollect(
-                    OrdersPriorityStatus,
-                    {
-                        Order: "",
-                        HasPriority: true
-                    }
-                );
+                =Select(btn_OrdenesAfectadas_OM);
+                
                 If(
-                    !IsEmpty(MaquinaRemplazo),// Verifica si MaquinaRemplazo no está vacío
-                    ForAll(
-                        OrdenRemplazo,// Itera sobre cada registro en OrdenRemplazo
-                        With(
-                            {
-                                // Obtiene la primera prioridad disponible que no esté en uso y no sea 1
-                                NewPri: If(
-                                    IsEmpty(
-                                        Filter(
-                                            Prioridades,
-                                            !(Value in Filter(
-                                                Orden_MaquinasLists_1,
-                                                Maquina in Filter(
-                                                    Orden_MaquinasLists_1,
-                                                    Orden = ThisRecord.Orden,
-                                                    Operacion = ThisRecord.Operacion
-                                                ).Maquina
-                                            ).Prioridad) && Value <> 1
-                                        )
-                                    ),
-                                    Max(
-                                        Orden_MaquinasLists_1,
-                                        Prioridad
-                                    ) + 1,
-                                    First(
-                                        Filter(
-                                            Prioridades,
-                                            !(Value in Filter(
-                                                Orden_MaquinasLists_1,
-                                                Maquina in Filter(
-                                                    Orden_MaquinasLists_1,
-                                                    Orden = ThisRecord.Orden,
-                                                    Operacion = ThisRecord.Operacion
-                                                ).Maquina
-                                            ).Prioridad) && Value <> 1
-                                        )
-                                    ).Value
-                                ),
-                                ORD: ThisRecord.Orden,
-                                // Almacena la orden actual
-                                OP: ThisRecord.Operacion,
-                                // Almacena la operación actual
-                                Maquinas: Filter(
-                                    Orden_MaquinasLists_1,
-                                    Orden = ThisRecord.Orden,
-                                    Operacion = ThisRecord.Operacion
-                                )// Filtra las máquinas asociadas a la orden y operación actuales
-                            },
-                            // Verifica si NewPri está vacío (no hay prioridad disponible)
-                            If(
-                                IsBlank(NewPri),
-                                Collect(
-                                    OrdersPriorityStatus,
-                                    {
-                                        Order: ORD,
-                                        HasPriority: false
-                                    }
-                                ),// Añade el estado a la colección
-                // Si hay prioridad disponible, actualiza la prioridad de la orden en Orden_Maquinas_1
-                                Patch(
-                                    Orden_Maquinas_1,
-                                    LookUp(
-                                        Orden_Maquinas_1,
-                                        Orden = ORD && Operacion = OP
-                                    ),
-                                    {Prioridad: NewPri}
-                                );
-                                // Itera sobre cada máquina y actualiza su prioridad en Orden_MaquinasLists_1
-                ForAll(
-                                    Maquinas,
-                                    With(
-                                        {m: ThisRecord.Maquina},// Almacena la máquina actual
-                                        Patch(
-                                            Orden_MaquinasLists_1,
-                                            LookUp(
-                                                Orden_MaquinasLists_1,
-                                                Orden = ORD && Operacion = OP && Maquina = ThisRecord.Maquina
-                                            ),
-                                            {Prioridad: NewPri}
-                                        )
-                                    )
-                                )
-                            )
-                        )
-                    )
-                );
-                // Verifica si todas las órdenes tienen prioridad disponible antes de ejecutar el resto del código
-                If(
-                    IsEmpty(
-                        Filter(
-                            OrdersPriorityStatus,
-                            HasPriority = false
+                    IsBlank(
+                        LookUp(
+                            Orden_Maquinas_1,
+                            Orden = info.Orden && Operacion = info.Operacion
                         )
                     ),
-                    true,
-                    UpdateContext(
+                    Collect(
+                        Orden_Maquinas_1,
                         {
-                            Aviso: true,
-                            TextoAdvertencia: "Algunas ordenes no tienen prioridad disponible, debe revisar y hacer cambios manualmente"
+                            Orden: info.Orden,
+                            Operacion: info.Operacion,
+                            'P/N': info.'P/N',
+                            Meta: Value(txt_Meta_OM.Text),
+                            User: txt_User_OM.Text,
+                            Prioridad: Value(drp_Pri_OM.SelectedText.Value),
+                            Fecha_Inicio: dp_Fecha_OM.SelectedDate,
+                            Fecha_Fin_Aprox: DateValue(
+                                Text(
+                                    txt_FechaFin_OM.Text,
+                                    "mm/dd/yyyy"
+                                )
+                            ),
+                            Fecha_Fin: Blank(),
+                            Jornada: drp_Joranada_OM.SelectedText.Valor,
+                            Horas: Value(txt_Horas_OM.Text),
+                            Dias: Value(txt_Dias_OM.Text),
+                            Zona: drp_Zona_OM.SelectedText.Texto
+                        }
+                    ),
+                    Patch(
+                        Orden_Maquinas_1,
+                        LookUp(
+                            Orden_Maquinas_1,
+                            Orden = info.Orden && Operacion = info.Operacion
+                        ),
+                        {
+                            Orden: info.Orden,
+                            Operacion: info.Operacion,
+                            'P/N': info.'P/N',
+                            Meta: Value(txt_Meta_OM.Text),
+                            User: txt_User_OM.Text,
+                            Prioridad: Value(drp_Pri_OM.SelectedText.Value),
+                            Fecha_Inicio: dp_Fecha_OM.SelectedDate,
+                            Fecha_Fin_Aprox: DateValue(
+                                Text(
+                                    txt_FechaFin_OM.Text,
+                                    "mm/dd/yyyy"
+                                )
+                            ),
+                            Fecha_Fin: Blank(),
+                            Jornada: drp_Joranada_OM.SelectedText.Valor,
+                            Horas: Value(txt_Horas_OM.Text),
+                            Dias: Value(txt_Dias_OM.Text),
+                            Zona: drp_Zona_OM.SelectedText.Texto
                         }
                     )
-                )
+                );
+                
+                Select(btn_Registro_EM);
+                Clear(MaquinasList);
+                Refresh(Maquinas);
+                UpdateContext(
+                    {
+                        info: Blank(),
+                        info2: Blank(),
+                        MaquinasOrigin: Blank()
+                    }
+                );
+                Reset(txt_BuscaMaquina_OM);
+                Reset(drp_Pri_OM);
+                Reset(glr_Ordenes_OM);
+                UpdateContext({Guardar: false});
+                UpdateContext({Disable: false});
+                CountIf(OrdenRemplazo, true)
             Size: =15
             Text: ="Guardar"
             X: =187
@@ -2583,13 +2583,20 @@ OrdenMaquinas As screen:
                                 ).Maquina,
                                 // Busca la prioridad más alta actualmente asignada
                                 MaxPriority: Max(
-                                    Orden_MaquinasLists_1,
+                                    Filter(
+                                        Orden_MaquinasLists_1,
+                                        Maquina in Filter(
+                                            Orden_MaquinasLists_1,
+                                            Orden = ThisItem.Orden,
+                                            Operacion = ThisItem.Operacion
+                                        ).Maquina
+                                    ),
                                     Prioridad
                                 )
                             },
                             Text(
                                 // Busca la primera prioridad disponible
-                                    // Si no hay prioridades disponibles, asigna una nueva prioridad incremental
+                        // Si no hay prioridades disponibles, asigna una nueva prioridad incremental
                                 If(
                                     IsEmpty(
                                         Filter(
@@ -2797,7 +2804,7 @@ OrdenMaquinas As screen:
                 Y: =38
                 ZIndex: =7
 
-        btn_ContinuarAviso_HxH_12 As button:
+        btn_OrdenesAfectadas_OM As button:
             DisabledBorderColor: =RGBA(166, 166, 166, 1)
             DisabledColor: =RGBA(166, 166, 166, 1)
             DisabledFill: =RGBA(244, 244, 244, 1)
@@ -2805,288 +2812,86 @@ OrdenMaquinas As screen:
             FontWeight: =FontWeight.Semibold
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(21, 68, 18, 1)
-            OnSelect: |-
+            OnSelect: |
                 =If(
-                    IsBlank(
-                        LookUp(
-                            Orden_Maquinas_1,
-                            Orden = info.Orden && Operacion = info.Operacion
-                        )
-                    ),
-                    Collect(
-                        Orden_Maquinas_1,
-                        {
-                            Orden: info.Orden,
-                            Operacion: info.Operacion,
-                            'P/N': info.'P/N',
-                            Meta: Value(txt_Meta_OM.Text),
-                            User: txt_User_OM.Text,
-                            Prioridad: Value(drp_Pri_OM.SelectedText.Value),
-                            Fecha_Inicio: dp_Fecha_OM.SelectedDate,
-                            Fecha_Fin_Aprox: DateValue(
-                                Text(
-                                    txt_FechaFin_OM.Text,
-                                    "mm/dd/yyyy"
-                                )
-                            ),
-                            Fecha_Fin: Blank(),
-                            Jornada: drp_Joranada_OM.SelectedText.Valor,
-                            Horas: Value(txt_Horas_OM.Text),
-                            Dias: Value(txt_Dias_OM.Text),
-                            Zona: drp_Zona_OM.SelectedText.Texto
-                        }
-                    ),
-                    UpdateContext(
-                        {
-                            RegistroOrden: LookUp(
-                                Orden_Maquinas_1,
-                                Orden = info.Orden && Operacion = info.Operacion
-                            ),
-                            PriOrden: Value(drp_Pri_OM.SelectedText.Value)
-                        }
-                    );
-                    Patch(
-                        Orden_Maquinas_1,
-                        LookUp(
-                            Orden_Maquinas_1,
-                            Orden = info.Orden && Operacion = info.Operacion
-                        ),
-                        {
-                            Orden: info.Orden,
-                            Operacion: info.Operacion,
-                            'P/N': info.'P/N',
-                            Meta: Value(txt_Meta_OM.Text),
-                            User: txt_User_OM.Text,
-                            Prioridad: Value(drp_Pri_OM.SelectedText.Value),
-                            Fecha_Inicio: dp_Fecha_OM.SelectedDate,
-                            Fecha_Fin_Aprox: DateValue(
-                                Text(
-                                    txt_FechaFin_OM.Text,
-                                    "mm/dd/yyyy"
-                                )
-                            ),
-                            Fecha_Fin: Blank(),
-                            Jornada: drp_Joranada_OM.SelectedText.Valor,
-                            Horas: Value(txt_Horas_OM.Text),
-                            Dias: Value(txt_Dias_OM.Text),
-                            Zona: drp_Zona_OM.SelectedText.Texto
-                        }
-                    )
-                );
-                UpdateContext(
-                    {
-                        RegistroMaquinasOrigen: MaquinasOrigin,
-                        RegistroMaquinas: MaquinasList
-                    }
-                );
-                ForAll(
-                    MaquinasOrigin,
-                    Remove(
-                        Orden_MaquinasLists_1,
-                        ThisRecord
-                    )
-                );
-                ForAll(
-                    MaquinasList,
-                    With(
-                        {
-                            thisMaquina: ThisRecord.Maquina,
-                            H: txt_Horas_OM.Text / CountIf(
-                                MaquinasList,
-                                true
-                            )
-                        },
-                        If(
-                            IsBlank(
-                                LookUp(
-                                   Orden_MaquinasLists_1,
-                                    Maquina = thisMaquina && Prioridad = Value(drp_Pri_OM.SelectedText.Value)
-                                )
-                            ) || thisMaquina in [
-                                "SIERRABHERINGER1",
-                                "SIERRABHERINGER2"
-                            ],
-                            Collect(
-                               Orden_MaquinasLists_1,
-                                {
-                                    Maquina: thisMaquina,
-                                    Orden: info.Orden,
-                                    Operacion: info.Operacion,
-                                    Prioridad: Value(drp_Pri_OM.SelectedText.Value),
-                                    Meta: If(
-                                        thisMaquina in [
-                                            "MORI1",
-                                            "MORI2",
-                                            "MORI12",
-                                            "MORI13",
-                                            "MORI14",
-                                            "MORI15"
-                                        ],
-                                        Value(txt_Meta_OM.Text) + (Value(txt_Meta_OM.Text) * 0.1),
-                                        Value(txt_Meta_OM.Text)
-                                    ),
-                                    Horas: H,
-                                    Fecha: Now()
-                                }
-                            ),
-                            With(
-                                {
-                                    MaquinaOrden: LookUp(
-                                       Orden_MaquinasLists_1,
-                                        Maquina = thisMaquina && Prioridad = Value(drp_Pri_OM.SelectedText.Value)
-                                    ).Orden,
-                                    MaquinaOperacion: LookUp(
-                                       Orden_MaquinasLists_1,
-                                        Maquina = thisMaquina && Prioridad = Value(drp_Pri_OM.SelectedText.Value)
-                                    ).Operacion,
-                                    MaquinaPrioridad: LookUp(
-                                       Orden_MaquinasLists_1,
-                                        Maquina = thisMaquina && Prioridad = Value(drp_Pri_OM.SelectedText.Value)
-                                    ).Prioridad
-                                },
-                                Patch(
-                                   Orden_MaquinasLists_1,
-                                    LookUp(
-                                       Orden_MaquinasLists_1,
-                                        Maquina = thisMaquina && Prioridad = Value(drp_Pri_OM.SelectedText.Value)
-                                    ),
-                                    {
-                                        Maquina: thisMaquina,
-                                        Orden: info.Orden,
-                                        Operacion: info.Operacion,
-                                        Prioridad: Value(drp_Pri_OM.SelectedText.Value),
-                                        Meta: If(
-                                            thisMaquina in [
-                                                "MORI1",
-                                                "MORI2",
-                                                "MORI12",
-                                                "MORI13",
-                                                "MORI14",
-                                                "MORI15"
-                                            ],
-                                            Value(txt_Meta_OM.Text) + (Value(txt_Meta_OM.Text) * 0.1),
-                                            Value(txt_Meta_OM.Text)
-                                        ),
-                                        Horas: H,
-                                        Fecha: Now()
-                                    }
-                                );
-                                With(
-                                    {
-                                        OrdenMaquina: LookUp(
-                                            Orden_Maquinas_1,
-                                            Orden = MaquinaOrden && Operacion = MaquinaOperacion
-                                        ),
-                                        OrdenEjecucion: LookUp(
-                                            Orden_Ejecucion,
-                                            Orden = MaquinaOrden && Operacion = MaquinaOperacion
-                                        ),
-                                        countMaquina: CountIf(
-                                            Filter(
-                                               Orden_MaquinasLists_1,
-                                                Orden = MaquinaOrden,
-                                                Operacion = MaquinaOperacion
-                                            ),
-                                            true
-                                        )
-                                    },
-                                    ForAll(
+                    !IsEmpty(MaquinaRemplazo),
+                    ForAll(
+                        OrdenRemplazo,
+                        With(
+                            {
+                                // Obtiene la primera prioridad disponible que no esté en uso y no sea 1
+                                NewPri: If(
+                                    IsEmpty(
                                         Filter(
-                                           Orden_MaquinasLists_1,
-                                            Orden = MaquinaOrden,
-                                            Operacion = MaquinaOperacion
-                                        ).Maquina,
-                                        With(
-                                            {MaquinaEdit: ThisRecord.Maquina},
-                                            Patch(
-                                               Orden_MaquinasLists_1,
-                                                LookUp(
-                                                   Orden_MaquinasLists_1,
-                                                    Maquina = MaquinaEdit && Prioridad = MaquinaPrioridad
-                                                ),
-                                                {
-                                                    Horas: (If(
-                                                        OrdenMaquina.Meta > 0,
-                                                        RoundUp(
-                                                            ((OrdenEjecucion.Cantidad / (OrdenMaquina.Meta * LookUp(
-                                                                ZonaPlannings,
-                                                                OrdenMaquina.Zona = Texto
-                                                            ).Valor)) + OrdenEjecucion.TiempoSetup) / If(
-                                                                countMaquina = 0,
-                                                                1,
-                                                                countMaquina
-                                                            ),
-                                                            0
-                                                        ),
-                                                        0
-                                                    )) / countMaquina
-                                                }
-                                            )
+                                            Prioridades,
+                                            !(Value in Filter(
+                                                Orden_MaquinasLists_1,
+                                                Maquina in Filter(
+                                                    Orden_MaquinasLists_1,
+                                                    Orden = ThisRecord.Orden,
+                                                    Operacion = ThisRecord.Operacion
+                                                ).Maquina
+                                            ).Prioridad) && Value <> 1
                                         )
-                                    );
-                                    Patch(
-                                        Orden_Maquinas_1,
-                                        LookUp(
-                                            Orden_Maquinas_1,
-                                            Orden = MaquinaOrden && Operacion = MaquinaOperacion
+                                    ),
+                                    Max(
+                                        Filter(
+                                            Orden_MaquinasLists_1,
+                                            Maquina in Filter(
+                                                Orden_MaquinasLists_1,
+                                                Orden = ThisRecord.Orden,
+                                                Operacion = ThisRecord.Operacion
+                                            ).Maquina
                                         ),
-                                        {
-                                            Horas: If(
-                                                OrdenMaquina.Meta > 0,
-                                                RoundUp(
-                                                    ((OrdenEjecucion.Cantidad / (OrdenMaquina.Meta * LookUp(
-                                                        ZonaPlannings,
-                                                        OrdenMaquina.Zona = Texto
-                                                    ).Valor)) + OrdenEjecucion.TiempoSetup) / If(
-                                                        countMaquina = 0,
-                                                        1,
-                                                        countMaquina
-                                                    ),
-                                                    0
-                                                ),
-                                                0
-                                            ),
-                                            Dias: RoundUp(
-                                                If(
-                                                    OrdenMaquina.Meta > 0,
-                                                    RoundUp(
-                                                        ((OrdenEjecucion.Cantidad / (OrdenMaquina.Meta * LookUp(
-                                                            ZonaPlannings,
-                                                            OrdenMaquina.Zona = Texto
-                                                        ).Valor)) + OrdenEjecucion.TiempoSetup) / If(
-                                                            countMaquina = 0,
-                                                            1,
-                                                            countMaquina
-                                                        ),
-                                                        0
-                                                    ),
-                                                    0
-                                                ) / OrdenMaquina.Jornada,
-                                                0
-                                            )
-                                        }
+                                        Prioridad
+                                    ) + 1,
+                                    First(
+                                        Filter(
+                                            Prioridades,
+                                            !(Value in Filter(
+                                                Orden_MaquinasLists_1,
+                                                Maquina in Filter(
+                                                    Orden_MaquinasLists_1,
+                                                    Orden = ThisRecord.Orden,
+                                                    Operacion = ThisRecord.Operacion
+                                                ).Maquina
+                                            ).Prioridad) && Value <> 1
+                                        )
+                                    ).Value
+                                ),
+                                ORD: ThisRecord.Orden,
+                                OP: ThisRecord.Operacion,
+                                Maquinas: Filter(
+                                    Orden_MaquinasLists_1,
+                                    Orden = ThisRecord.Orden,
+                                    Operacion = ThisRecord.Operacion
+                                )
+                            },
+                            Patch(
+                                Orden_Maquinas_1,
+                                LookUp(
+                                    Orden_Maquinas_1,
+                                    Orden = ORD && Operacion = OP
+                                ),
+                                {Prioridad: NewPri}
+                            );
+                            ForAll(
+                                Maquinas,
+                                With(
+                                    {m: ThisRecord.Maquina},
+                                    Patch(
+                                        Orden_MaquinasLists_1,
+                                        LookUp(
+                                            Orden_MaquinasLists_1,
+                                            Orden = ORD && Operacion = OP && Maquina = ThisRecord.Maquina
+                                        ),
+                                        {Prioridad: NewPri}
                                     )
                                 )
                             )
                         )
                     )
                 );
-                Select(btn_Registro_EM);
-                Clear(MaquinasList);
-                Refresh(Maquinas);
-                UpdateContext(
-                    {
-                        info: Blank(),
-                        info2: Blank(),
-                        MaquinasOrigin: Blank()
-                    }
-                );
-                Reset(txt_BuscaMaquina_OM);
-                Reset(drp_Pri_OM);
-                Reset(glr_Ordenes_OM);
-                UpdateContext({Guardar: false});
-                UpdateContext({Disable: false});
-                CountIf(OrdenRemplazo, true)
             Size: =15
             Text: ="Guardar"
             Width: =42
