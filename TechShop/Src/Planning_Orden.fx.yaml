@@ -1216,24 +1216,16 @@ Planning_Orden As screen:
                                     Color: =RGBA(0, 0, 0, 1)
                                     Default: |-
                                         =If(
-                                            Value(ThisItem.Meta) > 0,
+                                            Value(ThisItem.Meta) > 0, // Verifica si el valor de Meta es mayor que 0
                                             RoundUp(
-                                                (((txt_CantMax_PO.Text - (txt_CantPro_PO.Text - txt_CantDañada_PO.Text)) / (ThisItem.Meta * (LookUp(
-                                                    ZonaPlannings,
-                                                    Texto = ThisItem.Zona,
-                                                    Valor
-                                                )))) + LookUp(
-                                                    Orden_Ejecucion,
-                                                    Orden = ThisItem.Orden && Operacion = ThisItem.Operacion
-                                                ).TiempoSetup) / If(
-                                                    CountRows(
-                                                        Filter(
-                                                            Orden_MaquinasLists_1,
-                                                            Orden = txt_Orden_PO.Text,
-                                                            Operacion = txt_OP_PO.Text
-                                                        )
-                                                    ) = 0,
-                                                    1,
+                                                (
+                                                    (
+                                                        txt_CantMax_PO.Text - (txt_CantPro_PO.Text - txt_CantDañada_PO.Text) // Calcula la cantidad restante
+                                                    ) / (
+                                                        ThisItem.Meta * LookUp(ZonaPlannings, Texto = ThisItem.Zona, Valor) // Calcula el valor ajustado por la zona
+                                                    ) + LookUp(Orden_Ejecucion, Orden = ThisItem.Orden && Operacion = ThisItem.Operacion).TiempoSetup // Añade el tiempo de configuración
+                                                ) / Max(
+                                                    1, // Asegura que el divisor no sea 0
                                                     CountRows(
                                                         Filter(
                                                             Orden_MaquinasLists_1,
@@ -1242,9 +1234,9 @@ Planning_Orden As screen:
                                                         )
                                                     )
                                                 ),
-                                                0
+                                                0 // Redondea hacia arriba
                                             ),
-                                            0
+                                            0 // Si Meta es 0 o menor, devuelve 0
                                         )
                                     DisabledBorderColor: =RGBA(166, 166, 166, 1)
                                     DisabledColor: =RGBA(166, 166, 166, 1)

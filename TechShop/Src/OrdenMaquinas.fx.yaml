@@ -1031,11 +1031,6 @@ OrdenMaquinas As screen:
                                                             Maquina = thisMaquina && Prioridad = Value(drp_Pri_OM.SelectedText.Value) && (Orden <> info.Orden || Operacion <> info.Operacion)
                                                         )
                                                     )
-                                                ) && Not(
-                                                    thisMaquina in [
-                                                        "SIERRABHERINGER1",
-                                                        "SIERRABHERINGER2"
-                                                    ]
                                                 ),
                                                 LookUp(
                                                     Orden_MaquinasLists_1,
@@ -1107,10 +1102,10 @@ OrdenMaquinas As screen:
                         OnChange: =
                         OnSelect: =
                         PaddingLeft: =5
-                        RadiusBottomLeft: =20
-                        RadiusBottomRight: =20
-                        RadiusTopLeft: =20
-                        RadiusTopRight: =20
+                        RadiusBottomLeft: =10
+                        RadiusBottomRight: =10
+                        RadiusTopLeft: =10
+                        RadiusTopRight: =10
                         Size: =13
                         Width: =220
                         X: =8
@@ -1238,10 +1233,10 @@ OrdenMaquinas As screen:
                         OnChange: =
                         OnSelect: =
                         PaddingLeft: =5
-                        RadiusBottomLeft: =20
-                        RadiusBottomRight: =20
-                        RadiusTopLeft: =20
-                        RadiusTopRight: =20
+                        RadiusBottomLeft: =10
+                        RadiusBottomRight: =10
+                        RadiusTopLeft: =10
+                        RadiusTopRight: =10
                         Size: =13
                         Width: =220
                         X: =240
@@ -1805,6 +1800,7 @@ OrdenMaquinas As screen:
                         Size: =15
                         Text: ="Continuar"
                         Tooltip: =
+                        Visible: =false
                         Width: =52
                         Y: =541
                         ZIndex: =81
@@ -1855,9 +1851,9 @@ OrdenMaquinas As screen:
             FontWeight: =FontWeight.Semibold
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(21, 68, 18, 1)
-            OnSelect: |-
+            OnSelect: |
                 =Select(btn_OrdenesAfectadas_OM);
-                
+                //Crea la orden en caso de no existir. Si ya exite la edita
                 If(
                     IsBlank(
                         LookUp(
@@ -1865,6 +1861,7 @@ OrdenMaquinas As screen:
                             Orden = info.Orden && Operacion = info.Operacion
                         )
                     ),
+                    //Crea un registro de una orden
                     Collect(
                         Orden_Maquinas_1,
                         {
@@ -1888,7 +1885,17 @@ OrdenMaquinas As screen:
                             Zona: drp_Zona_OM.SelectedText.Texto
                         }
                     ),
-                    Patch(
+                    //Almacena el registro anterior de una orden antes de editarlo
+                    UpdateContext(
+                        {
+                            RegistroOrden: LookUp(
+                                Orden_Maquinas_1,
+                                Orden = info.Orden && Operacion = info.Operacion
+                            )
+                        }
+                    );
+                    //Edita el registro de una orden
+                Patch(
                         Orden_Maquinas_1,
                         LookUp(
                             Orden_Maquinas_1,
@@ -1916,15 +1923,120 @@ OrdenMaquinas As screen:
                         }
                     )
                 );
-                
+                //Guarda, edita o elimina las maquinas de la orden
+                ForAll(
+                    MaquinasList,
+                    With(
+                        {
+                            m: ThisRecord.Maquina,
+                            crear: IsBlank(
+                                LookUp(
+                                    Orden_MaquinasLists_1,
+                                    Orden = info.Orden && Operacion = info.Operacion && Maquina = ThisRecord.Maquina
+                                )
+                            ),
+                            editar: ThisRecord.Maquina in MaquinasOrigin.Maquina
+                        },
+                        If(
+                            IsBlank(
+                                LookUp(
+                                    Orden_MaquinasLists_1,
+                                    Orden = info.Orden && Operacion = info.Operacion && Maquina = m
+                                )
+                            ),
+                            //Crea un registro de la maquina
+                            Collect(
+                                Orden_MaquinasLists_1,
+                                {
+                                    Fecha: Now(),
+                                    Maquina: m,
+                                    Orden: info.Orden,
+                                    Operacion: info.Operacion,
+                                    Prioridad: Value(drp_Pri_OM.SelectedText.Value),
+                                    Horas: Value(txt_Horas_OM.Text) / CountIf(
+                                        MaquinasList,
+                                        true
+                                    ),
+                                    Meta: If(
+                                        m in [
+                                            "MORI1",
+                                            "MORI2",
+                                            "MORI12",
+                                            "MORI13",
+                                            "MORI14",
+                                            "MORI15"
+                                        ],
+                                        Value(txt_Meta_OM.Text) + (Value(txt_Meta_OM.Text) * 0.1),
+                                        Value(txt_Meta_OM.Text)
+                                    )
+                                }
+                            ),
+                            m in MaquinasOrigin.Maquina,
+                            //Almacena el registro anterior de la maquina antes de editarlo
+                            Collect(
+                                InfoMaquinasViejas,
+                                LookUp(
+                                    Orden_MaquinasLists_1,
+                                    Orden = info.Orden && Operacion = info.Operacion && Maquina = ThisRecord.Maquina
+                                )
+                            );
+                            //Edita el registro de la maquina   
+                Patch(
+                                Orden_MaquinasLists_1,
+                                LookUp(
+                                    Orden_MaquinasLists_1,
+                                    Orden = info.Orden && Operacion = info.Operacion && Maquina = ThisRecord.Maquina
+                                ),
+                                {
+                                    Fecha: Now(),
+                                    Maquina: m,
+                                    Orden: info.Orden,
+                                    Operacion: info.Operacion,
+                                    Prioridad: Value(drp_Pri_OM.SelectedText.Value),
+                                    Horas: Value(txt_Horas_OM.Text) / CountIf(
+                                        MaquinasList,
+                                        true
+                                    ),
+                                    Meta: If(
+                                        m in [
+                                            "MORI1",
+                                            "MORI2",
+                                            "MORI12",
+                                            "MORI13",
+                                            "MORI14",
+                                            "MORI15"
+                                        ],
+                                        Value(txt_Meta_OM.Text) + (Value(txt_Meta_OM.Text) * 0.1),
+                                        Value(txt_Meta_OM.Text)
+                                    )
+                                }
+                            ),
+                            //Almacena el registro anterior de la maquina antes de eliminarlo
+                            Collect(
+                                InfoMaquinasViejas,
+                                LookUp(
+                                    Orden_MaquinasLists_1,
+                                    Orden = info.Orden && Operacion = info.Operacion && Maquina = ThisRecord.Maquina
+                                )
+                            );
+                            //Elimina el registro de la maquina
+                Remove(
+                                Orden_MaquinasLists_1,
+                                LookUp(
+                                    Orden_MaquinasLists_1,
+                                    Orden = info.Orden && Operacion = info.Operacion && Maquina = ThisRecord.Maquina
+                                )
+                            )
+                        )
+                    )
+                );
                 Select(btn_Registro_EM);
                 Clear(MaquinasList);
                 Refresh(Maquinas);
                 UpdateContext(
                     {
                         info: Blank(),
-                        info2: Blank(),
-                        MaquinasOrigin: Blank()
+                        info2: Blank()
                     }
                 );
                 Reset(txt_BuscaMaquina_OM);
@@ -1932,7 +2044,6 @@ OrdenMaquinas As screen:
                 Reset(glr_Ordenes_OM);
                 UpdateContext({Guardar: false});
                 UpdateContext({Disable: false});
-                CountIf(OrdenRemplazo, true)
             Size: =15
             Text: ="Guardar"
             X: =187
@@ -1950,7 +2061,8 @@ OrdenMaquinas As screen:
             OnSelect: |-
                 =UpdateContext({Guardar: false});
                 UpdateContext({Disable: false});
-                Clear(MaquinaRemplazo)
+                Clear(MaquinaRemplazo);
+                Clear(OrdenRemplazo);
             Size: =15
             Text: ="Cancelar"
             X: =17
@@ -1963,8 +2075,7 @@ OrdenMaquinas As screen:
             BorderStyle: =BorderStyle.None
             BorderThickness: =2
             Color: =RGBA(255, 255, 255, 1)
-            Default: |-
-                ="Lea con atencion y detalle:"
+            Default: ="Lea con atencion y detalle"
             DisabledBorderColor: =RGBA(166, 166, 166, 1)
             DisabledColor: =RGBA(166, 166, 166, 1)
             DisabledFill: =RGBA(244, 244, 244, 1)
@@ -2003,295 +2114,135 @@ OrdenMaquinas As screen:
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(102, 182, 227, 1)
             OnSelect: |-
-                =If(
-                    RegistroOrden.Prioridad <> PriOrden,
-                    //true, Agrega el estado anterior de la orden y operacion al registro y sus maquinas correspondientes
-                    With(
-                        {
-                            PiezasDañadas: Sum(
-                                Filter(
-                                    Scrap_1,
-                                    Orden = RegistroOrden.Orden
-                                ),
-                                Cantidad
+                =With(
+                    {
+                        maximas: LookUp(
+                            Orden_Ejecucion,
+                            Orden = RegistroOrden.Orden && Operacion = RegistroOrden.Operacion
+                        ).Cantidad,
+                        producidas: LookUp(
+                            Orden_Ejecucion,
+                            Orden = RegistroOrden.Orden && Operacion = RegistroOrden.Operacion
+                        ).CantidadTotalProducida,
+                        dañadas: Sum(
+                            Filter(
+                                Scrap_1,
+                                Orden = RegistroOrden.Orden
                             ),
-                            PiezasHechas: LookUp(
-                                Orden_Ejecucion,
-                                Orden = RegistroOrden.Orden && Operacion = RegistroOrden.Operacion
-                            ).CantidadTotalProducida,
-                            PiezasMaximo: LookUp(
-                                Orden_Ejecucion,
-                                Orden = RegistroOrden.Orden && Operacion = RegistroOrden.Operacion
-                            ).Cantidad
-                        },
-                        Collect(
-                            Registro_Orden_Maquinas,
-                            {
-                                Orden: RegistroOrden.Orden,
-                                Operacion: RegistroOrden.Operacion,
-                                'P/N': RegistroOrden.'P/N',
-                                Prioridad: RegistroOrden.Prioridad,
-                                Meta: RegistroOrden.Meta,
-                                Fecha_inicio: RegistroOrden.Fecha_Inicio,
-                                Fecha_Fin: RegistroOrden.Fecha_Fin,
-                                Fecha_Fin_Aprox: RegistroOrden.Fecha_Fin_Aprox,
-                                Jornada: LookUp(
-                                    JornadaPlannings,
-                                    Valor = RegistroOrden.Jornada,
-                                    Texto
-                                ),
-                                Zona: RegistroOrden.Zona,
-                                Horas: RegistroOrden.Horas,
-                                HorasRestantes: If(
-                                    Value(RegistroOrden.Meta) > 0,
-                                    RoundUp(
-                                        (((PiezasMaximo - (PiezasHechas-PiezasDañadas)) / (RegistroOrden.Meta * (LookUp(
-                                            ZonaPlannings,
-                                            Texto = RegistroOrden.Zona,
-                                            Valor
-                                        )))) + LookUp(
-                                            Orden_Ejecucion,
-                                            Orden = RegistroOrden.Orden && Operacion = RegistroOrden.Operacion
-                                        ).TiempoSetup) / If(
-                                            CountRows(
-                                                Filter(
-                                                    Orden_MaquinasLists_1,
-                                                    Orden = RegistroOrden.Orden,
-                                                    Operacion = RegistroOrden.Operacion
-                                                )
-                                            ) = 0,
-                                            1,
-                                            CountRows(
-                                                Filter(
-                                                    Orden_MaquinasLists_1,
-                                                    Orden = RegistroOrden.Orden,
-                                                    Operacion = RegistroOrden.Operacion
-                                                )
+                            Cantidad
+                        )
+                    },
+                    Collect(
+                        Registro_Orden_Maquinas,
+                        {
+                            Creacion_Fecha: RegistroOrden.'Fecha de creación',
+                            Orden: RegistroOrden.Orden,
+                            Operacion: RegistroOrden.Operacion,
+                            'P/N': RegistroOrden.'P/N',
+                            Prioridad: RegistroOrden.Prioridad,
+                            Meta: RegistroOrden.Meta,
+                            Fecha_inicio: RegistroOrden.Fecha_Inicio,
+                            Fecha_Fin: RegistroOrden.Fecha_Fin,
+                            Fecha_Fin_Aprox: RegistroOrden.Fecha_Fin_Aprox,
+                            Jornada: LookUp(
+                                JornadaPlannings,
+                                Valor = RegistroOrden.Jornada
+                            ).Texto,
+                            Zona: RegistroOrden.Zona,
+                            Horas: RegistroOrden.Horas,
+                            HorasRestantes: If(
+                                Value(RegistroOrden.Meta) > 0,
+                                RoundUp(
+                                    ((maximas - (producidas - dañadas)) / (RegistroOrden.Meta * LookUp(
+                                        ZonaPlannings,
+                                        Texto = RegistroOrden.Zona,
+                                        Valor
+                                    )) + LookUp(
+                                        Orden_Ejecucion,
+                                        Orden = RegistroOrden.Orden && Operacion = RegistroOrden.Operacion
+                                    ).TiempoSetup) / Max(
+                                        1,
+                                        CountRows(
+                                            Filter(
+                                                Orden_MaquinasLists_1,
+                                                Orden = RegistroOrden.Orden,
+                                                Operacion = RegistroOrden.Operacion
                                             )
-                                        ),
-                                        0
+                                        )
                                     ),
                                     0
                                 ),
-                                Dias: RegistroOrden.Dias,
-                                User: txt_User_OM.Text,
-                                CantMaquinas: CountIf(
-                                    RegistroMaquinasOrigen,
-                                    true
-                                ),
-                                Creacion_Fecha: RegistroOrden.'Fecha de modificación',
-                                CantPro: PiezasHechas,
-                                CantDañada: PiezasDañadas,
-                                CantMax: PiezasMaximo
-                            }
-                        );
-                        ForAll(
-                            RegistroMaquinasOrigen,
-                            With(
-                                {
-                                    RegMaquina: ThisRecord,
-                                    m: ThisRecord.Maquina
-                                },
-                                Collect(
-                                    Registro_Orden_MaquinasLists,
-                                    {
-                                        Maquina: RegMaquina.Maquina,
-                                        Orden: RegistroOrden.Orden,
-                                        Operacion: RegistroOrden.Operacion,
-                                        'P/N': RegistroOrden.'P/N',
-                                        Prioridad: RegistroOrden.Prioridad,
-                                        Meta: RegMaquina.Meta,
-                                        Horas: RegMaquina.Horas,
-                                        HorasProducidas: CountIf(
-                                            Distinct(
-                                                Filter(
-                                                    'Hora X Hora',
-                                                    Orden = RegistroOrden.Orden,
-                                                    Operacion = RegistroOrden.Operacion,
-                                                    Maquina = m
-                                                ),
-                                                'Fecha_Registro_Supervisor '
-                                            ),
-                                            true
-                                        ),
-                                        HorasRes: RegMaquina.Horas - CountIf(
-                                            Distinct(
-                                                Filter(
-                                                    'Hora X Hora',
-                                                    Orden = RegistroOrden.Orden,
-                                                    Operacion = RegistroOrden.Operacion,
-                                                    Maquina = m
-                                                ),
-                                                'Fecha_Registro_Supervisor '
-                                            ),
-                                            true
-                                        ),
-                                        CantPro: Sum(
-                                            Filter(
-                                                'Hora X Hora',
-                                                Orden = RegistroOrden.Orden,
-                                                Operacion = RegistroOrden.Operacion,
-                                                Maquina = m
-                                            ),
-                                            Cantidad
-                                        ),
-                                        CantDañada: Sum(
-                                            Filter(
-                                                Scrap_1,
-                                                Orden = RegistroOrden.Orden,
-                                                Maquina = m
-                                            ),
-                                            Cantidad
-                                        ),
-                                        Creacion_Fecha: RegMaquina.Fecha
-                                    }
-                                )
-                            )
-                        )
-                    ),
-                    //Flase, Revisa la lista de maquinas para ver si alguna fue eliminada y crear un registro de la misma
-                    ForAll(
-                        RegistroMaquinasOrigen,
-                        With(
-                            {
-                                RegMaquina: ThisRecord,
-                                m: ThisRecord.Maquina
-                            },
-                            If(
-                                IsBlank(
-                                    LookUp(
-                                        Orden_MaquinasLists_1,
-                                        Maquina = m && Orden = RegistroOrden.Orden && Operacion = RegistroOrden.Operacion
-                                    )
-                                ),
-                                Collect(
-                                    Registro_Orden_MaquinasLists,
-                                    {
-                                        Maquina: RegMaquina.Maquina,
-                                        Orden: RegistroOrden.Orden,
-                                        Operacion: RegistroOrden.Operacion,
-                                        Prioridad: RegistroOrden.Prioridad,
-                                        'P/N': RegistroOrden.'P/N',
-                                        Meta: RegMaquina.Meta,
-                                        Horas: RegMaquina.Horas,
-                                        HorasProducidas: CountIf(
-                                            Distinct(
-                                                Filter(
-                                                    'Hora X Hora',
-                                                    Orden = RegistroOrden.Orden,
-                                                    Operacion = RegistroOrden.Operacion,
-                                                    Maquina = m
-                                                ),
-                                                'Fecha_Registro_Supervisor '
-                                            ),
-                                            true
-                                        ),
-                                        HorasRes: RegMaquina.Horas - CountIf(
-                                            Distinct(
-                                                Filter(
-                                                    'Hora X Hora',
-                                                    Orden = RegistroOrden.Orden,
-                                                    Operacion = RegistroOrden.Operacion,
-                                                    Maquina = m
-                                                ),
-                                                'Fecha_Registro_Supervisor '
-                                            ),
-                                            true
-                                        ),
-                                        CantPro: Sum(
-                                            Filter(
-                                                'Hora X Hora',
-                                                Orden = RegistroOrden.Orden,
-                                                Operacion = RegistroOrden.Operacion,
-                                                Maquina = m
-                                            ),
-                                            Cantidad
-                                        ),
-                                        CantDañada: Sum(
-                                            Filter(
-                                                Scrap_1,
-                                                Orden = RegistroOrden.Orden,
-                                                Maquina = m
-                                            ),
-                                            Cantidad
-                                        ),
-                                        Creacion_Fecha: RegMaquina.Fecha
-                                    }
-                                ),
-                                false
-                            )
-                        )
+                                0
+                            ),
+                            Dias: RegistroOrden.Dias,
+                            CantMaquinas: CountIf(
+                                MaquinasOrigin,
+                                true
+                            ),
+                            CantMax: maximas,
+                            CantPro: producidas,
+                            CantDañada: dañadas,
+                            User: RegistroOrden.User
+                        }
                     )
                 );
                 ForAll(
-                    MaquinaRemplazo,
+                    InfoMaquinasViejas,
                     With(
                         {
-                            RegMaquina: ThisRecord,
-                            m: ThisRecord.Maquina,
-                            RegOrden: ThisRecord.Orden,
-                            RegOP: ThisRecord.Operacion
+                            Maquina: ThisRecord,
+                            HorasPro: CountIf(
+                                Distinct(
+                                    Filter(
+                                        'Hora X Hora',
+                                        Orden = RegistroOrden.Orden,
+                                        Operacion = RegistroOrden.Operacion,
+                                        Maquina = ThisRecord.Maquina
+                                    ),
+                                    'Fecha_Registro_Supervisor '
+                                ),
+                                true
+                            ),
+                            cantPro: Sum(
+                                Filter(
+                                    'Hora X Hora',
+                                    Orden = RegistroOrden.Orden,
+                                    Operacion = RegistroOrden.Operacion,
+                                    Maquina = ThisRecord.Maquina
+                                ),
+                                Cantidad
+                            ),
+                            cantDa: Sum(
+                                Filter(
+                                    Scrap_1,
+                                    Orden = RegistroOrden.Orden,
+                                    Maquina = ThisRecord.Maquina
+                                ),
+                                Cantidad
+                            )
                         },
                         Collect(
                             Registro_Orden_MaquinasLists,
                             {
-                                Maquina: RegMaquina.Maquina,
-                                Orden: RegMaquina.Orden,
-                                Operacion: RegMaquina.Operacion,
-                                Prioridad: RegMaquina.Prioridad,
-                                'P/N': LookUp(
-                                    Orden_Maquinas_1,
-                                    Orden = RegOrden && Operacion = RegOP
-                                ).'P/N',
-                                Meta: RegMaquina.Meta,
-                                Horas: RegMaquina.Horas,
-                                HorasProducidas: CountIf(
-                                    Distinct(
-                                        Filter(
-                                            'Hora X Hora',
-                                            Orden = RegOrden,
-                                            Operacion = RegOP,
-                                            Maquina = m
-                                        ),
-                                        'Fecha_Registro_Supervisor '
-                                    ),
-                                    true
-                                ),
-                                HorasRes: RegMaquina.Horas - CountIf(
-                                    Distinct(
-                                        Filter(
-                                            'Hora X Hora',
-                                            Orden = RegOrden,
-                                            Operacion = RegOP,
-                                            Maquina = m
-                                        ),
-                                        'Fecha_Registro_Supervisor '
-                                    ),
-                                    true
-                                ),
-                                CantPro: Sum(
-                                    Filter(
-                                        'Hora X Hora',
-                                        Orden = RegOrden,
-                                        Operacion = RegOP,
-                                        Maquina = m
-                                    ),
-                                    Cantidad
-                                ),
-                                CantDañada: Sum(
-                                    Filter(
-                                        Scrap_1,
-                                        Orden = RegOrden,
-                                        Maquina = m
-                                    ),
-                                    Cantidad
-                                ),
-                                Creacion_Fecha: RegMaquina.Fecha
+                                Creacion_Fecha: Maquina.Fecha,
+                                Maquina: Maquina.Maquina,
+                                Orden: RegistroOrden.Orden,
+                                Operacion: RegistroOrden.Operacion,
+                                'P/N': RegistroOrden.'P/N',
+                                Prioridad: Maquina.Prioridad,
+                                Meta: Maquina.Meta,
+                                Horas: Maquina.Horas,
+                                HorasProducidas: HorasPro,
+                                HorasRes: Maquina.Horas - HorasPro,
+                                CantPro: cantPro,
+                                CantDañada: cantDa
                             }
                         )
                     )
                 );
-                Clear(MaquinaRemplazo)
+                
+                UpdateContext({RegistroOrden: Blank(), MaquinasOrigin: Blank()});
+                Clear(InfoMaquinasViejas)
             PressedBorderColor: =App.Theme.Colors.Darker40
             PressedColor: =Self.Color
             PressedFill: =App.Theme.Colors.Darker40
@@ -2357,10 +2308,11 @@ OrdenMaquinas As screen:
                 TemplatePadding: =0
                 TemplateSize: =155
                 Width: =620
-                Y: =40
+                Y: =38
                 ZIndex: =3
 
                 TextInput10_12 As text:
+                    Align: =Align.Center
                     BorderColor: =RGBA(52, 152, 47, 1)
                     BorderThickness: =2
                     Color: =RGBA(0, 0, 0, 1)
@@ -2892,8 +2844,11 @@ OrdenMaquinas As screen:
                         )
                     )
                 );
+                Clear(MaquinaRemplazo);
+                Clear(OrdenRemplazo);
             Size: =15
             Text: ="Guardar"
+            Visible: =false
             Width: =42
             X: =326
             Y: =267
