@@ -1894,8 +1894,7 @@ OrdenMaquinas As screen:
                             )
                         }
                     );
-                    //Edita el registro de una orden
-                Patch(
+                    Patch(//Edita el registro de una orden
                         Orden_Maquinas_1,
                         LookUp(
                             Orden_Maquinas_1,
@@ -1928,14 +1927,7 @@ OrdenMaquinas As screen:
                     MaquinasList,
                     With(
                         {
-                            m: ThisRecord.Maquina,
-                            crear: IsBlank(
-                                LookUp(
-                                    Orden_MaquinasLists_1,
-                                    Orden = info.Orden && Operacion = info.Operacion && Maquina = ThisRecord.Maquina
-                                )
-                            ),
-                            editar: ThisRecord.Maquina in MaquinasOrigin.Maquina
+                            m: ThisRecord.Maquina
                         },
                         If(
                             IsBlank(
@@ -1977,15 +1969,14 @@ OrdenMaquinas As screen:
                                 InfoMaquinasViejas,
                                 LookUp(
                                     Orden_MaquinasLists_1,
-                                    Orden = info.Orden && Operacion = info.Operacion && Maquina = ThisRecord.Maquina
+                                    Orden = info.Orden && Operacion = info.Operacion && Maquina = m
                                 )
                             );
-                            //Edita el registro de la maquina   
-                Patch(
+                            Patch(//Edita el registro de la maquina
                                 Orden_MaquinasLists_1,
                                 LookUp(
                                     Orden_MaquinasLists_1,
-                                    Orden = info.Orden && Operacion = info.Operacion && Maquina = ThisRecord.Maquina
+                                    Orden = info.Orden && Operacion = info.Operacion && Maquina = m
                                 ),
                                 {
                                     Fecha: Now(),
@@ -2016,15 +2007,14 @@ OrdenMaquinas As screen:
                                 InfoMaquinasViejas,
                                 LookUp(
                                     Orden_MaquinasLists_1,
-                                    Orden = info.Orden && Operacion = info.Operacion && Maquina = ThisRecord.Maquina
+                                    Orden = info.Orden && Operacion = info.Operacion && Maquina = m
                                 )
                             );
-                            //Elimina el registro de la maquina
-                Remove(
+                            Remove(//Elimina el registro de la maquina
                                 Orden_MaquinasLists_1,
                                 LookUp(
                                     Orden_MaquinasLists_1,
-                                    Orden = info.Orden && Operacion = info.Operacion && Maquina = ThisRecord.Maquina
+                                    Orden = info.Orden && Operacion = info.Operacion && Maquina = m
                                 )
                             )
                         )
@@ -2240,8 +2230,12 @@ OrdenMaquinas As screen:
                         )
                     )
                 );
-                
-                UpdateContext({RegistroOrden: Blank(), MaquinasOrigin: Blank()});
+                UpdateContext(
+                    {
+                        RegistroOrden: Blank(),
+                        MaquinasOrigin: Blank()
+                    }
+                );
                 Clear(InfoMaquinasViejas)
             PressedBorderColor: =App.Theme.Colors.Darker40
             PressedColor: =Self.Color
@@ -2812,12 +2806,7 @@ OrdenMaquinas As screen:
                                     ).Value
                                 ),
                                 ORD: ThisRecord.Orden,
-                                OP: ThisRecord.Operacion,
-                                Maquinas: Filter(
-                                    Orden_MaquinasLists_1,
-                                    Orden = ThisRecord.Orden,
-                                    Operacion = ThisRecord.Operacion
-                                )
+                                OP: ThisRecord.Operacion
                             },
                             Patch(
                                 Orden_Maquinas_1,
@@ -2827,17 +2816,26 @@ OrdenMaquinas As screen:
                                 ),
                                 {Prioridad: NewPri}
                             );
-                            ForAll(
-                                Maquinas,
-                                With(
-                                    {m: ThisRecord.Maquina},
-                                    Patch(
+                            With(
+                                {
+                                    Maquinas: Filter(
                                         Orden_MaquinasLists_1,
-                                        LookUp(
+                                        Orden = ThisRecord.Orden,
+                                        Operacion = ThisRecord.Operacion
+                                    )
+                                },
+                                ForAll(
+                                    Maquinas,
+                                    With(
+                                        {m: ThisRecord.Maquina},
+                                        Patch(
                                             Orden_MaquinasLists_1,
-                                            Orden = ORD && Operacion = OP && Maquina = ThisRecord.Maquina
-                                        ),
-                                        {Prioridad: NewPri}
+                                            LookUp(
+                                                Orden_MaquinasLists_1,
+                                                Orden = ORD && Operacion = OP && Maquina = m
+                                            ),
+                                            {Prioridad: NewPri}
+                                        )
                                     )
                                 )
                             )
