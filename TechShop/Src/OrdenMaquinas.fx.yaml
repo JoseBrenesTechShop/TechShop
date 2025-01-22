@@ -2181,51 +2181,62 @@ OrdenMaquinas As screen:
                     With(
                         {
                             Maquina: ThisRecord,
-                            HorasPro: CountIf(
-                                Distinct(
-                                    Filter(
-                                        'Hora X Hora',
-                                        Orden = RegistroOrden.Orden,
-                                        Operacion = RegistroOrden.Operacion,
-                                        Maquina = ThisRecord.Maquina
-                                    ),
-                                    'Fecha_Registro_Supervisor '
-                                ),
-                                true
-                            ),
-                            cantPro: Sum(
-                                Filter(
-                                    'Hora X Hora',
-                                    Orden = RegistroOrden.Orden,
-                                    Operacion = RegistroOrden.Operacion,
-                                    Maquina = ThisRecord.Maquina
-                                ),
-                                Cantidad
-                            ),
-                            cantDa: Sum(
-                                Filter(
-                                    Scrap_1,
-                                    Orden = RegistroOrden.Orden,
-                                    Maquina = ThisRecord.Maquina
-                                ),
-                                Cantidad
-                            )
+                            m: ThisRecord.Maquina,
+                            ORD: ThisRecord.Orden, 
+                            OP: ThisRecord.Operacion
                         },
                         Collect(
                             Registro_Orden_MaquinasLists,
                             {
                                 Creacion_Fecha: Maquina.Fecha,
                                 Maquina: Maquina.Maquina,
-                                Orden: RegistroOrden.Orden,
-                                Operacion: RegistroOrden.Operacion,
+                                Orden: ORD,
+                                Operacion: OP,
                                 'P/N': RegistroOrden.'P/N',
                                 Prioridad: Maquina.Prioridad,
                                 Meta: Maquina.Meta,
                                 Horas: Maquina.Horas,
-                                HorasProducidas: HorasPro,
-                                HorasRes: Maquina.Horas - HorasPro,
-                                CantPro: cantPro,
-                                CantDañada: cantDa
+                                HorasProducidas: CountIf(
+                                    Distinct(
+                                        Filter(
+                                            'Hora X Hora',
+                                            Orden = ORD,
+                                            Operacion = OP,
+                                            Maquina = m
+                                        ),
+                                        'Fecha_Registro_Supervisor '
+                                    ),
+                                    true
+                                ),
+                                HorasRes: Maquina.Horas - CountIf(
+                                    Distinct(
+                                        Filter(
+                                            'Hora X Hora',
+                                            Orden = ORD,
+                                            Operacion = OP,
+                                            Maquina = m
+                                        ),
+                                        'Fecha_Registro_Supervisor '
+                                    ),
+                                    true
+                                ),
+                                CantPro: Sum(
+                                    Filter(
+                                        'Hora X Hora',
+                                        Orden = ORD,
+                                        Operacion = OP,
+                                        Maquina = m
+                                    ),
+                                    Cantidad
+                                ),
+                                CantDañada: Sum(
+                                    Filter(
+                                        Scrap_1,
+                                        Orden = ORD,
+                                        Maquina = m
+                                    ),
+                                    Cantidad
+                                )
                             }
                         )
                     )
