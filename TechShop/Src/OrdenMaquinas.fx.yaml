@@ -3,41 +3,7 @@ OrdenMaquinas As screen:
     Fill: =Color.White
     ImagePosition: =ImagePosition.Fill
     LoadingSpinnerColor: =App.Theme.Colors.Primary
-    OnVisible: |
-        =// Inicializa la colección de prioridades con los valores mínimos
-        ClearCollect(
-            Prioridades,
-            [
-                1,
-                2,
-                3,
-                4,
-                5,
-                6
-            ]
-        );
-        // Obtiene la prioridad más alta actualmente asignada en la tabla de órdenes
-        Set(
-            MaxPriority,
-            Max(
-                Orden_Maquinas_1,
-                Prioridad
-            )
-        );
-        // Si la prioridad más alta es mayor que 6, agrega las prioridades adicionales a la colección
-        If(
-            MaxPriority > 6,
-            ForAll(
-                Sequence(
-                    MaxPriority - 6,
-                    7
-                ),// Crea una secuencia de números desde 7 hasta MaxPriority
-                Collect(
-                    Prioridades,
-                    Value
-                )
-            )
-        );
+    OnVisible: =Select(btn_Prioridades_OM)
 
     ScreenContainer10_2 As groupContainer.verticalAutoLayoutContainer:
         DropShadow: =DropShadow.Light
@@ -1670,7 +1636,7 @@ OrdenMaquinas As screen:
                         Y: =380
                         ZIndex: =80
 
-                    btn_Guardar_EM_13 As button:
+                    btn_Prioridades_OM As button:
                         BorderColor: =App.Theme.Colors.Primary
                         BorderStyle: =BorderStyle.None
                         DisabledBorderColor: =RGBA(244, 244, 244, 1)
@@ -1684,116 +1650,41 @@ OrdenMaquinas As screen:
                         HoverBorderColor: =App.Theme.Colors.Darker10
                         HoverColor: =RGBA(255, 255, 255, 1)
                         HoverFill: =RGBA(102, 182, 227, 1)
-                        OnSelect: |-
-                            =If(
-                                IsBlank(glr_Ordenes_OM.Selected),
-                                UpdateContext(
-                                    {
-                                        Aviso: true,
-                                        TextoAdvertencia: "Debe selecionar una Orden"
-                                    }
-                                ),
-                                IsBlank(drp_Op_OM.SelectedText.Value),
-                                UpdateContext(
-                                    {
-                                        Aviso: true,
-                                        TextoAdvertencia: "Debe selecionar la Operacion"
-                                    }
-                                ),
-                                IsBlank(txt_Meta_OM.Text) || txt_Meta_OM.Text = "0",
-                                UpdateContext(
-                                    {
-                                        Aviso: true,
-                                        TextoAdvertencia: "La meta debe ser mayor a 0"
-                                    }
-                                ),
-                                IsBlank(drp_Pri_OM.SelectedText.Value),
-                                UpdateContext(
-                                    {
-                                        Aviso: true,
-                                        TextoAdvertencia: "Debe seleccionar la prioridad de la Orden"
-                                    }
-                                ),
-                                drp_Pri_OM.SelectedText.Value = "1" && IsBlank(dp_Fecha_OM.SelectedDate),
-                                UpdateContext(
-                                    {
-                                        Aviso: true,
-                                        TextoAdvertencia: "Debe seleccionar la fecha de inico"
-                                    }
-                                ),
-                                CountIf(
-                                    MaquinasList,
-                                    true
-                                ) = 0,
-                                UpdateContext(
-                                    {
-                                        Aviso: true,
-                                        TextoAdvertencia: "Debe seleccionar al menos una maquina"
-                                    }
-                                ),
-                                UpdateContext(
-                                    {
-                                        StringMaquinas: Concat(
-                                            ForAll(
-                                                MaquinasList,
-                                                With(
-                                                    {
-                                                        item: ThisRecord,
-                                                        thisMaquina: ThisRecord.Maquina
-                                                    },
-                                                    If(
-                                                        Not(
-                                                            IsBlank(
-                                                                LookUp(
-                                                                    Orden_MaquinasLists_1,
-                                                                    Maquina = thisMaquina && Prioridad = Value(drp_Pri_OM.SelectedText.Value) && (Orden <> info.Orden || Operacion <> info.Operacion)
-                                                                )
-                                                            )
-                                                        ) && Not(
-                                                            thisMaquina in [
-                                                                "SIERRABHERINGER1",
-                                                                "SIERRABHERINGER2"
-                                                            ]
-                                                        ),
-                                                        item.Maquina & ", ",
-                                                        ""
-                                                    )
-                                                )
-                                            ),
-                                            ThisRecord.Value
-                                        ),
-                                        Guardar: true
-                                    }
-                                );
-                                Collect(
-                                    MaquinaRemplazo,
-                                    ForAll(
-                                        MaquinasList,
-                                        With(
-                                            {thisMaquina: ThisRecord.Maquina},
-                                            If(
-                                                Not(
-                                                    IsBlank(
-                                                        LookUp(
-                                                            Orden_MaquinasLists_1,
-                                                            Maquina = thisMaquina && Prioridad = Value(drp_Pri_OM.SelectedText.Value) && (Orden <> info.Orden || Operacion <> info.Operacion)
-                                                        )
-                                                    )
-                                                ) && Not(
-                                                    thisMaquina in [
-                                                        "SIERRABHERINGER1",
-                                                        "SIERRABHERINGER2"
-                                                    ]
-                                                ),
-                                                LookUp(
-                                                    Orden_MaquinasLists_1,
-                                                    Maquina = thisMaquina && Prioridad = Value(drp_Pri_OM.SelectedText.Value) && (Orden <> info.Orden || Operacion <> info.Operacion)
-                                                )
-                                            )
-                                        )
+                        OnSelect: |
+                            =// Inicializa la colección de prioridades con los valores mínimos
+                            ClearCollect(
+                                Prioridades,
+                                [
+                                    1,
+                                    2,
+                                    3,
+                                    4,
+                                    5,
+                                    6
+                                ]
+                            );
+                            // Obtiene la prioridad más alta actualmente asignada en la tabla de órdenes
+                            UpdateContext({
+                                MaxPriority:
+                                Max(
+                                    Orden_Maquinas_1,
+                                    Prioridad
+                                )}
+                            );
+                            // Si la prioridad más alta es mayor que 6, agrega las prioridades adicionales a la colección
+                            If(
+                                MaxPriority > 6,
+                                ForAll(
+                                    Sequence(
+                                        MaxPriority - 6,
+                                        7
+                                    ),// Crea una secuencia de números desde 7 hasta MaxPriority
+                                    Collect(
+                                        Prioridades,
+                                        Value
                                     )
                                 )
-                            )
+                            );
                         PressedBorderColor: =App.Theme.Colors.Darker40
                         PressedColor: =Self.Color
                         PressedFill: =App.Theme.Colors.Darker40
@@ -1851,7 +1742,7 @@ OrdenMaquinas As screen:
             FontWeight: =FontWeight.Semibold
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(21, 68, 18, 1)
-            OnSelect: |
+            OnSelect: |-
                 =Select(btn_OrdenesAfectadas_OM);
                 //Crea la orden en caso de no existir. Si ya exite la edita
                 If(
@@ -2034,6 +1925,7 @@ OrdenMaquinas As screen:
                 Reset(glr_Ordenes_OM);
                 UpdateContext({Guardar: false});
                 UpdateContext({Disable: false});
+                Select(btn_Prioridades_OM)
             Size: =15
             Text: ="Guardar"
             X: =187
@@ -2259,7 +2151,8 @@ OrdenMaquinas As screen:
                         MaquinasOrigin: Blank()
                     }
                 );
-                Clear(InfoMaquinasViejas)
+                Clear(InfoMaquinasViejas);
+                Select(btn_Prioridades_OM)
             PressedBorderColor: =App.Theme.Colors.Darker40
             PressedColor: =Self.Color
             PressedFill: =App.Theme.Colors.Darker40
@@ -2781,7 +2674,7 @@ OrdenMaquinas As screen:
             FontWeight: =FontWeight.Semibold
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(21, 68, 18, 1)
-            OnSelect: |
+            OnSelect: |-
                 =If(
                     !IsEmpty(MaquinaRemplazo),
                     ForAll(
@@ -3116,6 +3009,7 @@ OrdenMaquinas As screen:
                 Clear(infoOrdenAntigua);
                 Clear(MaquinaRemplazo);
                 Clear(OrdenRemplazo);
+                Select(btn_Prioridades_OM)
             Size: =15
             Text: ="Guardar"
             Visible: =false
