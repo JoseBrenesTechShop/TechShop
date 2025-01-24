@@ -1994,226 +1994,8 @@ Planning_Orden As screen:
             Height: =50
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(171, 129, 5, 1)
-            OnSelect: |
-                =With(
-                    {
-                        Operaciones: Filter(
-                            Orden_Maquinas_1,
-                            Orden = ItemEliminar.Orden
-                        )
-                    },
-                    ForAll(
-                        Operaciones,
-                        With(
-                            {
-                                ORD: ThisRecord.Orden,
-                                OP: ThisRecord.Operacion
-                            },
-                            Patch(
-                                Orden_Ejecucion,
-                                LookUp(
-                                    Orden_Ejecucion,
-                                    Orden = ORD && Operacion = OP
-                                ),
-                                {Estado_Orden: "Finalizado"}
-                            );
-                            Collect(
-                                infoOrdenEliminar,
-                                LookUp(
-                                    Orden_Maquinas_1,
-                                    Orden = ORD && Operacion = OP
-                                )
-                            );
-                            Remove(
-                                Orden_Maquinas_1,
-                                LookUp(
-                                    Orden_Maquinas_1,
-                                    Orden = ORD && Operacion = OP
-                                )
-                            );
-                            With(
-                                {
-                                    MaquinasEliminar: Filter(
-                                        Orden_MaquinasLists_1,
-                                        Orden = ORD,
-                                        Operacion = OP
-                                    )
-                                },
-                                ForAll(
-                                    MaquinasEliminar,
-                                    Collect(
-                                        InfoMaquinasEliminar,
-                                        ThisRecord
-                                    );
-                                    Remove(
-                                        Orden_MaquinasLists_1,
-                                        ThisRecord
-                                    )
-                                )
-                            )
-                        )
-                    )
-                );
-                ForAll(
-                    infoOrdenEliminar,
-                    With(
-                        {
-                            maximas: LookUp(
-                                Orden_Ejecucion,
-                                Orden = ThisRecord.Orden && Operacion = ThisRecord.Operacion
-                            ).Cantidad,
-                            producidas: LookUp(
-                                Orden_Ejecucion,
-                                Orden = ThisRecord.Orden && Operacion = ThisRecord.Operacion
-                            ).CantidadTotalProducida,
-                            dañadas: Sum(
-                                Filter(
-                                    Scrap_1,
-                                    Orden = ThisRecord.Orden
-                                ),
-                                Cantidad
-                            ),
-                            O: ThisRecord,
-                            Z: ThisRecord.Zona,
-                            J: ThisRecord.Jornada,
-                            ORD: ThisRecord.Orden,
-                            OP: ThisRecord.Operacion
-                        },
-                        Collect(
-                            Registro_Orden_Maquinas,
-                            {
-                                Creacion_Fecha: O.'Fecha de creación',
-                                Orden: O.Orden,
-                                Operacion: O.Operacion,
-                                'P/N': O.'P/N',
-                                Prioridad: O.Prioridad,
-                                Meta: O.Meta,
-                                Fecha_inicio: O.Fecha_Inicio,
-                                Fecha_Fin: O.Fecha_Fin,
-                                Fecha_Fin_Aprox: O.Fecha_Fin_Aprox,
-                                Jornada: LookUp(
-                                    JornadaPlannings,
-                                    Valor = J
-                                ).Texto,
-                                Zona: O.Zona,
-                                Horas: O.Horas,
-                                HorasRestantes: If(
-                                    Value(O.Meta) > 0,
-                                    RoundUp(
-                                        ((maximas - (producidas - dañadas)) / (O.Meta * LookUp(
-                                            ZonaPlannings,
-                                            Texto = Z,
-                                            Valor
-                                        )) + LookUp(
-                                            Orden_Ejecucion,
-                                            Orden = ORD && Operacion = OP
-                                        ).TiempoSetup) / Max(
-                                            1,
-                                            CountRows(
-                                                Filter(
-                                                    Orden_MaquinasLists_1,
-                                                    Orden = ORD,
-                                                    Operacion = OP
-                                                )
-                                            )
-                                        ),
-                                        0
-                                    ),
-                                    0
-                                ),
-                                Dias: O.Dias,
-                                CantMaquinas: CountIf(
-                                    Filter(
-                                        Orden_MaquinasLists_1,
-                                        Orden = ORD,
-                                        Operacion = OP
-                                    ),
-                                    true
-                                ),
-                                CantMax: maximas,
-                                CantPro: producidas,
-                                CantDañada: dañadas,
-                                User: O.User
-                            }
-                        )
-                    )
-                );
-                ForAll(
-                    InfoMaquinasEliminar,
-                    With(
-                        {
-                            Maquina: ThisRecord,
-                            m: ThisRecord.Maquina,
-                            ORD: ThisRecord.Orden,
-                            OP: ThisRecord.Operacion
-                        },
-                        Collect(
-                            Registro_Orden_MaquinasLists,
-                            {
-                                Creacion_Fecha: Maquina.Fecha,
-                                Maquina: Maquina.Maquina,
-                                Orden: ORD,
-                                Operacion: OP,
-                                'P/N': LookUp(
-                                    infoOrdenAntigua,
-                                    Orden = ORD && Operacion = OP
-                                ).'P/N',
-                                Prioridad: Maquina.Prioridad,
-                                Meta: Maquina.Meta,
-                                Horas: Maquina.Horas,
-                                HorasProducidas: CountIf(
-                                    Distinct(
-                                        Filter(
-                                            'Hora X Hora',
-                                            Orden = ORD,
-                                            Operacion = OP,
-                                            Maquina = m
-                                        ),
-                                        'Fecha_Registro_Supervisor '
-                                    ),
-                                    true
-                                ),
-                                HorasRes: Maquina.Horas - CountIf(
-                                    Distinct(
-                                        Filter(
-                                            'Hora X Hora',
-                                            Orden = ORD,
-                                            Operacion = OP,
-                                            Maquina = m
-                                        ),
-                                        'Fecha_Registro_Supervisor '
-                                    ),
-                                    true
-                                ),
-                                CantPro: Sum(
-                                    Filter(
-                                        'Hora X Hora',
-                                        Orden = ORD,
-                                        Operacion = OP,
-                                        Maquina = m
-                                    ),
-                                    Cantidad
-                                ),
-                                CantDañada: Sum(
-                                    Filter(
-                                        Scrap_1,
-                                        Orden = ORD,
-                                        Maquina = m
-                                    ),
-                                    Cantidad
-                                )
-                            }
-                        )
-                    )
-                );
-                Clear(InfoMaquinasEliminar);
-                Clear(infoOrdenEliminar);
-                UpdateContext(
-                    {
-                        Eliminar: false,
-                        ItemEliminar: Blank()
-                    }
-                );
+            OnSelect: |-
+                =UpdateContext({FinOrden: true})
             Size: =15
             Text: ="Finalizar Orden"
             Width: =200
@@ -2248,209 +2030,587 @@ Planning_Orden As screen:
             Height: =50
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(21, 68, 18, 1)
-            OnSelect: |
-                =Patch(
-                    Orden_Ejecucion,
-                    LookUp(
-                        Orden_Ejecucion,
-                        Orden = ItemEliminar.Orden && Operacion = ItemEliminar.Operacion
-                    ),
-                    {Estado_Orden: "Finalizado"}
-                );
-                Remove(
-                    Orden_Maquinas_1,
-                    ItemEliminar
-                );
-                With(
-                    {
-                        MaquinasEliminar: Filter(
-                            Orden_MaquinasLists_1,
-                            Orden = ItemEliminar.Orden,
-                            Operacion = ItemEliminar.Operacion
-                        )
-                    },
-                    ForAll(
-                        MaquinasEliminar,
-                        Collect(
-                            InfoMaquinasEliminar,
-                            ThisRecord
-                        );
-                        Remove(
-                            Orden_MaquinasLists_1,
-                            ThisRecord
-                        )
-                    )
-                );
-                With(
-                    {
-                        maximas: LookUp(
-                            Orden_Ejecucion,
-                            Orden = ItemEliminar.Orden && Operacion = ItemEliminar.Operacion
-                        ).Cantidad,
-                        producidas: LookUp(
-                            Orden_Ejecucion,
-                            Orden = ItemEliminar.Orden && Operacion = ItemEliminar.Operacion
-                        ).CantidadTotalProducida,
-                        dañadas: Sum(
-                            Filter(
-                                Scrap_1,
-                                Orden = ItemEliminar.Orden
-                            ),
-                            Cantidad
-                        )
-                    },
-                    Collect(
-                        Registro_Orden_Maquinas,
-                        {
-                            Creacion_Fecha: ItemEliminar.'Fecha de creación',
-                            Orden: ItemEliminar.Orden,
-                            Operacion: ItemEliminar.Operacion,
-                            'P/N': ItemEliminar.'P/N',
-                            Prioridad: ItemEliminar.Prioridad,
-                            Meta: ItemEliminar.Meta,
-                            Fecha_inicio: ItemEliminar.Fecha_Inicio,
-                            Fecha_Fin: ItemEliminar.Fecha_Fin,
-                            Fecha_Fin_Aprox: ItemEliminar.Fecha_Fin_Aprox,
-                            Jornada: LookUp(
-                                JornadaPlannings,
-                                Valor = ItemEliminar.Jornada
-                            ).Texto,
-                            Zona: ItemEliminar.Zona,
-                            Horas: ItemEliminar.Horas,
-                            HorasRestantes: If(
-                                Value(ItemEliminar.Meta) > 0,
-                                RoundUp(
-                                    ((maximas - (producidas - dañadas)) / (ItemEliminar.Meta * LookUp(
-                                        ZonaPlannings,
-                                        Texto = ItemEliminar.Zona,
-                                        Valor
-                                    )) + LookUp(
-                                        Orden_Ejecucion,
-                                        Orden = ItemEliminar.Orden && Operacion = ItemEliminar.Operacion
-                                    ).TiempoSetup) / Max(
-                                        1,
-                                        CountRows(
-                                            Filter(
-                                                Orden_MaquinasLists_1,
-                                                Orden = ItemEliminar.Orden,
-                                                Operacion = ItemEliminar.Operacion
-                                            )
-                                        )
-                                    ),
-                                    0
-                                ),
-                                0
-                            ),
-                            Dias: ItemEliminar.Dias,
-                            CantMaquinas: CountIf(
-                                Filter(
-                                    Orden_MaquinasLists_1,
-                                    Orden = ItemEliminar.Orden,
-                                    Operacion = ItemEliminar.Operacion
-                                ),
-                                true
-                            ),
-                            CantMax: maximas,
-                            CantPro: producidas,
-                            CantDañada: dañadas,
-                            User: ItemEliminar.User
-                        }
-                    )
-                );
-                ForAll(
-                    InfoMaquinasEliminar,
-                    With(
-                        {
-                            Maquina: ThisRecord,
-                            m: ThisRecord.Maquina,
-                            ORD: ThisRecord.Orden,
-                            OP: ThisRecord.Operacion,
-                            HorasPro: CountIf(
-                                Distinct(
-                                    Filter(
-                                        'Hora X Hora',
-                                        Orden = ThisRecord.Orden,
-                                        Operacion = ThisRecord.Operacion,
-                                        Maquina = ThisRecord.Maquina
-                                    ),
-                                    'Fecha_Registro_Supervisor '
-                                ),
-                                true
-                            )
-                        },
-                        Collect(
-                            Registro_Orden_MaquinasLists,
-                            {
-                                Creacion_Fecha: Maquina.Fecha,
-                                Maquina: Maquina.Maquina,
-                                Orden: ORD,
-                                Operacion: OP,
-                                'P/N': ItemEliminar.'P/N',
-                                Prioridad: Maquina.Prioridad,
-                                Meta: Maquina.Meta,
-                                Horas: Maquina.Horas,
-                                HorasProducidas: CountIf(
-                                    Distinct(
-                                        Filter(
-                                            'Hora X Hora',
-                                            Orden = ORD,
-                                            Operacion = OP,
-                                            Maquina = m
-                                        ),
-                                        'Fecha_Registro_Supervisor '
-                                    ),
-                                    true
-                                ),
-                                HorasRes: Maquina.Horas - CountIf(
-                                    Distinct(
-                                        Filter(
-                                            'Hora X Hora',
-                                            Orden = ORD,
-                                            Operacion = OP,
-                                            Maquina = m
-                                        ),
-                                        'Fecha_Registro_Supervisor '
-                                    ),
-                                    true
-                                ),
-                                CantPro: Sum(
-                                    Filter(
-                                        'Hora X Hora',
-                                        Orden = ORD,
-                                        Operacion = OP,
-                                        Maquina = m
-                                    ),
-                                    Cantidad
-                                ),
-                                CantDañada: Sum(
-                                    Filter(
-                                        Scrap_1,
-                                        Orden = ORD,
-                                        Maquina = m
-                                    ),
-                                    Cantidad
-                                )
-                            }
-                        )
-                    )
-                );
-                UpdateContext(
-                    {
-                        ItemEliminar: Blank(),
-                        MaquinasOrigin: Blank()
-                    }
-                );
-                Clear(InfoMaquinasEliminar);
-                UpdateContext(
-                    {
-                        Eliminar: false,
-                        ItemEliminar: Blank()
-                    }
-                );
+            OnSelect: |-
+                =UpdateContext({FinOperacion: true})
             Size: =15
             Text: ="Finalizar Operacion"
             Width: =200
             X: =360
             Y: =20
             ZIndex: =75
+
+        Container44 As groupContainer.manualLayoutContainer:
+            BorderColor: =RGBA(52, 152, 47, 1)
+            BorderThickness: =3
+            DropShadow: =DropShadow.ExtraBold
+            Fill: =RGBA(255, 255, 255, 1)
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Visible: =FinOperacion
+            Width: =550
+            X: =15
+            Y: =10
+            ZIndex: =76
+
+            btn_ContinuarAviso_HxH_21 As button:
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                DisabledFill: =RGBA(244, 244, 244, 1)
+                Fill: =RGBA(52, 152, 47, 1)
+                FontWeight: =FontWeight.Semibold
+                Height: =50
+                HoverColor: =RGBA(255, 255, 255, 1)
+                HoverFill: =RGBA(21, 68, 18, 1)
+                OnSelect: |
+                    =Patch(
+                        Orden_Ejecucion,
+                        LookUp(
+                            Orden_Ejecucion,
+                            Orden = ItemEliminar.Orden && Operacion = ItemEliminar.Operacion
+                        ),
+                        {Estado_Orden: "Finalizado"}
+                    );
+                    Remove(
+                        Orden_Maquinas_1,
+                        ItemEliminar
+                    );
+                    With(
+                        {
+                            MaquinasEliminar: Filter(
+                                Orden_MaquinasLists_1,
+                                Orden = ItemEliminar.Orden,
+                                Operacion = ItemEliminar.Operacion
+                            )
+                        },
+                        ForAll(
+                            MaquinasEliminar,
+                            Collect(
+                                InfoMaquinasEliminar,
+                                ThisRecord
+                            );
+                            Remove(
+                                Orden_MaquinasLists_1,
+                                ThisRecord
+                            )
+                        )
+                    );
+                    With(
+                        {
+                            maximas: LookUp(
+                                Orden_Ejecucion,
+                                Orden = ItemEliminar.Orden && Operacion = ItemEliminar.Operacion
+                            ).Cantidad,
+                            producidas: LookUp(
+                                Orden_Ejecucion,
+                                Orden = ItemEliminar.Orden && Operacion = ItemEliminar.Operacion
+                            ).CantidadTotalProducida,
+                            dañadas: Sum(
+                                Filter(
+                                    Scrap_1,
+                                    Orden = ItemEliminar.Orden
+                                ),
+                                Cantidad
+                            )
+                        },
+                        Collect(
+                            Registro_Orden_Maquinas,
+                            {
+                                Creacion_Fecha: ItemEliminar.'Fecha de creación',
+                                Orden: ItemEliminar.Orden,
+                                Operacion: ItemEliminar.Operacion,
+                                'P/N': ItemEliminar.'P/N',
+                                Prioridad: ItemEliminar.Prioridad,
+                                Meta: ItemEliminar.Meta,
+                                Fecha_inicio: ItemEliminar.Fecha_Inicio,
+                                Fecha_Fin: ItemEliminar.Fecha_Fin,
+                                Fecha_Fin_Aprox: ItemEliminar.Fecha_Fin_Aprox,
+                                Jornada: LookUp(
+                                    JornadaPlannings,
+                                    Valor = ItemEliminar.Jornada
+                                ).Texto,
+                                Zona: ItemEliminar.Zona,
+                                Horas: ItemEliminar.Horas,
+                                HorasRestantes: If(
+                                    Value(ItemEliminar.Meta) > 0,
+                                    RoundUp(
+                                        ((maximas - (producidas - dañadas)) / (ItemEliminar.Meta * LookUp(
+                                            ZonaPlannings,
+                                            Texto = ItemEliminar.Zona,
+                                            Valor
+                                        )) + LookUp(
+                                            Orden_Ejecucion,
+                                            Orden = ItemEliminar.Orden && Operacion = ItemEliminar.Operacion
+                                        ).TiempoSetup) / Max(
+                                            1,
+                                            CountRows(
+                                                Filter(
+                                                    Orden_MaquinasLists_1,
+                                                    Orden = ItemEliminar.Orden,
+                                                    Operacion = ItemEliminar.Operacion
+                                                )
+                                            )
+                                        ),
+                                        0
+                                    ),
+                                    0
+                                ),
+                                Dias: ItemEliminar.Dias,
+                                CantMaquinas: CountIf(
+                                    Filter(
+                                        Orden_MaquinasLists_1,
+                                        Orden = ItemEliminar.Orden,
+                                        Operacion = ItemEliminar.Operacion
+                                    ),
+                                    true
+                                ),
+                                CantMax: maximas,
+                                CantPro: producidas,
+                                CantDañada: dañadas,
+                                User: ItemEliminar.User
+                            }
+                        )
+                    );
+                    ForAll(
+                        InfoMaquinasEliminar,
+                        With(
+                            {
+                                Maquina: ThisRecord,
+                                m: ThisRecord.Maquina,
+                                ORD: ThisRecord.Orden,
+                                OP: ThisRecord.Operacion,
+                                HorasPro: CountIf(
+                                    Distinct(
+                                        Filter(
+                                            'Hora X Hora',
+                                            Orden = ThisRecord.Orden,
+                                            Operacion = ThisRecord.Operacion,
+                                            Maquina = ThisRecord.Maquina
+                                        ),
+                                        'Fecha_Registro_Supervisor '
+                                    ),
+                                    true
+                                )
+                            },
+                            Collect(
+                                Registro_Orden_MaquinasLists,
+                                {
+                                    Creacion_Fecha: Maquina.Fecha,
+                                    Maquina: Maquina.Maquina,
+                                    Orden: ORD,
+                                    Operacion: OP,
+                                    'P/N': ItemEliminar.'P/N',
+                                    Prioridad: Maquina.Prioridad,
+                                    Meta: Maquina.Meta,
+                                    Horas: Maquina.Horas,
+                                    HorasProducidas: CountIf(
+                                        Distinct(
+                                            Filter(
+                                                'Hora X Hora',
+                                                Orden = ORD,
+                                                Operacion = OP,
+                                                Maquina = m
+                                            ),
+                                            'Fecha_Registro_Supervisor '
+                                        ),
+                                        true
+                                    ),
+                                    HorasRes: Maquina.Horas - CountIf(
+                                        Distinct(
+                                            Filter(
+                                                'Hora X Hora',
+                                                Orden = ORD,
+                                                Operacion = OP,
+                                                Maquina = m
+                                            ),
+                                            'Fecha_Registro_Supervisor '
+                                        ),
+                                        true
+                                    ),
+                                    CantPro: Sum(
+                                        Filter(
+                                            'Hora X Hora',
+                                            Orden = ORD,
+                                            Operacion = OP,
+                                            Maquina = m
+                                        ),
+                                        Cantidad
+                                    ),
+                                    CantDañada: Sum(
+                                        Filter(
+                                            Scrap_1,
+                                            Orden = ORD,
+                                            Maquina = m
+                                        ),
+                                        Cantidad
+                                    )
+                                }
+                            )
+                        )
+                    );
+                    UpdateContext(
+                        {
+                            ItemEliminar: Blank(),
+                            MaquinasOrigin: Blank()
+                        }
+                    );
+                    Clear(InfoMaquinasEliminar);
+                    UpdateContext(
+                        {
+                            Eliminar: false,
+                            ItemEliminar: Blank()
+                        }
+                    );
+                Size: =15
+                Text: ="Finalizar Operacion"
+                Width: =200
+                X: =290
+                Y: =135
+                ZIndex: =1
+
+            btn_ContinuarAviso_HxH_22 As button:
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                DisabledFill: =RGBA(244, 244, 244, 1)
+                Fill: =RGBA(215, 58, 60, 1)
+                FontWeight: =FontWeight.Semibold
+                Height: =50
+                HoverColor: =RGBA(255, 255, 255, 1)
+                HoverFill: =RGBA(132, 40, 38, 1)
+                OnSelect: |-
+                    =UpdateContext({FinOperacion: false});
+                Size: =15
+                Text: ="Cancelar"
+                Width: =200
+                X: =60
+                Y: =135
+                ZIndex: =2
+
+            TextInput10 As text:
+                Align: =Align.Center
+                BorderColor: =App.Theme.Colors.Darker40
+                BorderThickness: =2
+                Color: =RGBA(0, 0, 0, 1)
+                Default: |-
+                    ="¿Esta seguro/a de finalizar la Operacion: " & ItemEliminar.Operacion & " de la Orden: " & ItemEliminar.Orden & "?"
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                DisabledFill: =RGBA(244, 244, 244, 1)
+                DisplayMode: =DisplayMode.View
+                FocusedBorderThickness: =4
+                Font: =App.Theme.Font
+                FontWeight: =FontWeight.Semibold
+                Height: =87
+                HoverBorderColor: =App.Theme.Colors.Darker40
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =App.Theme.Colors.Lighter70
+                Mode: =TextMode.MultiLine
+                Size: =18
+                Width: =500
+                X: =25
+                Y: =25
+                ZIndex: =3
+
+        Container44_1 As groupContainer.manualLayoutContainer:
+            BorderColor: =RGBA(255, 191, 0, 1)
+            BorderThickness: =3
+            DropShadow: =DropShadow.ExtraBold
+            Fill: =RGBA(255, 255, 255, 1)
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Visible: =FinOrden
+            Width: =550
+            X: =15
+            Y: =10
+            ZIndex: =77
+
+            btn_ContinuarAviso_HxH_24 As button:
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                DisabledFill: =RGBA(244, 244, 244, 1)
+                Fill: =RGBA(215, 58, 60, 1)
+                FontWeight: =FontWeight.Semibold
+                Height: =50
+                HoverColor: =RGBA(255, 255, 255, 1)
+                HoverFill: =RGBA(132, 40, 38, 1)
+                OnSelect: |-
+                    =UpdateContext({FinOrden: false});
+                Size: =15
+                Text: ="Cancelar"
+                Width: =200
+                X: =60
+                Y: =135
+                ZIndex: =2
+
+            TextInput10_1 As text:
+                Align: =Align.Center
+                BorderColor: =App.Theme.Colors.Darker40
+                BorderThickness: =2
+                Color: =RGBA(0, 0, 0, 1)
+                Default: |-
+                    ="¿Esta seguro/a de finalizar todas las Operaciones de la Orden: " & ItemEliminar.Orden & "?"
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                DisabledFill: =RGBA(244, 244, 244, 1)
+                DisplayMode: =DisplayMode.View
+                FocusedBorderThickness: =4
+                Font: =App.Theme.Font
+                FontWeight: =FontWeight.Semibold
+                Height: =87
+                HoverBorderColor: =App.Theme.Colors.Darker40
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =App.Theme.Colors.Lighter70
+                Mode: =TextMode.MultiLine
+                Size: =18
+                Width: =500
+                X: =25
+                Y: =25
+                ZIndex: =3
+
+            btn_ContinuarAviso_HxH_23 As button:
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                DisabledFill: =RGBA(244, 244, 244, 1)
+                Fill: =RGBA(255, 191, 0, 1)
+                FontWeight: =FontWeight.Semibold
+                Height: =50
+                HoverColor: =RGBA(255, 255, 255, 1)
+                HoverFill: =RGBA(171, 129, 5, 1)
+                OnSelect: |
+                    =With(
+                        {
+                            Operaciones: Filter(
+                                Orden_Ejecucion,
+                                Orden = ItemEliminar.Orden
+                            ).Operacion
+                        },
+                        ForAll(
+                            Operaciones,
+                            With(
+                                {
+                                    ORD: ItemEliminar.Orden,
+                                    OP: ThisRecord.Operacion
+                                },
+                                Patch(
+                                    Orden_Ejecucion,
+                                    LookUp(
+                                        Orden_Ejecucion,
+                                        Orden = ORD && Operacion = OP
+                                    ),
+                                    {Estado_Orden: "Finalizado"}
+                                );
+                                If(
+                                    !IsBlank(
+                                        LookUp(
+                                            Orden_Maquinas_1,
+                                            Orden = ORD && Operacion = OP
+                                        )
+                                    ),
+                                    Collect(
+                                        infoOrdenEliminar,
+                                        LookUp(
+                                            Orden_Maquinas_1,
+                                            Orden = ORD && Operacion = OP
+                                        )
+                                    );
+                                    Remove(
+                                        Orden_Maquinas_1,
+                                        LookUp(
+                                            Orden_Maquinas_1,
+                                            Orden = ORD && Operacion = OP
+                                        )
+                                    )
+                                );
+                                With(
+                                    {
+                                        MaquinasEliminar: Filter(
+                                            Orden_MaquinasLists_1,
+                                            Orden = ORD,
+                                            Operacion = OP
+                                        )
+                                    },
+                                    ForAll(
+                                        MaquinasEliminar,
+                                        Collect(
+                                            InfoMaquinasEliminar,
+                                            ThisRecord
+                                        );
+                                        Remove(
+                                            Orden_MaquinasLists_1,
+                                            ThisRecord
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    );
+                    ForAll(
+                        infoOrdenEliminar,
+                        With(
+                            {
+                                maximas: LookUp(
+                                    Orden_Ejecucion,
+                                    Orden = ThisRecord.Orden && Operacion = ThisRecord.Operacion
+                                ).Cantidad,
+                                producidas: LookUp(
+                                    Orden_Ejecucion,
+                                    Orden = ThisRecord.Orden && Operacion = ThisRecord.Operacion
+                                ).CantidadTotalProducida,
+                                dañadas: Sum(
+                                    Filter(
+                                        Scrap_1,
+                                        Orden = ThisRecord.Orden
+                                    ),
+                                    Cantidad
+                                ),
+                                O: ThisRecord,
+                                Z: ThisRecord.Zona,
+                                J: ThisRecord.Jornada,
+                                ORD: ThisRecord.Orden,
+                                OP: ThisRecord.Operacion
+                            },
+                            Collect(
+                                Registro_Orden_Maquinas,
+                                {
+                                    Creacion_Fecha: O.'Fecha de creación',
+                                    Orden: O.Orden,
+                                    Operacion: O.Operacion,
+                                    'P/N': O.'P/N',
+                                    Prioridad: O.Prioridad,
+                                    Meta: O.Meta,
+                                    Fecha_inicio: O.Fecha_Inicio,
+                                    Fecha_Fin: O.Fecha_Fin,
+                                    Fecha_Fin_Aprox: O.Fecha_Fin_Aprox,
+                                    Jornada: LookUp(
+                                        JornadaPlannings,
+                                        Valor = J
+                                    ).Texto,
+                                    Zona: O.Zona,
+                                    Horas: O.Horas,
+                                    HorasRestantes: If(
+                                        Value(O.Meta) > 0,
+                                        RoundUp(
+                                            ((maximas - (producidas - dañadas)) / (O.Meta * LookUp(
+                                                ZonaPlannings,
+                                                Texto = Z,
+                                                Valor
+                                            )) + LookUp(
+                                                Orden_Ejecucion,
+                                                Orden = ORD && Operacion = OP
+                                            ).TiempoSetup) / Max(
+                                                1,
+                                                CountRows(
+                                                    Filter(
+                                                        Orden_MaquinasLists_1,
+                                                        Orden = ORD,
+                                                        Operacion = OP
+                                                    )
+                                                )
+                                            ),
+                                            0
+                                        ),
+                                        0
+                                    ),
+                                    Dias: O.Dias,
+                                    CantMaquinas: CountIf(
+                                        Filter(
+                                            Orden_MaquinasLists_1,
+                                            Orden = ORD,
+                                            Operacion = OP
+                                        ),
+                                        true
+                                    ),
+                                    CantMax: maximas,
+                                    CantPro: producidas,
+                                    CantDañada: dañadas,
+                                    User: O.User
+                                }
+                            )
+                        )
+                    );
+                    ForAll(
+                        InfoMaquinasEliminar,
+                        With(
+                            {
+                                Maquina: ThisRecord,
+                                m: ThisRecord.Maquina,
+                                ORD: ThisRecord.Orden,
+                                OP: ThisRecord.Operacion
+                            },
+                            Collect(
+                                Registro_Orden_MaquinasLists,
+                                {
+                                    Creacion_Fecha: Maquina.Fecha,
+                                    Maquina: Maquina.Maquina,
+                                    Orden: ORD,
+                                    Operacion: OP,
+                                    'P/N': LookUp(
+                                        infoOrdenAntigua,
+                                        Orden = ORD && Operacion = OP
+                                    ).'P/N',
+                                    Prioridad: Maquina.Prioridad,
+                                    Meta: Maquina.Meta,
+                                    Horas: Maquina.Horas,
+                                    HorasProducidas: CountIf(
+                                        Distinct(
+                                            Filter(
+                                                'Hora X Hora',
+                                                Orden = ORD,
+                                                Operacion = OP,
+                                                Maquina = m
+                                            ),
+                                            'Fecha_Registro_Supervisor '
+                                        ),
+                                        true
+                                    ),
+                                    HorasRes: Maquina.Horas - CountIf(
+                                        Distinct(
+                                            Filter(
+                                                'Hora X Hora',
+                                                Orden = ORD,
+                                                Operacion = OP,
+                                                Maquina = m
+                                            ),
+                                            'Fecha_Registro_Supervisor '
+                                        ),
+                                        true
+                                    ),
+                                    CantPro: Sum(
+                                        Filter(
+                                            'Hora X Hora',
+                                            Orden = ORD,
+                                            Operacion = OP,
+                                            Maquina = m
+                                        ),
+                                        Cantidad
+                                    ),
+                                    CantDañada: Sum(
+                                        Filter(
+                                            Scrap_1,
+                                            Orden = ORD,
+                                            Maquina = m
+                                        ),
+                                        Cantidad
+                                    )
+                                }
+                            )
+                        )
+                    );
+                    Clear(InfoMaquinasEliminar);
+                    Clear(infoOrdenEliminar);
+                    UpdateContext(
+                        {
+                            Eliminar: false,
+                            ItemEliminar: Blank()
+                        }
+                    );
+                Size: =15
+                Text: ="Finalizar Orden"
+                Width: =200
+                X: =290
+                Y: =135
+                ZIndex: =4
 
