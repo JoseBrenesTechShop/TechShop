@@ -1709,13 +1709,31 @@ Planning_Orden As screen:
                         Height: =38
                         Icon: ="ArrowLeft"
                         Layout: ='ButtonCanvas.Layout'.IconBefore
-                        OnSelect: |-
-                            =Navigate(OrdenMaquinas);
-                            Reset(txt_BuscaOrdenes_PO);
-                            Reset(drp_Pri_PO);
-                            Reset(drp_Maquina_PO);
-                            Reset(glr_Ordenes_PO);
-                            UpdateContext({Eliminar: false, ItemEliminar: Blank()});
+                        OnSelect: |
+                            =If(
+                                VarName = "2328" || VarName = "9" || LookUp(
+                                    Empleados,
+                                    VarName = Codigo
+                                ).Rol = "ADMIN" || VarName = "2154",
+                                Navigate(
+                                    OrdenMaquinas,
+                                    ScreenTransition.Fade
+                                );
+                                Reset(txt_BuscaOrdenes_PO);
+                                Reset(drp_Pri_PO);
+                                Reset(drp_Maquina_PO);
+                                Reset(glr_Ordenes_PO);
+                                UpdateContext(
+                                    {
+                                        Eliminar: false,
+                                        ItemEliminar: Blank()
+                                    }
+                                ),
+                                Notify(
+                                    "No tienes acceso a este módulo",
+                                    NotificationType.Information
+                                )
+                            );
                         PaddingBottom: =0
                         PaddingLeft: =0
                         PaddingRight: =0
