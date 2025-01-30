@@ -3,6 +3,8 @@ BonoDiario As screen:
     Fill: =RGBA(0, 0, 0, 0)
     ImagePosition: =ImagePosition.Fill
     LoadingSpinnerColor: =App.Theme.Colors.Primary
+    OnVisible: |-
+        =UpdateContext({Semanas: Distinct(Filter(BonoDiarios, Año = Text(Today(), "yyyy")), Semana)})
 
     ScreenContainer4_3 As groupContainer.verticalAutoLayoutContainer:
         DropShadow: =DropShadow.Light
@@ -140,7 +142,8 @@ BonoDiario As screen:
                 OnSelect: |
                     =Navigate(MenuAdministrativo);
                     Reset(dropSemana);
-                    Reset(dropUbicacion)
+                    Reset(dropUbicacion);
+                    Reset(dropAño);
                 PaddingBottom: =5
                 PaddingLeft: =5
                 PaddingRight: =5
@@ -1013,7 +1016,10 @@ BonoDiario As screen:
                             Icon: ="ArrowSync"
                             OnSelect: |-
                                 =Reset(txtCodigo);
-                                Refresh(BonoDiarios)
+                                Reset(dropSemana);
+                                Reset(dropUbicacion);
+                                Reset(dropAño);
+                                Refresh(BonoDiarios);
                             Text: ="Refrescar"
                             Width: =101
                             X: =705
@@ -1027,6 +1033,7 @@ BonoDiario As screen:
                             ChevronDisabledFill: =RGBA(244, 244, 244, 1)
                             ChevronHoverBackground: =App.Theme.Colors.Darker10
                             ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                            Default: =If(dropAño.SelectedText.Value = Text(Today(), "yyyy"), WeekNum(Today())-1, "52")
                             DisabledBorderColor: =RGBA(166, 166, 166, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             DisabledFill: =RGBA(244, 244, 244, 1)
@@ -1034,7 +1041,7 @@ BonoDiario As screen:
                             Height: =44
                             HoverColor: =RGBA(0, 0, 0, 1)
                             HoverFill: =App.Theme.Colors.Lighter70
-                            Items: =Sort(Distinct(Filter(BonoDiarios, Año = dropAño.SelectedText.Value), Semana),Value,SortOrder.Descending)
+                            Items: =Sequence(52)
                             PressedColor: =RGBA(255, 255, 255, 1)
                             PressedFill: =App.Theme.Colors.Darker30
                             SelectionFill: =App.Theme.Colors.Primary
@@ -1107,6 +1114,8 @@ BonoDiario As screen:
                                     Text(Year(Today())-4),
                                     Text(Year(Today())-5)
                                 ]
+                            OnChange: |-
+                                =UpdateContext({Semanas: Distinct(Filter(BonoDiarios, Año = Self.SelectedText.Value), Semana)})
                             PressedColor: =RGBA(255, 255, 255, 1)
                             PressedFill: =RGBA(0, 18, 107, 1)
                             SelectionFill: =RGBA(15, 108, 189, 1)
