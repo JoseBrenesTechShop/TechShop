@@ -415,7 +415,7 @@ OrdenMaquinas_Prioridad As screen:
                         PaddingTop: =0
                         Size: =15
                         Text: ="Zona"
-                        Width: =110
+                        Width: =112
                         X: =632
                         Y: =42
                         ZIndex: =78
@@ -668,7 +668,7 @@ OrdenMaquinas_Prioridad As screen:
                             RadiusTopLeft: =0
                             RadiusTopRight: =0
                             Size: =15
-                            Width: =110
+                            Width: =112
                             X: =632
                             ZIndex: =19
 
@@ -695,7 +695,7 @@ OrdenMaquinas_Prioridad As screen:
                             RadiusTopRight: =0
                             Size: =15
                             Width: =90
-                            X: =742
+                            X: =744
                             ZIndex: =20
 
                         TextInput3_81 As text:
@@ -775,7 +775,9 @@ OrdenMaquinas_Prioridad As screen:
                                             ),
                                             Maquina,
                                             SortOrder.Ascending
-                                        )
+                                        ),
+                                        NewPri: ThisItem.Prioridad,
+                                        OrdenSelected: ThisItem
                                     }
                                 )
                             PaddingBottom: =2
@@ -1450,7 +1452,7 @@ OrdenMaquinas_Prioridad As screen:
             Height: =233
             Size: =18
             Text: |-
-                =With({item: glr_Ordenes_OMP.Selected},
+                =With({item: OrdenSelected},
                 "Orden: " & item.Orden & "
                 OP: " & item.Operacion & "
                 Meta: " & item.Meta & "
@@ -1812,7 +1814,7 @@ OrdenMaquinas_Prioridad As screen:
                                             Prioridades,
                                             !(Value in Filter(
                                                 Orden_MaquinasLists_1,
-                                                Maquina in thisMaquinas && Prioridad <> glr_Ordenes_OMP.Selected.Prioridad
+                                                Maquina in thisMaquinas && Prioridad <> OrdenSelected.Prioridad
                                             ).Prioridad) && Value <> 1
                                         )
                                     ),
@@ -1822,7 +1824,7 @@ OrdenMaquinas_Prioridad As screen:
                                             Prioridades,
                                             !(Value in Filter(
                                                 Orden_MaquinasLists_1,
-                                                Maquina in thisMaquinas && Prioridad <> glr_Ordenes_OMP.Selected.Prioridad
+                                                Maquina in thisMaquinas && Prioridad <> OrdenSelected.Prioridad
                                             ).Prioridad) && Value <> 1
                                         )
                                     ).Value
@@ -1883,7 +1885,7 @@ OrdenMaquinas_Prioridad As screen:
                     Y: =25
                     ZIndex: =94
 
-        btn_OrdenesAfectadas_OM_1 As button:
+        btn_OrdenesAfectadas_OMP As button:
             DisabledBorderColor: =RGBA(166, 166, 166, 1)
             DisabledColor: =RGBA(166, 166, 166, 1)
             DisabledFill: =RGBA(244, 244, 244, 1)
@@ -1909,7 +1911,7 @@ OrdenMaquinas_Prioridad As screen:
                                                     Orden_MaquinasLists_1,
                                                     Orden = ThisRecord.Orden,
                                                     Operacion = ThisRecord.Operacion
-                                                ).Maquina && Prioridad <> NewPri
+                                                ).Maquina && Prioridad <> OrdenSelected.Prioridad
                                             ).Prioridad) && Value <> 1
                                         )
                                     ),
@@ -1933,7 +1935,7 @@ OrdenMaquinas_Prioridad As screen:
                                                     Orden_MaquinasLists_1,
                                                     Orden = ThisRecord.Orden,
                                                     Operacion = ThisRecord.Operacion
-                                                ).Maquina && Prioridad <> NewPri
+                                                ).Maquina && Prioridad <> OrdenSelected.Prioridad
                                             ).Prioridad) && Value <> 1
                                         )
                                     ).Value
@@ -1954,45 +1956,47 @@ OrdenMaquinas_Prioridad As screen:
                                     Orden_Maquinas_1,
                                     Orden = ORD && Operacion = OP
                                 ),
-                                {Prioridad: If(
-                                    IsEmpty(
-                                        Filter(
-                                            Prioridades,
-                                            !(Value in Filter(
-                                                Orden_MaquinasLists_1,
-                                                Maquina in Filter(
+                                {
+                                    Prioridad: If(
+                                        IsEmpty(
+                                            Filter(
+                                                Prioridades,
+                                                !(Value in Filter(
                                                     Orden_MaquinasLists_1,
-                                                    Orden = ORD,
-                                                    Operacion = OP
-                                                ).Maquina && Prioridad <> NewPri
-                                            ).Prioridad) && Value <> 1
-                                        )
-                                    ),
-                                    Max(
-                                        Filter(
-                                            Orden_MaquinasLists_1,
-                                            Maquina in Filter(
-                                                Orden_MaquinasLists_1,
-                                                Orden = ORD,
-                                                Operacion = OP
-                                            ).Maquina
+                                                    Maquina in Filter(
+                                                        Orden_MaquinasLists_1,
+                                                        Orden = ORD,
+                                                        Operacion = OP
+                                                    ).Maquina && Prioridad <> OrdenSelected.Prioridad
+                                                ).Prioridad) && Value <> 1
+                                            )
                                         ),
-                                        Prioridad
-                                    ) + 1,
-                                    First(
-                                        Filter(
-                                            Prioridades,
-                                            !(Value in Filter(
+                                        Max(
+                                            Filter(
                                                 Orden_MaquinasLists_1,
                                                 Maquina in Filter(
                                                     Orden_MaquinasLists_1,
                                                     Orden = ORD,
                                                     Operacion = OP
-                                                ).Maquina && Prioridad <> NewPri
-                                            ).Prioridad) && Value <> 1
-                                        )
-                                    ).Value
-                                )}
+                                                ).Maquina
+                                            ),
+                                            Prioridad
+                                        ) + 1,
+                                        First(
+                                            Filter(
+                                                Prioridades,
+                                                !(Value in Filter(
+                                                    Orden_MaquinasLists_1,
+                                                    Maquina in Filter(
+                                                        Orden_MaquinasLists_1,
+                                                        Orden = ORD,
+                                                        Operacion = OP
+                                                    ).Maquina && Prioridad <> OrdenSelected.Prioridad
+                                                ).Prioridad) && Value <> 1
+                                            )
+                                        ).Value
+                                    )
+                                }
                             );
                             With(
                                 {
@@ -2024,45 +2028,47 @@ OrdenMaquinas_Prioridad As screen:
                                                 Orden_MaquinasLists_1,
                                                 Orden = ORDM && Operacion = OPM && Maquina = m
                                             ),
-                                            {Prioridad: If(
-                                    IsEmpty(
-                                        Filter(
-                                            Prioridades,
-                                            !(Value in Filter(
-                                                Orden_MaquinasLists_1,
-                                                Maquina in Filter(
-                                                    Orden_MaquinasLists_1,
-                                                    Orden = ORDM,
-                                                    Operacion = OPM
-                                                ).Maquina && Prioridad <> NewPri
-                                            ).Prioridad) && Value <> 1
-                                        )
-                                    ),
-                                    Max(
-                                        Filter(
-                                            Orden_MaquinasLists_1,
-                                            Maquina in Filter(
-                                                Orden_MaquinasLists_1,
-                                                Orden = ORDM,
-                                                Operacion = OPM
-                                            ).Maquina
-                                        ),
-                                        Prioridad
-                                    ) + 1,
-                                    First(
-                                        Filter(
-                                            Prioridades,
-                                            !(Value in Filter(
-                                                Orden_MaquinasLists_1,
-                                                Maquina in Filter(
-                                                    Orden_MaquinasLists_1,
-                                                    Orden = ORDM,
-                                                    Operacion = OPM
-                                                ).Maquina && Prioridad <> NewPri
-                                            ).Prioridad) && Value <> 1
-                                        )
-                                    ).Value
-                                )}
+                                            {
+                                                Prioridad: If(
+                                                    IsEmpty(
+                                                        Filter(
+                                                            Prioridades,
+                                                            !(Value in Filter(
+                                                                Orden_MaquinasLists_1,
+                                                                Maquina in Filter(
+                                                                    Orden_MaquinasLists_1,
+                                                                    Orden = ORDM,
+                                                                    Operacion = OPM
+                                                                ).Maquina && Prioridad <> OrdenSelected.Prioridad
+                                                            ).Prioridad) && Value <> 1
+                                                        )
+                                                    ),
+                                                    Max(
+                                                        Filter(
+                                                            Orden_MaquinasLists_1,
+                                                            Maquina in Filter(
+                                                                Orden_MaquinasLists_1,
+                                                                Orden = ORDM,
+                                                                Operacion = OPM
+                                                            ).Maquina
+                                                        ),
+                                                        Prioridad
+                                                    ) + 1,
+                                                    First(
+                                                        Filter(
+                                                            Prioridades,
+                                                            !(Value in Filter(
+                                                                Orden_MaquinasLists_1,
+                                                                Maquina in Filter(
+                                                                    Orden_MaquinasLists_1,
+                                                                    Orden = ORDM,
+                                                                    Operacion = OPM
+                                                                ).Maquina && Prioridad <> OrdenSelected.Prioridad
+                                                            ).Prioridad) && Value <> 1
+                                                        )
+                                                    ).Value
+                                                )
+                                            }
                                         )
                                     )
                                 )
@@ -2446,7 +2452,7 @@ OrdenMaquinas_Prioridad As screen:
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(21, 68, 18, 1)
             OnSelect: |-
-                =Select(btn_OrdenesAfectadas_OM_1);
+                =Select(btn_OrdenesAfectadas_OMP);
                 //Crea la orden en caso de no existir. Si ya exite la edita
                 With(
                     {
@@ -2491,7 +2497,7 @@ OrdenMaquinas_Prioridad As screen:
                         }
                     );
                     //Guarda, edita o elimina las maquinas de la orden
-                    ForAll(
+                ForAll(
                         MaquinasOrigin,
                         With(
                             {m: ThisRecord.Maquina},
