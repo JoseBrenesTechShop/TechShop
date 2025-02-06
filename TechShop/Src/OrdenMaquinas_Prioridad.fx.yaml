@@ -106,7 +106,7 @@ OrdenMaquinas_Prioridad As screen:
                 Height: =60
                 Size: =25
                 Text: ="Orden - Maquinas"
-                Width: =720
+                Width: =735
                 ZIndex: =5
 
             Icon14_140 As icon.VerticalLine:
@@ -139,18 +139,9 @@ OrdenMaquinas_Prioridad As screen:
                 HoverFill: =RGBA(40, 134, 222, 1)
                 Icon: =Icon.Home
                 OnSelect: |-
-                    =Navigate(MenuPlanning);
-                    Clear(MaquinasList);
-                    Refresh(Maquinas);
-                    UpdateContext({info: Blank(),info2: Blank(), MaquinasOrigin: Blank(), Aviso: false, TextoAdvertencia:"", Guardar: false, StringMaquinas: "", Eliminar: false, edit: false});
-                    Reset(txt_BuscaMaquina_OM);
-                    Reset(drp_Pri_OM);
-                    Reset(txt_BuscaOrdenes_OM);
-                    Reset(glr_Ordenes_OM);
-                    Reset(txt_Jornada_OM);
-                    Reset(txt_Zona_OM);
-                    Reset(txt_Valor_OM);
-                    Reset(txt_Efi_OM);
+                    =UpdateContext({Eliminar: false, ItemEliminar: Blank(), Guardar: false, MaquinasOrigin: Blank(), NewPri: Blank(), OrdenSelected: Blank(), RegistroOrden: Blank()});
+                    Refresh(Orden_Maquinas_1);
+                    Back()
                 PaddingBottom: =5
                 PaddingLeft: =5
                 PaddingRight: =5
@@ -247,7 +238,6 @@ OrdenMaquinas_Prioridad As screen:
                         DisabledBorderColor: =RGBA(244, 244, 244, 1)
                         DisabledColor: =RGBA(166, 166, 166, 1)
                         DisabledFill: =RGBA(244, 244, 244, 1)
-                        DisplayMode: =If(Guardar || Aviso || edit, DisplayMode.Disabled, DisplayMode.Edit)
                         Fill: =RGBA(0, 134, 208, 1)
                         Font: =App.Theme.Font
                         FontWeight: =FontWeight.Semibold
@@ -525,8 +515,8 @@ OrdenMaquinas_Prioridad As screen:
                         BorderStyle: =BorderStyle.None
                         Default: ={}
                         DelayItemLoading: =true
-                        DisplayMode: =If(Guardar || Aviso || edit, DisplayMode.Disabled, DisplayMode.Edit)
-                        Height: =214
+                        DisplayMode: =If(Guardar || Eliminar, DisplayMode.Disabled, DisplayMode.Edit)
+                        Height: =594
                         Items: |-
                             =Sort(
                                 Orden_Maquinas_1,
@@ -929,7 +919,6 @@ OrdenMaquinas_Prioridad As screen:
                             Fill: =RGBA(0, 0, 0, 0)
                             FocusedBorderThickness: =4
                             Font: =App.Theme.Font
-                            Height: =30
                             HoverBorderColor: =App.Theme.Colors.Darker40
                             HoverColor: =RGBA(0, 0, 0, 1)
                             HoverFill: =
@@ -940,36 +929,10 @@ OrdenMaquinas_Prioridad As screen:
                             RadiusTopRight: =0
                             Size: =15
                             Visible: =!ThisItem.IsSelected
-                            Width: =127
-                            X: =436
+                            Width: =1090
+                            X: =30
+                            Y: =-5
                             ZIndex: =27
-
-                        TextInput3_83 As text:
-                            Align: =Align.Center
-                            BorderColor: =App.Theme.Colors.Darker40
-                            Color: =RGBA(0, 0, 0, 0)
-                            Default: =
-                            DisabledBorderColor: =RGBA(0, 0, 0, 0)
-                            DisabledColor: =RGBA(0, 0, 0, 0)
-                            DisabledFill: =
-                            DisplayMode: =DisplayMode.Disabled
-                            Fill: =RGBA(0, 0, 0, 0)
-                            FocusedBorderThickness: =4
-                            Font: =App.Theme.Font
-                            Height: =30
-                            HoverBorderColor: =App.Theme.Colors.Darker40
-                            HoverColor: =RGBA(0, 0, 0, 1)
-                            HoverFill: =
-                            PaddingLeft: =5
-                            RadiusBottomLeft: =0
-                            RadiusBottomRight: =0
-                            RadiusTopLeft: =0
-                            RadiusTopRight: =0
-                            Size: =15
-                            Visible: =!ThisItem.IsSelected
-                            Width: =142
-                            X: =972
-                            ZIndex: =28
 
                         Icon3_71 As icon.Erase:
                             BorderColor: =RGBA(40, 134, 222, 1)
@@ -992,6 +955,33 @@ OrdenMaquinas_Prioridad As screen:
                             Visible: =ThisItem.IsSelected
                             Width: =30
                             ZIndex: =29
+
+                    Icon3_65 As icon.Erase:
+                        BorderColor: =App.Theme.Colors.Primary
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =2
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                        DisabledColor: =RGBA(122, 138, 143, 1)
+                        DisabledFill: =RGBA(40, 134, 222, 1)
+                        DisplayMode: =If(Guardar || Eliminar, DisplayMode.Disabled, DisplayMode.Edit)
+                        Fill: =RGBA(40, 134, 222, 1)
+                        FocusedBorderThickness: =20
+                        Height: =42
+                        HoverBorderColor: =App.Theme.Colors.Darker10
+                        HoverColor: =RGBA(15, 84, 140, 1)
+                        HoverFill: =RGBA(40, 134, 222, 1)
+                        Icon: =Icon.Reload
+                        OnSelect: |-
+                            =Refresh(Orden_Maquinas_1);
+                            Reset(glr_Detalles_DSC)
+                        PaddingBottom: =5
+                        PaddingLeft: =5
+                        PaddingRight: =5
+                        PaddingTop: =5
+                        Width: =42
+                        X: =1065
+                        ZIndex: =85
 
             Container22_5 As groupContainer.manualLayoutContainer:
                 BorderColor: =RGBA(40, 134, 222, 1)
@@ -1037,7 +1027,7 @@ OrdenMaquinas_Prioridad As screen:
                 "glr_Maquinas_OMP As gallery.'BrowseLayout_Flexible_NewsFeed_ver5.0'":
                     BorderColor: =RGBA(0, 18, 107, 1)
                     DelayItemLoading: =true
-                    DisplayMode: =If(Guardar || Aviso || edit, DisplayMode.Disabled, DisplayMode.Edit)
+                    DisplayMode: =If(Guardar || Eliminar, DisplayMode.Disabled, DisplayMode.Edit)
                     Height: =621
                     Items: =MaquinasOrigin
                     Layout: =Layout.Vertical
@@ -2314,7 +2304,6 @@ OrdenMaquinas_Prioridad As screen:
             HoverFill: =RGBA(132, 40, 38, 1)
             OnSelect: |-
                 =UpdateContext({Guardar: false});
-                UpdateContext({Disable: false});
                 Clear(MaquinaRemplazo);
                 Clear(OrdenRemplazo);
             Size: =15
@@ -2427,7 +2416,6 @@ OrdenMaquinas_Prioridad As screen:
                 Clear(MaquinasList);
                 Refresh(Maquinas);
                 UpdateContext({Guardar: false});
-                UpdateContext({Disable: false});
                 Select(btn_Prioridades_OM_1)
             Size: =15
             Text: ="Guardar"
