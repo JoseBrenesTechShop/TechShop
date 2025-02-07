@@ -1659,7 +1659,21 @@ SolicitudesHerramientas As screen:
                                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 DisabledFill: =RGBA(244, 244, 244, 1)
-                                DisplayMode: =If(!IsBlank(LookUp(Materiales, item = ThisItem.item)) || Disable, DisplayMode.Disabled, DisplayMode.Edit)
+                                DisplayMode: |-
+                                    =If(
+                                        !IsBlank(
+                                            LookUp(
+                                                Materiales,
+                                                item = ThisItem.item && referencia = LookUp(
+                                                    job_ref,
+                                                    job = info.Orden && oper_num = Value(info.Operacion) && suffix = ThisItem.suffix && sequence = ThisItem.sequence,
+                                                    ref_des
+                                                )
+                                            )
+                                        ) || Disable,
+                                        DisplayMode.Disabled,
+                                        DisplayMode.Edit
+                                    )
                                 Fill: =RGBA(72, 163, 62, 1)
                                 FontWeight: =FontWeight.Semibold
                                 Height: =41
@@ -1686,6 +1700,11 @@ SolicitudesHerramientas As screen:
                                             Materiales,
                                             {
                                                 item: ThisItem.item,
+                                                referencia: LookUp(
+                                                    job_ref,
+                                                    job = info.Orden && oper_num = Value(info.Operacion) && suffix = ThisItem.suffix && sequence = ThisItem.sequence,
+                                                    ref_des
+                                                ),
                                                 description: ThisItem.description,
                                                 Cant_x_Inserto: txt_CantxInserto_SH_2.Text,
                                                 Cant_Inserto: txt_Cant_Insertos_SH_2.Text,
