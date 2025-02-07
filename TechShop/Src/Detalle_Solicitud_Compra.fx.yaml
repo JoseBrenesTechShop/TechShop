@@ -52,7 +52,7 @@ Detalle_Solicitud_Compra As screen:
                 Width: =75
                 ZIndex: =2
 
-            txt_EmpleadoUso_EM_3 As text:
+            txt_User_DSC As text:
                 Align: =Align.Center
                 AlignInContainer: =AlignInContainer.Center
                 BorderColor: =RGBA(204, 231, 246, 1)
@@ -327,7 +327,8 @@ Detalle_Solicitud_Compra As screen:
                                 BorderColor: =RGBA(40, 134, 222, 1)
                                 BorderThickness: =0.5
                                 Color: =RGBA(0, 0, 0, 1)
-                                Default: =ThisItem.unit_mat_cost
+                                Default: |-
+                                    =Text(ThisItem.unit_mat_cost, "###,###,###.##")
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
                                 DisabledFill: =
@@ -356,7 +357,27 @@ Detalle_Solicitud_Compra As screen:
                                 CheckboxSize: =30
                                 CheckmarkFill: =RGBA(52, 152, 47, 1)
                                 Color: =RGBA(0, 0, 0, 1)
-                                Default: =ThisItem.req_line in CheckList_DSC.req_line && ThisItem.ref_num in CheckList_DSC.ref_num
+                                Default: |-
+                                    =!IsBlank(
+                                        LookUp(
+                                            Solicitud_Compras,
+                                            soli_num = txt_Num_Soli_DSC.Text
+                                        )
+                                    )
+                                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                                DisabledColor: =RGBA(40, 134, 222, 1)
+                                DisabledFill: =RGBA(255, 255, 255, 1)
+                                DisplayMode: |-
+                                    =If(
+                                        IsBlank(
+                                            LookUp(
+                                                Solicitud_Compras,
+                                                soli_num = txt_Num_Soli_DSC.Text
+                                            )
+                                        ),
+                                        DisplayMode.Edit,
+                                        DisplayMode.Disabled
+                                    )
                                 Fill: =RGBA(255, 255, 255, 1)
                                 Font: =App.Theme.Font
                                 Height: =30
@@ -404,7 +425,8 @@ Detalle_Solicitud_Compra As screen:
                                 BorderColor: =RGBA(40, 134, 222, 1)
                                 BorderThickness: =0.5
                                 Color: =RGBA(0, 0, 0, 1)
-                                Default: =ThisItem.unit_mat_cost * ThisItem.qty_ordered
+                                Default: |-
+                                    =Text(ThisItem.unit_mat_cost * ThisItem.qty_ordered, "###,###,###.##")
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
                                 DisabledFill: =
@@ -632,7 +654,7 @@ Detalle_Solicitud_Compra As screen:
                             PaddingRight: =0
                             PaddingTop: =0
                             Size: =16
-                            Text: ="Total"
+                            Text: ="Subtotal"
                             Weight: ='TextCanvas.Weight'.Regular
                             Width: =110
                             X: =760
@@ -735,7 +757,7 @@ Detalle_Solicitud_Compra As screen:
                         RadiusTopLeft: =10
                         RadiusTopRight: =10
                         Size: =15
-                        Width: =180
+                        Width: =160
                         X: =140
                         Y: =10
                         ZIndex: =4
@@ -944,7 +966,7 @@ Detalle_Solicitud_Compra As screen:
                         Y: =10
                         ZIndex: =21
 
-                    txt_Solicitante_DSC As text:
+                    txt_Fecha_DSC As text:
                         Align: =Align.Center
                         BorderColor: =RGBA(180, 214, 250, 1)
                         BorderThickness: =3
@@ -974,8 +996,8 @@ Detalle_Solicitud_Compra As screen:
                         RadiusTopLeft: =10
                         RadiusTopRight: =10
                         Size: =12
-                        Width: =120
-                        X: =394
+                        Width: =110
+                        X: =369
                         Y: =10
                         ZIndex: =22
 
@@ -993,7 +1015,7 @@ Detalle_Solicitud_Compra As screen:
                         VerticalAlign: =VerticalAlign.Middle
                         Weight: ='TextCanvas.Weight'.Bold
                         Width: =60
-                        X: =330
+                        X: =305
                         Y: =10
                         ZIndex: =23
 
@@ -1003,7 +1025,13 @@ Detalle_Solicitud_Compra As screen:
                         DisabledBorderColor: =RGBA(244, 244, 244, 1)
                         DisabledColor: =RGBA(166, 166, 166, 1)
                         DisabledFill: =RGBA(244, 244, 244, 1)
-                        DisplayMode: =If(CountIf(CheckList_DSC, true) = CountIf(glr_Detalles_DSC.AllItems, true) && CountIf(glr_Detalles_DSC.AllItems, true) > 0, DisplayMode.Edit, DisplayMode.Disabled)
+                        DisplayMode: |-
+                            =If(CountIf(CheckList_DSC, true) = CountIf(glr_Detalles_DSC.AllItems, true) && CountIf(glr_Detalles_DSC.AllItems, true) > 0 && IsBlank(
+                                    LookUp(
+                                        Solicitud_Compras,
+                                        soli_num = txt_Num_Soli_DSC.Text
+                                    )
+                                ), DisplayMode.Edit, DisplayMode.Disabled)
                         Fill: =RGBA(15, 108, 189, 1)
                         Font: =App.Theme.Font
                         FontWeight: =FontWeight.Semibold
@@ -1011,6 +1039,26 @@ Detalle_Solicitud_Compra As screen:
                         HoverBorderColor: =RGBA(15, 84, 140, 1)
                         HoverColor: =App.Theme.Colors.PrimaryForeground
                         HoverFill: =RGBA(15, 84, 140, 1)
+                        OnSelect: |-
+                            =If(
+                                IsBlank(
+                                    LookUp(
+                                        Solicitud_Compras,
+                                        soli_num = txt_Num_Soli_DSC.Text
+                                    )
+                                ),
+                                Collect(
+                                    Solicitud_Compras,
+                                    {
+                                        soli_num: Upper(txt_Num_Soli_DSC.Text),
+                                        fecha: DateValue(txt_Fecha_DSC.Text),
+                                        solicitante: txt_Solicitante_DSC.Text,
+                                        user: txt_User_DSC.Text,
+                                        total: Value(txt_Total_DSC.Text),
+                                        estado: "Listo"
+                                    }
+                                )
+                            )
                         PressedBorderColor: =RGBA(15, 108, 189, 1)
                         PressedColor: =RGBA(15, 108, 189, 1)
                         PressedFill: =RGBA(255, 255, 255, 1)
@@ -1040,7 +1088,7 @@ Detalle_Solicitud_Compra As screen:
                         Y: =10
                         ZIndex: =25
 
-                    txt_Solicitante_DSC_1 As text:
+                    txt_Solicitante_DSC As text:
                         Align: =Align.Center
                         BorderColor: =RGBA(180, 214, 250, 1)
                         BorderThickness: =3
@@ -1100,8 +1148,8 @@ Detalle_Solicitud_Compra As screen:
                         RadiusTopLeft: =10
                         RadiusTopRight: =10
                         Size: =12
-                        Width: =250
-                        X: =633
+                        Width: =220
+                        X: =595
                         Y: =10
                         ZIndex: =26
 
@@ -1119,7 +1167,61 @@ Detalle_Solicitud_Compra As screen:
                         VerticalAlign: =VerticalAlign.Middle
                         Weight: ='TextCanvas.Weight'.Bold
                         Width: =110
-                        X: =522
+                        X: =484
                         Y: =10
                         ZIndex: =27
+
+                    txt_Total_DSC As text:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(180, 214, 250, 1)
+                        BorderThickness: =3
+                        Clear: =true
+                        Color: =RGBA(0, 0, 0, 1)
+                        Default: |-
+                            =Text(Sum(Filter(preqitem, req_num = txt_Num_Soli_DSC.Text), qty_ordered * unit_mat_cost), "###,###,###.##")
+                        DisabledBorderColor: =RGBA(180, 214, 250, 1)
+                        DisabledColor: =RGBA(0, 0, 0, 1)
+                        DisabledFill: =RGBA(255, 255, 255, 1)
+                        DisplayMode: =DisplayMode.Disabled
+                        FocusedBorderThickness: =4
+                        Font: =App.Theme.Font
+                        Height: =30
+                        HintText: ="Total"
+                        HoverBorderColor: =RGBA(180, 214, 250, 1)
+                        HoverColor: =RGBA(0, 0, 0, 1)
+                        HoverFill: =RGBA(227, 240, 252, 1)
+                        OnChange: =
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        PressedColor: =RGBA(0, 0, 0, 1)
+                        PressedFill: =RGBA(255, 255, 255, 1)
+                        RadiusBottomLeft: =10
+                        RadiusBottomRight: =10
+                        RadiusTopLeft: =10
+                        RadiusTopRight: =10
+                        Size: =12
+                        Width: =110
+                        X: =879
+                        Y: =10
+                        ZIndex: =28
+
+                    lbl_ValorDato_EM_13 As Texto:
+                        Align: ='TextCanvas.Align'.Center
+                        DisplayMode: =DisplayMode.Edit
+                        FontColor: =RGBA(255, 255, 255, 1)
+                        Height: =30
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =20
+                        Text: ="Total"
+                        VerticalAlign: =VerticalAlign.Middle
+                        Weight: ='TextCanvas.Weight'.Bold
+                        Width: =60
+                        X: =820
+                        Y: =10
+                        ZIndex: =29
 
