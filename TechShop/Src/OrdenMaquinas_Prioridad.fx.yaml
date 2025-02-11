@@ -3,7 +3,7 @@ OrdenMaquinas_Prioridad As screen:
     Fill: =Color.White
     ImagePosition: =ImagePosition.Fill
     LoadingSpinnerColor: =App.Theme.Colors.Primary
-    OnVisible: =Select(btn_Prioridades_OM_1)
+    OnVisible: =Select(btn_Prioridades_OMP)
 
     ScreenContainer10_6 As groupContainer.verticalAutoLayoutContainer:
         DropShadow: =DropShadow.Light
@@ -213,9 +213,9 @@ OrdenMaquinas_Prioridad As screen:
                         HoverBorderColor: =App.Theme.Colors.Darker40
                         HoverColor: =RGBA(0, 0, 0, 1)
                         HoverFill: =App.Theme.Colors.Lighter70
-                        PaddingLeft: =5
+                        PaddingLeft: =350
                         Size: =18
-                        Width: =1116
+                        Width: =1112
                         ZIndex: =19
 
                     Label2_177 As label:
@@ -233,7 +233,7 @@ OrdenMaquinas_Prioridad As screen:
                         Y: =42
                         ZIndex: =45
 
-                    btn_Prioridades_OM_1 As button:
+                    btn_Prioridades_OMP As button:
                         BorderColor: =App.Theme.Colors.Primary
                         BorderStyle: =BorderStyle.None
                         DisabledBorderColor: =RGBA(244, 244, 244, 1)
@@ -516,11 +516,23 @@ OrdenMaquinas_Prioridad As screen:
                         BorderStyle: =BorderStyle.None
                         Default: ={}
                         DelayItemLoading: =true
-                        DisplayMode: =If(Guardar || Eliminar, DisplayMode.Disabled, DisplayMode.Edit)
+                        DisplayMode: =If(Guardar || Eliminar || GuardarFecha, DisplayMode.Disabled, DisplayMode.Edit)
                         Height: =594
                         Items: |-
                             =Sort(
-                                Orden_Maquinas_1,
+                                Filter(
+                                    Orden_Maquinas_1,
+                                    (IsBlank(drp_Orden_OMP.SelectedText.Value) || Orden = drp_Orden_OMP.SelectedText.Value),
+                                    (IsBlank(drp_Flitro_Pri_OMP.SelectedText.Value) || Prioridad = Value(drp_Flitro_Pri_OMP.SelectedText.Value)),
+                                    (IsBlank(drp_OP_OMP.SelectedText.Value) || Operacion = drp_OP_OMP.SelectedText.Value),
+                                    (IsBlank(drp_Maquina_OMP.SelectedText.Value) || (Orden in Filter(
+                                        Orden_MaquinasLists_1,
+                                        Maquina = drp_Maquina_OMP.SelectedText.Value
+                                    ).Orden && Operacion in Filter(
+                                        Orden_MaquinasLists_1,
+                                        Maquina = drp_Maquina_OMP.SelectedText.Value
+                                    ).Operacion))
+                                ),
                                 Prioridad,
                                 SortOrder.Ascending
                             )
@@ -842,7 +854,11 @@ OrdenMaquinas_Prioridad As screen:
                                         )
                                     )
                                 );
-                                UpdateContext({Guardar: true})
+                                If(
+                                    NewPri = 1,
+                                    UpdateContext({GuardarFecha: true}),
+                                    UpdateContext({Guardar: true})
+                                )
                             PaddingBottom: =2
                             PaddingLeft: =2
                             PaddingRight: =2
@@ -965,7 +981,7 @@ OrdenMaquinas_Prioridad As screen:
                         DisabledBorderColor: =RGBA(166, 166, 166, 1)
                         DisabledColor: =RGBA(122, 138, 143, 1)
                         DisabledFill: =RGBA(40, 134, 222, 1)
-                        DisplayMode: =If(Guardar || Eliminar, DisplayMode.Disabled, DisplayMode.Edit)
+                        DisplayMode: =If(Guardar || Eliminar || GuardarFecha, DisplayMode.Disabled, DisplayMode.Edit)
                         Fill: =RGBA(40, 134, 222, 1)
                         FocusedBorderThickness: =20
                         Height: =42
@@ -990,6 +1006,266 @@ OrdenMaquinas_Prioridad As screen:
                         Width: =42
                         X: =1065
                         ZIndex: =85
+
+                    Label6_116 As label:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisabledColor: =RGBA(166, 166, 166, 1)
+                        Height: =15
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =10
+                        Text: ="Prioridad"
+                        Width: =90
+                        X: =50
+                        Y: =3
+                        ZIndex: =86
+
+                    drp_Flitro_Pri_OMP As dropdown:
+                        AllowEmptySelection: =true
+                        BorderColor: =RGBA(40, 134, 222, 1)
+                        ChevronBackground: =RGBA(255, 255, 255, 1)
+                        ChevronDisabledBackground: =RGBA(0, 0, 0, 0)
+                        ChevronDisabledFill: =RGBA(0, 0, 0, 1)
+                        ChevronFill: =RGBA(0, 0, 0, 1)
+                        ChevronHoverBackground: =RGBA(214, 221, 224, 1)
+                        ChevronHoverFill: =RGBA(0, 0, 0, 1)
+                        Default: =-1
+                        DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                        DisabledColor: =RGBA(166, 166, 166, 1)
+                        DisabledFill: =RGBA(244, 244, 244, 1)
+                        DisplayMode: =If(Guardar || Eliminar || GuardarFecha, DisplayMode.Disabled, DisplayMode.Edit)
+                        Height: =20
+                        HoverBorderColor: =RGBA(40, 134, 222, 1)
+                        HoverColor: =RGBA(0, 0, 0, 1)
+                        HoverFill: =RGBA(214, 221, 224, 1)
+                        Items: =Prioridades
+                        OnChange: |-
+                            =Refresh(Orden_Maquinas_1);
+                            Reset(glr_Ordenes_OMP);
+                            UpdateContext(
+                                {
+                                    MaquinasOrigin: Blank(),
+                                    NewPri: Blank(),
+                                    OrdenSelected: Blank()
+                                }
+                            )
+                        PressedBorderColor: =RGBA(40, 134, 222, 1)
+                        PressedColor: =RGBA(255, 255, 255, 1)
+                        PressedFill: =RGBA(71, 158, 245, 1)
+                        Reset: =true
+                        SelectionFill: =RGBA(180, 214, 250, 1)
+                        Width: =90
+                        X: =50
+                        Y: =17
+                        ZIndex: =87
+
+                    Label6_117 As label:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisabledColor: =RGBA(166, 166, 166, 1)
+                        Height: =15
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =10
+                        Text: ="Operacion"
+                        Width: =90
+                        X: =290
+                        Y: =3
+                        ZIndex: =88
+
+                    drp_OP_OMP As dropdown:
+                        AllowEmptySelection: =true
+                        BorderColor: =RGBA(40, 134, 222, 1)
+                        ChevronBackground: =RGBA(255, 255, 255, 1)
+                        ChevronDisabledBackground: =RGBA(0, 0, 0, 0)
+                        ChevronDisabledFill: =RGBA(0, 0, 0, 1)
+                        ChevronFill: =RGBA(0, 0, 0, 1)
+                        ChevronHoverBackground: =RGBA(214, 221, 224, 1)
+                        ChevronHoverFill: =RGBA(0, 0, 0, 1)
+                        Default: =-1
+                        DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                        DisabledColor: =RGBA(166, 166, 166, 1)
+                        DisabledFill: =RGBA(244, 244, 244, 1)
+                        DisplayMode: =If(Guardar || Eliminar || GuardarFecha, DisplayMode.Disabled, DisplayMode.Edit)
+                        Height: =20
+                        HoverBorderColor: =RGBA(40, 134, 222, 1)
+                        HoverColor: =RGBA(0, 0, 0, 1)
+                        HoverFill: =RGBA(214, 221, 224, 1)
+                        Items: =Sort(Distinct(Filter(Orden_Maquinas_1, IsBlank(drp_Orden_OMP.SelectedText.Value) || Orden = drp_Orden_OMP.SelectedText.Value), Operacion), Value(ThisRecord.Value), SortOrder.Ascending)
+                        OnChange: |-
+                            =Refresh(Orden_Maquinas_1);
+                            Reset(glr_Ordenes_OMP);
+                            UpdateContext(
+                                {
+                                    MaquinasOrigin: Blank(),
+                                    NewPri: Blank(),
+                                    OrdenSelected: Blank()
+                                }
+                            )
+                        PressedBorderColor: =RGBA(40, 134, 222, 1)
+                        PressedColor: =RGBA(255, 255, 255, 1)
+                        PressedFill: =RGBA(71, 158, 245, 1)
+                        Reset: =true
+                        SelectionFill: =RGBA(180, 214, 250, 1)
+                        Width: =90
+                        X: =290
+                        Y: =17
+                        ZIndex: =89
+
+                    btn_Guardar_EM_13 As button:
+                        BorderColor: =App.Theme.Colors.Primary
+                        BorderStyle: =BorderStyle.None
+                        DisabledBorderColor: =RGBA(255, 255, 255, 1)
+                        DisabledColor: =RGBA(166, 166, 166, 1)
+                        DisabledFill: =RGBA(0, 0, 0, 0)
+                        DisplayMode: =If(Guardar || Eliminar || GuardarFecha, DisplayMode.Disabled, DisplayMode.Edit)
+                        Fill: =RGBA(0, 0, 0, 0)
+                        Font: =App.Theme.Font
+                        FontWeight: =FontWeight.Semibold
+                        Height: =42
+                        HoverBorderColor: =App.Theme.Colors.Darker10
+                        HoverColor: =RGBA(0, 0, 0, 1)
+                        HoverFill: =RGBA(0, 0, 0, 0)
+                        OnSelect: |-
+                            =Reset(drp_Flitro_Pri_OMP);
+                            Reset(drp_OP_OMP);
+                            Reset(drp_Orden_OMP);
+                            Reset(drp_Maquina_OMP);
+                            Refresh(Orden_Maquinas_1);
+                            Reset(glr_Ordenes_OMP);
+                            UpdateContext(
+                                {
+                                    MaquinasOrigin: Blank(),
+                                    NewPri: Blank(),
+                                    OrdenSelected: Blank()
+                                }
+                            )
+                        PressedBorderColor: =App.Theme.Colors.Darker40
+                        PressedColor: =Self.Color
+                        PressedFill: =App.Theme.Colors.Darker40
+                        Size: =14
+                        Text: ="All"
+                        Width: =50
+                        ZIndex: =90
+
+                    Label6_118 As label:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisabledColor: =RGBA(166, 166, 166, 1)
+                        Height: =15
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =10
+                        Text: ="Orden"
+                        Width: =140
+                        X: =145
+                        Y: =3
+                        ZIndex: =91
+
+                    drp_Orden_OMP As dropdown:
+                        AllowEmptySelection: =true
+                        BorderColor: =RGBA(40, 134, 222, 1)
+                        ChevronBackground: =RGBA(255, 255, 255, 1)
+                        ChevronDisabledBackground: =RGBA(0, 0, 0, 0)
+                        ChevronDisabledFill: =RGBA(0, 0, 0, 1)
+                        ChevronFill: =RGBA(0, 0, 0, 1)
+                        ChevronHoverBackground: =RGBA(214, 221, 224, 1)
+                        ChevronHoverFill: =RGBA(0, 0, 0, 1)
+                        Default: =-1
+                        DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                        DisabledColor: =RGBA(166, 166, 166, 1)
+                        DisabledFill: =RGBA(244, 244, 244, 1)
+                        DisplayMode: =If(Guardar || Eliminar || GuardarFecha, DisplayMode.Disabled, DisplayMode.Edit)
+                        Height: =20
+                        HoverBorderColor: =RGBA(40, 134, 222, 1)
+                        HoverColor: =RGBA(0, 0, 0, 1)
+                        HoverFill: =RGBA(214, 221, 224, 1)
+                        Items: =Sort(Distinct(Orden_Maquinas_1, Orden), ThisRecord.Value, SortOrder.Ascending)
+                        OnChange: |-
+                            =Refresh(Orden_Maquinas_1);
+                            Reset(glr_Ordenes_OMP);
+                            UpdateContext(
+                                {
+                                    MaquinasOrigin: Blank(),
+                                    NewPri: Blank(),
+                                    OrdenSelected: Blank()
+                                }
+                            )
+                        PressedBorderColor: =RGBA(40, 134, 222, 1)
+                        PressedColor: =RGBA(255, 255, 255, 1)
+                        PressedFill: =RGBA(71, 158, 245, 1)
+                        Reset: =true
+                        SelectionFill: =RGBA(180, 214, 250, 1)
+                        Width: =140
+                        X: =145
+                        Y: =17
+                        ZIndex: =92
+
+                    Label6_119 As label:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisabledColor: =RGBA(166, 166, 166, 1)
+                        Height: =15
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =10
+                        Text: ="Maquinas"
+                        Width: =110
+                        X: =384
+                        Y: =3
+                        ZIndex: =93
+
+                    drp_Maquina_OMP As dropdown:
+                        AllowEmptySelection: =true
+                        BorderColor: =RGBA(40, 134, 222, 1)
+                        ChevronBackground: =RGBA(255, 255, 255, 1)
+                        ChevronDisabledBackground: =RGBA(0, 0, 0, 0)
+                        ChevronDisabledFill: =RGBA(0, 0, 0, 1)
+                        ChevronFill: =RGBA(0, 0, 0, 1)
+                        ChevronHoverBackground: =RGBA(214, 221, 224, 1)
+                        ChevronHoverFill: =RGBA(0, 0, 0, 1)
+                        Default: =-1
+                        DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                        DisabledColor: =RGBA(166, 166, 166, 1)
+                        DisabledFill: =RGBA(244, 244, 244, 1)
+                        DisplayMode: =If(Guardar || Eliminar || GuardarFecha, DisplayMode.Disabled, DisplayMode.Edit)
+                        Height: =20
+                        HoverBorderColor: =RGBA(40, 134, 222, 1)
+                        HoverColor: =RGBA(0, 0, 0, 1)
+                        HoverFill: =RGBA(214, 221, 224, 1)
+                        Items: =Sort(Distinct(Orden_MaquinasLists_1, Maquina), ThisRecord.Value, SortOrder.Ascending)
+                        OnChange: |-
+                            =Refresh(Orden_Maquinas_1);
+                            Reset(glr_Ordenes_OMP);
+                            UpdateContext(
+                                {
+                                    MaquinasOrigin: Blank(),
+                                    NewPri: Blank(),
+                                    OrdenSelected: Blank()
+                                }
+                            )
+                        PressedBorderColor: =RGBA(40, 134, 222, 1)
+                        PressedColor: =RGBA(255, 255, 255, 1)
+                        PressedFill: =RGBA(71, 158, 245, 1)
+                        Reset: =true
+                        SelectionFill: =RGBA(180, 214, 250, 1)
+                        Width: =110
+                        X: =384
+                        Y: =17
+                        ZIndex: =94
 
             Container22_5 As groupContainer.manualLayoutContainer:
                 BorderColor: =RGBA(40, 134, 222, 1)
@@ -1035,7 +1311,7 @@ OrdenMaquinas_Prioridad As screen:
                 "glr_Maquinas_OMP As gallery.'BrowseLayout_Flexible_NewsFeed_ver5.0'":
                     BorderColor: =RGBA(0, 18, 107, 1)
                     DelayItemLoading: =true
-                    DisplayMode: =If(Guardar || Eliminar, DisplayMode.Disabled, DisplayMode.Edit)
+                    DisplayMode: =If(Guardar || Eliminar || GuardarFecha, DisplayMode.Disabled, DisplayMode.Edit)
                     Height: =621
                     Items: =MaquinasOrigin
                     Layout: =Layout.Vertical
@@ -1264,7 +1540,7 @@ OrdenMaquinas_Prioridad As screen:
                                 X: =160
                                 ZIndex: =3
 
-    cnt_Aviso_HxH_13 As groupContainer.manualLayoutContainer:
+    cnt_Guardar_OMP As groupContainer.manualLayoutContainer:
         BorderColor: =RGBA(52, 152, 47, 1)
         BorderThickness: =5
         DropShadow: =DropShadow.ExtraBold
@@ -2110,7 +2386,7 @@ OrdenMaquinas_Prioridad As screen:
                 Clear(infoOrdenAntigua);
                 Clear(MaquinaRemplazo);
                 Clear(OrdenRemplazo);
-                Select(btn_Prioridades_OM_1)
+                Select(btn_Prioridades_OMP)
             Size: =15
             Text: ="Guardar"
             Visible: =false
@@ -2289,7 +2565,7 @@ OrdenMaquinas_Prioridad As screen:
                     }
                 );
                 Clear(InfoMaquinasViejas);
-                Select(btn_Prioridades_OM_1)
+                Select(btn_Prioridades_OMP)
             PressedBorderColor: =App.Theme.Colors.Darker40
             PressedColor: =Self.Color
             PressedFill: =App.Theme.Colors.Darker40
@@ -2359,14 +2635,12 @@ OrdenMaquinas_Prioridad As screen:
                             Meta: Sitem.Meta,
                             User: txt_User_OM_2.Text,
                             Prioridad: NewPri,
-                            Fecha_Inicio: Blank(),
-                            Fecha_Fin_Aprox: DateValue(
+                            Fecha_Inicio: dp_Fecha_OMP.SelectedDate,
+                            Fecha_Fin: DateValue(
                                 Text(
-                                    txt_FechaFin_OM.Text,
+                                    txt_FechaFin_OMP.Text,
                                     "mm/dd/yyyy"
-                                )
-                            ),
-                            Fecha_Fin: Blank(),
+                                )),
                             Jornada: Sitem.Jornada,
                             Horas: Sitem.Horas,
                             Dias: Sitem.Dias,
@@ -2424,14 +2698,16 @@ OrdenMaquinas_Prioridad As screen:
                 Clear(MaquinasList);
                 Refresh(Maquinas);
                 UpdateContext({Guardar: false});
-                Select(btn_Prioridades_OM_1)
+                Reset(dp_Fecha_OMP);
+                Reset(txt_FechaFin_OMP);
+                Select(btn_Prioridades_OMP)
             Size: =15
             Text: ="Guardar"
             X: =187
             Y: =307
             ZIndex: =98
 
-    Container44_2 As groupContainer.manualLayoutContainer:
+    cnt_Eliminar_OMP As groupContainer.manualLayoutContainer:
         BorderColor: =RGBA(215, 58, 60, 1)
         BorderThickness: =4
         DropShadow: =DropShadow.ExtraBold
@@ -2702,4 +2978,631 @@ OrdenMaquinas_Prioridad As screen:
             X: =25
             Y: =25
             ZIndex: =3
+
+    cnt_Guardar_OMP_1 As groupContainer.manualLayoutContainer:
+        BorderColor: =RGBA(52, 152, 47, 1)
+        BorderThickness: =5
+        DropShadow: =DropShadow.ExtraBold
+        Fill: =RGBA(255, 255, 255, 1)
+        Height: =187
+        RadiusBottomLeft: =20
+        RadiusBottomRight: =20
+        RadiusTopLeft: =20
+        RadiusTopRight: =20
+        Visible: =GuardarFecha
+        Width: =If(IsEmpty(MaquinaRemplazo), 366, 1000)
+        X: |-
+            =If(IsEmpty(MaquinaRemplazo), 500
+            , 183
+            )
+        Y: =272
+        ZIndex: =5
+
+        txt_Orden_OM_11 As text:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 18, 107, 1)
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =2
+            Color: =RGBA(255, 255, 255, 1)
+            Default: ="Seleccione la fecha de inicio para poder continuar"
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            DisplayMode: =DisplayMode.View
+            Fill: =RGBA(52, 152, 47, 1)
+            FocusedBorderThickness: =4
+            FontWeight: =FontWeight.Semibold
+            Height: =64
+            HintText: ="Orden"
+            HoverBorderColor: =RGBA(204, 231, 246, 1)
+            HoverColor: =RGBA(0, 0, 0, 1)
+            HoverFill: =RGBA(204, 231, 246, 1)
+            Mode: =TextMode.MultiLine
+            OnChange: =
+            OnSelect: =
+            PaddingLeft: =5
+            RadiusBottomLeft: =20
+            RadiusBottomRight: =20
+            RadiusTopLeft: =20
+            RadiusTopRight: =20
+            Size: =15
+            X: =23
+            Y: =8
+            ZIndex: =75
+
+        btn_OrdenesAfectadas_OMP_1 As button:
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            Fill: =RGBA(72, 163, 62, 1)
+            FontWeight: =FontWeight.Semibold
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(21, 68, 18, 1)
+            OnSelect: |-
+                =If(
+                    !IsEmpty(MaquinaRemplazo),
+                    ForAll(
+                        OrdenRemplazo,
+                        With(
+                            {
+                                // Obtiene la primera prioridad disponible que no esté en uso y no sea 1
+                                NewPri: If(
+                                    IsEmpty(
+                                        Filter(
+                                            Prioridades,
+                                            !(Value in Filter(
+                                                Orden_MaquinasLists_1,
+                                                Maquina in Filter(
+                                                    Orden_MaquinasLists_1,
+                                                    Orden = ThisRecord.Orden,
+                                                    Operacion = ThisRecord.Operacion
+                                                ).Maquina && Prioridad <> OrdenSelected.Prioridad
+                                            ).Prioridad) && Value <> 1
+                                        )
+                                    ),
+                                    Max(
+                                        Filter(
+                                            Orden_MaquinasLists_1,
+                                            Maquina in Filter(
+                                                Orden_MaquinasLists_1,
+                                                Orden = ThisRecord.Orden,
+                                                Operacion = ThisRecord.Operacion
+                                            ).Maquina
+                                        ),
+                                        Prioridad
+                                    ) + 1,
+                                    First(
+                                        Filter(
+                                            Prioridades,
+                                            !(Value in Filter(
+                                                Orden_MaquinasLists_1,
+                                                Maquina in Filter(
+                                                    Orden_MaquinasLists_1,
+                                                    Orden = ThisRecord.Orden,
+                                                    Operacion = ThisRecord.Operacion
+                                                ).Maquina && Prioridad <> OrdenSelected.Prioridad
+                                            ).Prioridad) && Value <> 1
+                                        )
+                                    ).Value
+                                ),
+                                ORD: ThisRecord.Orden,
+                                OP: ThisRecord.Operacion
+                            },
+                            Collect(
+                                infoOrdenAntigua,
+                                LookUp(
+                                    Orden_Maquinas_1,
+                                    Orden = ORD && Operacion = OP
+                                )
+                            );
+                            Patch(
+                                Orden_Maquinas_1,
+                                LookUp(
+                                    Orden_Maquinas_1,
+                                    Orden = ORD && Operacion = OP
+                                ),
+                                {
+                                    Prioridad: NewPri
+                                }
+                            );
+                            With(
+                                {
+                                    Maquinas: Filter(
+                                        Orden_MaquinasLists_1,
+                                        Orden = ORD,
+                                        Operacion = OP
+                                    )
+                                },
+                                ForAll(
+                                    Maquinas,
+                                    With(
+                                        {
+                                            m: ThisRecord.Maquina,
+                                            Maquina: ThisRecord,
+                                            ORDM: ThisRecord.Orden,
+                                            OPM: ThisRecord.Operacion
+                                        },
+                                        Collect(
+                                            InfoMaquinasAntigua,
+                                            LookUp(
+                                                Orden_MaquinasLists_1,
+                                                Orden = ORDM && Operacion = OPM && Maquina = m
+                                            )
+                                        );
+                                        Patch(
+                                            Orden_MaquinasLists_1,
+                                            LookUp(
+                                                Orden_MaquinasLists_1,
+                                                Orden = ORDM && Operacion = OPM && Maquina = m
+                                            ),
+                                            {
+                                                Prioridad: NewPri
+                                            }
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                );
+                ForAll(
+                    infoOrdenAntigua,
+                    With(
+                        {
+                            maximas: LookUp(
+                                Orden_Ejecucion,
+                                Orden = ThisRecord.Orden && Operacion = ThisRecord.Operacion
+                            ).Cantidad,
+                            producidas: LookUp(
+                                Orden_Ejecucion,
+                                Orden = ThisRecord.Orden && Operacion = ThisRecord.Operacion
+                            ).CantidadTotalProducida,
+                            dañadas: Sum(
+                                Filter(
+                                    Scrap_1,
+                                    Orden = ThisRecord.Orden
+                                ),
+                                Cantidad
+                            ),
+                            O: ThisRecord,
+                            Z: ThisRecord.Zona,
+                            J: ThisRecord.Jornada,
+                            ORD: ThisRecord.Orden,
+                            OP: ThisRecord.Operacion
+                        },
+                        Collect(
+                            Registro_Orden_Maquinas,
+                            {
+                                Creacion_Fecha: O.'Fecha de creación',
+                                Orden: O.Orden,
+                                Operacion: O.Operacion,
+                                'P/N': O.'P/N',
+                                Prioridad: O.Prioridad,
+                                Meta: O.Meta,
+                                Fecha_inicio: O.Fecha_Inicio,
+                                Fecha_Fin: O.Fecha_Fin,
+                                Fecha_Fin_Aprox: O.Fecha_Fin_Aprox,
+                                Jornada: LookUp(
+                                    JornadaPlannings,
+                                    Valor = J
+                                ).Texto,
+                                Zona: O.Zona,
+                                Horas: O.Horas,
+                                HorasRestantes: If(
+                                    Value(O.Meta) > 0,
+                                    RoundUp(
+                                        ((maximas - (producidas - dañadas)) / (O.Meta * LookUp(
+                                            ZonaPlannings,
+                                            Texto = Z,
+                                            Valor
+                                        )) + LookUp(
+                                            Orden_Ejecucion,
+                                            Orden = ORD && Operacion = OP
+                                        ).TiempoSetup) / Max(
+                                            1,
+                                            CountRows(
+                                                Filter(
+                                                    Orden_MaquinasLists_1,
+                                                    Orden = ORD,
+                                                    Operacion = OP
+                                                )
+                                            )
+                                        ),
+                                        0
+                                    ),
+                                    0
+                                ),
+                                Dias: O.Dias,
+                                CantMaquinas: CountIf(
+                                    Filter(
+                                        Orden_MaquinasLists_1,
+                                        Orden = ORD,
+                                        Operacion = OP
+                                    ),
+                                    true
+                                ),
+                                CantMax: maximas,
+                                CantPro: producidas,
+                                CantDañada: dañadas,
+                                User: O.User
+                            }
+                        )
+                    )
+                );
+                ForAll(
+                    InfoMaquinasAntigua,
+                    With(
+                        {
+                            Maquina: ThisRecord,
+                            m: ThisRecord.Maquina,
+                            ORD: ThisRecord.Orden,
+                            OP: ThisRecord.Operacion
+                        },
+                        Collect(
+                            Registro_Orden_MaquinasLists,
+                            {
+                                Creacion_Fecha: Maquina.Fecha,
+                                Maquina: Maquina.Maquina,
+                                Orden: ORD,
+                                Operacion: OP,
+                                'P/N': LookUp(
+                                    infoOrdenAntigua,
+                                    Orden = ORD && Operacion = OP
+                                ).'P/N',
+                                Prioridad: Maquina.Prioridad,
+                                Meta: Maquina.Meta,
+                                Horas: Maquina.Horas,
+                                HorasProducidas: CountIf(
+                                    Distinct(
+                                        Filter(
+                                            'Hora X Hora',
+                                            Orden = ORD,
+                                            Operacion = OP,
+                                            Maquina = m
+                                        ),
+                                        'Fecha_Registro_Supervisor '
+                                    ),
+                                    true
+                                ),
+                                HorasRes: Maquina.Horas - CountIf(
+                                    Distinct(
+                                        Filter(
+                                            'Hora X Hora',
+                                            Orden = ORD,
+                                            Operacion = OP,
+                                            Maquina = m
+                                        ),
+                                        'Fecha_Registro_Supervisor '
+                                    ),
+                                    true
+                                ),
+                                CantPro: Sum(
+                                    Filter(
+                                        'Hora X Hora',
+                                        Orden = ORD,
+                                        Operacion = OP,
+                                        Maquina = m
+                                    ),
+                                    Cantidad
+                                ),
+                                CantDañada: Sum(
+                                    Filter(
+                                        Scrap_1,
+                                        Orden = ORD,
+                                        Maquina = m
+                                    ),
+                                    Cantidad
+                                )
+                            }
+                        )
+                    )
+                );
+                Clear(InfoMaquinasAntigua);
+                Clear(infoOrdenAntigua);
+                Clear(MaquinaRemplazo);
+                Clear(OrdenRemplazo);
+                Select(btn_Prioridades_OMP)
+            Size: =15
+            Text: ="Guardar"
+            Visible: =false
+            Width: =42
+            X: =324
+            Y: =267
+            ZIndex: =95
+
+        btn_Registro_EM_2 As button:
+            BorderColor: =App.Theme.Colors.Primary
+            BorderStyle: =BorderStyle.None
+            DisabledBorderColor: =RGBA(244, 244, 244, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            Fill: =RGBA(0, 134, 208, 1)
+            Font: =App.Theme.Font
+            FontWeight: =FontWeight.Semibold
+            Height: =26
+            HoverBorderColor: =App.Theme.Colors.Darker10
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(102, 182, 227, 1)
+            OnSelect: |-
+                =With(
+                    {
+                        maximas: LookUp(
+                            Orden_Ejecucion,
+                            Orden = RegistroOrden.Orden && Operacion = RegistroOrden.Operacion
+                        ).Cantidad,
+                        producidas: LookUp(
+                            Orden_Ejecucion,
+                            Orden = RegistroOrden.Orden && Operacion = RegistroOrden.Operacion
+                        ).CantidadTotalProducida,
+                        dañadas: Sum(
+                            Filter(
+                                Scrap_1,
+                                Orden = RegistroOrden.Orden
+                            ),
+                            Cantidad
+                        )
+                    },
+                    Collect(
+                        Registro_Orden_Maquinas,
+                        {
+                            Creacion_Fecha: RegistroOrden.'Fecha de creación',
+                            Orden: RegistroOrden.Orden,
+                            Operacion: RegistroOrden.Operacion,
+                            'P/N': RegistroOrden.'P/N',
+                            Prioridad: RegistroOrden.Prioridad,
+                            Meta: RegistroOrden.Meta,
+                            Fecha_inicio: RegistroOrden.Fecha_Inicio,
+                            Fecha_Fin: RegistroOrden.Fecha_Fin,
+                            Fecha_Fin_Aprox: RegistroOrden.Fecha_Fin_Aprox,
+                            Jornada: LookUp(
+                                JornadaPlannings,
+                                Valor = RegistroOrden.Jornada
+                            ).Texto,
+                            Zona: RegistroOrden.Zona,
+                            Horas: RegistroOrden.Horas,
+                            HorasRestantes: If(
+                                Value(RegistroOrden.Meta) > 0,
+                                RoundUp(
+                                    ((maximas - (producidas - dañadas)) / (RegistroOrden.Meta * LookUp(
+                                        ZonaPlannings,
+                                        Texto = RegistroOrden.Zona,
+                                        Valor
+                                    )) + LookUp(
+                                        Orden_Ejecucion,
+                                        Orden = RegistroOrden.Orden && Operacion = RegistroOrden.Operacion
+                                    ).TiempoSetup) / Max(
+                                        1,
+                                        CountRows(
+                                            Filter(
+                                                Orden_MaquinasLists_1,
+                                                Orden = RegistroOrden.Orden,
+                                                Operacion = RegistroOrden.Operacion
+                                            )
+                                        )
+                                    ),
+                                    0
+                                ),
+                                0
+                            ),
+                            Dias: RegistroOrden.Dias,
+                            CantMaquinas: CountIf(
+                                MaquinasOrigin,
+                                true
+                            ),
+                            CantMax: maximas,
+                            CantPro: producidas,
+                            CantDañada: dañadas,
+                            User: RegistroOrden.User
+                        }
+                    )
+                );
+                ForAll(
+                    InfoMaquinasViejas,
+                    With(
+                        {
+                            Maquina: ThisRecord,
+                            m: ThisRecord.Maquina,
+                            ORD: ThisRecord.Orden,
+                            OP: ThisRecord.Operacion,
+                            HorasPro: CountIf(
+                                Distinct(
+                                    Filter(
+                                        'Hora X Hora',
+                                        Orden = ThisRecord.Orden,
+                                        Operacion = ThisRecord.Operacion,
+                                        Maquina = ThisRecord.Maquina
+                                    ),
+                                    'Fecha_Registro_Supervisor '
+                                ),
+                                true
+                            )
+                        },
+                        Collect(
+                            Registro_Orden_MaquinasLists,
+                            {
+                                Creacion_Fecha: Maquina.Fecha,
+                                Maquina: Maquina.Maquina,
+                                Orden: ORD,
+                                Operacion: OP,
+                                'P/N': RegistroOrden.'P/N',
+                                Prioridad: Maquina.Prioridad,
+                                Meta: Maquina.Meta,
+                                Horas: Maquina.Horas,
+                                HorasProducidas: CountIf(
+                                    Distinct(
+                                        Filter(
+                                            'Hora X Hora',
+                                            Orden = ORD,
+                                            Operacion = OP,
+                                            Maquina = m
+                                        ),
+                                        'Fecha_Registro_Supervisor '
+                                    ),
+                                    true
+                                ),
+                                HorasRes: Maquina.Horas - CountIf(
+                                    Distinct(
+                                        Filter(
+                                            'Hora X Hora',
+                                            Orden = ORD,
+                                            Operacion = OP,
+                                            Maquina = m
+                                        ),
+                                        'Fecha_Registro_Supervisor '
+                                    ),
+                                    true
+                                ),
+                                CantPro: Sum(
+                                    Filter(
+                                        'Hora X Hora',
+                                        Orden = ORD,
+                                        Operacion = OP,
+                                        Maquina = m
+                                    ),
+                                    Cantidad
+                                ),
+                                CantDañada: Sum(
+                                    Filter(
+                                        Scrap_1,
+                                        Orden = ORD,
+                                        Maquina = m
+                                    ),
+                                    Cantidad
+                                )
+                            }
+                        )
+                    )
+                );
+                UpdateContext(
+                    {
+                        RegistroOrden: Blank(),
+                        MaquinasOrigin: Blank()
+                    }
+                );
+                Clear(InfoMaquinasViejas);
+                Select(btn_Prioridades_OMP)
+            PressedBorderColor: =App.Theme.Colors.Darker40
+            PressedColor: =Self.Color
+            PressedFill: =App.Theme.Colors.Darker40
+            Size: =15
+            Text: ="Continuar"
+            Tooltip: =
+            Visible: =false
+            Width: =84
+            X: =145
+            Y: =281
+            ZIndex: =96
+
+        btn_ContinuarAviso_HxH_29 As button:
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            Fill: =RGBA(233, 79, 76, 1)
+            FontWeight: =FontWeight.Semibold
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(132, 40, 38, 1)
+            OnSelect: |-
+                =UpdateContext({GuardarFecha: false});
+                Clear(MaquinaRemplazo);
+                Clear(OrdenRemplazo);
+            Size: =15
+            Text: ="Cancelar"
+            X: =18
+            Y: =136
+            ZIndex: =97
+
+        btn_ContinuarAviso_HxH_30 As button:
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            Fill: =RGBA(72, 163, 62, 1)
+            FontWeight: =FontWeight.Semibold
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(21, 68, 18, 1)
+            OnSelect: |-
+                =If(!IsBlank( dp_Fecha_OMP.SelectedDate), UpdateContext({Guardar: true, GuardarFecha: false}), Notify("Debe indicar la fecha de inicio", NotificationType.Error))
+            Size: =15
+            Text: ="Continuar"
+            X: =188
+            Y: =136
+            ZIndex: =98
+
+        Label2_179 As label:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 18, 107, 1)
+            Color: =RGBA(0, 0, 0, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            Height: =20
+            Size: =12
+            Text: ="Fecha Inicio"
+            Visible: =drp_Pri_OM.SelectedText.Value = "1"
+            Width: =100
+            X: =57
+            Y: =75
+            ZIndex: =99
+
+        "dp_Fecha_OMP As 'Selector de fecha'":
+            BorderRadius: =15
+            DisplayMode: =DisplayMode.Edit
+            Fill: =RGBA(166, 215, 153, 1)
+            FontSize: =18
+            Format: ='DatePickerCanvas.Format'.Short
+            Height: =30
+            PaddingBottom: =5
+            PaddingLeft: =5
+            PaddingRight: =5
+            PaddingTop: =5
+            Placeholder: ="Fecha Inicio"
+            SelectedDate: =glr_Ordenes_OMP.Selected.Fecha_Inicio
+            StartDate: =Today()
+            Visible: =drp_Pri_OM.SelectedText.Value = "1"
+            Width: =140
+            X: =37
+            Y: =95
+            ZIndex: =100
+
+        Label2_180 As label:
+            Align: =Align.Center
+            BorderColor: =RGBA(0, 18, 107, 1)
+            Color: =RGBA(0, 0, 0, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            Height: =20
+            Size: =12
+            Text: ="Fecha Fin"
+            Visible: =drp_Pri_OM.SelectedText.Value = "1"
+            Width: =80
+            X: =219
+            Y: =75
+            ZIndex: =101
+
+        txt_FechaFin_OMP As text:
+            Align: =Align.Center
+            BorderColor: =RGBA(40, 134, 222, 1)
+            BorderThickness: =2
+            Color: =RGBA(0, 0, 0, 1)
+            Default: =Text(dp_Fecha_OMP.SelectedDate + glr_Ordenes_OMP.Selected.Dias, "dd/mm/yyyy")
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            DisplayMode: =DisplayMode.View
+            Fill: =RGBA(166, 215, 153, 1)
+            FocusedBorderThickness: =4
+            Height: =30
+            HintText: ="Fecha Fin"
+            HoverBorderColor: =RGBA(40, 134, 222, 1)
+            HoverColor: =RGBA(0, 0, 0, 1)
+            HoverFill: =RGBA(204, 231, 246, 1)
+            OnChange: =
+            OnSelect: =
+            PaddingLeft: =5
+            RadiusBottomLeft: =20
+            RadiusBottomRight: =20
+            RadiusTopLeft: =20
+            RadiusTopRight: =20
+            Size: =12
+            Visible: =drp_Pri_OM.SelectedText.Value = "1"
+            Width: =140
+            X: =189
+            Y: =95
+            ZIndex: =102
 
