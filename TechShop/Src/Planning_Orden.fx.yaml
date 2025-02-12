@@ -3,6 +3,7 @@ Planning_Orden As screen:
     Fill: =Color.White
     ImagePosition: =ImagePosition.Fill
     LoadingSpinnerColor: =App.Theme.Colors.Primary
+    OnVisible: =Select(btn_Prioridades_PO)
 
     ScreenContainer10_3 As groupContainer.verticalAutoLayoutContainer:
         DropShadow: =DropShadow.Light
@@ -1356,7 +1357,20 @@ Planning_Orden As screen:
                                     BorderColor: =App.Theme.Colors.Darker40
                                     BorderThickness: =2
                                     Color: =RGBA(0, 0, 0, 1)
-                                    Default: =Text(ThisItem.Fecha_Fin, "dd/mm/yyyy")
+                                    Default: |-
+                                        =If(
+                                            IsBlank(ThisItem.Fecha_Inicio),
+                                            "",
+                                            Today() <= ThisItem.Fecha_Inicio,
+                                            Text(
+                                                ThisItem.Fecha_Fin,
+                                                "dd/mm/yyyy"
+                                            ),
+                                            Text(
+                                                Today() + ThisItem.Dias,
+                                                "dd/mm/yyyy"
+                                            )
+                                        )
                                     DisabledBorderColor: =RGBA(166, 166, 166, 1)
                                     DisabledColor: =RGBA(166, 166, 166, 1)
                                     DisabledFill: =RGBA(244, 244, 244, 1)
@@ -1853,9 +1867,7 @@ Planning_Orden As screen:
 
                     drp_Pri_PO As dropdown:
                         AllowEmptySelection: =true
-                        BorderColor: =RGBA(255, 255, 255, 1)
-                        BorderStyle: =BorderStyle.None
-                        BorderThickness: =0
+                        BorderColor: =RGBA(40, 134, 222, 1)
                         ChevronBackground: =RGBA(255, 255, 255, 1)
                         ChevronDisabledBackground: =RGBA(0, 0, 0, 0)
                         ChevronDisabledFill: =RGBA(0, 0, 0, 1)
@@ -1868,10 +1880,10 @@ Planning_Orden As screen:
                         DisabledFill: =RGBA(244, 244, 244, 1)
                         DisplayMode: =If(Eliminar, DisplayMode.Disabled, DisplayMode.Edit)
                         Height: =20
-                        HoverBorderColor: =RGBA(214, 221, 224, 1)
+                        HoverBorderColor: =RGBA(40, 134, 222, 1)
                         HoverColor: =RGBA(0, 0, 0, 1)
                         HoverFill: =RGBA(214, 221, 224, 1)
-                        Items: =[1,2,3,4,5]
+                        Items: =Prioridades
                         OnChange: =Reset(glr_Ordenes_PO)
                         PressedBorderColor: =RGBA(40, 134, 222, 1)
                         PressedColor: =RGBA(255, 255, 255, 1)
@@ -1903,9 +1915,7 @@ Planning_Orden As screen:
 
                     drp_Maquina_PO As dropdown:
                         AllowEmptySelection: =true
-                        BorderColor: =RGBA(255, 255, 255, 1)
-                        BorderStyle: =BorderStyle.None
-                        BorderThickness: =0
+                        BorderColor: =RGBA(40, 134, 222, 1)
                         ChevronBackground: =RGBA(255, 255, 255, 1)
                         ChevronDisabledBackground: =RGBA(0, 0, 0, 0)
                         ChevronDisabledFill: =RGBA(0, 0, 0, 1)
@@ -1918,7 +1928,7 @@ Planning_Orden As screen:
                         DisabledFill: =RGBA(244, 244, 244, 1)
                         DisplayMode: =If(Eliminar, DisplayMode.Disabled, DisplayMode.Edit)
                         Height: =20
-                        HoverBorderColor: =RGBA(214, 221, 224, 1)
+                        HoverBorderColor: =RGBA(40, 134, 222, 1)
                         HoverColor: =RGBA(0, 0, 0, 1)
                         HoverFill: =RGBA(214, 221, 224, 1)
                         Items: =Sort(Distinct(Orden_MaquinasLists_1, Maquina), ThisRecord.Value, SortOrder.Ascending)
@@ -1980,9 +1990,7 @@ Planning_Orden As screen:
 
                     drp_OP_PO As dropdown:
                         AllowEmptySelection: =true
-                        BorderColor: =RGBA(255, 255, 255, 1)
-                        BorderStyle: =BorderStyle.None
-                        BorderThickness: =0
+                        BorderColor: =RGBA(40, 134, 222, 1)
                         ChevronBackground: =RGBA(255, 255, 255, 1)
                         ChevronDisabledBackground: =RGBA(0, 0, 0, 0)
                         ChevronDisabledFill: =RGBA(0, 0, 0, 1)
@@ -1995,7 +2003,7 @@ Planning_Orden As screen:
                         DisabledFill: =RGBA(244, 244, 244, 1)
                         DisplayMode: =If(Eliminar, DisplayMode.Disabled, DisplayMode.Edit)
                         Height: =20
-                        HoverBorderColor: =RGBA(214, 221, 224, 1)
+                        HoverBorderColor: =RGBA(40, 134, 222, 1)
                         HoverColor: =RGBA(0, 0, 0, 1)
                         HoverFill: =RGBA(214, 221, 224, 1)
                         Items: =Sort(Distinct(Orden_Maquinas_1, Operacion), Value(ThisRecord.Value), SortOrder.Ascending)
@@ -2060,6 +2068,66 @@ Planning_Orden As screen:
                         X: =394
                         ZIndex: =12
 
+                    btn_Prioridades_PO As button:
+                        BorderColor: =App.Theme.Colors.Primary
+                        BorderStyle: =BorderStyle.None
+                        DisabledBorderColor: =RGBA(244, 244, 244, 1)
+                        DisabledColor: =RGBA(166, 166, 166, 1)
+                        DisabledFill: =RGBA(244, 244, 244, 1)
+                        DisplayMode: =
+                        Fill: =RGBA(0, 134, 208, 1)
+                        Font: =App.Theme.Font
+                        FontWeight: =FontWeight.Semibold
+                        Height: =44
+                        HoverBorderColor: =App.Theme.Colors.Darker10
+                        HoverColor: =RGBA(255, 255, 255, 1)
+                        HoverFill: =RGBA(102, 182, 227, 1)
+                        OnSelect: |
+                            =// Inicializa la colección de prioridades con los valores mínimos
+                            ClearCollect(
+                                Prioridades,
+                                [
+                                    1,
+                                    2,
+                                    3,
+                                    4,
+                                    5,
+                                    6
+                                ]
+                            );
+                            // Obtiene la prioridad más alta actualmente asignada en la tabla de órdenes
+                            UpdateContext({
+                                MaxPriority:
+                                Max(
+                                    Orden_Maquinas_1,
+                                    Prioridad
+                                )}
+                            );
+                            // Si la prioridad más alta es mayor que 6, agrega las prioridades adicionales a la colección
+                            If(
+                                MaxPriority > 6,
+                                ForAll(
+                                    Sequence(
+                                        MaxPriority - 6,
+                                        7
+                                    ),// Crea una secuencia de números desde 7 hasta MaxPriority
+                                    Collect(
+                                        Prioridades,
+                                        Value
+                                    )
+                                )
+                            );
+                        PressedBorderColor: =App.Theme.Colors.Darker40
+                        PressedColor: =Self.Color
+                        PressedFill: =App.Theme.Colors.Darker40
+                        Size: =15
+                        Text: ="Continuar"
+                        Tooltip: =
+                        Visible: =false
+                        Width: =52
+                        X: =202
+                        ZIndex: =13
+
     cnt_Eliminar_PO As groupContainer.manualLayoutContainer:
         BorderColor: =RGBA(215, 58, 60, 1)
         BorderThickness: =5
@@ -2091,9 +2159,65 @@ Planning_Orden As screen:
                 ¿Quiere finalizar solo esta Operacion o toda la Orden?"
             Width: =360
             Y: =20
-            ZIndex: =72
+            ZIndex: =1
 
-        btn_ContinuarAviso_HxH_14 As button:
+        btn_Eliminar_PO As button:
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            Fill: =RGBA(215, 58, 60, 1)
+            FontWeight: =FontWeight.Semibold
+            Height: =20
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(132, 40, 38, 1)
+            OnSelect: |
+                =Remove(
+                    Orden_Maquinas_1,
+                    ItemEliminar
+                );
+                With(
+                    {
+                        MaquinasEliminar: Filter(
+                            Orden_MaquinasLists_1,
+                            Orden = ItemEliminar.Orden,
+                            Operacion = ItemEliminar.Operacion
+                        )
+                    },
+                    ForAll(
+                        MaquinasEliminar,
+                        Collect(
+                            InfoMaquinasEliminar,
+                            ThisRecord
+                        );
+                        Remove(
+                            Orden_MaquinasLists_1,
+                            ThisRecord
+                        )
+                    )
+                );
+                UpdateContext(
+                    {
+                        ItemEliminar: Blank(),
+                        MaquinasOrigin: Blank()
+                    }
+                );
+                Clear(InfoMaquinasEliminar);
+                UpdateContext(
+                    {
+                        Eliminar: false,
+                        ItemEliminar: Blank(),
+                        FinOperacion: false
+                    }
+                );
+            Size: =15
+            Text: ="Eliminar"
+            Visible: =VarName in ["1", "2692", "2693"]
+            Width: =200
+            X: =80
+            Y: =200
+            ZIndex: =2
+
+        btn_OrdenFin_PO As button:
             DisabledBorderColor: =RGBA(166, 166, 166, 1)
             DisabledColor: =RGBA(166, 166, 166, 1)
             DisabledFill: =RGBA(244, 244, 244, 1)
@@ -2109,9 +2233,9 @@ Planning_Orden As screen:
             Width: =200
             X: =360
             Y: =85
-            ZIndex: =73
+            ZIndex: =3
 
-        btn_ContinuarAviso_HxH_19 As button:
+        btn_Cancelar_PO As button:
             DisabledBorderColor: =RGBA(166, 166, 166, 1)
             DisabledColor: =RGBA(166, 166, 166, 1)
             DisabledFill: =RGBA(244, 244, 244, 1)
@@ -2127,9 +2251,9 @@ Planning_Orden As screen:
             Width: =200
             X: =360
             Y: =150
-            ZIndex: =74
+            ZIndex: =4
 
-        btn_ContinuarAviso_HxH_20 As button:
+        btn_OpFin_PO As button:
             DisabledBorderColor: =RGBA(166, 166, 166, 1)
             DisabledColor: =RGBA(166, 166, 166, 1)
             DisabledFill: =RGBA(244, 244, 244, 1)
@@ -2145,7 +2269,7 @@ Planning_Orden As screen:
             Width: =200
             X: =360
             Y: =20
-            ZIndex: =75
+            ZIndex: =5
 
         Container44 As groupContainer.manualLayoutContainer:
             BorderColor: =RGBA(52, 152, 47, 1)
@@ -2160,9 +2284,9 @@ Planning_Orden As screen:
             Width: =550
             X: =15
             Y: =10
-            ZIndex: =76
+            ZIndex: =6
 
-            btn_ContinuarAviso_HxH_21 As button:
+            btn_FinOp_PO As button:
                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                 DisabledColor: =RGBA(166, 166, 166, 1)
                 DisabledFill: =RGBA(244, 244, 244, 1)
@@ -2171,7 +2295,7 @@ Planning_Orden As screen:
                 Height: =50
                 HoverColor: =RGBA(255, 255, 255, 1)
                 HoverFill: =RGBA(21, 68, 18, 1)
-                OnSelect: |
+                OnSelect: |-
                     =Patch(
                         Orden_Ejecucion,
                         LookUp(
@@ -2232,7 +2356,7 @@ Planning_Orden As screen:
                                 Prioridad: ItemEliminar.Prioridad,
                                 Meta: ItemEliminar.Meta,
                                 Fecha_inicio: ItemEliminar.Fecha_Inicio,
-                                Fecha_Fin: ItemEliminar.Fecha_Fin,
+                                Fecha_Fin: If(Today() <= ItemEliminar.Fecha_Inicio, ItemEliminar.Fecha_Fin, DateValue(Text(Today() + ItemEliminar.Dias, "dd/mm/yyyy"))),
                                 Fecha_Inicio_Aprox: ItemEliminar.Fecha_Inicio_Aprox,
                                 Fecha_Fin_Aprox: ItemEliminar.Fecha_Fin_Aprox,
                                 Jornada: LookUp(
@@ -2372,6 +2496,7 @@ Planning_Orden As screen:
                             FinOperacion: false
                         }
                     );
+                    Select(btn_Prioridades_PO)
                 Size: =15
                 Text: ="Finalizar Operacion"
                 Width: =200
@@ -2379,7 +2504,7 @@ Planning_Orden As screen:
                 Y: =135
                 ZIndex: =1
 
-            btn_ContinuarAviso_HxH_22 As button:
+            btn_CancelarOP_PO As button:
                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                 DisabledColor: =RGBA(166, 166, 166, 1)
                 DisabledFill: =RGBA(244, 244, 244, 1)
@@ -2435,9 +2560,9 @@ Planning_Orden As screen:
             Width: =550
             X: =15
             Y: =10
-            ZIndex: =77
+            ZIndex: =7
 
-            btn_ContinuarAviso_HxH_24 As button:
+            btn_CancelarOrden_PO As button:
                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                 DisabledColor: =RGBA(166, 166, 166, 1)
                 DisabledFill: =RGBA(244, 244, 244, 1)
@@ -2480,7 +2605,7 @@ Planning_Orden As screen:
                 Y: =25
                 ZIndex: =3
 
-            btn_ContinuarAviso_HxH_23 As button:
+            btn_FinOrden_PO As button:
                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                 DisabledColor: =RGBA(166, 166, 166, 1)
                 DisabledFill: =RGBA(244, 244, 244, 1)
@@ -2489,7 +2614,7 @@ Planning_Orden As screen:
                 Height: =50
                 HoverColor: =RGBA(255, 255, 255, 1)
                 HoverFill: =RGBA(171, 129, 5, 1)
-                OnSelect: |
+                OnSelect: |-
                     =With(
                         {
                             Operaciones: Filter(
@@ -2592,8 +2717,17 @@ Planning_Orden As screen:
                                     Prioridad: O.Prioridad,
                                     Meta: O.Meta,
                                     Fecha_inicio: O.Fecha_Inicio,
-                                    Fecha_Fin: O.Fecha_Fin,
-                                Fecha_Inicio_Aprox: O.Fecha_Inicio_Aprox,
+                                    Fecha_Fin: If(
+                                        Today() <= O.Fecha_Inicio,
+                                        O.Fecha_Fin,
+                                        DateValue(
+                                            Text(
+                                                Today() + O.Dias,
+                                                "dd/mm/yyyy"
+                                            )
+                                        )
+                                    ),
+                                    Fecha_Inicio_Aprox: O.Fecha_Inicio_Aprox,
                                     Fecha_Fin_Aprox: O.Fecha_Fin_Aprox,
                                     Jornada: LookUp(
                                         JornadaPlannings,
@@ -2719,6 +2853,7 @@ Planning_Orden As screen:
                             FinOrden: false
                         }
                     );
+                    Select(btn_Prioridades_PO)
                 Size: =15
                 Text: ="Finalizar Orden"
                 Width: =200

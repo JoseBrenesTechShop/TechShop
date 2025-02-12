@@ -487,7 +487,15 @@ OrdenMaquinas As screen:
                                         FechaInicio: LookUp(
                                             Orden_Maquinas_1,
                                             Orden = Self.SelectedText.Orden && Operacion = Self.SelectedText.Operacion
-                                        ).Fecha_Inicio
+                                        ).Fecha_Inicio,
+                                        FechaInicioAprox: LookUp(
+                                            Orden_Maquinas_1,
+                                            Orden = Self.SelectedText.Orden && Operacion = Self.SelectedText.Operacion
+                                        ).Fecha_Inicio_Aprox,
+                                        FechaFinAprox: LookUp(
+                                            Orden_Maquinas_1,
+                                            Orden = Self.SelectedText.Orden && Operacion = Self.SelectedText.Operacion
+                                        ).Fecha_Fin_Aprox
                                     },
                                     MaquinasOrigin: Filter(
                                         Orden_MaquinasLists_1,
@@ -1329,7 +1337,7 @@ OrdenMaquinas As screen:
                         PaddingRight: =5
                         PaddingTop: =5
                         Placeholder: ="Fecha Inicio"
-                        SelectedDate: =info2.FechaInicio
+                        SelectedDate: =If(IsBlank(info2.FechaInicio), Today(), info2.FechaInicio)
                         StartDate: =Today()
                         Visible: =drp_Pri_OM.SelectedText.Value = "1"
                         Width: =140
@@ -1549,7 +1557,7 @@ OrdenMaquinas As screen:
                         BorderColor: =RGBA(40, 134, 222, 1)
                         BorderThickness: =2
                         Color: =RGBA(0, 0, 0, 1)
-                        Default: =Text(dp_Fecha_OM.SelectedDate + txt_Dias_OM.Text, "dd/mm/yyyy")
+                        Default: =If(Today() <= dp_Fecha_OM.SelectedDate, Text(dp_Fecha_OM.SelectedDate + txt_Dias_OM.Text, "dd/mm/yyyy"), Text(Today() + txt_Dias_OM.Text, "dd/mm/yyyy"))
                         DisabledBorderColor: =RGBA(166, 166, 166, 1)
                         DisabledColor: =RGBA(166, 166, 166, 1)
                         DisabledFill: =RGBA(244, 244, 244, 1)
@@ -1743,7 +1751,7 @@ OrdenMaquinas As screen:
 
                     "dp_Fecha_Aprox_OM As 'Selector de fecha'":
                         BorderRadius: =15
-                        DisplayMode: =DisplayMode.Edit
+                        DisplayMode: =If(drp_Pri_OM.SelectedText.Value = "1", DisplayMode.View, DisplayMode.Edit)
                         Fill: =RGBA(255, 255, 255, 1)
                         FontSize: =18
                         Format: ='DatePickerCanvas.Format'.Short
@@ -1753,7 +1761,7 @@ OrdenMaquinas As screen:
                         PaddingRight: =5
                         PaddingTop: =5
                         Placeholder: ="Fecha Inicio"
-                        SelectedDate: =info2.FechaInicio
+                        SelectedDate: =If(IsBlank(info2.FechaInicioAprox) && drp_Pri_OM.SelectedText.Value = "1", dp_Fecha_OM.SelectedDate, info2.FechaInicioAprox)
                         StartDate: =Today()
                         Visible: =true
                         Width: =140
@@ -2146,7 +2154,7 @@ OrdenMaquinas As screen:
                             Meta: RegistroOrden.Meta,
                             Fecha_inicio: RegistroOrden.Fecha_Inicio,
                             Fecha_Inicio_Aprox: RegistroOrden.Fecha_Inicio_Aprox,
-                            Fecha_Fin: RegistroOrden.Fecha_Fin,
+                            Fecha_Fin: If(Today() <= RegistroOrden.Fecha_Inicio, RegistroOrden.Fecha_Fin, DateValue(Text(Today() + RegistroOrden.Dias, "dd/mm/yyyy"))),
                             Fecha_Fin_Aprox: RegistroOrden.Fecha_Fin_Aprox,
                             Jornada: LookUp(
                                 JornadaPlannings,
@@ -3011,7 +3019,7 @@ OrdenMaquinas As screen:
                                 Meta: O.Meta,
                                 Fecha_inicio: O.Fecha_Inicio,
                                 Fecha_Inicio_Aprox: O.Fecha_Inicio_Aprox,
-                                Fecha_Fin: O.Fecha_Fin,
+                                Fecha_Fin: If(Today() <= O.Fecha_Inicio, O.Fecha_Fin, DateValue(Text(Today() + O.Dias, "dd/mm/yyyy"))),
                                 Fecha_Fin_Aprox: O.Fecha_Fin_Aprox,
                                 Jornada: LookUp(
                                     JornadaPlannings,
