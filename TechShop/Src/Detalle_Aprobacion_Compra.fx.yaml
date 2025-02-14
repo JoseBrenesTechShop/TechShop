@@ -160,7 +160,7 @@ Detalle_Aprobacion_Compra As screen:
                 Icon: =Icon.BackArrow
                 OnSelect: |-
                     =Back();
-                    UpdateContext({edit: {view: false, item: Blank()}});
+                    UpdateContext({edit: {view: false, item: Blank()}, Aviso: false, mensajeNotificacion: "", Rechazo: false});
                     Clear(compras)
                 PaddingBottom: =5
                 PaddingLeft: =5
@@ -577,28 +577,7 @@ Detalle_Aprobacion_Compra As screen:
                             HoverColor: =App.Theme.Colors.PrimaryForeground
                             HoverFill: =RGBA(132, 40, 38, 1)
                             OnSelect: |-
-                                =If(
-                                    IsBlank(
-                                        LookUp(
-                                            Solicitud_Compras,
-                                            soli_num = txt_Num_Soli_DAC.Text
-                                        )
-                                    ),
-                                    Collect(
-                                        Solicitud_Compras,
-                                        {
-                                            soli_num: Upper(txt_Num_Soli_DAC.Text),
-                                            fecha: DateValue(txt_Fecha_DSC.Text),
-                                            solicitante: txt_Solicitante_DSC.Text,
-                                            user: txt_User_DSC.Text,
-                                            total: Value(txt_Total_DSC.Text),
-                                            estado: "Listo"
-                                        }
-                                    );
-                                    Back(),
-                                    Reset(txt_Num_Soli_DSC),
-                                    Clear(CheckList_DSC)
-                                )
+                                =UpdateContext({Rechazo: true})
                             PaddingBottom: =0
                             PaddingLeft: =0
                             PaddingRight: =0
@@ -1179,7 +1158,10 @@ Detalle_Aprobacion_Compra As screen:
         BorderColor: =App.Theme.Colors.Darker40
         Fill: =RGBA(122, 138, 143, 0.2)
         Height: =663
-        Visible: =edit.view || Aviso
+        OnSelect: |-
+            =
+            UpdateContext({edit: {view: false, item: Blank()}, Aviso: false, mensajeNotificacion: "", Rechazo: false});
+        Visible: =edit.view || Aviso || Rechazo
         Width: =1352
         X: =8
         Y: =97
@@ -1720,4 +1702,83 @@ Detalle_Aprobacion_Compra As screen:
             X: =235
             Y: =150
             ZIndex: =71
+
+    cnt_Rechazo_DAC As groupContainer.manualLayoutContainer:
+        BorderColor: =RGBA(215, 58, 60, 1)
+        BorderThickness: =5
+        DropShadow: =DropShadow.ExtraBold
+        Fill: =RGBA(255, 255, 255, 1)
+        Height: =190
+        RadiusBottomLeft: =20
+        RadiusBottomRight: =20
+        RadiusTopLeft: =20
+        RadiusTopRight: =20
+        Visible: =Rechazo
+        Width: =400
+        X: =483
+        Y: =289
+        ZIndex: =5
+
+        txt_MensajeNoti_EM_6 As label:
+            Align: =Align.Center
+            BorderColor: =App.Theme.Colors.Darker40
+            Color: =RGBA(0, 0, 0, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            Font: =Font.Arial
+            Height: =129
+            Size: =18
+            Text: ="¿Esta seguro que desea rechazar esta solicitud?"
+            Width: =400
+            ZIndex: =69
+
+        btn_Aceptar_EM_7 As button:
+            BorderColor: =RGBA(52, 152, 47, 1)
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            Fill: =RGBA(52, 152, 47, 1)
+            FontWeight: =FontWeight.Bold
+            HoverBorderColor: =RGBA(52, 152, 47, 1)
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(21, 68, 18, 1)
+            OnSelect: |-
+                =Patch(
+                    Solicitud_Compras,
+                    glr_Solicitud_AC.Selected,
+                    {
+                        soli_num: Upper(txt_Num_Soli_DAC.Text),
+                        fecha: DateValue(txt_Fecha_DAC.Text),
+                        solicitante: txt_Solicitante_DAC.Text,
+                        user: txt_User_DAC.Text,
+                        total: Value(txt_Total_DAC.Text),
+                        estado: "Rechazado"
+                    }
+                );
+            PressedBorderColor: =RGBA(52, 152, 47, 1)
+            Size: =15
+            Text: ="Aceptar"
+            Width: =150
+            X: =212
+            Y: =129
+            ZIndex: =71
+
+        btn_Aceptar_EM_8 As button:
+            BorderColor: =RGBA(215, 58, 60, 1)
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            Fill: =RGBA(215, 58, 60, 1)
+            FontWeight: =FontWeight.Bold
+            HoverBorderColor: =RGBA(215, 58, 60, 1)
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(132, 40, 38, 1)
+            OnSelect: |-
+                =UpdateContext({Rechazo: false})
+            PressedBorderColor: =RGBA(215, 58, 60, 1)
+            Size: =15
+            Text: ="Cancelar"
+            Width: =150
+            X: =37
+            Y: =129
+            ZIndex: =72
 
