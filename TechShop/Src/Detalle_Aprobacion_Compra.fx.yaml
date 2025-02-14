@@ -3,7 +3,26 @@ Detalle_Aprobacion_Compra As screen:
     Fill: =Color.White
     ImagePosition: =ImagePosition.Fill
     LoadingSpinnerColor: =App.Theme.Colors.Primary
-    OnVisible: =ClearCollect(compras, glr_Detalles_DAC.AllItems)
+    OnVisible: |-
+        =Clear(compras);
+        ForAll(
+            Filter(
+                preqitem,
+                req_num = glr_Solicitud_AC.Selected.soli_num
+            ),
+            Collect(
+                compras,
+                {req_line: ThisRecord.req_line,
+                item: ThisRecord.item,
+                descripcion: ThisRecord.description,
+                medida: ThisRecord.u_m,
+                cantidad: ThisRecord.qty_ordered,
+                precio: ThisRecord.unit_mat_cost,
+                num_vendedor: ThisRecord.vend_num,
+                aprobado: true
+                }
+            )
+        )
 
     ScreenContainer_EM_5 As groupContainer.verticalAutoLayoutContainer:
         DropShadow: =DropShadow.Light
@@ -141,7 +160,7 @@ Detalle_Aprobacion_Compra As screen:
                 Icon: =Icon.BackArrow
                 OnSelect: |-
                     =Back();
-                    UpdateContext({edit: false});
+                    UpdateContext({edit: {view: false, item: Blank()}});
                     Clear(compras)
                 PaddingBottom: =5
                 PaddingLeft: =5
@@ -204,25 +223,32 @@ Detalle_Aprobacion_Compra As screen:
                         ZIndex: =11
 
                         Button10_2 As button:
-                            BorderColor: =App.Theme.Colors.Primary
+                            BorderColor: =RGBA(52, 152, 47, 1)
                             Color: =App.Theme.Colors.PrimaryForeground
                             DisabledBorderColor: =RGBA(244, 244, 244, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             DisabledFill: =RGBA(244, 244, 244, 1)
                             DisplayMode: |-
-                                =If(CountIf(CheckList_DSC, true) = CountIf(glr_Detalles_DAC.AllItems, true) && CountIf(glr_Detalles_DAC.AllItems, true) > 0 && IsBlank(
+                                =If(
+                                    CountIf(
+                                        compras,
+                                        true
+                                    ) >= 0 && !IsBlank(
                                         LookUp(
                                             Solicitud_Compras,
                                             soli_num = txt_Num_Soli_DSC_2.Text
                                         )
-                                    ), DisplayMode.Edit, DisplayMode.Disabled)
-                            Fill: =RGBA(15, 108, 189, 1)
+                                    ),
+                                    DisplayMode.Edit,
+                                    DisplayMode.Disabled
+                                )
+                            Fill: =RGBA(52, 152, 47, 1)
                             Font: =App.Theme.Font
                             FontWeight: =FontWeight.Semibold
                             Height: =35
-                            HoverBorderColor: =RGBA(15, 84, 140, 1)
+                            HoverBorderColor: =RGBA(52, 152, 47, 1)
                             HoverColor: =App.Theme.Colors.PrimaryForeground
-                            HoverFill: =RGBA(15, 84, 140, 1)
+                            HoverFill: =RGBA(21, 68, 18, 1)
                             OnSelect: |-
                                 =If(
                                     IsBlank(
@@ -246,13 +272,17 @@ Detalle_Aprobacion_Compra As screen:
                                     Reset(txt_Num_Soli_DSC),
                                     Clear(CheckList_DSC)
                                 )
-                            PressedBorderColor: =RGBA(15, 108, 189, 1)
-                            PressedColor: =RGBA(15, 108, 189, 1)
+                            PaddingBottom: =2
+                            PaddingLeft: =0
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            PressedBorderColor: =RGBA(52, 152, 47, 1)
+                            PressedColor: =RGBA(52, 152, 47, 1)
                             PressedFill: =RGBA(255, 255, 255, 1)
-                            Size: =15
+                            Size: =14
                             Text: ="Enviar"
-                            Width: =88
-                            X: =1251
+                            Width: =120
+                            X: =1127
                             Y: =7
                             ZIndex: =12
 
@@ -270,7 +300,7 @@ Detalle_Aprobacion_Compra As screen:
                             VerticalAlign: =VerticalAlign.Middle
                             Weight: ='TextCanvas.Weight'.Bold
                             Width: =130
-                            X: =10
+                            X: =5
                             Y: =10
                             ZIndex: =13
 
@@ -303,9 +333,9 @@ Detalle_Aprobacion_Compra As screen:
                             RadiusBottomRight: =10
                             RadiusTopLeft: =10
                             RadiusTopRight: =10
-                            Size: =15
-                            Width: =160
-                            X: =140
+                            Size: =12
+                            Width: =120
+                            X: =135
                             Y: =10
                             ZIndex: =14
 
@@ -323,7 +353,7 @@ Detalle_Aprobacion_Compra As screen:
                             VerticalAlign: =VerticalAlign.Middle
                             Weight: ='TextCanvas.Weight'.Bold
                             Width: =60
-                            X: =305
+                            X: =260
                             Y: =10
                             ZIndex: =15
 
@@ -357,8 +387,8 @@ Detalle_Aprobacion_Compra As screen:
                             RadiusTopLeft: =10
                             RadiusTopRight: =10
                             Size: =12
-                            Width: =110
-                            X: =369
+                            Width: =100
+                            X: =324
                             Y: =10
                             ZIndex: =16
 
@@ -376,7 +406,7 @@ Detalle_Aprobacion_Compra As screen:
                             VerticalAlign: =VerticalAlign.Middle
                             Weight: ='TextCanvas.Weight'.Bold
                             Width: =110
-                            X: =484
+                            X: =429
                             Y: =10
                             ZIndex: =17
 
@@ -440,8 +470,8 @@ Detalle_Aprobacion_Compra As screen:
                             RadiusTopLeft: =10
                             RadiusTopRight: =10
                             Size: =12
-                            Width: =220
-                            X: =595
+                            Width: =200
+                            X: =540
                             Y: =10
                             ZIndex: =18
 
@@ -459,7 +489,7 @@ Detalle_Aprobacion_Compra As screen:
                             VerticalAlign: =VerticalAlign.Middle
                             Weight: ='TextCanvas.Weight'.Bold
                             Width: =60
-                            X: =820
+                            X: =740
                             Y: =10
                             ZIndex: =19
 
@@ -495,7 +525,7 @@ Detalle_Aprobacion_Compra As screen:
                             RadiusTopRight: =10
                             Size: =12
                             Width: =110
-                            X: =879
+                            X: =799
                             Y: =10
                             ZIndex: =20
 
@@ -510,13 +540,67 @@ Detalle_Aprobacion_Compra As screen:
                             PaddingTop: =0
                             Size: =20
                             Text: |-
-                                ="Aprobados: " & CountIf(compras, true) & "/" & glr_Detalles_DAC.AllItemsCount
+                                ="Aprobados: " & CountIf(compras, aprobado) & "/" & glr_Detalles_DAC.AllItemsCount
                             VerticalAlign: =VerticalAlign.Middle
                             Weight: ='TextCanvas.Weight'.Bold
                             Width: =174
-                            X: =1069
+                            X: =948
                             Y: =10
                             ZIndex: =21
+
+                        Button10_3 As button:
+                            BorderColor: =RGBA(215, 58, 60, 1)
+                            Color: =App.Theme.Colors.PrimaryForeground
+                            DisabledBorderColor: =RGBA(244, 244, 244, 1)
+                            DisabledColor: =RGBA(166, 166, 166, 1)
+                            DisabledFill: =RGBA(244, 244, 244, 1)
+                            Fill: =RGBA(215, 58, 60, 1)
+                            Font: =App.Theme.Font
+                            FontWeight: =FontWeight.Semibold
+                            Height: =35
+                            HoverBorderColor: =RGBA(215, 58, 60, 1)
+                            HoverColor: =App.Theme.Colors.PrimaryForeground
+                            HoverFill: =RGBA(132, 40, 38, 1)
+                            OnSelect: |-
+                                =If(
+                                    IsBlank(
+                                        LookUp(
+                                            Solicitud_Compras,
+                                            soli_num = txt_Num_Soli_DSC_2.Text
+                                        )
+                                    ),
+                                    Collect(
+                                        Solicitud_Compras,
+                                        {
+                                            soli_num: Upper(txt_Num_Soli_DSC_2.Text),
+                                            fecha: DateValue(txt_Fecha_DSC.Text),
+                                            solicitante: txt_Solicitante_DSC.Text,
+                                            user: txt_User_DSC.Text,
+                                            total: Value(txt_Total_DSC.Text),
+                                            estado: "Listo"
+                                        }
+                                    );
+                                    Back(),
+                                    Reset(txt_Num_Soli_DSC),
+                                    Clear(CheckList_DSC)
+                                )
+                            PaddingBottom: =0
+                            PaddingLeft: =0
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            PressedBorderColor: =RGBA(215, 58, 60, 1)
+                            PressedColor: =RGBA(215, 58, 60, 1)
+                            PressedFill: =RGBA(255, 255, 255, 1)
+                            RadiusBottomLeft: =6
+                            RadiusBottomRight: =6
+                            RadiusTopLeft: =6
+                            RadiusTopRight: =6
+                            Size: =14
+                            Text: ="Rechazar"
+                            Width: =90
+                            X: =1257
+                            Y: =7
+                            ZIndex: =22
 
                     ContainerGaleria_EM_4 As groupContainer.manualLayoutContainer:
                         BorderStyle: =BorderStyle.None
@@ -735,7 +819,7 @@ Detalle_Aprobacion_Compra As screen:
                             BorderColor: =RGBA(0, 18, 107, 1)
                             DelayItemLoading: =true
                             Height: =587
-                            Items: =Filter(preqitem, req_num = txt_Num_Soli_DSC_2.Text)
+                            Items: =compras
                             Layout: =Layout.Vertical
                             LoadingSpinner: =LoadingSpinner.Data
                             TemplatePadding: =0
@@ -751,17 +835,19 @@ Detalle_Aprobacion_Compra As screen:
                                 CheckboxSize: =30
                                 CheckmarkFill: =RGBA(52, 152, 47, 1)
                                 Color: =RGBA(0, 0, 0, 1)
-                                Default: =ThisItem.req_line in compras.req_line
+                                Default: =ThisItem.aprobado
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =RGBA(40, 134, 222, 1)
                                 DisabledFill: =RGBA(255, 255, 255, 1)
-                                Fill: =RGBA(255, 255, 255, 1)
+                                Fill: =If(ThisItem.req_line = edit.item.req_line , RGBA(206, 242, 196, 1), ThisItem.aprobado ,RGBA(255, 255, 255, 1), RGBA(255, 208, 201, 1))
                                 Font: =App.Theme.Font
                                 Height: =30
                                 HoverColor: =App.Theme.Colors.Darker30
-                                OnCheck: =Collect(compras, ThisItem)
+                                OnCheck: |-
+                                    =Patch(compras, ThisItem, {aprobado: true})
                                 OnSelect: =Select(Parent)
-                                OnUncheck: =Remove(compras, LookUp(compras, req_line = ThisItem.req_line))
+                                OnUncheck: |-
+                                    =Patch(compras, ThisItem, {aprobado: false})
                                 PaddingBottom: =3
                                 PaddingLeft: =5
                                 Size: =10
@@ -778,7 +864,7 @@ Detalle_Aprobacion_Compra As screen:
                                 Default: =ThisItem.req_line
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
-                                DisabledFill: =RGBA(180, 214, 250, 1)
+                                DisabledFill: =If(ThisItem.req_line = edit.item.req_line , RGBA(40, 134, 222, 1), ThisItem.aprobado, RGBA(180, 214, 250, 1), RGBA(215, 58, 60, 1))
                                 DisplayMode: =DisplayMode.Disabled
                                 FocusedBorderThickness: =4
                                 Font: =App.Theme.Font
@@ -804,7 +890,7 @@ Detalle_Aprobacion_Compra As screen:
                                 Default: =ThisItem.item
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
-                                DisabledFill: =
+                                DisabledFill: =If(ThisItem.req_line = edit.item.req_line , RGBA(206, 242, 196, 1), ThisItem.aprobado ,RGBA(255, 255, 255, 1), RGBA(255, 208, 201, 1))
                                 DisplayMode: =DisplayMode.Disabled
                                 FocusedBorderThickness: =4
                                 Font: =App.Theme.Font
@@ -828,10 +914,10 @@ Detalle_Aprobacion_Compra As screen:
                                 BorderColor: =RGBA(40, 134, 222, 1)
                                 BorderThickness: =0.5
                                 Color: =RGBA(0, 0, 0, 1)
-                                Default: =ThisItem.description
+                                Default: =ThisItem.descripcion
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
-                                DisabledFill: =
+                                DisabledFill: =If(ThisItem.req_line = edit.item.req_line , RGBA(206, 242, 196, 1), ThisItem.aprobado ,RGBA(255, 255, 255, 1), RGBA(255, 208, 201, 1))
                                 DisplayMode: =DisplayMode.Disabled
                                 FocusedBorderThickness: =4
                                 Font: =App.Theme.Font
@@ -855,10 +941,10 @@ Detalle_Aprobacion_Compra As screen:
                                 BorderColor: =RGBA(40, 134, 222, 1)
                                 BorderThickness: =0.5
                                 Color: =RGBA(0, 0, 0, 1)
-                                Default: =ThisItem.u_m
+                                Default: =ThisItem.medida
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
-                                DisabledFill: =
+                                DisabledFill: =If(ThisItem.req_line = edit.item.req_line , RGBA(206, 242, 196, 1), ThisItem.aprobado ,RGBA(255, 255, 255, 1), RGBA(255, 208, 201, 1))
                                 DisplayMode: =DisplayMode.Disabled
                                 FocusedBorderThickness: =4
                                 Font: =App.Theme.Font
@@ -882,10 +968,10 @@ Detalle_Aprobacion_Compra As screen:
                                 BorderColor: =RGBA(40, 134, 222, 1)
                                 BorderThickness: =0.5
                                 Color: =RGBA(0, 0, 0, 1)
-                                Default: =ThisItem.qty_ordered
+                                Default: =ThisItem.cantidad
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
-                                DisabledFill: =
+                                DisabledFill: =If(ThisItem.req_line = edit.item.req_line , RGBA(206, 242, 196, 1), ThisItem.aprobado ,RGBA(255, 255, 255, 1), RGBA(255, 208, 201, 1))
                                 DisplayMode: =DisplayMode.Disabled
                                 FocusedBorderThickness: =4
                                 Font: =App.Theme.Font
@@ -910,10 +996,10 @@ Detalle_Aprobacion_Compra As screen:
                                 BorderThickness: =0.5
                                 Color: =RGBA(0, 0, 0, 1)
                                 Default: |-
-                                    =Text(ThisItem.unit_mat_cost, "###,###,##0.00")
+                                    =Text(ThisItem.precio, "###,###,##0.00")
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
-                                DisabledFill: =
+                                DisabledFill: =If(ThisItem.req_line = edit.item.req_line , RGBA(206, 242, 196, 1), ThisItem.aprobado ,RGBA(255, 255, 255, 1), RGBA(255, 208, 201, 1))
                                 DisplayMode: =DisplayMode.Disabled
                                 FocusedBorderThickness: =4
                                 Font: =App.Theme.Font
@@ -938,10 +1024,10 @@ Detalle_Aprobacion_Compra As screen:
                                 BorderThickness: =0.5
                                 Color: =RGBA(0, 0, 0, 1)
                                 Default: |-
-                                    =Text(ThisItem.unit_mat_cost * ThisItem.qty_ordered, "###,###,##0.00")
+                                    =Text(ThisItem.precio * ThisItem.cantidad, "###,###,##0.00")
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
-                                DisabledFill: =
+                                DisabledFill: =If(ThisItem.req_line = edit.item.req_line , RGBA(206, 242, 196, 1), ThisItem.aprobado ,RGBA(255, 255, 255, 1), RGBA(255, 208, 201, 1))
                                 DisplayMode: =DisplayMode.Disabled
                                 FocusedBorderThickness: =4
                                 Font: =App.Theme.Font
@@ -965,10 +1051,10 @@ Detalle_Aprobacion_Compra As screen:
                                 BorderColor: =RGBA(40, 134, 222, 1)
                                 BorderThickness: =0.5
                                 Color: =RGBA(0, 0, 0, 1)
-                                Default: =ThisItem.vend_num
+                                Default: =ThisItem.num_vendedor
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
-                                DisabledFill: =
+                                DisabledFill: =If(ThisItem.req_line = edit.item.req_line , RGBA(206, 242, 196, 1), ThisItem.aprobado ,RGBA(255, 255, 255, 1), RGBA(255, 208, 201, 1))
                                 DisplayMode: =DisplayMode.Disabled
                                 FocusedBorderThickness: =4
                                 Font: =App.Theme.Font
@@ -992,10 +1078,10 @@ Detalle_Aprobacion_Compra As screen:
                                 BorderColor: =RGBA(40, 134, 222, 1)
                                 BorderThickness: =0.5
                                 Color: =RGBA(0, 0, 0, 1)
-                                Default: =LookUp(vendaddr, vend_num = ThisItem.vend_num, name)
+                                Default: =LookUp(vendaddr, vend_num = ThisItem.num_vendedor, name)
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
-                                DisabledFill: =
+                                DisabledFill: =If(ThisItem.req_line = edit.item.req_line , RGBA(206, 242, 196, 1), ThisItem.aprobado ,RGBA(255, 255, 255, 1), RGBA(255, 208, 201, 1))
                                 DisplayMode: =DisplayMode.Disabled
                                 FocusedBorderThickness: =4
                                 Font: =App.Theme.Font
@@ -1021,7 +1107,7 @@ Detalle_Aprobacion_Compra As screen:
                                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                                 DisabledColor: =RGBA(244, 244, 244, 1)
                                 DisplayMode: =
-                                Fill: =RGBA(255, 255, 255, 1)
+                                Fill: =If(ThisItem.req_line = edit.item.req_line , RGBA(206, 242, 196, 1), ThisItem.aprobado,RGBA(255, 255, 255, 1), RGBA(255, 208, 201, 1))
                                 FocusedBorderThickness: =20
                                 Height: =30
                                 HoverBorderColor: =RGBA(52, 152, 47, 1)
@@ -1029,7 +1115,7 @@ Detalle_Aprobacion_Compra As screen:
                                 HoverFill: =RGBA(206, 242, 196, 1)
                                 Icon: =Icon.Edit
                                 OnSelect: |-
-                                    =UpdateContext({edit: true})
+                                    =UpdateContext({edit: {view: true, item: ThisItem}})
                                 PaddingBottom: =5
                                 PaddingLeft: =5
                                 PaddingRight: =5
@@ -1248,7 +1334,7 @@ Detalle_Aprobacion_Compra As screen:
         BorderColor: =App.Theme.Colors.Darker40
         Fill: =RGBA(122, 138, 143, 0.2)
         Height: =663
-        Visible: =edit
+        Visible: =edit.view
         Width: =1352
         X: =8
         Y: =97
@@ -1264,7 +1350,7 @@ Detalle_Aprobacion_Compra As screen:
         RadiusBottomRight: =20
         RadiusTopLeft: =20
         RadiusTopRight: =20
-        Visible: =edit
+        Visible: =edit.view
         Width: =464
         X: =452
         Y: =225
@@ -1311,7 +1397,7 @@ Detalle_Aprobacion_Compra As screen:
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(132, 40, 38, 1)
             OnSelect: |-
-                =UpdateContext({edit: false});
+                =UpdateContext({edit: {view: false, item: Blank()}});
             Size: =15
             Text: ="Cancelar"
             X: =18
