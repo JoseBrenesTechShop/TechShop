@@ -1,0 +1,849 @@
+# ************************************************************************************************
+# Warning: YAML source code for Canvas Apps is in preview. The schema is being actively developed.
+# Content may be incomplete and subject to change.
+# This file is read-only and should only be used to review changes made within Power Apps Studio.
+# This file isn't used when loading the app. External editing, merging and conflict resolution are
+# not supported.
+# 
+# For more information, visit https://go.microsoft.com/fwlink/?linkid=2292623
+# ************************************************************************************************
+Screens:
+  IncumplimientoPersonal:
+    Properties:
+      BackgroundImage: ='abstracto geométrico blanco y gris'
+    Children:
+      - tbl_Icumplimientos_IP:
+          Control: DataTable@1.0.3
+          Variant: DataTable
+          Properties:
+            FontWeight: =FontWeight.Semibold
+            HeadingColor: =RGBA(255, 255, 255, 1)
+            HeadingFill: =RGBA(15, 84, 140, 1)
+            Height: =288
+            Items: |
+              =Filter(
+                  Incumplimiento_Personal,
+                  Fecha_Text = Text(
+                      Today(),
+                      "mm/dd/yyyy"
+                  ) || Fecha_Text = Text(
+                      Today() - 1,
+                      "mm/dd/yyyy"
+                  )
+              )
+            Width: =1366
+            Y: =480
+          Children:
+            - Empleado_Column1:
+                Control: DataTableColumn@1.0.1
+                Variant: Textual
+                Properties:
+                  FieldDisplayName: ="Colaborador"
+                  FieldName: ="crfb9_empleado"
+                  Order: =2
+                  Text: =ThisItem.Empleado
+            - Fecha_Column1:
+                Control: DataTableColumn@1.0.1
+                Variant: DateTime
+                Properties:
+                  AutoWidth: =false
+                  FieldDisplayName: ="Fecha"
+                  FieldName: ="crfb9_fecha"
+                  Order: =1
+                  Text: =Text(ThisItem.Fecha,DateTimeFormat.ShortDate)
+                  Width: =133
+            - Turno_Column1:
+                Control: DataTableColumn@1.0.1
+                Variant: Textual
+                Properties:
+                  AutoWidth: =false
+                  FieldDisplayName: ="Turno"
+                  FieldName: ="crfb9_turno"
+                  Order: =3
+                  Text: =ThisItem.Turno
+                  Width: =119
+            - Tipo_Incumplimiento_Column1:
+                Control: DataTableColumn@1.0.1
+                Variant: Textual
+                Properties:
+                  AutoWidth: =false
+                  FieldDisplayName: ="Incumplimiento"
+                  FieldName: ="crfb9_tipo_incumplimiento"
+                  Order: =4
+                  Text: =ThisItem.Tipo_Incumplimiento
+                  Width: =319
+            - Observacion_Column1:
+                Control: DataTableColumn@1.0.1
+                Variant: Textual
+                Properties:
+                  FieldDisplayName: ="Observacion"
+                  FieldName: ="crfb9_observacion"
+                  Order: =5
+                  Text: =ThisItem.Observacion
+            - Usuario_Column1:
+                Control: DataTableColumn@1.0.1
+                Variant: Textual
+                Properties:
+                  FieldDisplayName: ="Supervisor"
+                  FieldName: ="crfb9_usuario"
+                  Order: =6
+                  Text: =ThisItem.Usuario
+      - frm_Incumplimientos_IP:
+          Control: Form@2.4.2
+          Variant: Classic
+          Layout: Vertical
+          Properties:
+            DataSource: =Incumplimiento_Personal
+            DefaultMode: =FormMode.New
+            Fill: =RGBA(174, 208, 221, 1)
+            Height: =405
+            OnSuccess: |-
+              =Notify(
+                  "La orden se ha guardado correctamente",
+                  NotificationType.Success
+              );
+              ResetForm(frm_Incumplimientos_IP)
+            Width: =1366
+            Y: =75
+          Children:
+            - Fecha_DataCard1:
+                Control: TypedDataCard@1.0.6
+                Variant: ClassicDateTimeEdit
+                Properties:
+                  DataField: ="crfb9_fecha"
+                  Default: =ThisItem.Fecha
+                  DisplayName: =DataSourceInfo([@Incumplimiento_Personal],DataSourceInfo.DisplayName,crfb9_fecha)
+                  Required: =false
+                  Update: =If(Not IsBlank(DateValue1.SelectedDate), Date(Year(DateValue1.SelectedDate), Month(DateValue1.SelectedDate), Day(DateValue1.SelectedDate)))
+                  Width: =455
+                  Y: =0
+                Children:
+                  - DataCardKey42:
+                      Control: Label@2.5.1
+                      Properties:
+                        AutoHeight: =true
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        Color: =App.Theme.Colors.Darker30
+                        Height: =34
+                        Text: =Parent.DisplayName
+                        Width: =Parent.Width - 60
+                        Wrap: =false
+                        X: =30
+                        Y: =10
+                  - DateValue1:
+                      Control: Classic/DatePicker@2.6.0
+                      Properties:
+                        BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                        DefaultDate: =Parent.Default
+                        DisplayMode: =Parent.DisplayMode
+                        EndYear: =Year(Today())+100
+                        Height: =45
+                        IconFill: =RGBA(255, 255, 255, 1)
+                        IsEditable: =true
+                        PaddingBottom: =0
+                        PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                        StartYear: =1899
+                        Tooltip: =Parent.DisplayName
+                        Width: =395
+                        X: =29
+                        Y: =43
+                  - Separator4:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        FontWeight: =FontWeight.Bold
+                        Height: =
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Text: =":"
+                        Width: =10
+                        Wrap: =false
+                        X: =
+                        Y: =
+                  - ErrorMessage17:
+                      Control: Label@2.5.1
+                      Properties:
+                        AutoHeight: =true
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        Color: =RGBA(168, 0, 0, 1)
+                        FontWeight: =FontWeight.Semibold
+                        Height: =10
+                        Live: =Live.Assertive
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =14
+                        Text: =Parent.Error
+                        Visible: =Parent.DisplayMode=DisplayMode.Edit
+                        Width: =Parent.Width - 60
+                        X: =30
+                        Y: =
+                  - StarVisible17:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        Color: =App.Theme.Colors.Darker30
+                        Height: =DataCardKey42.Height
+                        Text: ="*"
+                        Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                        Width: =30
+                        Wrap: =false
+                        Y: =DataCardKey42.Y
+            - Id_Operario_DataCard2:
+                Control: TypedDataCard@1.0.6
+                Variant: ClassicTextualEdit
+                Properties:
+                  DataField: ="crfb9_id_operario"
+                  Default: =ThisItem.Id_Operario
+                  DisplayName: =DataSourceInfo([@Incumplimiento_Personal],DataSourceInfo.DisplayName,crfb9_id_operario)
+                  MaxLength: =DataSourceInfo([@Incumplimiento_Personal], DataSourceInfo.MaxLength, crfb9_id_operario)
+                  Required: =false
+                  Update: =txtEmployeeID.Text
+                  Width: =455
+                  Y: =1
+                Children:
+                  - DataCardKey9:
+                      Control: Label@2.5.1
+                      Properties:
+                        AutoHeight: =true
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        Color: =App.Theme.Colors.Darker30
+                        Height: =34
+                        Text: ="Codigo"
+                        Width: =Parent.Width - 60
+                        Wrap: =false
+                        X: =30
+                        Y: =10
+                  - txtEmployeeID:
+                      Control: Classic/TextInput@2.3.2
+                      Properties:
+                        BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                        Default: =Parent.Default
+                        DelayOutput: =true
+                        DisplayMode: =Parent.DisplayMode
+                        MaxLength: =Parent.MaxLength
+                        PaddingLeft: =5
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Tooltip: =Parent.DisplayName
+                        Width: =Parent.Width - 60
+                        X: =30
+                        Y: =DataCardKey9.Y + DataCardKey9.Height + 5
+                  - ErrorMessage8:
+                      Control: Label@2.5.1
+                      Properties:
+                        AutoHeight: =true
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        Color: =RGBA(168, 0, 0, 1)
+                        FontWeight: =FontWeight.Semibold
+                        Height: =10
+                        Live: =Live.Assertive
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =14
+                        Text: =Parent.Error
+                        Visible: =Parent.DisplayMode=DisplayMode.Edit
+                        Width: =Parent.Width - 60
+                        X: =30
+                        Y: =txtEmployeeID.Y + txtEmployeeID.Height
+                  - StarVisible8:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        Color: =App.Theme.Colors.Darker30
+                        Height: =DataCardKey9.Height
+                        Text: ="*"
+                        Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                        Width: =30
+                        Wrap: =false
+                        Y: =DataCardKey9.Y
+            - Empleado_DataCard2:
+                Control: TypedDataCard@1.0.6
+                Variant: ClassicTextualEdit
+                Properties:
+                  DataField: ="crfb9_empleado"
+                  Default: =LookUp(Empleados, Codigo = Text(txtEmployeeID.Text), Nombre)
+                  DisplayName: =DataSourceInfo([@Incumplimiento_Personal],DataSourceInfo.DisplayName,crfb9_empleado)
+                  MaxLength: =DataSourceInfo([@Incumplimiento_Personal], DataSourceInfo.MaxLength, crfb9_empleado)
+                  Required: =false
+                  Update: =DataCardValue12.Text
+                  Width: =455
+                  X: =1
+                  Y: =1
+                Children:
+                  - DataCardKey10:
+                      Control: Label@2.5.1
+                      Properties:
+                        AutoHeight: =true
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        Color: =App.Theme.Colors.Darker30
+                        Height: =34
+                        Text: ="Colaborador"
+                        Width: =Parent.Width - 60
+                        Wrap: =false
+                        X: =30
+                        Y: =10
+                  - DataCardValue12:
+                      Control: Classic/TextInput@2.3.2
+                      Properties:
+                        BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                        Default: =Parent.Default
+                        DelayOutput: =true
+                        DisplayMode: =Parent.DisplayMode
+                        MaxLength: =Parent.MaxLength
+                        PaddingLeft: =5
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Tooltip: =Parent.DisplayName
+                        Width: =Parent.Width - 60
+                        X: =30
+                        Y: =DataCardKey10.Y + DataCardKey10.Height + 5
+                  - ErrorMessage9:
+                      Control: Label@2.5.1
+                      Properties:
+                        AutoHeight: =true
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        Color: =RGBA(168, 0, 0, 1)
+                        FontWeight: =FontWeight.Semibold
+                        Height: =10
+                        Live: =Live.Assertive
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =14
+                        Text: =Parent.Error
+                        Visible: =Parent.DisplayMode=DisplayMode.Edit
+                        Width: =Parent.Width - 60
+                        X: =30
+                        Y: =DataCardValue12.Y + DataCardValue12.Height
+                  - StarVisible9:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        Color: =App.Theme.Colors.Darker30
+                        Height: =DataCardKey10.Height
+                        Text: ="*"
+                        Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                        Width: =30
+                        Wrap: =false
+                        Y: =DataCardKey10.Y
+            - Turno_DataCard13:
+                Control: TypedDataCard@1.0.6
+                Variant: ClassicTextualEdit
+                Properties:
+                  DataField: ="crfb9_turno"
+                  Default: =ThisItem.Turno
+                  DisplayName: =DataSourceInfo([@Incumplimiento_Personal],DataSourceInfo.DisplayName,crfb9_turno)
+                  MaxLength: =DataSourceInfo([@Incumplimiento_Personal], DataSourceInfo.MaxLength, crfb9_turno)
+                  Required: =false
+                  Update: =Dropdown4.Selected.Turno_Op
+                  Width: =455
+                  X: =2
+                  Y: =1
+                Children:
+                  - DataCardKey12:
+                      Control: Label@2.5.1
+                      Properties:
+                        AutoHeight: =true
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        Color: =App.Theme.Colors.Darker30
+                        Height: =34
+                        Text: =Parent.DisplayName
+                        Width: =Parent.Width - 60
+                        Wrap: =false
+                        X: =30
+                        Y: =10
+                  - ErrorMessage10:
+                      Control: Label@2.5.1
+                      Properties:
+                        AutoHeight: =true
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        Color: =RGBA(168, 0, 0, 1)
+                        FontWeight: =FontWeight.Semibold
+                        Height: =10
+                        Live: =Live.Assertive
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =14
+                        Text: =Parent.Error
+                        Visible: =Parent.DisplayMode=DisplayMode.Edit
+                        Width: =Parent.Width - 60
+                        X: =30
+                        Y: =
+                  - StarVisible10:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        Color: =App.Theme.Colors.Darker30
+                        Height: =DataCardKey12.Height
+                        Text: ="*"
+                        Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                        Width: =30
+                        Wrap: =false
+                        Y: =DataCardKey12.Y
+                  - Dropdown4:
+                      Control: Classic/DropDown@2.3.1
+                      Properties:
+                        AllowEmptySelection: =true
+                        ChevronFill: =RGBA(255, 255, 255, 1)
+                        ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                        Default: =
+                        Items: =Filter(Tipo_Turnos, Turno_Op = "TD" ||Turno_Op = "TN" ||Turno_Op = "T1" || Turno_Op = "T2" || Turno_Op = "T3"||Turno_Op = "T4" ||Turno_Op = "T5" ||Turno_Op = "TC" )
+                        Items.Value: =crfb9_turno_op
+                        PressedColor: =RGBA(255, 255, 255, 1)
+                        SelectionColor: =RGBA(255, 255, 255, 1)
+                        Width: =342
+                        X: =30
+                        Y: =48
+            - Tipo_Incumplimiento_DataCard1:
+                Control: TypedDataCard@1.0.6
+                Variant: ClassicTextualEdit
+                Properties:
+                  DataField: ="crfb9_tipo_incumplimiento"
+                  Default: =ThisItem.Tipo_Incumplimiento
+                  DisplayName: =DataSourceInfo([@Incumplimiento_Personal],DataSourceInfo.DisplayName,crfb9_tipo_incumplimiento)
+                  Height: =78
+                  MaxLength: =DataSourceInfo([@Incumplimiento_Personal], DataSourceInfo.MaxLength, crfb9_tipo_incumplimiento)
+                  Required: =false
+                  Update: =Dropdown3.Selected.Incumplimiento_Op
+                  Width: =455
+                  Y: =2
+                Children:
+                  - DataCardKey43:
+                      Control: Label@2.5.1
+                      Properties:
+                        AutoHeight: =true
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        Color: =App.Theme.Colors.Darker30
+                        Height: =34
+                        Text: ="Incumplimientos"
+                        Width: =Parent.Width - 60
+                        Wrap: =false
+                        X: =30
+                        Y: =10
+                  - ErrorMessage19:
+                      Control: Label@2.5.1
+                      Properties:
+                        AutoHeight: =true
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        Color: =RGBA(168, 0, 0, 1)
+                        FontWeight: =FontWeight.Semibold
+                        Height: =10
+                        Live: =Live.Assertive
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =14
+                        Text: =Parent.Error
+                        Visible: =Parent.DisplayMode=DisplayMode.Edit
+                        Width: =Parent.Width - 60
+                        X: =30
+                        Y: =
+                  - StarVisible19:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        Color: =App.Theme.Colors.Darker30
+                        Height: =DataCardKey43.Height
+                        Text: ="*"
+                        Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                        Width: =30
+                        Wrap: =false
+                        Y: =DataCardKey43.Y
+                  - Dropdown3:
+                      Control: Classic/DropDown@2.3.1
+                      Properties:
+                        AllowEmptySelection: =true
+                        ChevronFill: =RGBA(255, 255, 255, 1)
+                        ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                        Default: =
+                        Items: =Incumplimiento_Tipos
+                        Items.Value: =crfb9_incumplimiento_op
+                        PressedColor: =RGBA(255, 255, 255, 1)
+                        SelectionColor: =RGBA(255, 255, 255, 1)
+                        Width: =395
+                        X: =30
+                        Y: =48
+            - Observacion_DataCard2:
+                Control: TypedDataCard@1.0.6
+                Variant: ClassicTextualEdit
+                Properties:
+                  DataField: ="crfb9_observacion"
+                  Default: =ThisItem.Observacion
+                  DisplayName: =DataSourceInfo([@Incumplimiento_Personal],DataSourceInfo.DisplayName,crfb9_observacion)
+                  MaxLength: =DataSourceInfo([@Incumplimiento_Personal], DataSourceInfo.MaxLength, crfb9_observacion)
+                  Required: =false
+                  Update: =DataCardValue41.Text
+                  Width: =910
+                  X: =1
+                  Y: =2
+                Children:
+                  - DataCardKey40:
+                      Control: Label@2.5.1
+                      Properties:
+                        AutoHeight: =true
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        Color: =App.Theme.Colors.Darker30
+                        Height: =34
+                        Text: =Parent.DisplayName
+                        Width: =Parent.Width - 60
+                        Wrap: =false
+                        X: =30
+                        Y: =10
+                  - DataCardValue41:
+                      Control: Classic/TextInput@2.3.2
+                      Properties:
+                        BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                        Default: =Parent.Default
+                        DelayOutput: =true
+                        DisplayMode: =Parent.DisplayMode
+                        MaxLength: =Parent.MaxLength
+                        PaddingLeft: =5
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Tooltip: =Parent.DisplayName
+                        Width: =797
+                        X: =30
+                        Y: =DataCardKey40.Y + DataCardKey40.Height + 5
+                  - ErrorMessage12:
+                      Control: Label@2.5.1
+                      Properties:
+                        AutoHeight: =true
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        Color: =RGBA(168, 0, 0, 1)
+                        FontWeight: =FontWeight.Semibold
+                        Height: =10
+                        Live: =Live.Assertive
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =14
+                        Text: =Parent.Error
+                        Visible: =Parent.DisplayMode=DisplayMode.Edit
+                        Width: =Parent.Width - 60
+                        X: =30
+                        Y: =DataCardValue41.Y + DataCardValue41.Height
+                  - StarVisible12:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        Color: =App.Theme.Colors.Darker30
+                        Height: =DataCardKey40.Height
+                        Text: ="*"
+                        Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                        Width: =30
+                        Wrap: =false
+                        Y: =DataCardKey40.Y
+            - Usuario_DataCard1:
+                Control: TypedDataCard@1.0.6
+                Variant: ClassicTextualEdit
+                Properties:
+                  DataField: ="crfb9_usuario"
+                  Default: =ThisItem.Usuario
+                  DisplayName: =DataSourceInfo([@Incumplimiento_Personal],DataSourceInfo.DisplayName,crfb9_usuario)
+                  MaxLength: =DataSourceInfo([@Incumplimiento_Personal], DataSourceInfo.MaxLength, crfb9_usuario)
+                  Required: =false
+                  Update: =DataCardValue42.Text
+                  Visible: =false
+                  Width: =455
+                  X: =2
+                  Y: =4
+                Children:
+                  - DataCardKey41:
+                      Control: Label@2.5.1
+                      Properties:
+                        AutoHeight: =true
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        Color: =App.Theme.Colors.Darker30
+                        Height: =34
+                        Text: =Parent.DisplayName
+                        Width: =Parent.Width - 60
+                        Wrap: =false
+                        X: =30
+                        Y: =10
+                  - DataCardValue42:
+                      Control: Classic/TextInput@2.3.2
+                      Properties:
+                        BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                        Default: =LookUp(Empleados, Codigo= VarName, Nombre)
+                        DelayOutput: =true
+                        DisplayMode: =Parent.DisplayMode
+                        MaxLength: =Parent.MaxLength
+                        PaddingLeft: =5
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Tooltip: =Parent.DisplayName
+                        Width: =Parent.Width - 60
+                        X: =30
+                        Y: =DataCardKey41.Y + DataCardKey41.Height + 5
+                  - ErrorMessage14:
+                      Control: Label@2.5.1
+                      Properties:
+                        AutoHeight: =true
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        Color: =RGBA(168, 0, 0, 1)
+                        FontWeight: =FontWeight.Semibold
+                        Height: =10
+                        Live: =Live.Assertive
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =14
+                        Text: =Parent.Error
+                        Visible: =Parent.DisplayMode=DisplayMode.Edit
+                        Width: =Parent.Width - 60
+                        X: =30
+                        Y: =DataCardValue42.Y + DataCardValue42.Height
+                  - StarVisible14:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        Color: =App.Theme.Colors.Darker30
+                        Height: =DataCardKey41.Height
+                        Text: ="*"
+                        Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                        Width: =30
+                        Wrap: =false
+                        Y: =DataCardKey41.Y
+            - Fecha_Text_DataCard1:
+                Control: TypedDataCard@1.0.6
+                Variant: ClassicTextualEdit
+                Properties:
+                  DataField: ="crfb9_fecha_text"
+                  Default: =ThisItem.Fecha_Text
+                  DisplayName: =DataSourceInfo([@Incumplimiento_Personal],DataSourceInfo.DisplayName,crfb9_fecha_text)
+                  MaxLength: =DataSourceInfo([@Incumplimiento_Personal], DataSourceInfo.MaxLength, crfb9_fecha_text)
+                  Required: =false
+                  Update: =DataCardValue71.Text
+                  Visible: =false
+                  Width: =455
+                  X: =3
+                  Y: =4
+                Children:
+                  - DataCardKey170:
+                      Control: Label@2.5.1
+                      Properties:
+                        AutoHeight: =true
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        Color: =App.Theme.Colors.Darker30
+                        Height: =34
+                        Text: =Parent.DisplayName
+                        Width: =Parent.Width - 60
+                        Wrap: =false
+                        X: =30
+                        Y: =10
+                  - DataCardValue71:
+                      Control: Classic/TextInput@2.3.2
+                      Properties:
+                        BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                        Default: =Text(DateValue1.SelectedDate, "[$-en-US]mm/dd/yyyy")
+                        DelayOutput: =true
+                        DisplayMode: =Parent.DisplayMode
+                        MaxLength: =Parent.MaxLength
+                        PaddingLeft: =5
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Tooltip: =Parent.DisplayName
+                        Width: =Parent.Width - 60
+                        X: =30
+                        Y: =DataCardKey170.Y + DataCardKey170.Height + 5
+                  - ErrorMessage156:
+                      Control: Label@2.5.1
+                      Properties:
+                        AutoHeight: =true
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        Color: =RGBA(168, 0, 0, 1)
+                        FontWeight: =FontWeight.Semibold
+                        Height: =10
+                        Live: =Live.Assertive
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =14
+                        Text: =Parent.Error
+                        Visible: =Parent.DisplayMode=DisplayMode.Edit
+                        Width: =Parent.Width - 60
+                        X: =30
+                        Y: =DataCardValue71.Y + DataCardValue71.Height
+                  - StarVisible156:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 0, 0, 1)
+                        Color: =App.Theme.Colors.Darker30
+                        Height: =DataCardKey170.Height
+                        Text: ="*"
+                        Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                        Width: =30
+                        Wrap: =false
+                        Y: =DataCardKey170.Y
+      - HeaderContainer1_5:
+          Control: GroupContainer@1.3.0
+          Variant: AutoLayout
+          Properties:
+            Fill: =RGBA(12, 59, 94, 1)
+            Height: =79
+            LayoutDirection: =LayoutDirection.Horizontal
+            PaddingRight: =10
+            Width: =1366
+          Children:
+            - Icon1_23:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  AlignInContainer: =AlignInContainer.Center
+                  Color: =RGBA(255, 255, 255, 1)
+                  DisplayMode: =DisplayMode.View
+                  Height: =75
+                  Icon: =Icon.Person
+                  PaddingBottom: =2
+                  PaddingLeft: =5
+                  PaddingRight: =2
+                  PaddingTop: =2
+                  Width: =75
+            - txtEmpleadoHorarioView_13:
+                Control: Classic/TextInput@2.3.2
+                Properties:
+                  Align: =Align.Center
+                  AlignInContainer: =AlignInContainer.Center
+                  BorderColor: =RGBA(204, 231, 246, 1)
+                  BorderThickness: =20
+                  Color: =RGBA(12, 59, 94, 1)
+                  Default: =LookUp(Empleados, Codigo = VarName, Nombre)
+                  DisplayMode: =DisplayMode.View
+                  FontWeight: =FontWeight.Bold
+                  Height: =60
+                  PaddingLeft: =5
+                  RadiusBottomLeft: =20
+                  RadiusBottomRight: =20
+                  RadiusTopLeft: =20
+                  RadiusTopRight: =20
+                  Size: =18
+                  Width: =400
+            - Icon14_49:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  AlignInContainer: =AlignInContainer.Center
+                  Color: =RGBA(255, 255, 255, 1)
+                  DisplayMode: =DisplayMode.View
+                  Height: =60
+                  Icon: =Icon.VerticalLine
+                  Width: =30
+                  X: =820
+                  Y: =22
+            - Label1_26:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  AlignInContainer: =AlignInContainer.Center
+                  Color: =RGBA(255, 255, 255, 1)
+                  DisplayMode: =DisplayMode.View
+                  FontWeight: =FontWeight.Bold
+                  Height: =60
+                  Size: =25
+                  Text: ="Incumplimiento de Personal"
+                  Width: =755
+            - Icon14_50:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  AlignInContainer: =AlignInContainer.Center
+                  Color: =RGBA(255, 255, 255, 1)
+                  DisplayMode: =DisplayMode.View
+                  Height: =60
+                  Icon: =Icon.VerticalLine
+                  Width: =30
+                  X: =820
+                  Y: =22
+            - Icon3_23:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  AlignInContainer: =AlignInContainer.Center
+                  BorderColor: =App.Theme.Colors.Primary
+                  BorderStyle: =BorderStyle.None
+                  BorderThickness: =2
+                  Color: =RGBA(255, 255, 255, 1)
+                  Fill: =RGBA(12, 59, 94, 1)
+                  FocusedBorderThickness: =20
+                  Height: =60
+                  HoverBorderColor: =App.Theme.Colors.Darker10
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =RGBA(40, 134, 222, 1)
+                  Icon: =Icon.Home
+                  OnSelect: |-
+                    =Navigate(MenuProduccion);
+                    ResetForm(ApprovalForm1_1)
+                  PaddingBottom: =5
+                  PaddingLeft: =5
+                  PaddingRight: =5
+                  PaddingTop: =5
+                  Width: =65
+      - btn_GuardarIncumplimiento_IP:
+          Control: Button@0.0.44
+          Properties:
+            BasePaletteColor: =RGBA(5, 102, 178, 1)
+            Height: =35
+            Icon: ="Add"
+            OnSelect: |
+              =If(
+                  IsBlank(txtEmployeeID.Text) || IsBlank(DataCardValue12.Text) || IsBlank(DateValue1.SelectedDate) || IsBlank(Dropdown3.SelectedText.Incumplimiento_Op) || IsBlank(Dropdown4.SelectedText.Turno_Op) || IsBlank(DataCardValue41.Text),
+                  Notify(
+                      "Debe completar todos los campos del formulario",
+                      NotificationType.Error
+                  ),
+                  !IsBlank(LookUp(TramitesSolicitudes, Codigo = txtEmployeeID.Text && Fecha_Inicio <= DateValue1.SelectedDate && Fecha_Fin >= DateValue1.SelectedDate && EstadoDeProceso = "Aprobado")) && Dropdown3.SelectedText.Incumplimiento_Op = "Ausencia",
+                  Notify(
+                      "El empleado cuenta con un permiso para faltar por "& LookUp(TramitesSolicitudes, Codigo = txtEmployeeID.Text && Fecha_Inicio <= DateValue1.SelectedDate && Fecha_Fin >= DateValue1.SelectedDate && EstadoDeProceso = "Aprobado").Solicitud,
+                      NotificationType.Error
+                  ),
+                  SubmitForm(frm_Incumplimientos_IP);
+                  ResetForm(frm_Incumplimientos_IP)
+              );
+            Text: ="Guardar"
+            Width: =115
+            X: =1057
+            Y: =413
+      - btn_EditarIncumplimiento_IP:
+          Control: Button@0.0.44
+          Properties:
+            BasePaletteColor: =RGBA(246, 142, 104, 1)
+            Height: =35
+            Icon: ="Edit"
+            OnSelect: =Navigate(EditarIncumplimiento)
+            Text: ="Editar"
+            Visible: |-
+              =If(
+                  LookUp(Empleados, VarName = Codigo).Rol = "ADMIN"|| (LookUp(Empleados, VarName = Codigo).Rol = "SUP" ||VarName = "9"),
+                  true,
+                  false
+              )
+            Width: =115
+            X: =1204
+            Y: =413

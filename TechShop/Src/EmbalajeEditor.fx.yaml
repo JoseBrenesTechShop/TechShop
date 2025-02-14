@@ -138,7 +138,18 @@ EmbalajeEditor As screen:
                 HoverColor: =RGBA(255, 255, 255, 1)
                 HoverFill: =RGBA(0, 134, 208, 1)
                 Icon: =Icon.BackArrow
-                OnSelect: =Back()
+                OnSelect: |-
+                    =Back();
+                    UpdateContext({
+                        isEditing: false, 
+                        varRegistroSeleccionado: Blank(),
+                        txt_Destino: Blank(),
+                        txt_Destino2: Blank()
+                    });
+                    Reset(txt_Nomenclatura_EC);
+                    Reset(txt_Fecha_EC);
+                    Reset(txt_Pais_EC);
+                    Reset(drp_Estado_EC);
                 PaddingBottom: =5
                 PaddingLeft: =5
                 PaddingRight: =5
@@ -231,66 +242,66 @@ EmbalajeEditor As screen:
                         lbl_CantidadTarima_EM_2 As Texto:
                             Align: ='TextCanvas.Align'.Center
                             DisplayMode: =DisplayMode.Edit
-                            Height: =30
+                            Height: =35
                             Size: =22
                             Text: ="Cantidad Tarima"
-                            VerticalAlign: =VerticalAlign.Top
+                            VerticalAlign: =VerticalAlign.Bottom
                             Weight: ='TextCanvas.Weight'.Regular
                             Width: =200
                             X: =533
-                            Y: =5
+                            Y: =0
                             ZIndex: =26
 
                         lbl_ValorPieza_EM_2 As Texto:
                             Align: ='TextCanvas.Align'.Center
                             DisplayMode: =DisplayMode.Edit
-                            Height: =30
+                            Height: =35
                             Size: =22
                             Text: ="Valor de pieza"
-                            VerticalAlign: =VerticalAlign.Top
+                            VerticalAlign: =VerticalAlign.Bottom
                             Weight: ='TextCanvas.Weight'.Regular
                             Width: =200
                             X: =743
-                            Y: =5
+                            Y: =0
                             ZIndex: =27
 
                         lbl_pn_EM_2 As Texto:
                             Align: ='TextCanvas.Align'.Center
                             DisplayMode: =DisplayMode.Edit
-                            Height: =30
+                            Height: =35
                             Size: =22
                             Text: ="P/N"
-                            VerticalAlign: =VerticalAlign.Top
+                            VerticalAlign: =VerticalAlign.Bottom
                             Weight: ='TextCanvas.Weight'.Regular
                             Width: =280
                             X: =15
-                            Y: =5
+                            Y: =0
                             ZIndex: =28
 
                         lbl_Cantidad_EM_2 As Texto:
                             Align: ='TextCanvas.Align'.Center
                             DisplayMode: =DisplayMode.Edit
-                            Height: =30
+                            Height: =35
                             Size: =22
                             Text: ="Cantidad "
-                            VerticalAlign: =VerticalAlign.Top
+                            VerticalAlign: =VerticalAlign.Bottom
                             Weight: ='TextCanvas.Weight'.Regular
                             Width: =218
                             X: =305
-                            Y: =5
+                            Y: =0
                             ZIndex: =29
 
                         lbl_Peso_EM_2 As Texto:
                             Align: ='TextCanvas.Align'.Center
                             DisplayMode: =DisplayMode.Edit
-                            Height: =30
+                            Height: =35
                             Size: =22
                             Text: ="Peso "
-                            VerticalAlign: =VerticalAlign.Top
+                            VerticalAlign: =VerticalAlign.Bottom
                             Weight: ='TextCanvas.Weight'.Regular
                             Width: =200
                             X: =953
-                            Y: =5
+                            Y: =0
                             ZIndex: =30
 
                         txt_CantidadDato_EM_2 As text:
@@ -305,6 +316,7 @@ EmbalajeEditor As screen:
                             DisplayMode: =If(isSaving || Disable, DisplayMode.Disabled, DisplayMode.Edit)
                             FocusedBorderThickness: =4
                             Font: =App.Theme.Font
+                            Format: =TextFormat.Number
                             Height: =35
                             HintText: ="Digite la cantidad"
                             HoverBorderColor: =RGBA(40, 134, 222, 1)
@@ -324,21 +336,36 @@ EmbalajeEditor As screen:
 
                         txt_CantidadTarimaDato_EM_2 As text:
                             Align: =Align.Center
-                            BorderColor: =App.Theme.Colors.Darker40
+                            BorderColor: =RGBA(40, 134, 222, 1)
                             BorderThickness: =2
                             Color: =RGBA(0, 0, 0, 1)
-                            Default: =LookUp(item, item = txt_PNDato_EM_2.Text, decifld2)
+                            Default: |-
+                                =With(
+                                    {
+                                        tarima: LookUp(
+                                            item,
+                                            item = txt_PNDato_EM_2.Text,
+                                            decifld2
+                                        )
+                                    },
+                                    If(
+                                        tarima <> varRegistroSeleccionado.Cantidad_Tarima && !IsBlank(varRegistroSeleccionado.Cantidad_Tarima),
+                                        varRegistroSeleccionado.Cantidad_Tarima,
+                                        tarima
+                                    )
+                                )
                             DisabledBorderColor: =RGBA(166, 166, 166, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             DisabledFill: =RGBA(244, 244, 244, 1)
-                            DisplayMode: =DisplayMode.View
+                            DisplayMode: =If(isSaving || Disable, DisplayMode.Disabled, DisplayMode.Edit)
                             FocusedBorderThickness: =4
                             Font: =App.Theme.Font
+                            Format: =TextFormat.Number
                             Height: =35
                             HintText: ="Tarima"
-                            HoverBorderColor: =App.Theme.Colors.Darker40
+                            HoverBorderColor: =RGBA(40, 134, 222, 1)
                             HoverColor: =RGBA(0, 0, 0, 1)
-                            HoverFill: =App.Theme.Colors.Lighter70
+                            HoverFill: =RGBA(180, 214, 250, 1)
                             PaddingLeft: =5
                             RadiusBottomLeft: =10
                             RadiusBottomRight: =10
@@ -352,21 +379,36 @@ EmbalajeEditor As screen:
 
                         txt_ValorPiezaDato_EM_2 As text:
                             Align: =Align.Center
-                            BorderColor: =App.Theme.Colors.Darker40
+                            BorderColor: =RGBA(40, 134, 222, 1)
                             BorderThickness: =2
                             Color: =RGBA(0, 0, 0, 1)
-                            Default: =LookUp(item, item = txt_PNDato_EM_2.Text, decifld1)
+                            Default: |-
+                                =With(
+                                    {
+                                        valor: LookUp(
+                                            item,
+                                            item = txt_PNDato_EM_2.Text,
+                                            decifld1
+                                        )
+                                    },
+                                    If(
+                                        valor <> varRegistroSeleccionado.Valor_Pieza && !IsBlank(varRegistroSeleccionado.Valor_Pieza),
+                                        varRegistroSeleccionado.Valor_Pieza,
+                                        valor
+                                    )
+                                )
                             DisabledBorderColor: =RGBA(166, 166, 166, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             DisabledFill: =RGBA(244, 244, 244, 1)
-                            DisplayMode: =DisplayMode.View
+                            DisplayMode: =If(isSaving || Disable, DisplayMode.Disabled, DisplayMode.Edit)
                             FocusedBorderThickness: =4
                             Font: =App.Theme.Font
+                            Format: =TextFormat.Number
                             Height: =35
                             HintText: ="Valor"
-                            HoverBorderColor: =App.Theme.Colors.Darker40
+                            HoverBorderColor: =RGBA(40, 134, 222, 1)
                             HoverColor: =RGBA(0, 0, 0, 1)
-                            HoverFill: =App.Theme.Colors.Lighter70
+                            HoverFill: =RGBA(180, 214, 250, 1)
                             PaddingLeft: =5
                             RadiusBottomLeft: =10
                             RadiusBottomRight: =10
@@ -380,21 +422,36 @@ EmbalajeEditor As screen:
 
                         txt_PesoDato_EM_2 As text:
                             Align: =Align.Center
-                            BorderColor: =App.Theme.Colors.Darker40
+                            BorderColor: =RGBA(40, 134, 222, 1)
                             BorderThickness: =2
                             Color: =RGBA(0, 0, 0, 1)
-                            Default: =LookUp(item, item = txt_PNDato_EM_2.Text, unit_weight)
+                            Default: |-
+                                =With(
+                                    {
+                                        peso: LookUp(
+                                            item,
+                                            item = txt_PNDato_EM_2.Text,
+                                            unit_weight
+                                        )
+                                    },
+                                    If(
+                                        peso <> varRegistroSeleccionado.Peso && !IsBlank(varRegistroSeleccionado.Peso),
+                                        varRegistroSeleccionado.Peso,
+                                        peso
+                                    )
+                                )
                             DisabledBorderColor: =RGBA(166, 166, 166, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             DisabledFill: =RGBA(244, 244, 244, 1)
-                            DisplayMode: =DisplayMode.View
+                            DisplayMode: =If(isSaving || Disable, DisplayMode.Disabled, DisplayMode.Edit)
                             FocusedBorderThickness: =4
                             Font: =App.Theme.Font
+                            Format: =TextFormat.Number
                             Height: =35
                             HintText: ="Peso"
-                            HoverBorderColor: =App.Theme.Colors.Darker40
+                            HoverBorderColor: =RGBA(40, 134, 222, 1)
                             HoverColor: =RGBA(0, 0, 0, 1)
-                            HoverFill: =App.Theme.Colors.Lighter70
+                            HoverFill: =RGBA(180, 214, 250, 1)
                             PaddingLeft: =5
                             RadiusBottomLeft: =10
                             RadiusBottomRight: =10
@@ -483,7 +540,7 @@ EmbalajeEditor As screen:
                                         IsBlank(
                                             LookUp(
                                                 ContenedorPNS_2,
-                                                'P/N' = txt_PNDato_EM_2.Text && Nomenclatura = txt_Nomenclatura_EC_3.Text
+                                                'P/N' = txt_PNDato_EM_2.Text && Nomenclatura = txt_Nomenclatura_EC.Text
                                             )
                                         ),
                                         Collect(
@@ -505,7 +562,7 @@ EmbalajeEditor As screen:
                                                     charfld4
                                                 ),
                                                 'NumContenedorP/N': gl_ListaContenedores_LE.Selected.Contenedor,
-                                                Nomenclatura: txt_Nomenclatura_EC_3.Text,
+                                                Nomenclatura: txt_Nomenclatura_EC.Text,
                                                 User: txt_User_EC.Text,
                                                 Cantidad_Total: Value(txt_CantidadTarimaDato_EM_2.Text * txt_CantidadDato_EM_2.Text),
                                                 Valor_Total: Value((txt_CantidadTarimaDato_EM_2.Text * txt_CantidadDato_EM_2.Text) * txt_ValorPiezaDato_EM_2.Text),
@@ -601,7 +658,7 @@ EmbalajeEditor As screen:
                                                 charfld4
                                             ),
                                             'NumContenedorP/N': gl_ListaContenedores_LE.Selected.Contenedor,
-                                            Nomenclatura: txt_Nomenclatura_EC_3.Text,
+                                            Nomenclatura: txt_Nomenclatura_EC.Text,
                                             User: txt_User_EC.Text,
                                             Cantidad_Total: Value(txt_CantidadTarimaDato_EM_2.Text) * Value(txt_CantidadDato_EM_2.Text),
                                             Valor_Total: (Value(txt_CantidadTarimaDato_EM_2.Text) * Value(txt_CantidadDato_EM_2.Text)) * Value(txt_ValorPiezaDato_EM_2.Text),
@@ -635,10 +692,12 @@ EmbalajeEditor As screen:
                                         }
                                     )
                                 );
-                                UpdateContext({txt_Destino2: 0});
-                                UpdateContext({txt_Destino: ""});
-                                UpdateContext({isEditing: false});
-                                UpdateContext({varRegistroSeleccionado: Blank()});
+                                UpdateContext({
+                                    isEditing: Blank(), 
+                                    varRegistroSeleccionado: Blank(),
+                                    txt_Destino: Blank(),
+                                    txt_Destino2: Blank()
+                                });
                             Size: =15
                             Text: ="Editar"
                             Visible: =isEditing
@@ -659,10 +718,14 @@ EmbalajeEditor As screen:
                             Height: =35
                             HoverColor: =RGBA(255, 255, 255, 1)
                             HoverFill: =RGBA(15, 108, 189, 1)
-                            OnSelect: |-
-                                =UpdateContext({ isEditing: false});
-                                UpdateContext({txt_Destino2: 0});
-                                UpdateContext({txt_Destino: ""});
+                            OnSelect: |+
+                                =UpdateContext({
+                                    isEditing: Blank(), 
+                                    varRegistroSeleccionado: Blank(),
+                                    txt_Destino: Blank(),
+                                    txt_Destino2: Blank()
+                                });
+                                
                             Size: =16
                             Text: ="X"
                             Visible: =isEditing
@@ -687,7 +750,7 @@ EmbalajeEditor As screen:
                             BorderColor: =RGBA(0, 18, 107, 1)
                             DelayItemLoading: =true
                             Height: =483
-                            Items: =Filter(ContenedorPNS_2, Nomenclatura = txt_Nomenclatura_EC_3.Text)
+                            Items: =Filter(ContenedorPNS_2, Nomenclatura = txt_Nomenclatura_EC.Text)
                             Layout: =Layout.Vertical
                             LoadingSpinner: =LoadingSpinner.Data
                             TemplatePadding: =0
@@ -1219,7 +1282,7 @@ EmbalajeEditor As screen:
                         BorderStyle: =BorderStyle.None
                         BorderThickness: =2
                         Color: =RGBA(255, 255, 255, 1)
-                        Default: ="Contenedor " & txt_Nomenclatura_EC_3.Text
+                        Default: ="Contenedor " & txt_Nomenclatura_EC.Text
                         DisabledBorderColor: =RGBA(166, 166, 166, 1)
                         DisabledColor: =RGBA(166, 166, 166, 1)
                         DisabledFill: =RGBA(244, 244, 244, 1)
@@ -1271,7 +1334,7 @@ EmbalajeEditor As screen:
                         Y: =5
                         ZIndex: =6
 
-                    txt_Nomenclatura_EC_3 As text:
+                    txt_Nomenclatura_EC As text:
                         Align: =Align.Center
                         BorderColor: =App.Theme.Colors.Darker40
                         BorderStyle: =BorderStyle.None
@@ -1314,7 +1377,7 @@ EmbalajeEditor As screen:
                         Y: =5
                         ZIndex: =8
 
-                    txt_Fecha_EC_3 As text:
+                    txt_Fecha_EC As text:
                         Align: =Align.Center
                         BorderColor: =App.Theme.Colors.Darker40
                         BorderThickness: =2
@@ -1343,7 +1406,7 @@ EmbalajeEditor As screen:
                         Y: =5
                         ZIndex: =9
 
-                    txt_Pais_EC_3 As text:
+                    txt_Pais_EC As text:
                         Align: =Align.Center
                         BorderColor: =App.Theme.Colors.Darker40
                         BorderThickness: =2
@@ -1509,7 +1572,24 @@ EmbalajeEditor As screen:
                                         showContainer: false, 
                                         txt_Destino: ThisItem.Value
                                     });
-                                    Reset(txt_CantidadDato_EM_2)
+                                    Reset(txt_CantidadDato_EM_2);
+                                    If(
+                                        ThisItem.Value in gl_Contenedores_EC.AllItems.'P/N',
+                                        UpdateContext(
+                                            {
+                                                isEditing: true,
+                                                varRegistroSeleccionado: LookUp(
+                                                    gl_Contenedores_EC.AllItems,
+                                                    'P/N' = ThisItem.Value
+                                                ),
+                                                txt_Destino: ThisItem.Value,
+                                                txt_Destino2: LookUp(
+                                                    gl_Contenedores_EC.AllItems,
+                                                    'P/N' = ThisItem.Value
+                                                ).Cantidad
+                                            }
+                                        )
+                                    )
                                 PaddingBottom: =16
                                 PaddingLeft: =16
                                 PaddingRight: =16
@@ -1575,7 +1655,7 @@ EmbalajeEditor As screen:
                         Y: =5
                         ZIndex: =13
 
-                        drp_Estado_LE_1 As dropdown:
+                        drp_Estado_EC As dropdown:
                             AllowEmptySelection: =
                             BorderColor: =RGBA(0, 0, 0, 0)
                             BorderThickness: =3

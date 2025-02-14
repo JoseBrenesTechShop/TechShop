@@ -138,7 +138,19 @@ Embalaje As screen:
                 HoverColor: =RGBA(255, 255, 255, 1)
                 HoverFill: =RGBA(0, 134, 208, 1)
                 Icon: =Icon.BackArrow
-                OnSelect: =Back()
+                OnSelect: |
+                    =Back();
+                    UpdateContext({
+                        isEditing: false, 
+                        varRegistroSeleccionado: Blank(),
+                        txt_Destino: Blank(),
+                        txt_Destino2: Blank()
+                    });
+                    Reset(dp_FechaSalida_EM);
+                    Reset(txt_Contenedor_EM);
+                    Reset(txt_Nomenclatura_EM);
+                    Reset(drp_Pais_EM);
+                    Clear(Contenedores)
                 PaddingBottom: =5
                 PaddingLeft: =5
                 PaddingRight: =5
@@ -231,66 +243,66 @@ Embalaje As screen:
                         lbl_CantidadTarima_EM_1 As Texto:
                             Align: ='TextCanvas.Align'.Center
                             DisplayMode: =DisplayMode.Edit
-                            Height: =30
+                            Height: =35
                             Size: =22
                             Text: ="Cantidad Tarima"
-                            VerticalAlign: =VerticalAlign.Top
+                            VerticalAlign: =VerticalAlign.Bottom
                             Weight: ='TextCanvas.Weight'.Regular
                             Width: =200
                             X: =530
-                            Y: =4
+                            Y: =0
                             ZIndex: =26
 
                         lbl_ValorPieza_EM_1 As Texto:
                             Align: ='TextCanvas.Align'.Center
                             DisplayMode: =DisplayMode.Edit
-                            Height: =30
+                            Height: =35
                             Size: =22
                             Text: ="Valor de pieza"
-                            VerticalAlign: =VerticalAlign.Top
+                            VerticalAlign: =VerticalAlign.Bottom
                             Weight: ='TextCanvas.Weight'.Regular
                             Width: =200
                             X: =740
-                            Y: =4
+                            Y: =0
                             ZIndex: =27
 
                         lbl_pn_EM_1 As Texto:
                             Align: ='TextCanvas.Align'.Center
                             DisplayMode: =DisplayMode.Edit
-                            Height: =30
+                            Height: =35
                             Size: =22
                             Text: ="P/N"
-                            VerticalAlign: =VerticalAlign.Top
+                            VerticalAlign: =VerticalAlign.Bottom
                             Weight: ='TextCanvas.Weight'.Regular
                             Width: =280
                             X: =12
-                            Y: =4
+                            Y: =0
                             ZIndex: =28
 
                         lbl_Cantidad_EM_1 As Texto:
                             Align: ='TextCanvas.Align'.Center
                             DisplayMode: =DisplayMode.Edit
-                            Height: =30
+                            Height: =35
                             Size: =22
                             Text: ="Cantidad "
-                            VerticalAlign: =VerticalAlign.Top
+                            VerticalAlign: =VerticalAlign.Bottom
                             Weight: ='TextCanvas.Weight'.Regular
                             Width: =218
                             X: =302
-                            Y: =4
+                            Y: =0
                             ZIndex: =29
 
                         lbl_Peso_EM_1 As Texto:
                             Align: ='TextCanvas.Align'.Center
                             DisplayMode: =DisplayMode.Edit
-                            Height: =30
+                            Height: =35
                             Size: =22
                             Text: ="Peso "
-                            VerticalAlign: =VerticalAlign.Top
+                            VerticalAlign: =VerticalAlign.Bottom
                             Weight: ='TextCanvas.Weight'.Regular
                             Width: =200
                             X: =950
-                            Y: =4
+                            Y: =0
                             ZIndex: =30
 
                         txt_CantidadDato_EM_1 As text:
@@ -306,6 +318,7 @@ Embalaje As screen:
                                 =If(isSaving || Disable, DisplayMode.Disabled, DisplayMode.Edit)
                             FocusedBorderThickness: =4
                             Font: =App.Theme.Font
+                            Format: =TextFormat.Number
                             Height: =35
                             HintText: ="Digite la cantidad"
                             HoverBorderColor: =RGBA(40, 134, 222, 1)
@@ -325,21 +338,36 @@ Embalaje As screen:
 
                         txt_CantidadTarimaDato_EM_1 As text:
                             Align: =Align.Center
-                            BorderColor: =App.Theme.Colors.Darker40
+                            BorderColor: =RGBA(40, 134, 222, 1)
                             BorderThickness: =2
                             Color: =RGBA(0, 0, 0, 1)
-                            Default: =LookUp(item, item = txt_PNDato_EM_1.Text, decifld2)
+                            Default: |-
+                                =With(
+                                    {
+                                        tarima: LookUp(
+                                            item,
+                                            item = txt_PNDato_EM_1.Text,
+                                            decifld2
+                                        )
+                                    },
+                                    If(
+                                        tarima <> varRegistroSeleccionado.CantidadTarima && !IsBlank(varRegistroSeleccionado.CantidadTarima),
+                                        varRegistroSeleccionado.CantidadTarima,
+                                        tarima
+                                    )
+                                )
                             DisabledBorderColor: =RGBA(166, 166, 166, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             DisabledFill: =RGBA(244, 244, 244, 1)
-                            DisplayMode: =DisplayMode.View
+                            DisplayMode: =If(isSaving || Disable, DisplayMode.Disabled, DisplayMode.Edit)
                             FocusedBorderThickness: =4
                             Font: =App.Theme.Font
+                            Format: =TextFormat.Number
                             Height: =35
                             HintText: ="Tarima"
-                            HoverBorderColor: =App.Theme.Colors.Darker40
+                            HoverBorderColor: =RGBA(40, 134, 222, 1)
                             HoverColor: =RGBA(0, 0, 0, 1)
-                            HoverFill: =App.Theme.Colors.Lighter70
+                            HoverFill: =RGBA(180, 214, 250, 1)
                             PaddingLeft: =5
                             RadiusBottomLeft: =10
                             RadiusBottomRight: =10
@@ -353,21 +381,36 @@ Embalaje As screen:
 
                         txt_ValorPiezaDato_EM_1 As text:
                             Align: =Align.Center
-                            BorderColor: =App.Theme.Colors.Darker40
+                            BorderColor: =RGBA(40, 134, 222, 1)
                             BorderThickness: =2
                             Color: =RGBA(0, 0, 0, 1)
-                            Default: =LookUp(item, item = txt_PNDato_EM_1.Text, decifld1)
+                            Default: |-
+                                =With(
+                                    {
+                                        valor: LookUp(
+                                            item,
+                                            item = txt_PNDato_EM_1.Text,
+                                            decifld1
+                                        )
+                                    },
+                                    If(
+                                        valor <> varRegistroSeleccionado.ValorPieza && !IsBlank(varRegistroSeleccionado.ValorPieza),
+                                        varRegistroSeleccionado.ValorPieza,
+                                        valor
+                                    )
+                                )
                             DisabledBorderColor: =RGBA(166, 166, 166, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             DisabledFill: =RGBA(244, 244, 244, 1)
-                            DisplayMode: =DisplayMode.View
+                            DisplayMode: =If(isSaving || Disable, DisplayMode.Disabled, DisplayMode.Edit)
                             FocusedBorderThickness: =4
                             Font: =App.Theme.Font
+                            Format: =TextFormat.Number
                             Height: =35
                             HintText: ="Valor"
-                            HoverBorderColor: =App.Theme.Colors.Darker40
+                            HoverBorderColor: =RGBA(40, 134, 222, 1)
                             HoverColor: =RGBA(0, 0, 0, 1)
-                            HoverFill: =App.Theme.Colors.Lighter70
+                            HoverFill: =RGBA(180, 214, 250, 1)
                             PaddingLeft: =5
                             RadiusBottomLeft: =10
                             RadiusBottomRight: =10
@@ -381,21 +424,36 @@ Embalaje As screen:
 
                         txt_PesoDato_EM_1 As text:
                             Align: =Align.Center
-                            BorderColor: =App.Theme.Colors.Darker40
+                            BorderColor: =RGBA(40, 134, 222, 1)
                             BorderThickness: =2
                             Color: =RGBA(0, 0, 0, 1)
-                            Default: =LookUp(item, item = txt_PNDato_EM_1.Text, unit_weight)
+                            Default: |-
+                                =With(
+                                    {
+                                        peso: LookUp(
+                                            item,
+                                            item = txt_PNDato_EM_1.Text,
+                                            unit_weight
+                                        )
+                                    },
+                                    If(
+                                        peso <> varRegistroSeleccionado.Peso && !IsBlank(varRegistroSeleccionado.Peso),
+                                        varRegistroSeleccionado.Peso,
+                                        peso
+                                    )
+                                )
                             DisabledBorderColor: =RGBA(166, 166, 166, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             DisabledFill: =RGBA(244, 244, 244, 1)
-                            DisplayMode: =DisplayMode.View
+                            DisplayMode: =If(isSaving || Disable, DisplayMode.Disabled, DisplayMode.Edit)
                             FocusedBorderThickness: =4
                             Font: =App.Theme.Font
+                            Format: =TextFormat.Number
                             Height: =35
                             HintText: ="Peso"
-                            HoverBorderColor: =App.Theme.Colors.Darker40
+                            HoverBorderColor: =RGBA(40, 134, 222, 1)
                             HoverColor: =RGBA(0, 0, 0, 1)
-                            HoverFill: =App.Theme.Colors.Lighter70
+                            HoverFill: =RGBA(180, 214, 250, 1)
                             PaddingLeft: =5
                             RadiusBottomLeft: =10
                             RadiusBottomRight: =10
@@ -426,6 +484,7 @@ Embalaje As screen:
                             HoverBorderColor: =RGBA(40, 134, 222, 1)
                             HoverColor: =RGBA(0, 0, 0, 1)
                             HoverFill: =RGBA(180, 214, 250, 1)
+                            OnChange: =
                             OnSelect: |-
                                 =UpdateContext({showContainer: !showContainer})
                             PaddingLeft: =5
@@ -471,19 +530,18 @@ Embalaje As screen:
                             HoverFill: =RGBA(15, 84, 140, 1)
                             OnSelect: |-
                                 =If(
-                                   
                                     !IsNumeric(txt_CantidadDato_EM_1.Text) || 
                                     Value(txt_CantidadDato_EM_1.Text) <= 0 || 
                                     IsBlank(txt_PNDato_EM_1.Text) || 
-                                    IsBlank(drp_Pais_EM_2.SelectedText) || 
-                                    IsBlank(txt_Contenedor_EM_1.Text) || 
-                                    WeekNum(dt_FechaSalida_EM_1.SelectedDate, StartOfWeek.Monday) < WeekNum(Today(), StartOfWeek.Monday) || 
-                                    Year(dt_FechaSalida_EM_1.SelectedDate) < Year(Today()),
+                                    IsBlank(drp_Pais_EM.SelectedText) || 
+                                    IsBlank(txt_Contenedor_EM.Text) || 
+                                    WeekNum(dp_FechaSalida_EM.SelectedDate, StartOfWeek.Monday) < WeekNum(Today(), StartOfWeek.Monday) || 
+                                    Year(dp_FechaSalida_EM.SelectedDate) < Year(Today()),
                                     UpdateContext(
                                         {
                                             mensajeNotificacion: If(
-                                                WeekNum(dt_FechaSalida_EM_1.SelectedDate, StartOfWeek.Monday) < WeekNum(Today(), StartOfWeek.Monday) || 
-                                                Year(dt_FechaSalida_EM_1.SelectedDate) < Year(Today()),
+                                                WeekNum(dp_FechaSalida_EM.SelectedDate, StartOfWeek.Monday) < WeekNum(Today(), StartOfWeek.Monday) || 
+                                                Year(dp_FechaSalida_EM.SelectedDate) < Year(Today()),
                                                 "No se pudieron agregar los datos. La fecha de salida seleccionada corresponde a una semana o año anterior. Por favor, seleccione una fecha dentro de la semana actual para continuar.",
                                                 "Todos los campos son obligatorios (Fecha, País, P/N y la cantidad debe ser mayor a 0)."
                                             ),
@@ -501,10 +559,10 @@ Embalaje As screen:
                                         Collect(
                                             Contenedores,
                                             {
-                                                Fecha: dt_FechaSalida_EM_1.SelectedDate,
+                                                Fecha: dp_FechaSalida_EM.SelectedDate,
                                                 Nomenclatura: nomenclaturaGenerada,
-                                                Pais: drp_Pais_EM_2.SelectedText,
-                                                Contenedor: txt_Contenedor_EM_1.Text,
+                                                Pais: drp_Pais_EM.SelectedText,
+                                                Contenedor: txt_Contenedor_EM.Text,
                                                 'P/N': txt_PNDato_EM_1.Text,
                                                 Cantidad: Value(txt_CantidadDato_EM_1.Text),
                                                 CantidadTarima: Value(txt_CantidadTarimaDato_EM_1.Text),
@@ -520,9 +578,9 @@ Embalaje As screen:
                                                     item = txt_PNDato_EM_1.Text,
                                                     charfld4
                                                 ),
-                                                Ano: Year(dt_FechaSalida_EM_1.SelectedDate),
+                                                Ano: Year(dp_FechaSalida_EM.SelectedDate),
                                                 Semana: WeekNum(
-                                                    dt_FechaSalida_EM_1.SelectedDate,
+                                                    dp_FechaSalida_EM.SelectedDate,
                                                     StartOfWeek.Monday
                                                 ),
                                                 User: txt_EmpleadoUso_EM_1.Text,
@@ -573,8 +631,8 @@ Embalaje As screen:
                             OnSelect: |
                                 =If(
                                     !IsNumeric(txt_CantidadDato_EM_1.Text) || Value(txt_CantidadDato_EM_1.Text) <= 0 || 
-                                    IsBlank(txt_PNDato_EM_1.Text) || IsBlank(drp_Pais_EM_2.SelectedText) || 
-                                    IsBlank(txt_Contenedor_EM_1.Text),
+                                    IsBlank(txt_PNDato_EM_1.Text) || IsBlank(drp_Pais_EM.SelectedText) || 
+                                    IsBlank(txt_Contenedor_EM.Text),
                                     UpdateContext(
                                         {
                                             mensajeNotificacion: "Todos los campos son obligatorios y la cantidad debe ser un número mayor a 0.",
@@ -588,20 +646,23 @@ Embalaje As screen:
                                         Contenedores,
                                         varRegistroSeleccionado,
                                         {
-                                            Fecha: dt_FechaSalida_EM_1.SelectedDate,
+                                            Fecha: dp_FechaSalida_EM.SelectedDate,
                                             Nomenclatura: nomenclaturaGenerada,
-                                            Pais: drp_Pais_EM_2.SelectedText,
-                                            Contenedor: txt_Contenedor_EM_1.Text,
-                                        'P/N': txt_PNDato_EM_1.Text,
+                                            Pais: drp_Pais_EM.SelectedText,
+                                            Contenedor: txt_Contenedor_EM.Text,
+                                            'P/N': txt_PNDato_EM_1.Text,
                                             Cantidad: Value(txt_CantidadDato_EM_1.Text),
                                             CantidadTarima: Value(txt_CantidadTarimaDato_EM_1.Text),
                                             ValorPieza: Value(txt_ValorPiezaDato_EM_1.Text),
                                             Peso: Value(txt_PesoDato_EM_1.Text),
                                             TipoCaja: LookUp(item, item = txt_PNDato_EM_1.Text, Uf_TipoCaja),
                                             Tipo: LookUp(item, item = txt_PNDato_EM_1.Text, charfld4),
-                                            Ano: Year(dt_FechaSalida_EM_1.SelectedDate),
-                                            Semana: WeekNum(dt_FechaSalida_EM_1.SelectedDate, StartOfWeek.Monday),
-                                            User: txt_EmpleadoUso_EM_2.Text
+                                            Ano: Year(dp_FechaSalida_EM.SelectedDate),
+                                            Semana: WeekNum(dp_FechaSalida_EM.SelectedDate, StartOfWeek.Monday),
+                                            User: txt_EmpleadoUso_EM_2.Text,
+                                            CantidadTotal: Value(txt_CantidadTarimaDato_EM_1.Text) * Value(txt_CantidadDato_EM_1.Text),
+                                            ValorTotal: (Value(txt_CantidadTarimaDato_EM_1.Text) * Value(txt_CantidadDato_EM_1.Text)) * Value(txt_ValorPiezaDato_EM_1.Text),
+                                            PesoTotal: (Value(txt_CantidadTarimaDato_EM_1.Text) * Value(txt_CantidadDato_EM_1.Text)) * Value(txt_PesoDato_EM_1.Text)
                                         }
                                     ),
                                      UpdateContext(
@@ -615,8 +676,8 @@ Embalaje As screen:
                                 
                                 Reset(txt_PNDato_EM_1);
                                 Reset(txt_CantidadDato_EM_1);
-                                UpdateContext({ txt_Destino2: 0 });
-                                UpdateContext({ txt_Destino: "" });
+                                UpdateContext({ txt_Destino2: Blank() });
+                                UpdateContext({ txt_Destino: Blank() });
                                 UpdateContext({ isEditing: false });
                                 UpdateContext({ varRegistroSeleccionado: Blank() })
                             Size: =15
@@ -639,10 +700,14 @@ Embalaje As screen:
                             Height: =35
                             HoverColor: =RGBA(255, 255, 255, 1)
                             HoverFill: =RGBA(15, 108, 189, 1)
-                            OnSelect: |-
-                                =UpdateContext({ isEditing: false});
-                                UpdateContext({txt_Destino2: 0});
-                                UpdateContext({txt_Destino: ""});
+                            OnSelect: |+
+                                =UpdateContext({
+                                    isEditing: false, 
+                                    varRegistroSeleccionado: Blank(),
+                                    txt_Destino: Blank(),
+                                    txt_Destino2: Blank()
+                                });
+                                
                             Size: =16
                             Text: ="X"
                             Visible: =isEditing
@@ -1200,7 +1265,7 @@ Embalaje As screen:
                         Align: =Align.Center
                         BorderThickness: =2
                         Color: =RGBA(255, 255, 255, 1)
-                        Default: ="Contenedor " & txt_Nomenclatura_EM_1.Text
+                        Default: ="Contenedor " & txt_Nomenclatura_EM.Text
                         DisabledBorderColor: =RGBA(166, 166, 166, 1)
                         DisabledColor: =RGBA(166, 166, 166, 1)
                         DisabledFill: =RGBA(244, 244, 244, 1)
@@ -1358,11 +1423,30 @@ Embalaje As screen:
                                 Height: =60
                                 Icon: =Icon.Add
                                 OnSelect: |-
-                                    =UpdateContext({
-                                        showContainer: false, 
-                                        txt_Destino: ThisItem.Value
-                                    });
-                                    Reset(txt_CantidadDato_EM_1)
+                                    =UpdateContext(
+                                        {
+                                            showContainer: false,
+                                            txt_Destino: ThisItem.Value
+                                        }
+                                    );
+                                    Reset(txt_CantidadDato_EM_1);
+                                    If(
+                                        ThisItem.Value in Contenedores.'P/N',
+                                        UpdateContext(
+                                            {
+                                                isEditing: true,
+                                                varRegistroSeleccionado: LookUp(
+                                                    Contenedores,
+                                                    'P/N' = ThisItem.Value
+                                                ),
+                                                txt_Destino: ThisItem.Value,
+                                                txt_Destino2: LookUp(
+                                                    Contenedores,
+                                                    'P/N' = ThisItem.Value
+                                                ).Cantidad
+                                            }
+                                        )
+                                    )
                                 PaddingBottom: =16
                                 PaddingLeft: =16
                                 PaddingRight: =16
@@ -1414,7 +1498,7 @@ Embalaje As screen:
                             Y: =38
                             ZIndex: =4
 
-                    txt_Nomenclatura_EM_1 As text:
+                    txt_Nomenclatura_EM As text:
                         Align: =Align.Center
                         BorderColor: =App.Theme.Colors.Darker40
                         BorderStyle: =BorderStyle.None
@@ -1470,7 +1554,7 @@ Embalaje As screen:
                         Y: =4
                         ZIndex: =18
 
-                    txt_Contenedor_EM_1 As text:
+                    txt_Contenedor_EM As text:
                         Align: =Align.Center
                         BorderColor: =App.Theme.Colors.Darker40
                         BorderThickness: =2
@@ -1498,7 +1582,7 @@ Embalaje As screen:
                         Y: =4
                         ZIndex: =19
 
-                    "dt_FechaSalida_EM_1 As 'Selector de fecha'":
+                    "dp_FechaSalida_EM As 'Selector de fecha'":
                         BasePaletteColor: =RGBA(5, 102, 178, 1)
                         BorderColor: =RGBA(180, 214, 250, 1)
                         BorderRadius: =10
@@ -1522,8 +1606,8 @@ Embalaje As screen:
                                 ContenedoresSemanaActual,
                                 Filter(
                                     ContenedoresRecientes,
-                                    Year(Fecha) = Year(dt_FechaSalida_EM_1.SelectedDate) && 
-                                    WeekNum(Fecha) = WeekNum(dt_FechaSalida_EM_1.SelectedDate)
+                                    Year(Fecha) = Year(dp_FechaSalida_EM.SelectedDate) && 
+                                    WeekNum(Fecha) = WeekNum(dp_FechaSalida_EM.SelectedDate)
                                 )
                             );
                             
@@ -1544,11 +1628,11 @@ Embalaje As screen:
                                     nomenclaturaGenerada: 
                                         "C" & 
                                         Right(
-                                            Text(Year(dt_FechaSalida_EM_1.SelectedDate)), 
+                                            Text(Year(dp_FechaSalida_EM.SelectedDate)), 
                                             2
                                         ) & 
                                         Text(
-                                            WeekNum(dt_FechaSalida_EM_1.SelectedDate),
+                                            WeekNum(dp_FechaSalida_EM.SelectedDate),
                                             "0"
                                         ) & 
                                         contenedorTexto
@@ -1587,19 +1671,19 @@ Embalaje As screen:
                         Y: =4
                         ZIndex: =22
 
-                        drp_Pais_EM_2 As dropdown:
+                        drp_Pais_EM As dropdown:
                             AllowEmptySelection: =true
                             BorderColor: =RGBA(180, 214, 250, 1)
                             ChevronBackground: =RGBA(255, 255, 255, 1)
-                            ChevronDisabledBackground: =RGBA(166, 166, 166, 1)
-                            ChevronDisabledFill: =RGBA(244, 244, 244, 1)
+                            ChevronDisabledBackground: =RGBA(255, 255, 255, 1)
+                            ChevronDisabledFill: =RGBA(255, 255, 255, 1)
                             ChevronFill: =RGBA(0, 0, 0, 1)
                             ChevronHoverBackground: =RGBA(15, 108, 189, 1)
                             ChevronHoverFill: =RGBA(255, 255, 255, 1)
                             Default: =
-                            DisabledBorderColor: =RGBA(166, 166, 166, 1)
-                            DisabledColor: =RGBA(166, 166, 166, 1)
-                            DisabledFill: =RGBA(244, 244, 244, 1)
+                            DisabledBorderColor: =RGBA(180, 214, 250, 1)
+                            DisabledColor: =RGBA(0, 0, 0, 1)
+                            DisabledFill: =RGBA(255, 255, 255, 1)
                             DisplayMode: |
                                 =If(isSaving || isEditing || Disable, DisplayMode.Disabled, DisplayMode.Edit)
                             Height: =30
@@ -1645,17 +1729,17 @@ Embalaje As screen:
                             =If(
                              
                                 IsEmpty(Contenedores) || 
-                                WeekNum(dt_FechaSalida_EM_1.SelectedDate, StartOfWeek.Monday) < WeekNum(Today(), StartOfWeek.Monday) || 
-                                Year(dt_FechaSalida_EM_1.SelectedDate) < Year(Today()) || 
-                                IsBlank(dt_FechaSalida_EM_1.SelectedDate) || IsBlank(drp_Pais_EM_2.SelectedText),
+                                WeekNum(dp_FechaSalida_EM.SelectedDate, StartOfWeek.Monday) < WeekNum(Today(), StartOfWeek.Monday) || 
+                                Year(dp_FechaSalida_EM.SelectedDate) < Year(Today()) || 
+                                IsBlank(dp_FechaSalida_EM.SelectedDate) || IsBlank(drp_Pais_EM.SelectedText),
                                 UpdateContext(
                                     {
                                         mensajeNotificacion: If(
                                             IsEmpty(Contenedores),
                                             "No hay datos en la tabla Contenedores para guardar.",
                                             If(
-                                                WeekNum(dt_FechaSalida_EM_1.SelectedDate, StartOfWeek.Monday) < WeekNum(Today(), StartOfWeek.Monday) || 
-                                                Year(dt_FechaSalida_EM_1.SelectedDate) < Year(Today()),
+                                                WeekNum(dp_FechaSalida_EM.SelectedDate, StartOfWeek.Monday) < WeekNum(Today(), StartOfWeek.Monday) || 
+                                                Year(dp_FechaSalida_EM.SelectedDate) < Year(Today()),
                                                 "No se puede agregar, la fecha de salida pertenece a una semana anterior. Por favor cambiar a una fecha de la semana actual",
                                                 "La fecha y el país son obligatorios."
                                             )
@@ -1669,17 +1753,17 @@ Embalaje As screen:
                                  Collect(
                                         Contenedors_2,
                                         {
-                                            Fecha: dt_FechaSalida_EM_1.SelectedDate,
-                                            FechaTexto: Text(dt_FechaSalida_EM_1.SelectedDate),
+                                            Fecha: dp_FechaSalida_EM.SelectedDate,
+                                            FechaTexto: Text(dp_FechaSalida_EM.SelectedDate),
                                             Nomenclatura: nomenclaturaGenerada,
-                                            Pais: drp_Pais_EM_2.SelectedText.Value,
+                                            Pais: drp_Pais_EM.SelectedText.Value,
                                             Estado_Contenedor: "Activo",
                                             NumContenedor: contenedorTexto,
                                             Semana: Text( WeekNum(
-                                                dt_FechaSalida_EM_1.SelectedDate,
+                                                dp_FechaSalida_EM.SelectedDate,
                                                 StartOfWeek.Monday
                                             )),
-                                            Año: Text(Year(dt_FechaSalida_EM_1.SelectedDate)),
+                                            Año: Text(Year(dp_FechaSalida_EM.SelectedDate)),
                                             User: txt_EmpleadoUso_EM_2.Text,
                                             Cantidad_Total: Sum(gl_Contenedores_EM_1.AllItems, CantidadTotal),
                                             Peso_Total:Sum(gl_Contenedores_EM_1.AllItems, PesoTotal) ,
@@ -1710,8 +1794,8 @@ Embalaje As screen:
                                     )
                                 );
                                 Clear(Contenedores);
-                                Reset(dt_FechaSalida_EM_1);
-                                Reset(drp_Pais_EM_2);
+                                Reset(dp_FechaSalida_EM);
+                                Reset(drp_Pais_EM);
                                 Reset(txt_PNDato_EM_1);
                                 Reset(txt_CantidadDato_EM_1);
                                 UpdateContext(

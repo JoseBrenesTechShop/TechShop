@@ -1,0 +1,2065 @@
+# ************************************************************************************************
+# Warning: YAML source code for Canvas Apps is in preview. The schema is being actively developed.
+# Content may be incomplete and subject to change.
+# This file is read-only and should only be used to review changes made within Power Apps Studio.
+# This file isn't used when loading the app. External editing, merging and conflict resolution are
+# not supported.
+# 
+# For more information, visit https://go.microsoft.com/fwlink/?linkid=2292623
+# ************************************************************************************************
+Screens:
+  HoraXhora 4.0:
+    Properties:
+      BackgroundImage: ='abstracto geométrico blanco y gris'
+      ImagePosition: =ImagePosition.Fill
+      OnVisible: |
+        =UpdateContext({HoraActual: Value(Text(Now(), "[$-en-US]HH"))});
+        UpdateContext({Hora: drp_Hora_HxHE.SelectedText.Value});
+        UpdateContext({HoraValor: drp_Hora_HxHE.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'});
+        UpdateContext({FechaSup: Today()});
+        UpdateContext({Dia: Weekday(FechaSup)});
+
+        UpdateContext({
+            turnoSeleccionado:
+            If(
+            HoraValor >= 0 && HoraValor <= 6 && Dia = 2,
+            LookUp(
+                HorarioSemanals,
+                (Fecha_Fin = DateAdd(FechaSup, -1, TimeUnit.Days)) &&
+                Codigo = VarName
+            ),
+            LookUp(
+                HorarioSemanals,
+                (Fecha_Inicio <= FechaSup && Fecha_Fin >= FechaSup) &&
+                Codigo = VarName
+            )
+        )
+        });
+
+        UpdateContext({
+            turnoFinal:
+            If(
+                HoraValor >= 0 && HoraValor <= 6,
+                Switch(
+                    Dia,
+                    1, turnoSeleccionado.Sabado,
+                    2, turnoSeleccionado.Domingo,
+                    3, turnoSeleccionado.Lunes,
+                    4, turnoSeleccionado.Martes,
+                    5, turnoSeleccionado.Miercoles,
+                    6, turnoSeleccionado.Jueves,
+                    7, turnoSeleccionado.Viernes
+                ),
+                Switch(
+                    Dia,
+                    1, turnoSeleccionado.Domingo,
+                    2, turnoSeleccionado.Lunes,
+                    3, turnoSeleccionado.Martes,
+                    4, turnoSeleccionado.Miercoles,
+                    5, turnoSeleccionado.Jueves,
+                    6, turnoSeleccionado.Viernes,
+                    7, turnoSeleccionado.Sabado
+                )
+            )
+        });
+    Children:
+      - ScreenContainer11:
+          Control: GroupContainer@1.3.0
+          Variant: AutoLayout
+          Properties:
+            Height: =Parent.Height
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutGap: =16
+            PaddingBottom: =8
+            PaddingLeft: =8
+            PaddingRight: =8
+            PaddingTop: =8
+            Width: =Parent.Width
+          Children:
+            - HeaderContainer13:
+                Control: GroupContainer@1.3.0
+                Variant: AutoLayout
+                Properties:
+                  Fill: =RGBA(12, 59, 94, 1)
+                  FillPortions: =0
+                  Height: =75
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                Children:
+                  - Icon1_37:
+                      Control: Classic/Icon@2.5.0
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Center
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisplayMode: =DisplayMode.View
+                        Height: =75
+                        Icon: =Icon.Person
+                        PaddingBottom: =2
+                        PaddingLeft: =5
+                        PaddingRight: =2
+                        PaddingTop: =2
+                        Width: =75
+                  - txtEmpleadoEnUso_HxHE:
+                      Control: Classic/TextInput@2.3.2
+                      Properties:
+                        Align: =Align.Center
+                        AlignInContainer: =AlignInContainer.Center
+                        BorderColor: =RGBA(204, 231, 246, 1)
+                        BorderThickness: =20
+                        Color: =RGBA(12, 59, 94, 1)
+                        Default: =LookUp(Empleados, Codigo = VarName, Nombre)
+                        DisplayMode: =DisplayMode.View
+                        FontWeight: =FontWeight.Bold
+                        Height: =60
+                        PaddingLeft: =5
+                        RadiusBottomLeft: =20
+                        RadiusBottomRight: =20
+                        RadiusTopLeft: =20
+                        RadiusTopRight: =20
+                        Size: =18
+                        Width: =400
+                  - Icon14_66:
+                      Control: Classic/Icon@2.5.0
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Center
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisplayMode: =DisplayMode.View
+                        Height: =60
+                        Icon: =Icon.VerticalLine
+                        Width: =30
+                        X: =820
+                        Y: =22
+                  - Label1_37:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        AlignInContainer: =AlignInContainer.Center
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisplayMode: =DisplayMode.View
+                        FontWeight: =FontWeight.Bold
+                        Height: =60
+                        Size: =25
+                        Text: ="Hora X Hora"
+                        Width: =740
+                  - Icon14_93:
+                      Control: Classic/Icon@2.5.0
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Center
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisplayMode: =DisplayMode.View
+                        Height: =60
+                        Icon: =Icon.VerticalLine
+                        Width: =30
+                        X: =820
+                        Y: =22
+                  - icn_Home_HxH_1:
+                      Control: Classic/Icon@2.5.0
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Center
+                        BorderColor: =App.Theme.Colors.Primary
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =2
+                        Color: =RGBA(255, 255, 255, 1)
+                        Fill: =RGBA(12, 59, 94, 1)
+                        FocusedBorderThickness: =20
+                        Height: =60
+                        HoverBorderColor: =RGBA(0, 134, 208, 1)
+                        HoverColor: =RGBA(255, 255, 255, 1)
+                        HoverFill: =RGBA(0, 134, 208, 1)
+                        Icon: =Icon.Home
+                        OnSelect: |-
+                          =Reset(txt_Maquina_HxHE);
+                          Reset(txt_Tarima_HxHE);
+                          UpdateContext({FechaSup: Today()});
+                          UpdateContext({Dia: Weekday(FechaSup)});
+                          UpdateContext({Hora: Blank()});
+                          UpdateContext({turnoFinal: Blank()});
+                          UpdateContext({turnoSeleccionado: Blank()});
+                          UpdateContext({HoraValor: Blank()});
+                          UpdateContext({OrdenInfo: Blank()});
+                          UpdateContext({Disable: false});
+                          UpdateContext(
+                              {
+                                  Comentarios: {
+                                      Comentario: "PRODUCION",
+                                      Causa: "Bien"
+                                  }
+                              }
+                          );
+                          Reset(drp_Comentario_HxHE);
+                          Reset(drp_Causas_HxHE);
+                          Clear(Piezas);
+                          Back()
+                        PaddingBottom: =5
+                        PaddingLeft: =5
+                        PaddingRight: =5
+                        PaddingTop: =5
+                        Width: =65
+            - BottomContainer12:
+                Control: GroupContainer@1.3.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =16
+                  LayoutWrap: =true
+                  PaddingBottom: =2
+                  PaddingLeft: =2
+                  PaddingRight: =2
+                  PaddingTop: =2
+                Children:
+                  - Container26:
+                      Control: GroupContainer@1.3.0
+                      Variant: ManualLayout
+                      Properties:
+                        Fill: =RGBA(204, 231, 246, 0.7)
+                      Children:
+                        - Container27:
+                            Control: GroupContainer@1.3.0
+                            Variant: ManualLayout
+                            Properties:
+                              BorderColor: =RGBA(71, 158, 245, 1)
+                              BorderThickness: =4
+                              DropShadow: =DropShadow.Regular
+                              Fill: =RGBA(71, 158, 245, 0.31)
+                              Height: =142
+                              RadiusBottomLeft: =10
+                              RadiusBottomRight: =10
+                              RadiusTopLeft: =10
+                              RadiusTopRight: =10
+                              Width: =644
+                              X: =14
+                              Y: =14
+                            Children:
+                              - txt_Maquina_HxHE:
+                                  Control: Classic/TextInput@2.3.2
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    BorderStyle: =BorderStyle.None
+                                    Default: =glr_Info_HxH.Selected.Orden
+                                    DisplayMode: =If(Disable, DisplayMode.Disabled, DisplayMode.Edit)
+                                    Font: =Font.'Open Sans'
+                                    Height: =50
+                                    HintText: ="Escanear Maquina"
+                                    HoverBorderColor: =RGBA(204, 231, 246, 1)
+                                    HoverFill: =RGBA(204, 231, 246, 1)
+                                    OnChange: |-
+                                      =UpdateContext(
+                                          {
+                                              OrdenInfo: LookUp(
+                                                  Orden_Ejecucion,
+                                                  Orden = LookUp(
+                                                      Maquina_Ordens_1,
+                                                      Maquina = Self.Text
+                                                  ).Orden && Operacion = LookUp(
+                                                      Maquina_Ordens_1,
+                                                      Maquina = Self.Text
+                                                  ).Operacion
+                                              )
+                                          }
+                                      );
+                                      Reset(txt_Tarima_HxHE);
+                                      SetFocus(txt_Tarima_HxHE)
+                                    OnSelect: =Reset(Self)
+                                    PaddingLeft: =5
+                                    RadiusBottomLeft: =20
+                                    RadiusBottomRight: =20
+                                    RadiusTopLeft: =20
+                                    RadiusTopRight: =20
+                                    Size: =15
+                                    Width: =372
+                                    X: =17
+                                    Y: =79
+                              - Label2_26:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Font: =Font.'Open Sans'
+                                    Size: =18
+                                    Text: ="Maquina"
+                                    X: =128
+                                    Y: =39
+                              - txt_Tarima_HxHE:
+                                  Control: Classic/TextInput@2.3.2
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    BorderStyle: =BorderStyle.None
+                                    Default: =
+                                    DisplayMode: =If(Disable, DisplayMode.Disabled, DisplayMode.Edit)
+                                    Font: =Font.'Open Sans'
+                                    Height: =50
+                                    HintText: ="Tarima"
+                                    HoverBorderColor: =RGBA(204, 231, 246, 1)
+                                    HoverFill: =RGBA(204, 231, 246, 1)
+                                    OnChange: =SetFocus(txt_OrdenView_HxH_2)
+                                    OnSelect: =Reset(Self)
+                                    PaddingLeft: =5
+                                    RadiusBottomLeft: =20
+                                    RadiusBottomRight: =20
+                                    RadiusTopLeft: =20
+                                    RadiusTopRight: =20
+                                    Size: =15
+                                    Width: =191
+                                    X: =420
+                                    Y: =79
+                              - Label2_28:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Font: =Font.'Open Sans'
+                                    Size: =18
+                                    Text: ="Tarima"
+                                    X: =440
+                                    Y: =39
+                              - Label2_29:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Color: =RGBA(255, 255, 255, 1)
+                                    Fill: =RGBA(71, 158, 245, 1)
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =39
+                                    Size: =18
+                                    Text: ="Escanear"
+                                    Width: =644
+                        - txt_Orden_HxHE:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              BorderStyle: =BorderStyle.None
+                              Default: =OrdenInfo.Orden
+                              DisplayMode: =DisplayMode.View
+                              Font: =Font.'Open Sans'
+                              HintText: ="Numero Orden"
+                              HoverBorderColor: =RGBA(204, 231, 246, 1)
+                              HoverFill: =RGBA(204, 231, 246, 1)
+                              OnChange: =
+                              OnSelect: =
+                              PaddingLeft: =5
+                              RadiusBottomLeft: =20
+                              RadiusBottomRight: =20
+                              RadiusTopLeft: =20
+                              RadiusTopRight: =20
+                              Size: =15
+                              Width: =314
+                              X: =368
+                              Y: =284
+                        - Label2_83:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Font: =Font.'Open Sans'
+                              Size: =18
+                              Text: ="Orden"
+                              X: =454
+                              Y: =243
+                        - txt_PN_HxHE:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              BorderStyle: =BorderStyle.None
+                              Default: =OrdenInfo.'P/N'
+                              DisplayMode: =DisplayMode.View
+                              Font: =Font.'Open Sans'
+                              HintText: ="P/N"
+                              HoverBorderColor: =RGBA(204, 231, 246, 1)
+                              HoverFill: =RGBA(204, 231, 246, 1)
+                              OnChange: =
+                              OnSelect: =
+                              PaddingLeft: =5
+                              RadiusBottomLeft: =20
+                              RadiusBottomRight: =20
+                              RadiusTopLeft: =20
+                              RadiusTopRight: =20
+                              Size: =15
+                              Width: =314
+                              X: =1018
+                              Y: =283
+                        - Label2_84:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Font: =Font.'Open Sans'
+                              Size: =18
+                              Text: ="P/N"
+                              X: =1100
+                              Y: =243
+                        - txt_CantMax_HxHE:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              BorderStyle: =BorderStyle.None
+                              Default: =OrdenInfo.Cantidad
+                              DisplayMode: =DisplayMode.View
+                              Font: =Font.'Open Sans'
+                              Format: =TextFormat.Number
+                              HintText: ="Cantidad Max"
+                              HoverBorderColor: =RGBA(204, 231, 246, 1)
+                              HoverFill: =RGBA(204, 231, 246, 1)
+                              OnChange: =
+                              OnSelect: =
+                              PaddingLeft: =5
+                              RadiusBottomLeft: =20
+                              RadiusBottomRight: =20
+                              RadiusTopLeft: =20
+                              RadiusTopRight: =20
+                              Size: =15
+                              Width: =165
+                              X: =587
+                              Y: =375
+                        - Label2_85:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Font: =Font.'Open Sans'
+                              Size: =18
+                              Text: ="CantidadMax"
+                              Width: =165
+                              X: =587
+                              Y: =336
+                        - txt_OP_HxHE:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              BorderStyle: =BorderStyle.None
+                              Default: =OrdenInfo.Operacion
+                              DisplayMode: =DisplayMode.View
+                              Font: =Font.'Open Sans'
+                              HintText: ="Numero Operacion"
+                              HoverBorderColor: =RGBA(204, 231, 246, 1)
+                              HoverFill: =RGBA(204, 231, 246, 1)
+                              OnChange: =
+                              OnSelect: =
+                              PaddingLeft: =5
+                              RadiusBottomLeft: =20
+                              RadiusBottomRight: =20
+                              RadiusTopLeft: =20
+                              RadiusTopRight: =20
+                              Size: =15
+                              Width: =314
+                              X: =695
+                              Y: =283
+                        - Label2_89:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Font: =Font.'Open Sans'
+                              Size: =18
+                              Text: ="Operacion"
+                              X: =777
+                              Y: =243
+                        - txt_Meta_HxHE:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              BorderStyle: =BorderStyle.None
+                              Default: |-
+                                =If(
+                                    (Hora = "10:00" && (txt_Turno_HxHE.Text = "TD" || txt_Turno_HxHE.Text = "T1")) || (Hora = "16:00" && (txt_Turno_HxHE.Text = "TD" || txt_Turno_HxHE.Text = "T2")) || (Hora = "04:00" && (txt_Turno_HxHE.Text = "TN" || txt_Turno_HxHE.Text = "T3")) || (Hora = "22:00" && txt_Turno_HxHE.Text = "TN"),
+                                    OrdenInfo.Meta * 0.75,
+                                    (Hora = "13:00" && (txt_Turno_HxHE.Text = "TD" || txt_Turno_HxHE.Text = "T1")) || (Hora = "01:00" && (txt_Turno_HxHE.Text = "TN" || txt_Turno_HxHE.Text = "T3")) || (Hora = "20:00" && txt_Turno_HxHE.Text = "T2"),
+                                    OrdenInfo.Meta * 0.50,
+                                    OrdenInfo.Meta = 0,
+                                    4,
+                                    OrdenInfo.Meta
+                                )
+                              DisplayMode: =DisplayMode.View
+                              Font: =Font.'Open Sans'
+                              HintText: ="Meta Maxima"
+                              HoverBorderColor: =RGBA(204, 231, 246, 1)
+                              HoverFill: =RGBA(204, 231, 246, 1)
+                              OnChange: =
+                              OnSelect: =
+                              PaddingLeft: =5
+                              RadiusBottomLeft: =20
+                              RadiusBottomRight: =20
+                              RadiusTopLeft: =20
+                              RadiusTopRight: =20
+                              Size: =15
+                              Width: =170
+                              X: =766
+                              Y: =376
+                        - Label2_90:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Font: =Font.'Open Sans'
+                              Size: =18
+                              Text: ="MetaMax"
+                              Width: =166
+                              X: =770
+                              Y: =336
+                        - txt_TarimaMax_HxHE:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              BorderStyle: =BorderStyle.None
+                              Default: =OrdenInfo.Tarima
+                              DisplayMode: =DisplayMode.View
+                              Font: =Font.'Open Sans'
+                              HintText: ="Tarima Maxima"
+                              HoverBorderColor: =RGBA(204, 231, 246, 1)
+                              HoverFill: =RGBA(204, 231, 246, 1)
+                              OnChange: =
+                              OnSelect: =
+                              PaddingLeft: =5
+                              RadiusBottomLeft: =20
+                              RadiusBottomRight: =20
+                              RadiusTopLeft: =20
+                              RadiusTopRight: =20
+                              Size: =15
+                              Width: =166
+                              X: =950
+                              Y: =376
+                        - Label2_91:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Font: =Font.'Open Sans'
+                              Size: =18
+                              Text: ="TarimaMax"
+                              Width: =166
+                              X: =950
+                              Y: =336
+                        - txt_TarimaView_HxHE:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              BorderStyle: =BorderStyle.None
+                              Default: '=Upper(txt_Tarima_HxHE.Text) '
+                              DisplayMode: =DisplayMode.View
+                              Font: =Font.'Open Sans'
+                              HintText: ="Numero Tarima"
+                              HoverBorderColor: =RGBA(204, 231, 246, 1)
+                              HoverFill: =RGBA(204, 231, 246, 1)
+                              OnChange: =
+                              OnSelect: =
+                              PaddingLeft: =5
+                              RadiusBottomLeft: =20
+                              RadiusBottomRight: =20
+                              RadiusTopLeft: =20
+                              RadiusTopRight: =20
+                              Size: =15
+                              Width: =166
+                              X: =1130
+                              Y: =376
+                        - Label2_92:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Font: =Font.'Open Sans'
+                              Size: =18
+                              Text: ="Tarima"
+                              Width: =166
+                              X: =1130
+                              Y: =336
+                        - Rectangle2_5:
+                            Control: Rectangle@2.3.0
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Fill: =RGBA(0, 134, 208, 1)
+                              Height: =3
+                              Width: =950
+                              X: =377
+                              Y: =430
+                        - txt_Scrap_HxHE:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              BorderStyle: =BorderStyle.None
+                              Default: =If(!IsBlank(txt_Maquina_HxHE.Text), Sum(Filter(Scrap_1, Orden = OrdenInfo.Orden), Cantidad), "")
+                              DisplayMode: =DisplayMode.View
+                              Font: =Font.'Open Sans'
+                              HintText: ="Scrap Total"
+                              HoverBorderColor: =RGBA(204, 231, 246, 1)
+                              HoverFill: =RGBA(204, 231, 246, 1)
+                              OnChange: =
+                              OnSelect: =
+                              PaddingLeft: =5
+                              RadiusBottomLeft: =20
+                              RadiusBottomRight: =20
+                              RadiusTopLeft: =20
+                              RadiusTopRight: =20
+                              Size: =15
+                              Width: =166
+                              X: =407
+                              Y: =376
+                        - Label2_97:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Font: =Font.'Open Sans'
+                              Size: =18
+                              Text: ="ScrapTotal"
+                              Width: =166
+                              X: =407
+                              Y: =336
+                        - txt_CantTotal_HxHE:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              BorderStyle: =BorderStyle.None
+                              Default: =OrdenInfo.CantidadTotalProducida
+                              DisplayMode: =DisplayMode.View
+                              Font: =Font.'Open Sans'
+                              Format: =TextFormat.Number
+                              HintText: ="Cantidad Total"
+                              HoverBorderColor: =RGBA(204, 231, 246, 1)
+                              HoverFill: =RGBA(204, 231, 246, 1)
+                              OnChange: =
+                              OnSelect: =
+                              PaddingLeft: =5
+                              RadiusBottomLeft: =20
+                              RadiusBottomRight: =20
+                              RadiusTopLeft: =20
+                              RadiusTopRight: =20
+                              Size: =15
+                              Width: =200
+                              X: =645
+                              Y: =519
+                        - Label2_98:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Font: =Font.'Open Sans'
+                              Size: =18
+                              Text: ="Cantidad Total"
+                              Width: =186
+                              X: =459
+                              Y: =519
+                        - txt_CantTarima_HxHE:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              BorderStyle: =BorderStyle.None
+                              Default: =LookUp(Orden_Tarimas, Orden = OrdenInfo.Orden && Operacion = OrdenInfo.Operacion && Tarima = txt_Tarima_HxHE.Text, CantidadTotalProducida)
+                              DisplayMode: =DisplayMode.View
+                              Font: =Font.'Open Sans'
+                              Format: =TextFormat.Number
+                              HintText: ="Cantidad de Tarima"
+                              HoverBorderColor: =RGBA(204, 231, 246, 1)
+                              HoverFill: =RGBA(204, 231, 246, 1)
+                              OnChange: =
+                              OnSelect: =
+                              PaddingLeft: =5
+                              RadiusBottomLeft: =20
+                              RadiusBottomRight: =20
+                              RadiusTopLeft: =20
+                              RadiusTopRight: =20
+                              Size: =15
+                              Width: =200
+                              X: =1046
+                              Y: =519
+                        - Label2_99:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Font: =Font.'Open Sans'
+                              Size: =18
+                              Text: ="Cantidad Tarima"
+                              Width: =197
+                              X: =849
+                              Y: =519
+                        - Rectangle2_7:
+                            Control: Rectangle@2.3.0
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Fill: =RGBA(0, 134, 208, 1)
+                              Height: =3
+                              Width: =950
+                              X: =378
+                              Y: =501
+                        - txt_Descripcion_HxHE:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              BorderStyle: =BorderStyle.None
+                              Default: =OrdenInfo.Descripcion
+                              DisplayMode: =DisplayMode.View
+                              Font: =Font.'Open Sans'
+                              HintText: ="Descripcion"
+                              HoverBorderColor: =RGBA(204, 231, 246, 1)
+                              HoverFill: =RGBA(204, 231, 246, 1)
+                              OnChange: =
+                              OnSelect: =
+                              PaddingLeft: =5
+                              RadiusBottomLeft: =20
+                              RadiusBottomRight: =20
+                              RadiusTopLeft: =20
+                              RadiusTopRight: =20
+                              Size: =15
+                              Width: =610
+                              X: =641
+                              Y: =447
+                        - Label2_100:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Font: =Font.'Open Sans'
+                              Size: =18
+                              Text: ="Descripcion"
+                              Width: =186
+                              X: =455
+                              Y: =447
+                        - Container28:
+                            Control: GroupContainer@1.3.0
+                            Variant: ManualLayout
+                            Properties:
+                              BorderColor: =RGBA(71, 158, 245, 1)
+                              BorderThickness: =4
+                              DropShadow: =DropShadow.Regular
+                              Fill: =RGBA(71, 158, 245, 0.31)
+                              Height: =142
+                              RadiusBottomLeft: =10
+                              RadiusBottomRight: =10
+                              RadiusTopLeft: =10
+                              RadiusTopRight: =10
+                              Width: =647
+                              X: =685
+                              Y: =14
+                            Children:
+                              - txt_Turno_HxHE:
+                                  Control: Classic/TextInput@2.3.2
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    BorderStyle: =BorderStyle.None
+                                    Default: |-
+                                      =Mid(
+                                          turnoFinal,
+                                          1,
+                                          Find(
+                                              "-",
+                                              turnoFinal
+                                          ) - 2
+                                      )
+                                    DisplayMode: =DisplayMode.View
+                                    Font: =Font.'Open Sans'
+                                    Height: =49
+                                    HintText: ="Turno"
+                                    HoverBorderColor: =RGBA(204, 231, 246, 1)
+                                    HoverFill: =RGBA(204, 231, 246, 1)
+                                    OnChange: =
+                                    OnSelect: =
+                                    PaddingLeft: =5
+                                    RadiusBottomLeft: =20
+                                    RadiusBottomRight: =20
+                                    RadiusTopLeft: =20
+                                    RadiusTopRight: =20
+                                    Size: =15
+                                    Width: =126
+                                    X: =346
+                                    Y: =80
+                              - Label2_95:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Font: =Font.'Open Sans'
+                                    Size: =18
+                                    Text: ="Turno"
+                                    Width: =88
+                                    X: =364
+                                    Y: =39
+                              - txt_Semana_HxHE:
+                                  Control: Classic/TextInput@2.3.2
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    BorderStyle: =BorderStyle.None
+                                    Default: |-
+                                      =If(
+                                          drp_Hora_HxHE.Selected.Valor <= 6 && Weekday(FechaSup) = 2,
+                                          WeekNum(turnoSeleccionado.Fecha_Inicio)+1,
+                                          WeekNum(turnoSeleccionado.Fecha_Inicio)
+                                      )
+                                    DisplayMode: =DisplayMode.View
+                                    Font: =Font.'Open Sans'
+                                    Height: =50
+                                    HintText: ="Semana"
+                                    HoverBorderColor: =RGBA(204, 231, 246, 1)
+                                    HoverFill: =RGBA(204, 231, 246, 1)
+                                    OnChange: =
+                                    OnSelect: =
+                                    PaddingLeft: =5
+                                    RadiusBottomLeft: =20
+                                    RadiusBottomRight: =20
+                                    RadiusTopLeft: =20
+                                    RadiusTopRight: =20
+                                    Size: =15
+                                    Width: =126
+                                    X: =493
+                                    Y: =79
+                              - Label2_96:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Font: =Font.'Open Sans'
+                                    Size: =18
+                                    Text: ="Semana"
+                                    Width: =110
+                                    X: =501
+                                    Y: =39
+                              - drp_Hora_HxHE:
+                                  Control: Classic/DropDown@2.3.1
+                                  Properties:
+                                    BorderColor: =
+                                    BorderStyle: =BorderStyle.None
+                                    ChevronFill: =RGBA(255, 255, 255, 1)
+                                    ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                                    Default: =LookUp(Horas, Valor = HoraActual).Texto
+                                    DisplayMode: =If(Disable, DisplayMode.Disabled, DisplayMode.Edit)
+                                    Height: =50
+                                    Items: |-
+                                      =[
+                                          LookUp(Horas, Valor = HoraActual-1),
+                                          LookUp(Horas, Valor = HoraActual)
+                                      ]
+                                    Items.Value: =Texto
+                                    OnChange: |
+                                      =UpdateContext({Hora: drp_Hora_HxHE.SelectedText.Value});
+                                      UpdateContext({HoraValor: drp_Hora_HxHE.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'});
+
+                                      UpdateContext({
+                                          turnoSeleccionado:
+                                          If(
+                                          HoraValor >= 0 && HoraValor <= 6 && Dia = 2,
+                                          LookUp(
+                                              HorarioSemanals,
+                                              (Fecha_Fin = DateAdd(FechaSup, -1, TimeUnit.Days)) &&
+                                              Codigo = VarName
+                                          ),
+                                          LookUp(
+                                              HorarioSemanals,
+                                              (Fecha_Inicio <= FechaSup && Fecha_Fin >= FechaSup) &&
+                                              Codigo = VarName
+                                          )
+                                      )
+                                      });
+
+                                      UpdateContext({
+                                          turnoFinal:
+                                          If(
+                                              HoraValor >= 0 && HoraValor <= 6,
+                                              Switch(
+                                                  Dia,
+                                                  1, turnoSeleccionado.Sabado,
+                                                  2, turnoSeleccionado.Domingo,
+                                                  3, turnoSeleccionado.Lunes,
+                                                  4, turnoSeleccionado.Martes,
+                                                  5, turnoSeleccionado.Miercoles,
+                                                  6, turnoSeleccionado.Jueves,
+                                                  7, turnoSeleccionado.Viernes
+                                              ),
+                                              Switch(
+                                                  Dia,
+                                                  1, turnoSeleccionado.Domingo,
+                                                  2, turnoSeleccionado.Lunes,
+                                                  3, turnoSeleccionado.Martes,
+                                                  4, turnoSeleccionado.Miercoles,
+                                                  5, turnoSeleccionado.Jueves,
+                                                  6, turnoSeleccionado.Viernes,
+                                                  7, turnoSeleccionado.Sabado
+                                              )
+                                          )
+                                      });
+                                    PressedColor: =RGBA(255, 255, 255, 1)
+                                    SelectionColor: =RGBA(255, 255, 255, 1)
+                                    Tooltip: =
+                                    Width: =101
+                                    X: =224
+                                    Y: =79
+                              - txt_Fecha_HxHE:
+                                  Control: Classic/TextInput@2.3.2
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    BorderStyle: =BorderStyle.None
+                                    Default: |-
+                                      =If(
+                                          drp_Hora_HxHE.Selected.Valor >= 18 && HoraActual <= 6,
+                                          Text(Today()-1, "dd/mmm/yyyy", "es-ES"),
+                                          Text(Today(), "dd/mmm/yyyy", "es-ES")
+                                      )
+                                    DisplayMode: =DisplayMode.View
+                                    Font: =Font.'Open Sans'
+                                    Height: =50
+                                    HintText: ="P/N"
+                                    HoverBorderColor: =RGBA(204, 231, 246, 1)
+                                    HoverFill: =RGBA(204, 231, 246, 1)
+                                    OnChange: =
+                                    OnSelect: =
+                                    PaddingLeft: =5
+                                    RadiusBottomLeft: =20
+                                    RadiusBottomRight: =20
+                                    RadiusTopLeft: =20
+                                    RadiusTopRight: =20
+                                    Size: =14
+                                    Width: =175
+                                    X: =28
+                                    Y: =79
+                              - Label2_101:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Font: =Font.'Open Sans'
+                                    Size: =18
+                                    Text: ="Fecha"
+                                    X: =40
+                                    Y: =39
+                              - Label2_102:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Font: =Font.'Open Sans'
+                                    Size: =18
+                                    Text: ="Hora"
+                                    Width: =101
+                                    X: =224
+                                    Y: =39
+                              - Label2_103:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Color: =RGBA(255, 255, 255, 1)
+                                    Fill: =RGBA(71, 158, 245, 1)
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =39
+                                    Size: =18
+                                    Text: ="Informacion de Turno"
+                                    Width: =647
+                              - icn_Home_HxH_3:
+                                  Control: Classic/Icon@2.5.0
+                                  Properties:
+                                    BorderColor: =App.Theme.Colors.Primary
+                                    BorderStyle: =BorderStyle.None
+                                    BorderThickness: =2
+                                    Color: =RGBA(255, 255, 255, 1)
+                                    DisplayMode: =If(Disable, DisplayMode.Disabled, DisplayMode.Edit)
+                                    Fill: =RGBA(71, 158, 245, 1)
+                                    FocusedBorderThickness: =20
+                                    Height: =39
+                                    HoverBorderColor: =RGBA(0, 134, 208, 1)
+                                    HoverColor: =RGBA(255, 255, 255, 1)
+                                    HoverFill: =RGBA(0, 134, 208, 1)
+                                    Icon: =Icon.Reload
+                                    OnSelect: |
+                                      =UpdateContext({HoraActual: Value(Text(Now(), "[$-en-US]HH"))});
+                                      UpdateContext({Hora: drp_Hora_HxHE.SelectedText.Value});
+                                      UpdateContext({HoraValor: drp_Hora_HxHE.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'});
+                                      UpdateContext({FechaSup: Today()});
+                                      UpdateContext({Dia: Weekday(FechaSup)});
+
+                                      UpdateContext({
+                                          turnoSeleccionado:
+                                          If(
+                                          HoraValor >= 0 && HoraValor <= 6 && Dia = 2,
+                                          LookUp(
+                                              HorarioSemanals,
+                                              (Fecha_Fin = DateAdd(FechaSup, -1, TimeUnit.Days)) &&
+                                              Codigo = VarName
+                                          ),
+                                          LookUp(
+                                              HorarioSemanals,
+                                              (Fecha_Inicio <= FechaSup && Fecha_Fin >= FechaSup) &&
+                                              Codigo = VarName
+                                          )
+                                      )
+                                      });
+
+                                      UpdateContext({
+                                          turnoFinal:
+                                          If(
+                                              HoraValor >= 0 && HoraValor <= 6,
+                                              Switch(
+                                                  Dia,
+                                                  1, turnoSeleccionado.Sabado,
+                                                  2, turnoSeleccionado.Domingo,
+                                                  3, turnoSeleccionado.Lunes,
+                                                  4, turnoSeleccionado.Martes,
+                                                  5, turnoSeleccionado.Miercoles,
+                                                  6, turnoSeleccionado.Jueves,
+                                                  7, turnoSeleccionado.Viernes
+                                              ),
+                                              Switch(
+                                                  Dia,
+                                                  1, turnoSeleccionado.Domingo,
+                                                  2, turnoSeleccionado.Lunes,
+                                                  3, turnoSeleccionado.Martes,
+                                                  4, turnoSeleccionado.Miercoles,
+                                                  5, turnoSeleccionado.Jueves,
+                                                  6, turnoSeleccionado.Viernes,
+                                                  7, turnoSeleccionado.Sabado
+                                              )
+                                          )
+                                      });
+                                    PaddingBottom: =5
+                                    PaddingLeft: =5
+                                    PaddingRight: =5
+                                    PaddingTop: =5
+                                    Width: =44
+                                    X: =603
+                        - txt_OrdenView_HxH_5:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              BorderStyle: =BorderStyle.None
+                              Color: =RGBA(255, 255, 255, 1)
+                              Default: ="Informacion de la Orden"
+                              DisplayMode: =DisplayMode.View
+                              Fill: =RGBA(40, 134, 222, 1)
+                              Font: =Font.'Open Sans'
+                              FontWeight: =FontWeight.Bold
+                              Height: =50
+                              HintText: ="Tarima"
+                              HoverBorderColor: =RGBA(204, 231, 246, 1)
+                              HoverFill: =RGBA(204, 231, 246, 1)
+                              OnChange: =
+                              OnSelect: =Reset(txt_OrdenView_HxH_5)
+                              PaddingLeft: =5
+                              RadiusBottomLeft: =20
+                              RadiusBottomRight: =20
+                              RadiusTopLeft: =20
+                              RadiusTopRight: =20
+                              Size: =18
+                              Width: =1318
+                              X: =14
+                              Y: =178
+                        - Container29:
+                            Control: GroupContainer@1.3.0
+                            Variant: ManualLayout
+                            Properties:
+                              BorderColor: =RGBA(71, 158, 245, 1)
+                              BorderThickness: =3
+                              DropShadow: =DropShadow.Regular
+                              Fill: =RGBA(71, 158, 245, 0.31)
+                              Height: =414
+                              RadiusBottomLeft: =10
+                              RadiusBottomRight: =10
+                              RadiusTopLeft: =10
+                              RadiusTopRight: =10
+                              Width: =339
+                              X: =14
+                              Y: =235
+                            Children:
+                              - Label2_104:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Color: =RGBA(255, 255, 255, 1)
+                                    Fill: =RGBA(71, 158, 245, 1)
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =39
+                                    Size: =18
+                                    Text: ="Escanear Piezas"
+                                    Width: =339
+                              - txt_OrdenView_HxH_2:
+                                  Control: Classic/TextInput@2.3.2
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    BorderStyle: =BorderStyle.None
+                                    Default: =
+                                    DisplayMode: =If(Disable, DisplayMode.Disabled, DisplayMode.Edit)
+                                    Font: =Font.'Open Sans'
+                                    HintText: ="Escanear"
+                                    HoverBorderColor: =RGBA(204, 231, 246, 1)
+                                    HoverFill: =RGBA(204, 231, 246, 1)
+                                    OnChange: |-
+                                      =If(
+                                          IsBlank(
+                                              LookUp(
+                                                  Piezas,
+                                                  Pieza = Self.Text
+                                              )
+                                          ),
+                                          Collect(
+                                              Piezas,
+                                              {Pieza: Self.Text}
+                                          ),
+                                          Notify("La pieza " & Self.Text & " ya fue registrada", NotificationType.Error)
+                                      );
+                                      Reset(Self);
+                                      SetFocus(Self)
+                                    OnSelect: =Reset(txt_OrdenView_HxH_2)
+                                    PaddingLeft: =5
+                                    RadiusBottomLeft: =0
+                                    RadiusBottomRight: =0
+                                    RadiusTopLeft: =0
+                                    RadiusTopRight: =0
+                                    Size: =15
+                                    Width: =339
+                                    Y: =40
+                              - Table1:
+                                  Control: Table@1.0.262
+                                  Properties:
+                                    Height: =334
+                                    Items: =Piezas
+                                    Y: =80
+                                  Children:
+                                    - Pieza1:
+                                        Control: TableDataField@1.5.0
+                                        Variant: textualColumn
+                                        Properties:
+                                          FieldDisplayName: ="Pieza"
+                                          FieldName: ="Pieza"
+                                          FieldType: ="s"
+                                          Order: =1
+                        - icn_Home_HxH_2:
+                            Control: Classic/Icon@2.5.0
+                            Properties:
+                              BorderColor: =App.Theme.Colors.Primary
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(255, 255, 255, 1)
+                              DisplayMode: =If(Disable, DisplayMode.Disabled, DisplayMode.Edit)
+                              Fill: =RGBA(153, 201, 238, 1)
+                              FocusedBorderThickness: =20
+                              Height: =40
+                              HoverBorderColor: =RGBA(0, 134, 208, 1)
+                              HoverColor: =RGBA(255, 255, 255, 1)
+                              HoverFill: =RGBA(0, 134, 208, 1)
+                              Icon: =Icon.Erase
+                              OnSelect: =Clear(Piezas)
+                              PaddingBottom: =5
+                              PaddingLeft: =5
+                              PaddingRight: =5
+                              PaddingTop: =5
+                              Width: =45
+                              X: =360
+                              Y: =609
+                        - txtEstadoMaquina_27:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              BorderStyle: =BorderStyle.None
+                              Default: =
+                              DisplayMode: =DisplayMode.View
+                              Fill: =RGBA(102, 182, 227, 1)
+                              Font: =Font.'Open Sans'
+                              Height: =53
+                              HintText: =
+                              HoverBorderColor: =RGBA(204, 231, 246, 1)
+                              HoverFill: =RGBA(204, 231, 246, 1)
+                              OnChange: =
+                              OnSelect: =
+                              PaddingLeft: =5
+                              RadiusBottomLeft: =30
+                              RadiusBottomRight: =30
+                              RadiusTopLeft: =30
+                              RadiusTopRight: =30
+                              Size: =15
+                              Width: =539
+                              X: =507
+                              Y: =583
+                        - txt_CantProducida_HxHE:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              BorderStyle: =BorderStyle.None
+                              Default: =CountRows(Piezas)
+                              DisplayMode: =DisplayMode.View
+                              Font: =Font.'Open Sans'
+                              Format: =TextFormat.Number
+                              HintText: ="Conteo de piezas"
+                              HoverBorderColor: =RGBA(204, 231, 246, 1)
+                              HoverFill: =RGBA(204, 231, 246, 1)
+                              OnChange: =
+                              OnSelect: =
+                              PaddingLeft: =5
+                              RadiusBottomLeft: =20
+                              RadiusBottomRight: =20
+                              RadiusTopLeft: =20
+                              RadiusTopRight: =20
+                              Size: =15
+                              Width: =200
+                              X: =807
+                              Y: =589
+                        - Label2_93:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Font: =Font.'Open Sans'
+                              FontWeight: =FontWeight.Bold
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =18
+                              Text: ="Cantidad Producida"
+                              Width: =258
+                              X: =549
+                              Y: =589
+                        - btn_Guardar_HxHE:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              BorderColor: =ColorFade(Self.Fill, -15%)
+                              BorderStyle: =BorderStyle.None
+                              Color: =RGBA(255, 255, 255, 1)
+                              DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                              DisplayMode: =If(Disable, DisplayMode.Disabled, DisplayMode.Edit)
+                              Fill: =RGBA(0, 134, 208, 1)
+                              Font: =Font.'Open Sans'
+                              Height: =53
+                              HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                              HoverColor: =RGBA(255, 255, 255, 1)
+                              HoverFill: =RGBA(102, 182, 227, 1)
+                              OnSelect: |-
+                                =UpdateContext({Efi: (Value(txt_CantProducida_HxHE.Text) / Value(txt_Meta_HxHE.Text)) * 100});
+                                UpdateContext({Disable: true});
+                                If(
+
+                                  //Validacion de maquina
+                                    IsBlank(txt_Maquina_HxHE.Text),//Maquina en blanco?
+                                    UpdateContext({TextoAdvertencia: "Debe escanear la MAQUINA en la que esta trabajando"});
+                                    UpdateContext({Mostra: true}),
+                                    IsBlank(
+                                        LookUp(
+                                            Maquinas,
+                                            Maquina = Upper(txt_Maquina_HxHE.Text)
+                                        )
+                                    ),//Maquina Existe?
+                                    UpdateContext({TextoAdvertencia: "La MAQUINA no existe"});
+                                    UpdateContext({Mostra: true}),
+                                    LookUp(
+                                        Maquinas,
+                                        Maquina = Upper(txt_Maquina_HxHE.Text)
+                                    ).Status = "Paro",//Maquina en paro?
+                                    UpdateContext({TextoAdvertencia: "La maquina seleccionada esta en Paro"});
+                                    UpdateContext({Mostra: true}),
+
+
+                                  //Validacion de tarima
+                                    IsBlank(txt_Tarima_HxHE.Text),//Tarima en blanco?
+                                    UpdateContext({TextoAdvertencia: "Debe escanear la TARIMA que se esta llenando"});
+                                    UpdateContext({Mostra: true}),
+                                    Len(txt_Tarima_HxHE.Text) < 3 || Left(
+                                        txt_Tarima_HxHE.Text,
+                                        1
+                                    ) <> "T" || !IsNumeric(
+                                        Mid(
+                                            txt_Tarima_HxHE.Text,
+                                            2,
+                                            Len(txt_Tarima_HxHE.Text) - 1
+                                        )
+                                    ),//Formato valido?
+                                    UpdateContext({TextoAdvertencia: "El formato de la TARIMA es invalido"});
+                                    UpdateContext({Mostra: true}),
+
+
+                                  //Validacion Turno
+                                    txt_Turno_HxHE.Text in [
+                                        "LIBRE",
+                                        "TV",
+                                        "TF"
+                                    ],//Turno igual a LIBRE o TV o TF?
+                                    UpdateContext({TextoAdvertencia: "No puede guardar registros en el turno seleccionado actual"});
+                                    UpdateContext({Mostra: true}),
+
+
+                                  //Validacion Cantidad
+                                    If(
+                                        (txt_CantProducida_HxHE.Text + txt_CantTotal_HxHE.Text) >= Value(txt_CantMax_HxHE.Text),
+                                        Notify(
+                                            "La cantidad total de la Orden junto a la operación seleccionada ha cumplido con la cantidad maxima deseada.",
+                                            NotificationType.Information
+                                        )
+                                    );
+                                    LookUp(
+                                        Maquinas,
+                                        Maquina = Upper(txt_Maquina_HxHE.Text)
+                                    ).Guns = "SI" && (txt_CantProducida_HxHE.Text + txt_CantTarima_HxHE.Text) > 50,
+                                    UpdateContext({TextoAdvertencia: "La cantidad digitada supera la cantidad maxima (50) permitida por tarima. Por favor revisar la informacion digitada."});
+                                    UpdateContext({Mostra: true}),
+
+
+                                  //Validadcion de registros
+                                    CountRows(
+                                        Filter(
+                                            'Hora X Hora',
+                                            Orden = txt_Orden_HxHE.Text,
+                                            Operacion = txt_OP_HxHE.Text,
+                                            Maquina = txt_Maquina_HxHE.Text,
+                                            FechaRegistro = FechaSup,
+                                            Hora = drp_Hora_HxHE.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                                        )
+                                    ) >= 2,
+                                    UpdateContext({TextoAdvertencia: "Ya existen 2 registros de esta maquina en la misma hora"});
+                                    UpdateContext({Mostra: true}),
+                                    CountRows(
+                                        Filter(
+                                            'Hora X Hora',
+                                            CodigoEmpleado = VarName,
+                                            FechaRegistro = FechaSup,
+                                            Hora = HoraValor
+                                        )
+                                    ) >= 4,
+                                    UpdateContext({TextoAdvertencia: "Se llego al limite de 4 registros por hora del empleado"});
+                                    UpdateContext({Mostra: true}),
+
+
+                                  //lógica para establecer Cantidad_Por_Hora a 0 si ya existe un registro igual
+                                    If(
+                                        CountRows(
+                                            Filter(
+                                                'Hora X Hora',
+                                                Maquina = txt_Maquina_HxHE.Text,
+                                                FechaRegistro = FechaSup,
+                                                Hora = HoraValor
+                                            )
+                                        ) > 0,
+                                        UpdateContext({CantidadPorHoraGuardar: 0}),//Si ya existe un registro, establece Cantidad_Por_Hora a 0
+                                        UpdateContext({CantidadPorHoraGuardar: Value(txt_Meta_HxHE.Text)})//Si no existe un registro, establece Cantidad_Por_Hora a txtMetaHxH.Text
+                                    );
+
+
+                                  //Aprovacion del 1.5
+                                    (txt_CantProducida_HxHE.Text + txt_CantTotal_HxHE.Text) > (txt_CantMax_HxHE.Text + (txt_CantMax_HxHE.Text * 0.015)) && OrdenInfo.'Permiso_1.5' <> "Aprobado",
+                                    If(
+                                        IsBlank(
+                                            LookUp(
+                                                'RegistroOredenes_1.5_1',
+                                                Orden = OrdenInfo.Orden && Operacion = OrdenInfo.Operacion
+                                            )
+                                        ),
+                                        Collect(
+                                            'RegistroOredenes_1.5_1',
+                                            {
+                                                Orden: OrdenInfo.Orden,
+                                                Operacion: OrdenInfo.Operacion,
+                                                User_Solicitud: txtEmpleadoEnUso_HxHE.Text,
+                                                Respuesta: "En Espera"
+                                            }
+                                        ),
+                                        Remove(
+                                            'RegistroOredenes_1.5_1',
+                                            LookUp(
+                                                'RegistroOredenes_1.5_1',
+                                                Orden = OrdenInfo.Orden && Operacion = OrdenInfo.Operacion
+                                            )
+                                        );
+                                        Collect(
+                                            'RegistroOredenes_1.5_1',
+                                            {
+                                                Orden: OrdenInfo.Orden,
+                                                Operacion: OrdenInfo.Operacion,
+                                                User_Solicitud: txtEmpleadoEnUso_HxHE.Text,
+                                                Respuesta: "En Espera"
+                                            }
+                                        )
+                                    );
+                                    UpdateContext({MostraBloqueo: true}),
+
+
+                                  //Guarda el registro
+                                    If(
+                                        Efi = 0,
+                                        UpdateContext({MostraCausa: true}),
+                                        If(Efi > 0 && Efi < 80, 
+                                            UpdateContext({Comentarios: {Comentario: "PRODUCCION", Causa: "Bajo rendimiento de operario"}});
+                                            Reset(drp_Comentario_HxHE);
+                                            Reset(drp_Causas_HxHE);
+                                        );
+                                        Collect(
+                                            'Hora X Hora',
+                                            {
+                                                CodigoEmpleado: VarName,
+                                                Operario: txtEmpleadoEnUso_HxHE.Text,
+                                                Maquina: txt_Maquina_HxHE.Text,
+                                                Orden: OrdenInfo.Orden,
+                                                Operacion: OrdenInfo.Operacion,
+                                                'P/N': OrdenInfo.'P/N',
+                                                Cantidad_Por_Hora: CantidadPorHoraGuardar,
+                                                Cantidad: Value(txt_CantProducida_HxHE.Text),
+                                                Semana: Value(txt_Semana_HxHE.Text),
+                                                Turno: txt_Turno_HxHE.Text,
+                                                User: txtEmpleadoEnUso_HxHE.Text,
+                                                'Fecha_Registro_Supervisor ': Text(
+                                                    Text(
+                                                        FechaSup,
+                                                        "mm/dd/yyyy"
+                                                    ) & " " & drp_Hora_HxHE.SelectedText.Value
+                                                ),
+                                                FechaRegistro: FechaSup,
+                                                Tarima: txt_Tarima_HxHE.Text,
+                                                Comentario: drp_Comentario_HxHE.SelectedText.Value,
+                                                Causa: drp_Causas_HxHE.SelectedText.Value,
+                                                Descripcion: txt_Descripcion_HxHE.Text,
+                                                Ubicacion_Bono: LookUp(
+                                                    Maquinas,
+                                                    Maquina = txt_Maquina_HxHE.Text,
+                                                    Ubicacion_Bono
+                                                ),
+                                                Fecha_Hora: Text(
+                                                    Now(),
+                                                    "mm/dd/yyyy hh:mm AM/PM"
+                                                ),
+                                                Hora: drp_Hora_HxHE.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                                            }
+                                        );
+                                        Patch(
+                                            Maquina_Ordens_1,
+                                            LookUp(
+                                                Maquina_Ordens_1,
+                                                Maquina = txt_Maquina_HxHE.Text
+                                            ),
+                                            {
+                                                Meta: LookUp(
+                                                    Maquina_Ordens_1,
+                                                    Maquina = txt_Maquina_HxHE.Text
+                                                ).Meta + txt_CantProducida_HxHE.Text
+                                            }
+                                        );
+                                        Patch(
+                                            Orden_Ejecucion,
+                                            OrdenInfo,
+                                            {CantidadTotalProducida: txt_CantTotal_HxHE.Text + txt_CantProducida_HxHE.Text}
+                                        );
+                                        If(
+                                            IsBlank(txt_CantTarima_HxHE.Text),
+                                            Collect(
+                                                Orden_Tarimas,
+                                                {
+                                                    Orden: txt_Orden_HxHE.Text,
+                                                    Operacion: txt_OP_HxHE.Text,
+                                                    Tarima: txt_Tarima_HxHE.Text,
+                                                    CantidadTotalProducida: Value(txt_CantProducida_HxHE.Text)
+                                                }
+                                            ),
+                                            Patch(
+                                                Orden_Tarimas,
+                                                LookUp(
+                                                    Orden_Tarimas,
+                                                    Orden = OrdenInfo.Orden && Operacion = OrdenInfo.Operacion && Tarima = txt_Tarima_HxHE.Text
+                                                ),
+                                                {CantidadTotalProducida: txt_CantTarima_HxHE.Text + txt_CantProducida_HxHE.Text}
+                                            )
+                                        );
+                                        UpdateContext(
+                                            {
+                                                RecordHerramienta: Filter(
+                                                    Herramientas,
+                                                    Maquina = Upper(txt_Maquina_HxHE.Text),
+                                                    Orden = OrdenInfo.Orden,
+                                                    Operacion = OrdenInfo.Operacion
+                                                )
+                                            }
+                                        );
+                                        ForAll(
+                                            RecordHerramienta,
+                                            Patch(
+                                                Herramientas,
+                                                ThisRecord,
+                                                {Cant_Actual: Cant_Actual + Value(txt_CantProducida_HxHE.Text)}
+                                            )
+                                        );
+                                        ClearCollect(
+                                            colExistingRecord,
+                                            LookUp(
+                                                HoraxHoraFinals,
+                                                Codigo_Empleado = VarName && Hora = HoraValor && Fecha = Text(
+                                                    FechaSup,
+                                                    "dd/mm/yyyy"
+                                                )
+                                            )
+                                        );
+                                        If(
+                                            !IsEmpty(colExistingRecord),
+                                            Patch(
+                                                HoraxHoraFinals,
+                                                First(colExistingRecord),
+                                                {
+                                                    Cantidad_Producida: Sum(
+                                                        Filter(
+                                                            'Hora X Hora',
+                                                            CodigoEmpleado = VarName,
+                                                            FechaRegistro = FechaSup,
+                                                            Hora = drp_Hora_HxHE.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                                                        ),
+                                                        Cantidad
+                                                    ),
+                                                    Meta: Sum(
+                                                        Filter(
+                                                            'Hora X Hora',
+                                                            CodigoEmpleado = VarName,
+                                                            FechaRegistro = FechaSup,
+                                                            Hora = drp_Hora_HxHE.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                                                        ),
+                                                        Cantidad_Por_Hora
+                                                    ),
+                                                    Turno: txt_Turno_HxHE.Text,
+                                                    Ubicacion_Bono: LookUp(
+                                                        Maquinas,
+                                                        Maquina = txt_Maquina_HxHE.Text,
+                                                        Ubicacion_Bono
+                                                    ),
+                                                    Semana: Value(txt_Semana_HxHE.Text)
+                                                }
+                                            ),
+                                            Collect(
+                                                HoraxHoraFinals,
+                                                {
+                                                    Codigo_Empleado: VarName,
+                                                    Cantidad_Producida: Sum(
+                                                        Filter(
+                                                            'Hora X Hora',
+                                                            CodigoEmpleado = VarName,
+                                                            FechaRegistro = FechaSup,
+                                                            Hora = drp_Hora_HxHE.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                                                        ),
+                                                        Cantidad
+                                                    ),
+                                                    Meta: Sum(
+                                                        Filter(
+                                                            'Hora X Hora',
+                                                            CodigoEmpleado = VarName,
+                                                            FechaRegistro = FechaSup,
+                                                            Hora = drp_Hora_HxHE.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                                                        ),
+                                                        Cantidad_Por_Hora
+                                                    ),
+                                                    Fecha_Registro: FechaSup,
+                                                    Turno: txt_Turno_HxHE.Text,
+                                                    Hora: drp_Hora_HxHE.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor',
+                                                    Ubicacion_Bono: LookUp(
+                                                        Maquinas,
+                                                        Maquina = txt_Maquina_HxHE.Text,
+                                                        Ubicacion_Bono
+                                                    ),
+                                                    Semana: Value(txt_Semana_HxHE.Text),
+                                                    Fecha: Text(
+                                                        FechaSup,
+                                                        "dd/mm/yyyy"
+                                                    )
+                                                }
+                                            )
+                                        );
+                                        Reset(txt_Maquina_HxHE);
+                                        Reset(txt_Tarima_HxHE);
+                                        UpdateContext({Comentarios: {Comentario: "PRODUCION", Causa: "Bien"}});
+                                        Reset(drp_Comentario_HxHE);
+                                        Reset(drp_Causas_HxHE);
+                                        UpdateContext({FechaSup: Today()});
+                                        UpdateContext({Dia: Weekday(FechaSup)});
+                                        UpdateContext({Hora: Blank()});
+                                        UpdateContext({turnoFinal: Blank()});
+                                        UpdateContext({turnoSeleccionado: Blank()});
+                                        UpdateContext({HoraValor: Blank()});
+                                        UpdateContext({OrdenInfo: Blank()});
+                                        Clear(Piezas);
+                                        UpdateContext({Disable: false});
+                                        UpdateContext({CantidadPorHoraGuardar: Blank()});
+                                        Notify(
+                                            "Se ha Guardado exitosamente",
+                                            NotificationType.Success
+                                        )
+                                    )
+                                )
+                              PressedBorderColor: =Self.Fill
+                              PressedColor: =Self.Fill
+                              PressedFill: =Self.Color
+                              Text: ="Guardar"
+                              Width: =201
+                              X: =1127
+                              Y: =583
+      - cnt_Aviso_HxH_1:
+          Control: GroupContainer@1.3.0
+          Variant: ManualLayout
+          Properties:
+            BorderColor: =RGBA(255, 191, 0, 1)
+            BorderThickness: =5
+            DropShadow: =DropShadow.ExtraBold
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =273
+            RadiusBottomLeft: =20
+            RadiusBottomRight: =20
+            RadiusTopLeft: =20
+            RadiusTopRight: =20
+            Visible: =Mostra
+            Width: =581
+            X: =432
+            Y: =287
+          Children:
+            - btn_ContinuarAviso_HxH_1:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =ColorFade(Self.Fill, -15%)
+                  Color: =RGBA(255, 255, 255, 1)
+                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                  Fill: =RGBA(72, 163, 62, 1)
+                  Font: =Font.'Open Sans'
+                  HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =RGBA(52, 152, 47, 1)
+                  OnSelect: |-
+                    =UpdateContext({Mostra: false});
+                    UpdateContext({TextoAdvertencia:""});
+                    UpdateContext({Disable:false})
+                  PressedBorderColor: =Self.Fill
+                  PressedColor: =Self.Fill
+                  PressedFill: =Self.Color
+                  Text: ="OK"
+                  X: =208
+                  Y: =216
+            - Label15_4:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Height: =155
+                  Size: =20
+                  Text: =TextoAdvertencia
+                  Width: =505
+                  X: =35
+                  Y: =30
+      - cnt_Bloqueo_HxH_1:
+          Control: GroupContainer@1.3.0
+          Variant: ManualLayout
+          Properties:
+            BorderColor: =RGBA(168, 0, 0, 1)
+            BorderThickness: =5
+            DropShadow: =DropShadow.ExtraBold
+            Fill: =RGBA(168, 0, 0, 0.2)
+            Height: =768
+            RadiusBottomLeft: =20
+            RadiusBottomRight: =20
+            RadiusTopLeft: =20
+            RadiusTopRight: =20
+            Visible: =MostraBloqueo
+            Width: =1366
+          Children:
+            - btn_Continuar_HxH_1:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =ColorFade(Self.Fill, -15%)
+                  Color: =RGBA(255, 255, 255, 1)
+                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                  Fill: =RGBA(184, 0, 0, 1)
+                  Font: =Font.'Open Sans'
+                  FontWeight: =FontWeight.Bold
+                  Height: =52
+                  HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =RGBA(255, 0, 0, 1)
+                  OnSelect: |
+                    =UpdateContext({MostraBloqueoAcesso: true});
+                    EnviarCorreo.Run(
+                        "supervisoresTSI@tsicr.com",
+                        "Solicitud de 1.5",
+                        "Estimado/a,<br><br>
+                    Se ha realizado una solicitud para ingresar datos que superen el 1.5 en la Orden: " & txt_OrdenView_HxH.Text & ",  Operacion: " & txt_OP_HxH.Text & " y P/N: " & txt_PN_HxH.Text & "<br>
+                    Por favor, revise y apruebe esta solicitud a la brevedad posible.
+                    <br>Gracias por su atención."
+                    )
+                  PressedBorderColor: =Self.Fill
+                  PressedColor: =Self.Fill
+                  PressedFill: =Self.Color
+                  Size: =18
+                  Text: ="Continuar"
+                  Width: =199
+                  X: =583
+                  Y: =393
+            - Label15_5:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Color: =RGBA(255, 255, 255, 1)
+                  Fill: =RGBA(189, 49, 51, 1)
+                  FontWeight: =FontWeight.Bold
+                  Height: =187
+                  Size: =20
+                  Text: ="Está intentando hacer un registro que supera el 1.5 de la cantidad máxima de la orden. Actualmente, la orden y la operación no tienen permiso para guardar este tipo de registros. Al darle continuar, estará enviando una solicitud al supervisor a cargo para aprobar el ingreso de registros que superen el 1.5."
+                  Width: =864
+                  X: =250
+                  Y: =176
+      - cnt_Comentario_HxH_1:
+          Control: GroupContainer@1.3.0
+          Variant: ManualLayout
+          Properties:
+            BorderColor: =RGBA(15, 84, 140, 1)
+            BorderThickness: =5
+            DropShadow: =DropShadow.ExtraBold
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =340
+            RadiusBottomLeft: =20
+            RadiusBottomRight: =20
+            RadiusTopLeft: =20
+            RadiusTopRight: =20
+            Visible: =MostraCausa
+            Width: =631
+            X: =367
+            Y: =253
+          Children:
+            - btn_GuardarComent_HxH_1:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =ColorFade(Self.Fill, -15%)
+                  Color: =RGBA(255, 255, 255, 1)
+                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                  Fill: =RGBA(72, 163, 62, 1)
+                  Font: =Font.'Open Sans'
+                  HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =RGBA(52, 152, 47, 1)
+                  OnSelect: |-
+                    =Collect(
+                        'Hora X Hora',
+                        {
+                            CodigoEmpleado: VarName,
+                            Operario: txtEmpleadoEnUso_HxHE.Text,
+                            Maquina: txt_Maquina_HxHE.Text,
+                            Orden: OrdenInfo.Orden,
+                            Operacion: OrdenInfo.Operacion,
+                            'P/N': OrdenInfo.'P/N',
+                            Cantidad_Por_Hora: CantidadPorHoraGuardar,
+                            Cantidad: Value(txt_CantProducida_HxHE.Text),
+                            Semana: Value(txt_Semana_HxHE.Text),
+                            Turno: txt_Turno_HxHE.Text,
+                            User: txtEmpleadoEnUso_HxHE.Text,
+                            'Fecha_Registro_Supervisor ': Text(
+                                Text(
+                                    FechaSup,
+                                    "mm/dd/yyyy"
+                                ) & " " & drp_Hora_HxHE.SelectedText.Value
+                            ),
+                            FechaRegistro: FechaSup,
+                            Tarima: txt_Tarima_HxHE.Text,
+                            Comentario: drp_Comentario_HxHE.SelectedText.Value,
+                            Causa: drp_Causas_HxHE.SelectedText.Value,
+                            Descripcion: txt_Descripcion_HxHE.Text,
+                            Ubicacion_Bono: LookUp(
+                                Maquinas,
+                                Maquina = txt_Maquina_HxHE.Text,
+                                Ubicacion_Bono
+                            ),
+                            Fecha_Hora: Text(
+                                Now(),
+                                "mm/dd/yyyy hh:mm AM/PM"
+                            ),
+                            Hora: drp_Hora_HxHE.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                        }
+                    );
+                    Patch(
+                        Maquina_Ordens_1,
+                        LookUp(
+                            Maquina_Ordens_1,
+                            Maquina = txt_Maquina_HxHE.Text
+                        ),
+                        {
+                            Meta: LookUp(
+                                Maquina_Ordens_1,
+                                Maquina = txt_Maquina_HxHE.Text
+                            ).Meta + txt_CantProducida_HxHE.Text
+                        }
+                    );
+                    Patch(
+                        Orden_Ejecucion,
+                        OrdenInfo,
+                        {CantidadTotalProducida: txt_CantTotal_HxHE.Text + txt_CantProducida_HxHE.Text}
+                    );
+                    If(
+                        IsBlank(txt_CantTarima_HxHE.Text),
+                        Collect(
+                            Orden_Tarimas,
+                            {
+                                Orden: txt_Orden_HxHE.Text,
+                                Operacion: txt_OP_HxHE.Text,
+                                Tarima: txt_Tarima_HxHE.Text,
+                                CantidadTotalProducida: Value(txt_CantProducida_HxHE.Text)
+                            }
+                        ),
+                        Patch(
+                            Orden_Tarimas,
+                            LookUp(
+                                Orden_Tarimas,
+                                Orden = OrdenInfo.Orden && Operacion = OrdenInfo.Operacion && Tarima = txt_Tarima_HxHE.Text
+                            ),
+                            {CantidadTotalProducida: txt_CantTarima_HxHE.Text + txt_CantProducida_HxHE.Text}
+                        )
+                    );
+                    UpdateContext(
+                        {
+                            RecordHerramienta: Filter(
+                                Herramientas,
+                                Maquina = Upper(txt_Maquina_HxHE.Text),
+                                Orden = OrdenInfo.Orden,
+                                Operacion = OrdenInfo.Operacion
+                            )
+                        }
+                    );
+                    ForAll(
+                        RecordHerramienta,
+                        Patch(
+                            Herramientas,
+                            ThisRecord,
+                            {Cant_Actual: Cant_Actual + Value(txt_CantProducida_HxHE.Text)}
+                        )
+                    );
+                    ClearCollect(
+                        colExistingRecord,
+                        LookUp(
+                            HoraxHoraFinals,
+                            Codigo_Empleado = VarName && Hora = HoraValor && Fecha = Text(
+                                FechaSup,
+                                "dd/mm/yyyy"
+                            )
+                        )
+                    );
+                    If(
+                        !IsEmpty(colExistingRecord),
+                        Patch(
+                            HoraxHoraFinals,
+                            First(colExistingRecord),
+                            {
+                                Cantidad_Producida: Sum(
+                                    Filter(
+                                        'Hora X Hora',
+                                        CodigoEmpleado = VarName,
+                                        FechaRegistro = FechaSup,
+                                        Hora = drp_Hora_HxHE.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                                    ),
+                                    Cantidad
+                                ),
+                                Meta: Sum(
+                                    Filter(
+                                        'Hora X Hora',
+                                        CodigoEmpleado = VarName,
+                                        FechaRegistro = FechaSup,
+                                        Hora = drp_Hora_HxHE.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                                    ),
+                                    Cantidad_Por_Hora
+                                ),
+                                Turno: txt_Turno_HxHE.Text,
+                                Ubicacion_Bono: LookUp(
+                                    Maquinas,
+                                    Maquina = txt_Maquina_HxHE.Text,
+                                    Ubicacion_Bono
+                                ),
+                                Semana: Value(txt_Semana_HxHE.Text)
+                            }
+                        ),
+                        Collect(
+                            HoraxHoraFinals,
+                            {
+                                Codigo_Empleado: VarName,
+                                Cantidad_Producida: Sum(
+                                    Filter(
+                                        'Hora X Hora',
+                                        CodigoEmpleado = VarName,
+                                        FechaRegistro = FechaSup,
+                                        Hora = drp_Hora_HxHE.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                                    ),
+                                    Cantidad
+                                ),
+                                Meta: Sum(
+                                    Filter(
+                                        'Hora X Hora',
+                                        CodigoEmpleado = VarName,
+                                        FechaRegistro = FechaSup,
+                                        Hora = drp_Hora_HxHE.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                                    ),
+                                    Cantidad_Por_Hora
+                                ),
+                                Fecha_Registro: FechaSup,
+                                Turno: txt_Turno_HxHE.Text,
+                                Hora: drp_Hora_HxHE.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor',
+                                Ubicacion_Bono: LookUp(
+                                    Maquinas,
+                                    Maquina = txt_Maquina_HxHE.Text,
+                                    Ubicacion_Bono
+                                ),
+                                Semana: Value(txt_Semana_HxHE.Text),
+                                Fecha: Text(
+                                    FechaSup,
+                                    "dd/mm/yyyy"
+                                )
+                            }
+                        )
+                    );
+                    Reset(txt_Maquina_HxHE);
+                    Reset(txt_Tarima_HxHE);
+                    UpdateContext(
+                        {
+                            Comentarios: {
+                                Comentario: "PRODUCION",
+                                Causa: "Bien"
+                            }
+                        }
+                    );
+                    Reset(drp_Comentario_HxHE);
+                    Reset(drp_Causas_HxHE);
+                    UpdateContext({FechaSup: Today()});
+                    UpdateContext({Dia: Weekday(FechaSup)});
+                    UpdateContext({Hora: Blank()});
+                    UpdateContext({turnoFinal: Blank()});
+                    UpdateContext({turnoSeleccionado: Blank()});
+                    UpdateContext({HoraValor: Blank()});
+                    UpdateContext({OrdenInfo: Blank()});
+                    Clear(Piezas);
+                    UpdateContext({Disable: false});
+                    UpdateContext({CantidadPorHoraGuardar: Blank()});
+                    Notify(
+                        "Se ha Guardado exitosamente",
+                        NotificationType.Success
+                    )
+                  PressedBorderColor: =Self.Fill
+                  PressedColor: =Self.Fill
+                  PressedFill: =Self.Color
+                  Text: ="Guardar"
+                  X: =336
+                  Y: =276
+            - drp_Comentario_HxHE:
+                Control: Classic/DropDown@2.3.1
+                Properties:
+                  ChevronFill: =RGBA(255, 255, 255, 1)
+                  ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                  Default: =Comentarios.Comentario
+                  Height: =47
+                  Items: =Distinct(Causas,Comentario)
+                  PressedColor: =RGBA(255, 255, 255, 1)
+                  SelectionColor: =RGBA(255, 255, 255, 1)
+                  Width: =466
+                  X: =81
+                  Y: =116
+            - drp_Causas_HxHE:
+                Control: Classic/DropDown@2.3.1
+                Properties:
+                  ChevronFill: =RGBA(255, 255, 255, 1)
+                  ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                  Default: =Comentarios.Causa
+                  Height: =47
+                  Items: =Distinct(Filter(Causas, Comentario = drp_Comentario_HxHE.SelectedText.Value, Causa <> "Bien"), Causa)
+                  PressedColor: =RGBA(255, 255, 255, 1)
+                  SelectionColor: =RGBA(255, 255, 255, 1)
+                  Width: =466
+                  X: =81
+                  Y: =214
+            - btn_CancelarComent_HxH_1:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =ColorFade(Self.Fill, -15%)
+                  Color: =RGBA(255, 255, 255, 1)
+                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                  Fill: =RGBA(233, 79, 76, 1)
+                  Font: =Font.'Open Sans'
+                  HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =RGBA(215, 58, 60, 1)
+                  OnSelect: |-
+                    =UpdateContext({MostraCausa: false});
+                    UpdateContext({Comentarios: {Comentario: "PRODUCCION", Causa: "Bien"}});
+                    Reset(drp_Comentario_HxHE);
+                    Reset(drp_Causas_HxHE);
+                    UpdateContext({Disable:false})
+                  PressedBorderColor: =Self.Fill
+                  PressedColor: =Self.Fill
+                  PressedFill: =Self.Color
+                  Text: ="Cancelar"
+                  X: =135
+                  Y: =276
+            - Label11_1:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Height: =86
+                  Size: =18
+                  Text: ="La eficiencia del operario es inferior al 85%. Por favor, indique un comentario y la causa correspondiente."
+                  Width: =556
+                  X: =40
+                  Y: =12
+      - cnt_BloqueoAviso_HxH_1:
+          Control: GroupContainer@1.3.0
+          Variant: ManualLayout
+          Properties:
+            Fill: =RGBA(184, 0, 0, 1)
+            Height: =284
+            RadiusBottomLeft: =30
+            RadiusBottomRight: =30
+            RadiusTopLeft: =30
+            RadiusTopRight: =30
+            Visible: =MostraBloqueoAcesso
+            Width: =907
+            X: =229
+            Y: =163
+          Children:
+            - btn_ContinuarBloqueo_HxH_1:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =ColorFade(Self.Fill, -15%)
+                  BorderStyle: =BorderStyle.None
+                  Color: =RGBA(255, 255, 255, 1)
+                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                  Fill: =RGBA(255, 0, 0, 1)
+                  Font: =Font.'Open Sans'
+                  FontWeight: =FontWeight.Bold
+                  Height: =52
+                  HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =RGBA(255, 71, 71, 1)
+                  OnSelect: |-
+                    =Clear(Piezas);
+                    UpdateContext({MostraBloqueo: false});
+                    UpdateContext({MostraBloqueoAcesso: false});
+                    UpdateContext({Disable: false})
+                  PressedBorderColor: =Self.Fill
+                  PressedColor: =Self.Fill
+                  PressedFill: =Self.Color
+                  Size: =18
+                  Text: ="Continuar"
+                  Width: =258
+                  X: =324
+                  Y: =192
+            - Label24_1:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Color: =RGBA(255, 255, 255, 1)
+                  FontWeight: =FontWeight.Bold
+                  Height: =151
+                  Size: =18
+                  Text: ="La solicitud ha sido enviada al supervisor. Por favor, comuníquese con él para llevar a cabo la aprobación. El registro actual no se guardará; continúe con el proceso mientras el supervisor aprueba la solicitud."
+                  Width: =843
+                  X: =31
+                  Y: =18

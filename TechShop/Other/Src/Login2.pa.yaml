@@ -1,0 +1,201 @@
+# ************************************************************************************************
+# Warning: YAML source code for Canvas Apps is in preview. The schema is being actively developed.
+# Content may be incomplete and subject to change.
+# This file is read-only and should only be used to review changes made within Power Apps Studio.
+# This file isn't used when loading the app. External editing, merging and conflict resolution are
+# not supported.
+# 
+# For more information, visit https://go.microsoft.com/fwlink/?linkid=2292623
+# ************************************************************************************************
+Screens:
+  Login2:
+    Properties:
+      BackgroundImage: ='abstracto geométrico blanco y gris'
+      Fill: =RGBA(0, 0, 0, 0)
+      ImagePosition: =ImagePosition.Fill
+    Children:
+      - Container6:
+          Control: GroupContainer@1.3.0
+          Variant: ManualLayout
+          Properties:
+            BorderColor: =RGBA(128, 116, 116, 1)
+            Height: =768
+            Width: =1366
+          Children:
+            - txt_Codigo_Lg:
+                Control: Classic/TextInput@2.3.2
+                Properties:
+                  Align: =Align.Center
+                  BorderColor: =RGBA(12, 59, 94, 1)
+                  Default: =
+                  HintText: ="Ingrese su ID"
+                  OnChange: =SetFocus(txt_Contrasena_Lg)
+                  RadiusBottomLeft: =12
+                  RadiusBottomRight: =12
+                  RadiusTopLeft: =12
+                  RadiusTopRight: =12
+                  Size: =18
+                  X: =523
+                  Y: =360
+            - txt_Contrasena_Lg:
+                Control: Classic/TextInput@2.3.2
+                Properties:
+                  Align: =Align.Center
+                  BorderColor: =RGBA(12, 59, 94, 1)
+                  Default: =
+                  HintText: ="Ingrese su contraseña"
+                  Mode: =If(Varpw_visible,TextMode.SingleLine,TextMode.Password)
+                  PaddingLeft: =15
+                  PaddingRight: =15
+                  RadiusBottomLeft: =12
+                  RadiusBottomRight: =12
+                  RadiusTopLeft: =12
+                  RadiusTopRight: =12
+                  Size: =18
+                  X: =523
+                  Y: =464
+            - btn_Login_Lg:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =RGBA(15, 84, 140, 1)
+                  Color: =RGBA(255, 255, 255, 1)
+                  Fill: =RGBA(15, 84, 140, 1)
+                  Height: =56
+                  HoverBorderColor: =RGBA(15, 108, 189, 1)
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =RGBA(15, 108, 189, 1)
+                  OnSelect: |-
+                    =UpdateContext(
+                        {
+                            Valida: LookUp(
+                                Empleados,
+                                txt_Codigo_Lg.Text = Codigo,
+                                Contraseña
+                            )
+                        }
+                    );
+                    If(
+                        IsNumeric(txt_Codigo_Lg.Text),
+                        If(
+                            Valida = txt_Contrasena_Lg.Text,
+                            Set(
+                                VarName,
+                                txt_Codigo_Lg.Text
+                            );
+                            If(
+                                Text(
+                                    Today(),
+                                    "dd/mm/yyyy"
+                                ) = "14/02/2025",
+                                Navigate(
+                                    Screen1,
+                                    ScreenTransition.Fade
+                                ),
+                                Navigate(
+                                    MenuPrincipal,
+                                    ScreenTransition.Fade
+                                )
+                            );
+                            Reset(txt_Codigo_Lg);
+                            Reset(txt_Contrasena_Lg);
+                            UpdateContext({Varpw_visible: false}),
+                            Notify(
+                                "El usuario y la contrasena no coinciden, por favor verificar los datos",
+                                NotificationType.Error
+                            )
+                        ),
+                        Notify(
+                            "El usuario y la contrasena no coinciden, por favor verificar los datos",
+                            NotificationType.Error
+                        )
+                    )
+                  PressedBorderColor: =RGBA(15, 108, 189, 1)
+                  PressedFill: =RGBA(15, 108, 189, 1)
+                  RadiusBottomLeft: =12
+                  RadiusBottomRight: =12
+                  RadiusTopLeft: =12
+                  RadiusTopRight: =12
+                  Text: ="Ingresar"
+                  Width: =320
+                  X: =523
+                  Y: =556
+            - icon_Login_Lg:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  BorderColor: =
+                  Color: =RGBA(12, 59, 94, 1)
+                  DisabledBorderColor: =RGBA(255, 255, 255, 1)
+                  DisabledColor: =RGBA(15, 84, 140, 1)
+                  Height: =180
+                  HoverColor: =RGBA(15, 108, 189, 1)
+                  Icon: =Icon.Person
+                  Width: =290
+                  X: =538
+                  Y: =59
+            - lbl_Login_Lg:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  BorderColor: =
+                  Color: =RGBA(15, 84, 140, 1)
+                  Height: =68
+                  Size: =40
+                  Text: ="Iniciar Sesión"
+                  Width: =400
+                  X: =483
+                  Y: =224
+            - lbl_RecupContra_Lg:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =RGBA(15, 84, 140, 1)
+                  Height: =28
+                  HoverColor: =RGBA(233, 79, 76, 1)
+                  OnSelect: "=Set(CambiarContra, true);\nSet(randomToken, RoundDown(Rand() * 99999 + 10000, 0));\nSet(tokenExpirationTime, DateAdd(Now(),10,TimeUnit.Minutes));\nSet(correoEmpleado, LookUp(Empleados, Codigo = txt_Codigo_Lg.Text, Correo));\nSet(Asunto, \"CAMBIO DE CONTRASEÑA\");\nSet(Texto, \n    \"Estimado/a,<br><br>\" & \n    \"Has solicitado un cambio de contraseña. Tu token de verificación para proceder con el cambio es: \" & randomToken & \".<br><br>\" & \n    \"Si no solicitaste este cambio, por favor contacta a nuestro equipo de soporte inmediatamente para asegurar la seguridad de tu cuenta.<br><br>\" & \n    \"Gracias,<br>\" & \n    \"El equipo de soporte.\"\n);\n\n\nIf(\n    !IsBlank(txt_Codigo_Lg.Text) && !IsBlank(correoEmpleado),\n    \n        EnviarCorreo.Run(correoEmpleado, Asunto, Texto);\n        Set(VarName, txt_Codigo_Lg.Text);\n        Notify(\"Correo enviado con éxito.\", NotificationType.Success);\n      \n        Navigate(CambiarContraseña, ScreenTransition.Fade);\n    ,\n    Notify(\"El código de empleado no existe o el correo está vacío.\", NotificationType.Warning)\n)"
+                  Text: ="¡Olvide mi contraseña!"
+                  Width: =188
+                  X: =655
+                  Y: =507
+            - icn_VisibleContrasena_Lg:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  Height: =20
+                  Icon: =Icon.View
+                  OnSelect: =UpdateContext({Varpw_visible:true})
+                  Visible: =If(Varpw_visible,false,true)
+                  Width: =33
+                  X: =807
+                  Y: =471
+            - icn_InvisibleContrasena_Lg:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  Height: =25
+                  Icon: =Icon.Hide
+                  OnSelect: =UpdateContext({Varpw_visible:false})
+                  Visible: =If(Varpw_visible,true,false)
+                  Width: =33
+                  X: =807
+                  Y: =471
+            - lbl_Codigo_Lg:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Color: =RGBA(15, 108, 189, 1)
+                  Height: =68
+                  PaddingTop: =20
+                  Size: =30
+                  Text: ="Codigo"
+                  Width: =400
+                  X: =483
+                  Y: =292
+            - lbl_Contrasena_Lg:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Color: =RGBA(15, 108, 189, 1)
+                  Height: =68
+                  PaddingTop: =20
+                  Size: =30
+                  Text: ="Contraseña"
+                  Width: =400
+                  X: =483
+                  Y: =396
