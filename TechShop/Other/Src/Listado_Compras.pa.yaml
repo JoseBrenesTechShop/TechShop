@@ -122,7 +122,7 @@ Screens:
                         HoverColor: =RGBA(255, 255, 255, 1)
                         HoverFill: =RGBA(0, 134, 208, 1)
                         Icon: =Icon.Home
-                        OnSelect: =
+                        OnSelect: =Back()
                         PaddingBottom: =5
                         PaddingLeft: =5
                         PaddingRight: =5
@@ -171,13 +171,31 @@ Screens:
                                     Width: =1352
                                     Y: =50
                                   Children:
-                                    - gl_ListaContenedores_LE_1:
+                                    - glr_Solicitudes_SC:
                                         Control: Gallery@2.15.0
                                         Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
                                         Properties:
                                           BorderColor: =RGBA(0, 18, 107, 1)
                                           Height: =587
-                                          Items: =Distinct(preqitem, req_num)
+                                          Items: |-
+                                            =Distinct(
+                                                Filter(
+                                                    preqitem,
+                                                    With(
+                                                        {num: ThisRecord.req_num},
+                                                        Year(
+                                                            LookUp(
+                                                                preq,
+                                                                req_num = num,
+                                                                req_date
+                                                            )
+                                                        ) = Value(drp_Ano_SC.SelectedText.Value)
+                                                    ),
+                                                    !(req_num in Solicitud_Compras.soli_num)
+                                                ),
+                                                req_num
+                                            )
+                                          ShowScrollbar: =false
                                           TemplateSize: =30
                                           Width: =1352
                                           Y: =25
@@ -203,7 +221,7 @@ Screens:
                                                 RadiusTopLeft: =0
                                                 RadiusTopRight: =0
                                                 Size: =15
-                                                Width: =272
+                                                Width: =242
                                           - txt_Cantidad_EM_62:
                                               Control: Classic/TextInput@2.3.2
                                               Properties:
@@ -225,8 +243,8 @@ Screens:
                                                 RadiusTopLeft: =0
                                                 RadiusTopRight: =0
                                                 Size: =15
-                                                Width: =270
-                                                X: =272
+                                                Width: =210
+                                                X: =242
                                           - txt_Cantidad_EM_63:
                                               Control: Classic/TextInput@2.3.2
                                               Properties:
@@ -278,15 +296,15 @@ Screens:
                                                 RadiusTopLeft: =0
                                                 RadiusTopRight: =0
                                                 Size: =15
-                                                Width: =270
-                                                X: =542
+                                                Width: =430
+                                                X: =622
                                           - txt_Cantidad_EM_64:
                                               Control: Classic/TextInput@2.3.2
                                               Properties:
                                                 Align: =Align.Center
                                                 BorderColor: =RGBA(40, 134, 222, 1)
                                                 BorderThickness: =0.5
-                                                Default: =
+                                                Default: ="Pendiente"
                                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                                 DisabledColor: =
                                                 DisabledFill: =
@@ -301,14 +319,14 @@ Screens:
                                                 RadiusTopLeft: =0
                                                 RadiusTopRight: =0
                                                 Size: =15
-                                                Width: =270
-                                                X: =812
+                                                Width: =190
+                                                X: =1052
                                           - icn_Eliminar_EM_11:
                                               Control: Classic/Icon@2.5.0
                                               Properties:
                                                 BorderColor: =RGBA(40, 134, 222, 1)
                                                 BorderThickness: =0.5
-                                                Color: =RGBA(215, 58, 60, 1)
+                                                Color: =RGBA(0, 0, 0, 1)
                                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                                 DisabledColor: =
                                                 DisabledFill: =
@@ -317,17 +335,40 @@ Screens:
                                                 Fill: =RGBA(255, 255, 255, 1)
                                                 FocusedBorderThickness: =20
                                                 Height: =30
-                                                HoverBorderColor: =RGBA(215, 58, 60, 1)
-                                                HoverColor: =RGBA(215, 58, 60, 1)
-                                                HoverFill: =RGBA(247, 201, 195, 1)
-                                                Icon: =Icon.ListScrollWatchlist
-                                                OnSelect: =
+                                                HoverBorderColor: =RGBA(52, 152, 47, 1)
+                                                HoverColor: =RGBA(0, 0, 0, 1)
+                                                HoverFill: =RGBA(219, 255, 209, 1)
+                                                Icon: =Icon.DetailList
+                                                OnSelect: =Navigate(Detalle_Solicitud_Compra)
                                                 PaddingBottom: =2
                                                 PaddingLeft: =2
                                                 PaddingRight: =2
                                                 PaddingTop: =2
-                                                Width: =270
-                                                X: =1082
+                                                Width: =110
+                                                X: =1242
+                                          - txt_Cantidad_EM_65:
+                                              Control: Classic/TextInput@2.3.2
+                                              Properties:
+                                                Align: =Align.Center
+                                                BorderColor: =RGBA(40, 134, 222, 1)
+                                                BorderThickness: =0.5
+                                                Default: =Text(Sum(Filter(preqitem, req_num = ThisItem.Value), qty_ordered * unit_mat_cost), "###,###,##0.00")
+                                                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                                                DisabledColor: =
+                                                DisabledFill: =
+                                                DisplayMode: =DisplayMode.Disabled
+                                                FontWeight: =FontWeight.Semibold
+                                                Height: =30
+                                                HoverBorderColor: =RGBA(40, 134, 222, 1)
+                                                HoverFill: =RGBA(255, 255, 255, 1)
+                                                PaddingLeft: =5
+                                                RadiusBottomLeft: =0
+                                                RadiusBottomRight: =0
+                                                RadiusTopLeft: =0
+                                                RadiusTopRight: =0
+                                                Size: =15
+                                                Width: =170
+                                                X: =452
                                     - lbl_PNDato_EM_104:
                                         Control: Text@0.0.50
                                         Properties:
@@ -343,8 +384,9 @@ Screens:
                                           PaddingTop: =0
                                           Size: =16
                                           Text: ="Nº Solicitud"
-                                          Weight: ='TextCanvas.Weight'.Semibold
-                                          Width: =272
+                                          VerticalAlign: =VerticalAlign.Middle
+                                          Weight: ='TextCanvas.Weight'.Regular
+                                          Width: =242
                                     - lbl_PNDato_EM_105:
                                         Control: Text@0.0.50
                                         Properties:
@@ -360,9 +402,10 @@ Screens:
                                           PaddingTop: =0
                                           Size: =16
                                           Text: ="Fecha"
-                                          Weight: ='TextCanvas.Weight'.Semibold
-                                          Width: =270
-                                          X: =272
+                                          VerticalAlign: =VerticalAlign.Middle
+                                          Weight: ='TextCanvas.Weight'.Regular
+                                          Width: =210
+                                          X: =242
                                     - lbl_PNDato_EM_106:
                                         Control: Text@0.0.50
                                         Properties:
@@ -378,9 +421,10 @@ Screens:
                                           PaddingTop: =0
                                           Size: =16
                                           Text: ="Solicitante"
-                                          Weight: ='TextCanvas.Weight'.Semibold
-                                          Width: =270
-                                          X: =542
+                                          VerticalAlign: =VerticalAlign.Middle
+                                          Weight: ='TextCanvas.Weight'.Regular
+                                          Width: =430
+                                          X: =622
                                     - lbl_PNDato_EM_108:
                                         Control: Text@0.0.50
                                         Properties:
@@ -395,10 +439,11 @@ Screens:
                                           PaddingRight: =0
                                           PaddingTop: =0
                                           Size: =16
-                                          Text: ="Gestion aprobacion"
-                                          Weight: ='TextCanvas.Weight'.Semibold
-                                          Width: =270
-                                          X: =1082
+                                          Text: ="Detalles"
+                                          VerticalAlign: =VerticalAlign.Middle
+                                          Weight: ='TextCanvas.Weight'.Regular
+                                          Width: =110
+                                          X: =1242
                                     - lbl_PNDato_EM_107:
                                         Control: Text@0.0.50
                                         Properties:
@@ -414,9 +459,29 @@ Screens:
                                           PaddingTop: =0
                                           Size: =16
                                           Text: ="Estado"
-                                          Weight: ='TextCanvas.Weight'.Semibold
-                                          Width: =270
-                                          X: =812
+                                          VerticalAlign: =VerticalAlign.Middle
+                                          Weight: ='TextCanvas.Weight'.Regular
+                                          Width: =190
+                                          X: =1052
+                                    - lbl_PNDato_EM_109:
+                                        Control: Text@0.0.50
+                                        Properties:
+                                          Align: ='TextCanvas.Align'.Center
+                                          BorderColor: =RGBA(40, 134, 222, 1)
+                                          BorderStyle: =BorderStyle.Solid
+                                          BorderThickness: =0.5
+                                          Fill: =RGBA(180, 214, 250, 1)
+                                          Height: =25
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =16
+                                          Text: ="Total"
+                                          VerticalAlign: =VerticalAlign.Middle
+                                          Weight: ='TextCanvas.Weight'.Regular
+                                          Width: =170
+                                          X: =452
                               - lbl_BarraVista_EM_3:
                                   Control: Classic/TextInput@2.3.2
                                   Properties:
@@ -649,10 +714,10 @@ Screens:
                                     RadiusTopLeft: =10
                                     RadiusTopRight: =10
                                     Width: =100
-                                    X: =626
+                                    X: =370
                                     Y: =10
                                   Children:
-                                    - drp_Ano_LE_1:
+                                    - drp_Ano_SC:
                                         Control: Classic/DropDown@2.3.1
                                         Properties:
                                           BorderColor: =RGBA(0, 0, 0, 0)
@@ -684,52 +749,6 @@ Screens:
                                           Size: =15
                                           Tooltip: ="Seleccione el año"
                                           Width: =100
-                              - ContainerPais_EM_8:
-                                  Control: GroupContainer@1.3.0
-                                  Variant: ManualLayout
-                                  Properties:
-                                    BorderColor: =RGBA(180, 214, 250, 1)
-                                    BorderThickness: =3
-                                    DropShadow: =DropShadow.None
-                                    Fill: =RGBA(255, 255, 255, 1)
-                                    Height: =30
-                                    RadiusBottomLeft: =10
-                                    RadiusBottomRight: =10
-                                    RadiusTopLeft: =10
-                                    RadiusTopRight: =10
-                                    Width: =150
-                                    X: =402
-                                    Y: =10
-                                  Children:
-                                    - drp_Estado_LE_1:
-                                        Control: Classic/DropDown@2.3.1
-                                        Properties:
-                                          AllowEmptySelection: =true
-                                          BorderColor: =RGBA(0, 0, 0, 0)
-                                          BorderThickness: =3
-                                          ChevronBackground: =RGBA(0, 0, 0, 0)
-                                          ChevronDisabledBackground: =RGBA(255, 255, 255, 1)
-                                          ChevronDisabledFill: =RGBA(120, 120, 120, 1)
-                                          ChevronFill: =RGBA(0, 0, 0, 1)
-                                          ChevronHoverBackground: =RGBA(15, 108, 189, 1)
-                                          ChevronHoverFill: =RGBA(255, 255, 255, 1)
-                                          Default: ="Pendiente"
-                                          DisabledBorderColor: =RGBA(0, 0, 0, 0)
-                                          DisabledFill: =RGBA(255, 255, 255, 1)
-                                          DisplayMode: |
-                                            =
-                                          Font: =Font.'Open Sans'
-                                          Height: =30
-                                          HoverBorderColor: =RGBA(180, 214, 250, 1)
-                                          HoverFill: =RGBA(180, 214, 250, 1)
-                                          Items: =["Inactivo", "Activo", "Pendiente"]
-                                          PressedColor: =RGBA(255, 255, 255, 1)
-                                          PressedFill: =RGBA(15, 108, 189, 1)
-                                          SelectionColor: =RGBA(255, 255, 255, 1)
-                                          SelectionFill: =RGBA(15, 108, 189, 1)
-                                          Size: =15
-                                          Tooltip: ="Seleccione el año"
-                                          Width: =150
                               - lbl_ValorDato_EM_32:
                                   Control: Text@0.0.50
                                   Properties:
@@ -740,19 +759,7 @@ Screens:
                                     Text: ="Año"
                                     Weight: ='TextCanvas.Weight'.Bold
                                     Width: =60
-                                    X: =566
-                                    Y: =10
-                              - lbl_ValorDato_EM_31:
-                                  Control: Text@0.0.50
-                                  Properties:
-                                    Align: ='TextCanvas.Align'.Center
-                                    FontColor: =RGBA(255, 255, 255, 1)
-                                    Height: =30
-                                    Size: =20
-                                    Text: ="Estado"
-                                    Weight: ='TextCanvas.Weight'.Bold
-                                    Width: =80
-                                    X: =322
+                                    X: =310
                                     Y: =10
                               - lbl_ValorDato_EM_30:
                                   Control: Text@0.0.50

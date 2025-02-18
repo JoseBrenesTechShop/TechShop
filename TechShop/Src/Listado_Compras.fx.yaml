@@ -138,7 +138,7 @@ Listado_Compras As screen:
                 HoverColor: =RGBA(255, 255, 255, 1)
                 HoverFill: =RGBA(0, 134, 208, 1)
                 Icon: =Icon.Home
-                OnSelect: =
+                OnSelect: =Back()
                 PaddingBottom: =5
                 PaddingLeft: =5
                 PaddingRight: =5
@@ -202,13 +202,31 @@ Listado_Compras As screen:
                         Y: =50
                         ZIndex: =1
 
-                        "gl_ListaContenedores_LE_1 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+                        "glr_Solicitudes_SC As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
                             BorderColor: =RGBA(0, 18, 107, 1)
                             DelayItemLoading: =true
                             Height: =587
-                            Items: =Distinct(preqitem, req_num)
+                            Items: |-
+                                =Distinct(
+                                    Filter(
+                                        preqitem,
+                                        With(
+                                            {num: ThisRecord.req_num},
+                                            Year(
+                                                LookUp(
+                                                    preq,
+                                                    req_num = num,
+                                                    req_date
+                                                )
+                                            ) = Value(drp_Ano_SC.SelectedText.Value)
+                                        ),
+                                        !(req_num in Solicitud_Compras.soli_num)
+                                    ),
+                                    req_num
+                                )
                             Layout: =Layout.Vertical
                             LoadingSpinner: =LoadingSpinner.Data
+                            ShowScrollbar: =false
                             TemplatePadding: =0
                             TemplateSize: =30
                             Width: =1352
@@ -238,7 +256,7 @@ Listado_Compras As screen:
                                 RadiusTopLeft: =0
                                 RadiusTopRight: =0
                                 Size: =15
-                                Width: =272
+                                Width: =242
                                 ZIndex: =3
 
                             txt_Cantidad_EM_62 As text:
@@ -264,8 +282,8 @@ Listado_Compras As screen:
                                 RadiusTopLeft: =0
                                 RadiusTopRight: =0
                                 Size: =15
-                                Width: =270
-                                X: =272
+                                Width: =210
+                                X: =242
                                 ZIndex: =4
 
                             txt_Cantidad_EM_63 As text:
@@ -321,8 +339,8 @@ Listado_Compras As screen:
                                 RadiusTopLeft: =0
                                 RadiusTopRight: =0
                                 Size: =15
-                                Width: =270
-                                X: =542
+                                Width: =430
+                                X: =622
                                 ZIndex: =5
 
                             txt_Cantidad_EM_64 As text:
@@ -330,7 +348,7 @@ Listado_Compras As screen:
                                 BorderColor: =RGBA(40, 134, 222, 1)
                                 BorderThickness: =0.5
                                 Color: =RGBA(0, 0, 0, 1)
-                                Default: =
+                                Default: ="Pendiente"
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
                                 DisabledFill: =
@@ -348,14 +366,13 @@ Listado_Compras As screen:
                                 RadiusTopLeft: =0
                                 RadiusTopRight: =0
                                 Size: =15
-                                Width: =270
-                                X: =812
+                                Width: =190
+                                X: =1052
                                 ZIndex: =6
 
                             icn_Eliminar_EM_11 As icon.Erase:
                                 BorderColor: =RGBA(40, 134, 222, 1)
                                 BorderThickness: =0.5
-                                Color: =RGBA(215, 58, 60, 1)
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
                                 DisabledFill: =
@@ -364,18 +381,46 @@ Listado_Compras As screen:
                                 Fill: =RGBA(255, 255, 255, 1)
                                 FocusedBorderThickness: =20
                                 Height: =30
-                                HoverBorderColor: =RGBA(215, 58, 60, 1)
-                                HoverColor: =RGBA(215, 58, 60, 1)
-                                HoverFill: =RGBA(247, 201, 195, 1)
-                                Icon: =Icon.ListScrollWatchlist
-                                OnSelect: =
+                                HoverBorderColor: =RGBA(52, 152, 47, 1)
+                                HoverColor: =RGBA(0, 0, 0, 1)
+                                HoverFill: =RGBA(219, 255, 209, 1)
+                                Icon: =Icon.DetailList
+                                OnSelect: =Navigate(Detalle_Solicitud_Compra)
                                 PaddingBottom: =2
                                 PaddingLeft: =2
                                 PaddingRight: =2
                                 PaddingTop: =2
-                                Width: =270
-                                X: =1082
+                                Width: =110
+                                X: =1242
                                 ZIndex: =12
+
+                            txt_Cantidad_EM_65 As text:
+                                Align: =Align.Center
+                                BorderColor: =RGBA(40, 134, 222, 1)
+                                BorderThickness: =0.5
+                                Color: =RGBA(0, 0, 0, 1)
+                                Default: |-
+                                    =Text(Sum(Filter(preqitem, req_num = ThisItem.Value), qty_ordered * unit_mat_cost), "###,###,##0.00")
+                                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                                DisabledColor: =
+                                DisabledFill: =
+                                DisplayMode: =DisplayMode.Disabled
+                                FocusedBorderThickness: =4
+                                Font: =App.Theme.Font
+                                FontWeight: =FontWeight.Semibold
+                                Height: =30
+                                HoverBorderColor: =RGBA(40, 134, 222, 1)
+                                HoverColor: =RGBA(0, 0, 0, 1)
+                                HoverFill: =RGBA(255, 255, 255, 1)
+                                PaddingLeft: =5
+                                RadiusBottomLeft: =0
+                                RadiusBottomRight: =0
+                                RadiusTopLeft: =0
+                                RadiusTopRight: =0
+                                Size: =15
+                                Width: =170
+                                X: =452
+                                ZIndex: =13
 
                         lbl_PNDato_EM_104 As Texto:
                             Align: ='TextCanvas.Align'.Center
@@ -391,8 +436,9 @@ Listado_Compras As screen:
                             PaddingTop: =0
                             Size: =16
                             Text: ="Nº Solicitud"
-                            Weight: ='TextCanvas.Weight'.Semibold
-                            Width: =272
+                            VerticalAlign: =VerticalAlign.Middle
+                            Weight: ='TextCanvas.Weight'.Regular
+                            Width: =242
                             X: =0
                             Y: =0
                             ZIndex: =48
@@ -411,9 +457,10 @@ Listado_Compras As screen:
                             PaddingTop: =0
                             Size: =16
                             Text: ="Fecha"
-                            Weight: ='TextCanvas.Weight'.Semibold
-                            Width: =270
-                            X: =272
+                            VerticalAlign: =VerticalAlign.Middle
+                            Weight: ='TextCanvas.Weight'.Regular
+                            Width: =210
+                            X: =242
                             Y: =0
                             ZIndex: =49
 
@@ -431,9 +478,10 @@ Listado_Compras As screen:
                             PaddingTop: =0
                             Size: =16
                             Text: ="Solicitante"
-                            Weight: ='TextCanvas.Weight'.Semibold
-                            Width: =270
-                            X: =542
+                            VerticalAlign: =VerticalAlign.Middle
+                            Weight: ='TextCanvas.Weight'.Regular
+                            Width: =430
+                            X: =622
                             Y: =0
                             ZIndex: =50
 
@@ -450,10 +498,11 @@ Listado_Compras As screen:
                             PaddingRight: =0
                             PaddingTop: =0
                             Size: =16
-                            Text: ="Gestion aprobacion"
-                            Weight: ='TextCanvas.Weight'.Semibold
-                            Width: =270
-                            X: =1082
+                            Text: ="Detalles"
+                            VerticalAlign: =VerticalAlign.Middle
+                            Weight: ='TextCanvas.Weight'.Regular
+                            Width: =110
+                            X: =1242
                             Y: =0
                             ZIndex: =54
 
@@ -471,11 +520,33 @@ Listado_Compras As screen:
                             PaddingTop: =0
                             Size: =16
                             Text: ="Estado"
-                            Weight: ='TextCanvas.Weight'.Semibold
-                            Width: =270
-                            X: =812
+                            VerticalAlign: =VerticalAlign.Middle
+                            Weight: ='TextCanvas.Weight'.Regular
+                            Width: =190
+                            X: =1052
                             Y: =0
                             ZIndex: =57
+
+                        lbl_PNDato_EM_109 As Texto:
+                            Align: ='TextCanvas.Align'.Center
+                            BorderColor: =RGBA(40, 134, 222, 1)
+                            BorderStyle: =BorderStyle.Solid
+                            BorderThickness: =0.5
+                            DisplayMode: =DisplayMode.Edit
+                            Fill: =RGBA(180, 214, 250, 1)
+                            Height: =25
+                            PaddingBottom: =0
+                            PaddingLeft: =0
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            Size: =16
+                            Text: ="Total"
+                            VerticalAlign: =VerticalAlign.Middle
+                            Weight: ='TextCanvas.Weight'.Regular
+                            Width: =170
+                            X: =452
+                            Y: =0
+                            ZIndex: =58
 
                     lbl_BarraVista_EM_3 As text:
                         Align: =Align.Center
@@ -735,11 +806,11 @@ Listado_Compras As screen:
                         RadiusTopLeft: =10
                         RadiusTopRight: =10
                         Width: =100
-                        X: =626
+                        X: =370
                         Y: =10
                         ZIndex: =9
 
-                        drp_Ano_LE_1 As dropdown:
+                        drp_Ano_SC As dropdown:
                             BorderColor: =RGBA(0, 0, 0, 0)
                             BorderThickness: =3
                             ChevronBackground: =RGBA(255, 255, 255, 1)
@@ -771,49 +842,6 @@ Listado_Compras As screen:
                             Width: =100
                             ZIndex: =19
 
-                    ContainerPais_EM_8 As groupContainer.manualLayoutContainer:
-                        BorderColor: =RGBA(180, 214, 250, 1)
-                        BorderThickness: =3
-                        Fill: =RGBA(255, 255, 255, 1)
-                        Height: =30
-                        RadiusBottomLeft: =10
-                        RadiusBottomRight: =10
-                        RadiusTopLeft: =10
-                        RadiusTopRight: =10
-                        Width: =150
-                        X: =402
-                        Y: =10
-                        ZIndex: =11
-
-                        drp_Estado_LE_1 As dropdown:
-                            AllowEmptySelection: =true
-                            BorderColor: =RGBA(0, 0, 0, 0)
-                            BorderThickness: =3
-                            ChevronBackground: =RGBA(0, 0, 0, 0)
-                            ChevronDisabledBackground: =RGBA(255, 255, 255, 1)
-                            ChevronDisabledFill: =RGBA(120, 120, 120, 1)
-                            ChevronFill: =RGBA(0, 0, 0, 1)
-                            ChevronHoverBackground: =RGBA(15, 108, 189, 1)
-                            ChevronHoverFill: =RGBA(255, 255, 255, 1)
-                            Default: ="Pendiente"
-                            DisabledBorderColor: =RGBA(0, 0, 0, 0)
-                            DisabledColor: =RGBA(166, 166, 166, 1)
-                            DisabledFill: =RGBA(255, 255, 255, 1)
-                            DisplayMode: |
-                                =
-                            Height: =30
-                            HoverBorderColor: =RGBA(180, 214, 250, 1)
-                            HoverColor: =RGBA(0, 0, 0, 1)
-                            HoverFill: =RGBA(180, 214, 250, 1)
-                            Items: =["Inactivo", "Activo", "Pendiente"]
-                            PressedColor: =RGBA(255, 255, 255, 1)
-                            PressedFill: =RGBA(15, 108, 189, 1)
-                            SelectionFill: =RGBA(15, 108, 189, 1)
-                            Size: =15
-                            Tooltip: ="Seleccione el año"
-                            Width: =150
-                            ZIndex: =19
-
                     lbl_ValorDato_EM_32 As Texto:
                         Align: ='TextCanvas.Align'.Center
                         DisplayMode: =DisplayMode.Edit
@@ -823,22 +851,9 @@ Listado_Compras As screen:
                         Text: ="Año"
                         Weight: ='TextCanvas.Weight'.Bold
                         Width: =60
-                        X: =566
+                        X: =310
                         Y: =10
                         ZIndex: =13
-
-                    lbl_ValorDato_EM_31 As Texto:
-                        Align: ='TextCanvas.Align'.Center
-                        DisplayMode: =DisplayMode.Edit
-                        FontColor: =RGBA(255, 255, 255, 1)
-                        Height: =30
-                        Size: =20
-                        Text: ="Estado"
-                        Weight: ='TextCanvas.Weight'.Bold
-                        Width: =80
-                        X: =322
-                        Y: =10
-                        ZIndex: =14
 
                     lbl_ValorDato_EM_30 As Texto:
                         Align: ='TextCanvas.Align'.Center
