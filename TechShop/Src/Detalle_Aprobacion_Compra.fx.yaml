@@ -4,23 +4,27 @@ Detalle_Aprobacion_Compra As screen:
     ImagePosition: =ImagePosition.Fill
     LoadingSpinnerColor: =App.Theme.Colors.Primary
     OnVisible: |-
-        =Clear(compras);
-        ForAll(
-            Filter(
-                preqitem,
-                req_num = glr_Solicitud_AC.Selected.soli_num
-            ),
-            Collect(
-                compras,
-                {req_line: ThisRecord.req_line,
-                item: ThisRecord.item,
-                descripcion: ThisRecord.description,
-                medida: ThisRecord.u_m,
-                cantidad: ThisRecord.qty_ordered,
-                precio: ThisRecord.unit_mat_cost,
-                num_vendedor: ThisRecord.vend_num,
-                aprobado: true
-                }
+        =If(
+            IsEmpty(compras),
+            Clear(compras);
+            ForAll(
+                Filter(
+                    preqitem,
+                    req_num = glr_Solicitud_AC.Selected.soli_num
+                ),
+                Collect(
+                    compras,
+                    {
+                        req_line: ThisRecord.req_line,
+                        item: ThisRecord.item,
+                        descripcion: ThisRecord.description,
+                        medida: ThisRecord.u_m,
+                        cantidad: ThisRecord.qty_ordered,
+                        precio: ThisRecord.unit_mat_cost,
+                        num_vendedor: ThisRecord.vend_num,
+                        aprobado: true
+                    }
+                )
             )
         )
 
@@ -240,7 +244,7 @@ Detalle_Aprobacion_Compra As screen:
                                             Detalle_Solicitud_Compras,
                                             soli_num = txt_Num_Soli_DAC.Text
                                         )
-                                    ),
+                                    ) && glr_Solicitud_AC.Selected.estado = "Listo",
                                     DisplayMode.Edit,
                                     DisplayMode.Disabled
                                 )
@@ -258,7 +262,6 @@ Detalle_Aprobacion_Compra As screen:
                                         soli_num: Upper(txt_Num_Soli_DAC.Text),
                                         fecha: DateValue(txt_Fecha_DAC.Text),
                                         solicitante: txt_Solicitante_DAC.Text,
-                                        user: txt_User_DAC.Text,
                                         total: Value(txt_Total_DAC.Text),
                                         estado: "Aprobado"
                                     }
@@ -456,7 +459,7 @@ Detalle_Aprobacion_Compra As screen:
                                                     ) - 1
                                                 ) = LookUp(
                                                     preq,
-                                                    req_num = txt_Num_Soli_DSC.Text,
+                                                    req_num = txt_Num_Soli_DAC.Text,
                                                     requester
                                                 )
                                             )
@@ -568,7 +571,7 @@ Detalle_Aprobacion_Compra As screen:
                                             Detalle_Solicitud_Compras,
                                             soli_num = txt_Num_Soli_DAC.Text
                                         )
-                                    ),
+                                    ) && glr_Solicitud_AC.Selected.estado = "Listo",
                                     DisplayMode.Edit,
                                     DisplayMode.Disabled
                                 )
@@ -620,11 +623,41 @@ Detalle_Aprobacion_Compra As screen:
                                         IsEmpty(datos),
                                         ClearCollect(
                                             SetCompararGlr,
-                                            glr_Detalles_DAC.AllItems
-                                        ),
+                                            Blank()
+                                        );
+                                        ForAll(glr_Detalles_DAC.AllItems, Collect(
+                                                SetCompararGlr,
+                                                {
+                                                    linea: ThisRecord.req_line,
+                                                    soli_num: txt_Num_Soli_DAC.Text,
+                                                    item: ThisRecord.item,
+                                                    descripcion: ThisRecord.descripcion,
+                                                    cantidad: ThisRecord.cantidad,
+                                                    precio: ThisRecord.precio,
+                                                    aprobado: chk_Aprobar_DAC.Value
+                                                }
+                                            )),
                                         ClearCollect(
                                             SetComparar,
-                                            datos
+                                            Blank()
+                                        );
+                                        ForAll(
+                                            Filter(
+                                                Detalle_Solicitud_Compras,
+                                                soli_num = txt_Num_Soli_DAC.Text
+                                            ),
+                                            Collect(
+                                                SetComparar,
+                                                {
+                                                    linea: ThisRecord.linea,
+                                                    soli_num: ThisRecord.soli_num,
+                                                    item: ThisRecord.item,
+                                                    descripcion: ThisRecord.descripcion,
+                                                    cantidad: ThisRecord.cantidad,
+                                                    precio: ThisRecord.precio,
+                                                    aprobado: ThisRecord.aprobado
+                                                }
+                                            )
                                         )
                                     )
                                 );
@@ -877,7 +910,7 @@ Detalle_Aprobacion_Compra As screen:
                                             )
                                         },
                                         If(
-                                            IsBlank(dato),
+                                            IsBlank(dato) && glr_Solicitud_AC.Selected.estado = "Listo",
                                             DisplayMode.Edit,
                                             DisplayMode.Disabled
                                         )
@@ -1158,7 +1191,7 @@ Detalle_Aprobacion_Compra As screen:
                                             )
                                         },
                                         If(
-                                            IsBlank(dato),
+                                            IsBlank(dato) && glr_Solicitud_AC.Selected.estado = "Listo",
                                             DisplayMode.Edit,
                                             DisplayMode.Disabled
                                         )
@@ -1824,7 +1857,6 @@ Detalle_Aprobacion_Compra As screen:
             DisabledColor: =RGBA(166, 166, 166, 1)
             DisabledFill: =RGBA(244, 244, 244, 1)
             Fill: =RGBA(52, 152, 47, 1)
-            FontWeight: =FontWeight.Bold
             HoverBorderColor: =RGBA(52, 152, 47, 1)
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(21, 68, 18, 1)
@@ -1836,11 +1868,14 @@ Detalle_Aprobacion_Compra As screen:
                         soli_num: Upper(txt_Num_Soli_DAC.Text),
                         fecha: DateValue(txt_Fecha_DAC.Text),
                         solicitante: txt_Solicitante_DAC.Text,
-                        user: txt_User_DAC.Text,
                         total: Value(txt_Total_DAC.Text),
                         estado: "Rechazado"
                     }
                 );
+                UpdateContext({edit: {view: false, item: Blank()}, Aviso: false, mensajeNotificacion: "", Rechazo: false});
+                Clear(compras);
+                Reset(txt_Num_Soli_DAC);
+                Back();
             PressedBorderColor: =RGBA(52, 152, 47, 1)
             Size: =15
             Text: ="Aceptar"
