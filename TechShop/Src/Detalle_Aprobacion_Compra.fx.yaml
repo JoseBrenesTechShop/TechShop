@@ -165,7 +165,7 @@ Detalle_Aprobacion_Compra As screen:
                 Icon: =Icon.BackArrow
                 OnSelect: |-
                     =Back();
-                    UpdateContext({edit: {view: false, item: Blank()}, Aviso: false, mensajeNotificacion: "", Rechazo: false});
+                    UpdateContext({edit: {view: false, item: Blank()}, Aviso: false, mensajeNotificacion: "", Rechazo: false, reset: false});
                     Clear(compras);
                     Reset(txt_Num_Soli_DAC)
                 PaddingBottom: =5
@@ -307,7 +307,7 @@ Detalle_Aprobacion_Compra As screen:
                             PressedFill: =RGBA(255, 255, 255, 1)
                             Size: =15
                             Text: |-
-                                ="Enviar: " & CountIf(glr_Detalles_DAC.AllItems, chk_Aprobar_DAC.Value) & "/" & CountIf(compras, true)
+                                ="Aprobar: " & CountIf(glr_Detalles_DAC.AllItems, chk_Aprobar_DAC.Value) & "/" & CountIf(compras, true)
                             Width: =204
                             X: =1138
                             Y: =5
@@ -741,7 +741,7 @@ Detalle_Aprobacion_Compra As screen:
                             HoverColor: =App.Theme.Colors.PrimaryForeground
                             HoverFill: =RGBA(132, 40, 38, 1)
                             OnSelect: |-
-                                =UpdateContext({Rechazo: true})
+                                =UpdateContext({Rechazo: true, reset: true})
                             PaddingBottom: =0
                             PaddingLeft: =0
                             PaddingRight: =0
@@ -948,10 +948,11 @@ Detalle_Aprobacion_Compra As screen:
                         "glr_Detalles_DAC As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
                             BorderColor: =RGBA(0, 18, 107, 1)
                             DelayItemLoading: =true
-                            Height: =540
+                            Height: =547
                             Items: =compras
                             Layout: =Layout.Vertical
                             LoadingSpinner: =LoadingSpinner.Data
+                            ShowScrollbar: =false
                             TemplatePadding: =0
                             TemplateSize: =30
                             Width: =1352
@@ -1985,7 +1986,10 @@ Detalle_Aprobacion_Compra As screen:
             Font: =Font.Arial
             Height: =129
             Size: =18
-            Text: ="¿Esta seguro que desea rechazar esta solicitud?"
+            Text: |-
+                =If(reset, "¿Esta seguro que desea restablecer el estado de esta solicitud?
+                Se perderan los cambios hechos",
+                "¿Esta seguro que desea rechazar esta solicitud?")
             Width: =400
             ZIndex: =69
 
@@ -1998,19 +2002,44 @@ Detalle_Aprobacion_Compra As screen:
             HoverBorderColor: =RGBA(52, 152, 47, 1)
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(21, 68, 18, 1)
-            OnSelect: |-
-                =Patch(
-                    Solicitud_Compras,
-                    glr_Solicitud_AC.Selected,
+            OnSelect: |
+                =If(
+                    !reset,
+                    Patch(
+                        Solicitud_Compras,
+                        glr_Solicitud_AC.Selected,
+                        {
+                            soli_num: Upper(txt_Num_Soli_DAC.Text),
+                            fecha: DateValue(txt_Fecha_DAC.Text),
+                            solicitante: txt_Solicitante_DAC.Text,
+                            total: Value(txt_Total_DAC.Text),
+                            estado: "Rechazado"
+                        }
+                    ),
+                    Patch(
+                        Solicitud_Compras,
+                        glr_Solicitud_AC.Selected,
+                        {
+                            soli_num: Upper(txt_Num_Soli_DAC.Text),
+                            fecha: DateValue(txt_Fecha_DAC.Text),
+                            solicitante: txt_Solicitante_DAC.Text,
+                            total: Value(txt_Total_DAC.Text),
+                            estado: "Listo"
+                        }
+                    );
+                    RemoveIf(Detalle_Solicitud_Compras, soli_num = Upper(txt_Num_Soli_DAC.Text))
+                );
+                UpdateContext(
                     {
-                        soli_num: Upper(txt_Num_Soli_DAC.Text),
-                        fecha: DateValue(txt_Fecha_DAC.Text),
-                        solicitante: txt_Solicitante_DAC.Text,
-                        total: Value(txt_Total_DAC.Text),
-                        estado: "Rechazado"
+                        edit: {
+                            view: false,
+                            item: Blank()
+                        },
+                        Aviso: false,
+                        mensajeNotificacion: "",
+                        Rechazo: false
                     }
                 );
-                UpdateContext({edit: {view: false, item: Blank()}, Aviso: false, mensajeNotificacion: "", Rechazo: false});
                 Clear(compras);
                 Reset(txt_Num_Soli_DAC);
                 Back();
