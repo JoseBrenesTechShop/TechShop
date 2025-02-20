@@ -142,6 +142,11 @@ OrdenMaquinas_Prioridad As screen:
                     =UpdateContext({Eliminar: false, ItemEliminar: Blank(), Guardar: false, MaquinasOrigin: Blank(), NewPri: Blank(), OrdenSelected: Blank(), RegistroOrden: Blank()});
                     Refresh(Orden_Maquinas_1);
                     Reset(glr_Ordenes_OMP);
+                    Reset(drp_PN_OMP);
+                    Reset(drp_Maquina_OMP);
+                    Reset(drp_Flitro_Pri_OMP);
+                    Reset(drp_OP_OMP);
+                    Reset(drp_Orden_OMP);
                     Back()
                 PaddingBottom: =5
                 PaddingLeft: =5
@@ -213,7 +218,7 @@ OrdenMaquinas_Prioridad As screen:
                         HoverBorderColor: =App.Theme.Colors.Darker40
                         HoverColor: =RGBA(0, 0, 0, 1)
                         HoverFill: =App.Theme.Colors.Lighter70
-                        PaddingLeft: =350
+                        PaddingLeft: =650
                         Size: =18
                         Width: =1112
                         ZIndex: =19
@@ -518,13 +523,13 @@ OrdenMaquinas_Prioridad As screen:
                                     (IsBlank(drp_Orden_OMP.SelectedText.Value) || Orden = drp_Orden_OMP.SelectedText.Value),
                                     (IsBlank(drp_Flitro_Pri_OMP.SelectedText.Value) || Prioridad = Value(drp_Flitro_Pri_OMP.SelectedText.Value)),
                                     (IsBlank(drp_OP_OMP.SelectedText.Value) || Operacion = drp_OP_OMP.SelectedText.Value),
-                                    (IsBlank(drp_Maquina_OMP.SelectedText.Value) || (Orden in Filter(
-                                        Orden_MaquinasLists_1,
-                                        Maquina = drp_Maquina_OMP.SelectedText.Value
-                                    ).Orden && Operacion in Filter(
-                                        Orden_MaquinasLists_1,
-                                        Maquina = drp_Maquina_OMP.SelectedText.Value
-                                    ).Operacion))
+                                    (IsBlank(drp_PN_OMP.SelectedText.Value) || 'P/N' = drp_PN_OMP.SelectedText.Value),
+                                    (IsBlank(drp_Maquina_OMP.SelectedText.Value) || 
+                                    (
+                                        Orden in Filter(Orden_MaquinasLists_1, Maquina = drp_Maquina_OMP.SelectedText.Value).Orden &&
+                                        Operacion in Filter(Orden_MaquinasLists_1, Maquina = drp_Maquina_OMP.SelectedText.Value).Operacion &&
+                                        With({ORD: ThisRecord.Orden, OP: ThisRecord.Operacion}, !IsBlank(LookUp(Orden_MaquinasLists_1, Maquina = drp_Maquina_OMP.SelectedText.Value && Operacion = OP && Orden = ORD)))
+                                    ))
                                 ),
                                 Prioridad,
                                 SortOrder.Ascending
@@ -1129,6 +1134,7 @@ OrdenMaquinas_Prioridad As screen:
                         OnSelect: |-
                             =Reset(drp_Flitro_Pri_OMP);
                             Reset(drp_OP_OMP);
+                            Reset(drp_PN_OMP);
                             Reset(drp_Orden_OMP);
                             Reset(drp_Maquina_OMP);
                             Refresh(Orden_Maquinas_1);
@@ -1259,6 +1265,54 @@ OrdenMaquinas_Prioridad As screen:
                         X: =384
                         Y: =17
                         ZIndex: =94
+
+                    Label6_121 As label:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisabledColor: =RGBA(166, 166, 166, 1)
+                        Height: =15
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =10
+                        Text: ="P/N"
+                        Width: =180
+                        X: =498
+                        Y: =3
+                        ZIndex: =95
+
+                    drp_PN_OMP As dropdown:
+                        AllowEmptySelection: =true
+                        BorderColor: =RGBA(40, 134, 222, 1)
+                        ChevronBackground: =RGBA(255, 255, 255, 1)
+                        ChevronDisabledBackground: =RGBA(0, 0, 0, 0)
+                        ChevronDisabledFill: =RGBA(0, 0, 0, 1)
+                        ChevronFill: =RGBA(0, 0, 0, 1)
+                        ChevronHoverBackground: =RGBA(214, 221, 224, 1)
+                        ChevronHoverFill: =RGBA(0, 0, 0, 1)
+                        Default: =-1
+                        DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                        DisabledColor: =RGBA(166, 166, 166, 1)
+                        DisabledFill: =RGBA(244, 244, 244, 1)
+                        DisplayMode: =If(Eliminar, DisplayMode.Disabled, DisplayMode.Edit)
+                        Height: =20
+                        HoverBorderColor: =RGBA(40, 134, 222, 1)
+                        HoverColor: =RGBA(0, 0, 0, 1)
+                        HoverFill: =RGBA(214, 221, 224, 1)
+                        Items: =Distinct(Orden_Maquinas_1, 'P/N')
+                        OnChange: =Reset(glr_Ordenes_PO)
+                        PressedBorderColor: =RGBA(40, 134, 222, 1)
+                        PressedColor: =RGBA(255, 255, 255, 1)
+                        PressedFill: =RGBA(71, 158, 245, 1)
+                        Reset: =true
+                        SelectionFill: =RGBA(180, 214, 250, 1)
+                        Size: =12
+                        Width: =180
+                        X: =498
+                        Y: =17
+                        ZIndex: =96
 
             Container22_5 As groupContainer.manualLayoutContainer:
                 BorderColor: =RGBA(40, 134, 222, 1)

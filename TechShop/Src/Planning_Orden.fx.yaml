@@ -144,6 +144,7 @@ Planning_Orden As screen:
                     Reset(drp_Pri_PO);
                     Reset(drp_Maquina_PO);
                     Reset(glr_Ordenes_PO);
+                    Reset(drp_PN_PO);
                 PaddingBottom: =5
                 PaddingLeft: =5
                 PaddingRight: =5
@@ -296,11 +297,12 @@ Planning_Orden As screen:
                         DisabledColor: =RGBA(0, 0, 0, 0)
                         Height: =47
                         Icon: =Icon.NextArrow
-                        OnSelect: |-
+                        OnSelect: |
                             =Select(Parent);
                             Reset(drp_Pri_PO);
                             Reset(drp_Maquina_PO);
                             Reset(drp_OP_PO);
+                            Reset(drp_PN_PO);
                         Width: =199
                         ZIndex: =16
 
@@ -347,20 +349,27 @@ Planning_Orden As screen:
                         DisplayMode: =If(Eliminar, DisplayMode.Disabled, DisplayMode.Edit)
                         Height: =604
                         Items: |-
-                            =Sort(
+                            =// Filtra y ordena la tabla Orden_Maquinas_1 según los criterios seleccionados
+                            Sort(
                                 Filter(
                                     Orden_Maquinas_1,
-                                    (IsBlank(glr_Ordenes_PO.Selected.Value) || Orden = glr_Ordenes_PO.Selected.Value),
-                                    (IsBlank(drp_Pri_PO.SelectedText.Value) || Prioridad = drp_Pri_PO.Selected.Value),
-                                    (IsBlank(drp_OP_PO.SelectedText.Value) || Operacion = drp_OP_PO.SelectedText.Value),
-                                    (IsBlank(drp_Maquina_PO.SelectedText.Value) || (Orden in Filter(
-                                        Orden_MaquinasLists_1,
-                                        Maquina = drp_Maquina_PO.SelectedText.Value
-                                    ).Orden && Operacion in Filter(
-                                        Orden_MaquinasLists_1,
-                                        Maquina = drp_Maquina_PO.SelectedText.Value
-                                    ).Operacion))
+                                    // Filtra por orden seleccionada, si está especificada
+                                    IsBlank(glr_Ordenes_PO.Selected.Value) || Orden = glr_Ordenes_PO.Selected.Value,
+                                    // Filtra por prioridad seleccionada, si está especificada
+                                    IsBlank(drp_Pri_PO.SelectedText.Value) || Prioridad = drp_Pri_PO.Selected.Value,
+                                    // Filtra por operación seleccionada, si está especificada
+                                    IsBlank(drp_OP_PO.SelectedText.Value) || Operacion = drp_OP_PO.SelectedText.Value,
+                                    // Filtra por P/N seleccionada, si está especificada
+                                    IsBlank(drp_PN_PO.SelectedText.Value) || 'P/N' = drp_PN_PO.SelectedText.Value,
+                                    // Filtra por máquina seleccionada, si está especificada
+                                    IsBlank(drp_Maquina_PO.SelectedText.Value) || 
+                                    (
+                                        Orden in Filter(Orden_MaquinasLists_1, Maquina = drp_Maquina_PO.SelectedText.Value).Orden &&
+                                        Operacion in Filter(Orden_MaquinasLists_1, Maquina = drp_Maquina_PO.SelectedText.Value).Operacion &&
+                                        With({ORD: ThisRecord.Orden, OP: ThisRecord.Operacion}, !IsBlank(LookUp(Orden_MaquinasLists_1, Maquina = drp_Maquina_PO.SelectedText.Value && Operacion = OP && Orden = ORD)))
+                                    )
                                 ),
+                                // Ordena por prioridad en orden ascendente
                                 Prioridad,
                                 SortOrder.Ascending
                             )
@@ -1799,6 +1808,7 @@ Planning_Orden As screen:
                         HoverColor: =RGBA(0, 0, 0, 1)
                         HoverFill: =App.Theme.Colors.Lighter70
                         PaddingLeft: =5
+                        PaddingRight: =150
                         RadiusBottomLeft: =0
                         RadiusBottomRight: =0
                         RadiusTopLeft: =0
@@ -1825,6 +1835,7 @@ Planning_Orden As screen:
                                 );
                                 Reset(txt_BuscaOrdenes_PO);
                                 Reset(drp_Pri_PO);
+                                Reset(drp_PN_PO);
                                 Reset(drp_Maquina_PO);
                                 Reset(glr_Ordenes_PO);
                                 UpdateContext(
@@ -1958,17 +1969,18 @@ Planning_Orden As screen:
                         HoverBorderColor: =App.Theme.Colors.Darker10
                         HoverColor: =RGBA(0, 0, 0, 1)
                         HoverFill: =RGBA(0, 0, 0, 0)
-                        OnSelect: |-
+                        OnSelect: |
                             =Reset(drp_Pri_PO);
                             Reset(drp_Maquina_PO);
                             Reset(glr_Ordenes_PO);
+                            Reset(drp_PN_PO);
                         PressedBorderColor: =App.Theme.Colors.Darker40
                         PressedColor: =Self.Color
                         PressedFill: =App.Theme.Colors.Darker40
                         Size: =14
                         Text: ="All"
                         Width: =50
-                        X: =761
+                        X: =582
                         ZIndex: =8
 
                     Label6_80 As label:
@@ -2040,7 +2052,7 @@ Planning_Orden As screen:
                         RadiusTopLeft: =10
                         RadiusTopRight: =10
                         Width: =42
-                        X: =438
+                        X: =373
                         ZIndex: =11
 
                     Image1_3 As image:
@@ -2065,7 +2077,7 @@ Planning_Orden As screen:
                         RadiusTopRight: =10
                         Visible: =!IsBlank(glr_Ordenes_PO.Selected.Value) || !IsBlank(drp_Pri_PO.SelectedText.Value) || !IsBlank(drp_OP_PO.SelectedText.Value)
                         Width: =42
-                        X: =394
+                        X: =329
                         ZIndex: =12
 
                     btn_Prioridades_PO As button:
@@ -2145,6 +2157,54 @@ Planning_Orden As screen:
                         Width: =65
                         X: =202
                         ZIndex: =14
+
+                    Label6_120 As label:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisabledColor: =RGBA(166, 166, 166, 1)
+                        Height: =15
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =10
+                        Text: ="P/N"
+                        Width: =180
+                        X: =625
+                        Y: =3
+                        ZIndex: =15
+
+                    drp_PN_PO As dropdown:
+                        AllowEmptySelection: =true
+                        BorderColor: =RGBA(40, 134, 222, 1)
+                        ChevronBackground: =RGBA(255, 255, 255, 1)
+                        ChevronDisabledBackground: =RGBA(0, 0, 0, 0)
+                        ChevronDisabledFill: =RGBA(0, 0, 0, 1)
+                        ChevronFill: =RGBA(0, 0, 0, 1)
+                        ChevronHoverBackground: =RGBA(214, 221, 224, 1)
+                        ChevronHoverFill: =RGBA(0, 0, 0, 1)
+                        Default: =-1
+                        DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                        DisabledColor: =RGBA(166, 166, 166, 1)
+                        DisabledFill: =RGBA(244, 244, 244, 1)
+                        DisplayMode: =If(Eliminar, DisplayMode.Disabled, DisplayMode.Edit)
+                        Height: =20
+                        HoverBorderColor: =RGBA(40, 134, 222, 1)
+                        HoverColor: =RGBA(0, 0, 0, 1)
+                        HoverFill: =RGBA(214, 221, 224, 1)
+                        Items: =Distinct(Orden_Maquinas_1, 'P/N')
+                        OnChange: =Reset(glr_Ordenes_PO)
+                        PressedBorderColor: =RGBA(40, 134, 222, 1)
+                        PressedColor: =RGBA(255, 255, 255, 1)
+                        PressedFill: =RGBA(71, 158, 245, 1)
+                        Reset: =true
+                        SelectionFill: =RGBA(180, 214, 250, 1)
+                        Size: =12
+                        Width: =180
+                        X: =625
+                        Y: =17
+                        ZIndex: =16
 
     cnt_Eliminar_PO As groupContainer.manualLayoutContainer:
         BorderColor: =RGBA(215, 58, 60, 1)
