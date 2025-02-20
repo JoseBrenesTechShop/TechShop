@@ -167,7 +167,8 @@ Detalle_Aprobacion_Compra As screen:
                     =Back();
                     UpdateContext({edit: {view: false, item: Blank()}, Aviso: false, mensajeNotificacion: "", Rechazo: false, reset: false});
                     Clear(compras);
-                    Reset(txt_Num_Soli_DAC)
+                    Reset(txt_Num_Soli_DAC);
+                    Reset(txt_Comentario_DAC);
                 PaddingBottom: =5
                 PaddingLeft: =5
                 PaddingRight: =5
@@ -2011,22 +2012,28 @@ Detalle_Aprobacion_Compra As screen:
                         Solicitud_Compras,
                         glr_Solicitud_AC.Selected,
                         {
-                            soli_num: Upper(txt_Num_Soli_DAC.Text),
-                            fecha: DateValue(txt_Fecha_DAC.Text),
-                            solicitante: txt_Solicitante_DAC.Text,
-                            total: Value(txt_Total_DAC.Text),
+                            comentario: txt_Comentario_DAC.Text,
                             estado: "Rechazado"
                         }
                     ),
-                    RemoveIf(Detalle_Solicitud_Compras, soli_num = Upper(txt_Num_Soli_DAC.Text));
+                    RemoveIf(
+                        Detalle_Solicitud_Compras,
+                        soli_num = Upper(txt_Num_Soli_DAC.Text)
+                    );
                     Patch(
                         Solicitud_Compras,
                         glr_Solicitud_AC.Selected,
                         {
-                            soli_num: Upper(txt_Num_Soli_DAC.Text),
-                            fecha: DateValue(txt_Fecha_DAC.Text),
-                            solicitante: txt_Solicitante_DAC.Text,
-                            total: Value(txt_Total_DAC.Text),
+                            total: Value(
+                                Sum(
+                                    Filter(
+                                        glr_Detalles_DAC.AllItems,
+                                        chk_Aprobar_DAC.Value
+                                    ),
+                                    cantidad * precio
+                                )
+                            ),
+                            comentario: Blank(),
                             estado: "Listo"
                         }
                     )
