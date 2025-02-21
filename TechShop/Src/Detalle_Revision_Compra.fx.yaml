@@ -247,7 +247,7 @@ Detalle_Revision_Compra As screen:
                             PressedFill: =RGBA(255, 255, 255, 1)
                             Size: =14
                             Text: ="Restablecer Estado"
-                            Visible: =false
+                            Visible: =glr_Solicitud_RC.Selected.estado <> "Aprobado" && !(glr_Solicitud_RC.Selected.soli_num in RegistroPagos.Requisicion) 
                             Width: =208
                             X: =920
                             Y: =5
@@ -265,7 +265,7 @@ Detalle_Revision_Compra As screen:
                                             Solicitud_Compras,
                                             soli_num = txt_Num_Soli_DRC.Text
                                         )
-                                    ),
+                                    ) && glr_Solicitud_RC.Selected.estado = "Aprobado",
                                     DisplayMode.Edit,
                                     DisplayMode.Disabled
                                 )
@@ -606,7 +606,7 @@ Detalle_Revision_Compra As screen:
                                             Solicitud_Compras,
                                             soli_num = txt_Num_Soli_DRC.Text
                                         )
-                                    ),
+                                    ) && glr_Solicitud_RC.Selected.estado = "Aprobado",
                                     DisplayMode.Edit,
                                     DisplayMode.Disabled
                                 )
@@ -1393,16 +1393,24 @@ Detalle_Revision_Compra As screen:
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(21, 68, 18, 1)
             OnSelect: |
-                =Patch(
-                    Solicitud_Compras,
-                    glr_Solicitud_AC.Selected,
-                    {
-                        soli_num: Upper(txt_Num_Soli_DRC.Text),
-                        fecha: DateValue(txt_Fecha_DAC.Text),
-                        solicitante: txt_Solicitante_DAC.Text,
-                        total: Value(txt_Total_DAC.Text),
-                        estado: "Denegado"
-                    }
+                =If(
+                    !reset,
+                    Patch(
+                        Solicitud_Compras,
+                        glr_Solicitud_AC.Selected,
+                        {
+                            user: txt_User_DRC.Text,
+                            estado: "Denegado"
+                        }
+                    ),
+                    Patch(
+                        Solicitud_Compras,
+                        glr_Solicitud_AC.Selected,
+                        {
+                            user: txt_User_DRC.Text,
+                            estado: "Aprobado"
+                        }
+                    )
                 );
                 UpdateContext(
                     {
