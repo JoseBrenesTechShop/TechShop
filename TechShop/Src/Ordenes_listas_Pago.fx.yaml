@@ -138,7 +138,23 @@ Ordenes_listas_Pago As screen:
                 HoverColor: =RGBA(255, 255, 255, 1)
                 HoverFill: =RGBA(0, 134, 208, 1)
                 Icon: =Icon.Home
-                OnSelect: =Back()
+                OnSelect: |-
+                    =UpdateContext(
+                        {
+                            AbrirConfirmar: false,
+                            Disable: false,
+                            AbrirC: false,
+                            isProcesando: false
+                        }
+                    );
+                    Reset(drp_MetodoPago_OLP);
+                    Reset(drp_EstadoPago_OLP);
+                    Reset(txt_montopagar_OPL);
+                    Reset(txt_NumTransferencia_OLP);
+                    Refresh(Metodo_Pagos);
+                    Refresh(RegistroPagos);
+                    Refresh(Solicitud_Compras);
+                    Back()
                 PaddingBottom: =5
                 PaddingLeft: =5
                 PaddingRight: =5
@@ -1754,7 +1770,7 @@ Ordenes_listas_Pago As screen:
                     DisabledBorderColor: =RGBA(166, 166, 166, 1)
                     DisabledColor: =RGBA(214, 221, 224, 1)
                     DisplayMode: |
-                        =If(Value(txt_Total_Pagar_OLP.Text) = 0, DisplayMode.Disabled, DisplayMode.Edit)
+                        =If(Value(txt_Total_Pagar_OLP.Text) = 0 || AbrirConfirmar, DisplayMode.Disabled, DisplayMode.Edit)
                     Fill: |-
                         =If(
                             Value(txt_Total_Pagar_OLP.Text) = 0,
@@ -1768,7 +1784,7 @@ Ordenes_listas_Pago As screen:
                     HoverFill: =RGBA(40, 134, 222, 1)
                     Icon: =Icon.Money
                     OnSelect: |-
-                        =UpdateContext({AbrirConfirmar: true})
+                        =UpdateContext({AbrirConfirmar: true, Disable:true })
                     PaddingBottom: =5
                     PaddingLeft: =5
                     PaddingRight: =5
@@ -1901,7 +1917,9 @@ Ordenes_listas_Pago As screen:
             Color: =RGBA(255, 255, 255, 1)
             DisabledBorderColor: =RGBA(166, 166, 166, 1)
             DisabledColor: =RGBA(214, 221, 224, 1)
-            DisplayMode: =
+            DisplayMode: |
+                =
+                If(Disable, DisplayMode.Disabled, DisplayMode.Edit)
             Fill: =RGBA(40, 134, 222, 1)
             FocusedBorderThickness: =20
             Height: =40
@@ -2053,6 +2071,7 @@ Ordenes_listas_Pago As screen:
             ZIndex: =4
 
             drp_MetodoPago_OLP As dropdown:
+                AllowEmptySelection: =true
                 BorderColor: =RGBA(0, 0, 0, 0)
                 BorderThickness: =3
                 ChevronBackground: =RGBA(0, 0, 0, 0)
@@ -2109,6 +2128,7 @@ Ordenes_listas_Pago As screen:
             ZIndex: =6
 
             drp_EstadoPago_OLP As dropdown:
+                AllowEmptySelection: =true
                 BorderColor: =RGBA(0, 0, 0, 0)
                 BorderThickness: =3
                 ChevronBackground: =RGBA(0, 0, 0, 0)
@@ -2158,6 +2178,13 @@ Ordenes_listas_Pago As screen:
                         {
                             MostrarAviso: true,
                             mensajeNotificacion: "El monto a pagar no puede estar vacío o ser negativo."
+                        }
+                    ),
+                        IsBlank(drp_MetodoPago_OLP.SelectedText.Value) || IsBlank(drp_EstadoPago_OLP.SelectedText.Value),
+                    UpdateContext(
+                        {
+                            MostrarAviso: true,
+                            mensajeNotificacion: "Asegurese de seleccionar el metodo de pago y el estado de pago"
                         }
                     ),
                     IsBlank(txt_totalPOT_OLP.Text) || Value(txt_totalPOT_OLP.Text) < 0,
@@ -2267,7 +2294,7 @@ Ordenes_listas_Pago As screen:
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(132, 40, 38, 1)
             OnSelect: |-
-                =UpdateContext({AbrirConfirmar: false});
+                =UpdateContext({AbrirConfirmar: false, Disable: false});
                     Reset(drp_MetodoPago_OLP);
                     Reset(drp_EstadoPago_OLP);
                     Reset(txt_montopagar_OPL);
