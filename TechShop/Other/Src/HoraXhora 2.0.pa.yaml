@@ -1645,7 +1645,30 @@ Screens:
                               Align: =Align.Center
                               BorderColor: =RGBA(0, 18, 107, 1)
                               BorderStyle: =BorderStyle.None
-                              Default: =
+                              Default: |-
+                                =If(
+                                    HoraValor >= 0 && HoraValor <= 6 && Dia = 2,
+                                    LookUp(
+                                        HorarioSemanals,
+                                        (Fecha_Fin = DateAdd(FechaHorario, -1, TimeUnit.Days))
+                                    ).Empleado,
+                                    LookUp(
+                                        HorarioSemanals,
+                                        (Fecha_Inicio <= FechaHorario && Fecha_Fin >= FechaHorario) && 
+                                        Zona = LookUp(Maquinas, Maquina = txt_Maquina_HxH2.Text).Ubicacion_Bono && 
+                                        Switch(
+                                            Dia,
+                                            1, Domingo = drp_Operario_HxH2.Selected.Domingo,
+                                            2, Lunes = drp_Operario_HxH2.Selected.Lunes,
+                                            3, Martes = drp_Operario_HxH2.Selected.Martes,
+                                            4, Miercoles = drp_Operario_HxH2.Selected.Miercoles,
+                                            5, Jueves = drp_Operario_HxH2.Selected.Jueves,
+                                            6, Viernes = drp_Operario_HxH2.Selected.Viernes,
+                                            7, Sabado = drp_Operario_HxH2.Selected.Sabado
+                                        ) && 
+                                        "SUPERVI" in With({Cod: ThisRecord.Codigo}, LookUp(Empleados, Codigo = Cod, Puesto))
+                                    ).Empleado
+                                )
                               DisplayMode: =DisplayMode.View
                               Font: =Font.'Open Sans'
                               Height: =28
