@@ -95,200 +95,61 @@ Screens:
                   RadiusTopLeft: =10
                   RadiusTopRight: =10
                 Children:
-                  - Btn_HP_1:
-                      Control: Classic/Button@2.2.0
-                      Properties:
-                        AlignInContainer: =AlignInContainer.Center
-                        Color: =RGBA(255, 255, 255, 1)
-                        Fill: |
-                          =RGBA(153, 201, 238, 1)
-                        Height: =60
-                        HoverColor: =RGBA(255, 255, 255, 1)
-                        HoverFill: =RGBA(40, 134, 222, 1)
-                        OnSelect: |-
-                          =If(
-                              IsBlank(Drp_Empleado_HP_1.SelectedText.Value),
-                              Notify(
-                                  "Debe seleccionar a un Empleado",
-                                  NotificationType.Error
-                              ),
-                              If(
-                                  IsBlank(dpFechaInicio_2.SelectedDate),
-                                  Notify(
-                                      "Debe indicar la Fecha de Inicio",
-                                      NotificationType.Error
-                                  ),
-                                  If(
-                                      Weekday(dpFechaInicio_2.SelectedDate) <> 2,
-                                      Notify(
-                                          "La Fecha Inicio debe ser un Lunes",
-                                          NotificationType.Error
-                                      ),
-                                      If(
-                                          dpFechaInicio_2.SelectedDate > Today() + 7,
-                                          Notify(
-                                              "No se permite asignar un horaro tan a futuro como ese, maximo el de la proxima semana",
-                                              NotificationType.Error
-                                          ),
-                                          If(
-                                              !IsBlank(
-                                                  LookUp(
-                                                      Filter(
-                                                          HorarioSemanals,
-                                                          Empleado = Drp_Empleado_HP_1.Selected.Nombre
-                                                      ),
-                                                      Fecha_Inicio = dpFechaInicio_2.SelectedDate
-                                                  )
-                                              ) && !(glr_InfoHorarios_HP.Selected.Fecha_Inicio = dpFechaInicio_2.SelectedDate && Mostrar),
-                                              Notify(
-                                                  "Ya exite un Horario para esa fecha",
-                                                  NotificationType.Error
-                                              ),
-                                              If(
-                                                  dpFechaInicio_2.SelectedDate + 6 <> dpFechaFin_1.SelectedDate,
-                                                  Notify(
-                                                      "Fechas Ingresadas invalidas, de be ser una semana completa(Lunes a Domingo)",
-                                                      NotificationType.Error
-                                                  ),
-                                                  If(
-                                                      LookUp(
-                                                          Empleados,
-                                                          Codigo = Drp_Empleado_HP_1.Selected.Codigo,
-                                                          Area
-                                                      ) = "OPERARIOS" && IsBlank(drpMaquina_1.SelectedText.Value) && IsBlank(drpMaquina2_1.SelectedText.Value) && IsBlank(drpMaquina3_1.SelectedText.Value),
-                                                      Notify(
-                                                          "Debe seleccionar al menos una maquina para el Operario",
-                                                          NotificationType.Error
-                                                      ),
-                                                      If(
-                                                          Value(txtHorasPagadas_1.Text) < 47.5,
-                                                          Notify(
-                                                              "Debe de cumplir con minimo 48 horas trabajadas",
-                                                              NotificationType.Error
-                                                          ),
-                                                          If(
-                                                              !Mostrar,
-                                                              Notify(
-                                                                  "Se Guardo Correctamente",
-                                                                  NotificationType.Success
-                                                              );
-                                                              If(
-                                                                  dpFechaInicio_2.SelectedDate > Today() || (dpFechaInicio_2.SelectedDate <= Today() && dpFechaFin_1.SelectedDate >= Today()),
-                                                                  CorreoConPDF.Run(
-                                                                      HtmlPDF_HP_1.HtmlText,
-                                                                      LookUp(
-                                                                          Empleados,
-                                                                          Nombre = Drp_Empleado_HP_1.SelectedText.Value,
-                                                                          Correo
-                                                                      ),
-                                                                      "Horario Semanal",
-                                                                      HtmlCuerpo_HP_1.HtmlText
-                                                                  );
-                                                              );
-                                                              SubmitForm(Frm_HP_1);
-                                                              ResetForm(Frm_HP_1),
-                                                              Patch(
-                                                                  HorarioSemanals,
-                                                                  glr_InfoHorarios_HP.Selected,
-                                                                  {
-                                                                      Lunes: drpTurno_L_1.Selected.Turno_Op & " - " & lblHorario_L_1.Text,
-                                                                      Martes: drpTurno_K.Selected.Turno_Op & " - " & lblHorario_K.Text,
-                                                                      Miercoles: drpTurno__M.Selected.Turno_Op & " - " & lblHorario_M.Text,
-                                                                      Jueves: drpTurno_J.Selected.Turno_Op & " - " & lblHorario_J.Text,
-                                                                      Viernes: drpTurno_V.Selected.Turno_Op & " - " & lblHorario_V.Text,
-                                                                      Sabado: drpTurno_S.Selected.Turno_Op & " - " & lblHorario_S.Text,
-                                                                      Domingo: drpTurno_D.Selected.Turno_Op & " - " & lblHorario_D.Text,
-                                                                      Horas_Trabajadas: Value(txtHorasTrabajadas.Text),
-                                                                      Total_Horas: txtHorasTrabajadas.Text,
-                                                                      Horas_Pagadas: Value(txtHorasPagadas.Text),
-                                                                      Total_Horas_Pagadas:txtHorasPagadas.Text,
-                                                                      Fecha_Inicio: Date(
-                                                                          Year(dpFechaInicio.SelectedDate),
-                                                                          Month(dpFechaInicio.SelectedDate),
-                                                                          Day(dpFechaInicio.SelectedDate)
-                                                                      ),
-                                                                      Fecha_Fin: Date(
-                                                                          Year(dpFechaFin.SelectedDate),
-                                                                          Month(dpFechaFin.SelectedDate),
-                                                                          Day(dpFechaFin.SelectedDate)
-                                                                      ),
-                                                                      Maquina: If(
-                                                                          LookUp(
-                                                                              Empleados,
-                                                                              Codigo = Drp_Empleado_HP.SelectedText.Codigo
-                                                                          ).Puesto = "INSPECTOR DE PROCESO FINAL",
-                                                                          "INSPECCIONFINAL",
-                                                                          drpMaquina.SelectedText.Value
-                                                                      ),
-                                                                      'Maquina 2': drpMaquina2.SelectedText.Value,
-                                                                      'Maquina 3': drpMaquina3.SelectedText.Value,
-                                                                      'Maquina 4': drpMaquina4.SelectedText.Value
-                                                                  }
-                                                              );
-                                                              Notify(
-                                                                  "Se Edito Correctamente",
-                                                                  NotificationType.Success
-                                                              );
-                                                              If(
-                                                                  dpFechaInicio.SelectedDate > Today() || (dpFechaInicio.SelectedDate <= Today() && dpFechaFin.SelectedDate >= Today()),
-                                                                  CorreoConPDF.Run(
-                                                                      HtmlPDF_HP.HtmlText,
-                                                                      LookUp(
-                                                                          Empleados,
-                                                                          Nombre = Drp_Empleado_HP.SelectedText.Value,
-                                                                          Correo
-                                                                      ),
-                                                                      "Horario Proxima Semana",
-                                                                      HtmlCuerpo_HP.HtmlText
-                                                                  )
-                                                              );
-                                                              UpdateContext({Mostrar: false});
-                                                              ResetForm(Frm_HP)
-                                                          )
-                                                      )
-                                                  )
-                                              )
-                                          )
-                                      )
-                                  )
-                              )
-                          )
-                        Size: =20
-                        Text: =If(Mostrar,"Editar", "Guardar")
-                        Width: =150
-                  - Icon14_141:
+                  - Icon1_47:
                       Control: Classic/Icon@2.5.0
                       Properties:
                         AlignInContainer: =AlignInContainer.Center
-                        Color: =RGBA(0, 0, 0, 0)
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisplayMode: =DisplayMode.View
+                        Height: =75
+                        Icon: =Icon.Person
+                        PaddingBottom: =2
+                        PaddingLeft: =5
+                        PaddingRight: =2
+                        PaddingTop: =2
+                        Width: =75
+                  - txt_User_HP:
+                      Control: Classic/TextInput@2.3.2
+                      Properties:
+                        Align: =Align.Center
+                        AlignInContainer: =AlignInContainer.Center
+                        BorderColor: =RGBA(204, 231, 246, 1)
+                        BorderThickness: =20
+                        Color: =RGBA(12, 59, 94, 1)
+                        Default: =LookUp(Empleados, Codigo = VarName, Nombre)
+                        DisplayMode: =DisplayMode.View
+                        FontWeight: =FontWeight.Bold
+                        Height: =60
+                        PaddingLeft: =5
+                        RadiusBottomLeft: =20
+                        RadiusBottomRight: =20
+                        RadiusTopLeft: =20
+                        RadiusTopRight: =20
+                        Size: =18
+                        Width: =400
+                  - Icon14_117:
+                      Control: Classic/Icon@2.5.0
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Center
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisplayMode: =DisplayMode.View
                         Height: =60
                         Icon: =Icon.VerticalLine
-                        Width: =15
+                        Width: =30
                         X: =820
                         Y: =22
-                  - Icn_Limpiar_HP_1:
-                      Control: Classic/Icon@2.5.0
+                  - Label1_59:
+                      Control: Label@2.5.1
                       Properties:
+                        Align: =Align.Center
                         AlignInContainer: =AlignInContainer.Center
-                        BorderColor: =App.Theme.Colors.Primary
-                        BorderThickness: =2
                         Color: =RGBA(255, 255, 255, 1)
-                        Fill: =RGBA(153, 201, 238, 1)
-                        FocusedBorderThickness: =20
+                        DisplayMode: =DisplayMode.View
+                        FontWeight: =FontWeight.Bold
                         Height: =60
-                        HoverBorderColor: =App.Theme.Colors.Darker10
-                        HoverColor: =RGBA(255, 255, 255, 1)
-                        HoverFill: =RGBA(40, 134, 222, 1)
-                        Icon: =Icon.Erase
-                        OnSelect: |-
-                          =UpdateContext({Mostrar: false});
-                          UpdateContext({FechaHorario: Blank()});
-                          ResetForm(Frm_HP_1)
-                        PaddingBottom: =5
-                        PaddingLeft: =5
-                        PaddingRight: =5
-                        PaddingTop: =5
-                        Width: =65
+                        Size: =25
+                        Text: ="Horarios de Empleados"
+                        Width: =740
                   - Icon14_142:
                       Control: Classic/Icon@2.5.0
                       Properties:
@@ -315,9 +176,13 @@ Screens:
                         HoverFill: =RGBA(40, 134, 222, 1)
                         Icon: =Icon.Home
                         OnSelect: |-
-                          =ResetForm(Frm_HP_1);
-                          Reset(Txt_Codigo_HP_1);
-                          UpdateContext({Mostrar: false});
+                          =UpdateContext({FechaHorario: Blank()});
+                          UpdateContext({Mostrar: false, reset: true});
+                          Reset(glr_Horarios_HP);
+                          Reset(dp_FechaInicio_HP);
+                          Reset(drp_Empleado_HP);
+                          Reset(txt_Codigo_HP);
+                          UpdateContext({reset: false});
                           Navigate(MenuAdministrativo)
                         PaddingBottom: =5
                         PaddingLeft: =5
@@ -407,7 +272,7 @@ Screens:
                                                 Items: |-
                                                   =//Empleados
                                                   If(IsBlank(txt_Codigo_HP.Text),
-                                                  Sort(Empleados, Codigo, SortOrder.Ascending), 
+                                                  Sort(Empleados, Nombre, SortOrder.Ascending), 
                                                   Filter(Empleados, Codigo = txt_Codigo_HP.Text))
                                                 Items.Value: =crfb9_nombre
                                                 OnChange: |
@@ -454,6 +319,259 @@ Screens:
                                           Width: =120
                                           X: =733
                                           Y: =5
+                                    - Btn_HP_2:
+                                        Control: Classic/Button@2.2.0
+                                        Properties:
+                                          Color: =RGBA(255, 255, 255, 1)
+                                          Fill: |
+                                            =RGBA(153, 201, 238, 1)
+                                          HoverColor: =RGBA(255, 255, 255, 1)
+                                          HoverFill: =RGBA(40, 134, 222, 1)
+                                          OnSelect: |
+                                            =UpdateContext({FechaHorario: Blank()});
+                                            UpdateContext({Mostrar: false, reset: true});
+                                            Reset(glr_Horarios_HP);
+                                            Reset(dp_FechaInicio_HP);
+                                            UpdateContext({reset: false});
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =18
+                                          Text: ="X"
+                                          Width: =50
+                                          X: =1290
+                                          Y: =5
+                                    - Btn_HP_1:
+                                        Control: Classic/Button@2.2.0
+                                        Properties:
+                                          Color: =RGBA(255, 255, 255, 1)
+                                          Fill: |
+                                            =RGBA(153, 201, 238, 1)
+                                          HoverColor: =RGBA(255, 255, 255, 1)
+                                          HoverFill: =RGBA(40, 134, 222, 1)
+                                          OnSelect: |-
+                                            =If(
+                                                IsBlank(drp_Empleado_HP.SelectedText.Value),
+                                                Notify(
+                                                    "Debe seleccionar a un Empleado",
+                                                    NotificationType.Error
+                                                ),
+                                                If(
+                                                    IsBlank(dp_FechaInicio_HP.SelectedDate),
+                                                    Notify(
+                                                        "Debe indicar la Fecha de Inicio",
+                                                        NotificationType.Error
+                                                    ),
+                                                    If(
+                                                        Weekday(dp_FechaInicio_HP.SelectedDate) <> 2,
+                                                        Notify(
+                                                            "La Fecha Inicio debe ser un Lunes",
+                                                            NotificationType.Error
+                                                        ),
+                                                        If(
+                                                            dp_FechaInicio_HP.SelectedDate > Today() + 7,
+                                                            Notify(
+                                                                "No se permite asignar un horaro tan a futuro como ese, maximo el de la proxima semana",
+                                                                NotificationType.Error
+                                                            ),
+                                                            If(
+                                                                !IsBlank(
+                                                                    LookUp(
+                                                                        Filter(
+                                                                            HorarioSemanals,
+                                                                            Empleado = drp_Empleado_HP.Selected.Nombre
+                                                                        ),
+                                                                        Fecha_Inicio = dp_FechaInicio_HP.SelectedDate
+                                                                    )
+                                                                ) && !(glr_InfoHorarios_HP.Selected.Fecha_Inicio = dp_FechaInicio_HP.SelectedDate && Mostrar),
+                                                                Notify(
+                                                                    "Ya exite un Horario para esa fecha",
+                                                                    NotificationType.Error
+                                                                ),
+                                                                If(
+                                                                    With(
+                                                                        {Empleado: drp_Empleado_HP.Selected},
+                                                                        ("Supervi" in Empleado.Puesto) && IsBlank(drp_Zona_HP.Selected.Texto)
+                                                                    ),
+                                                                    Notify(
+                                                                        "Debe asiganarle una Zona al supervisor",
+                                                                        NotificationType.Error
+                                                                    ),
+                                                                    If(
+                                                                        dp_FechaInicio_HP.SelectedDate + 6 <> DateValue(dp_fechaFin_HP.Text),
+                                                                        Notify(
+                                                                            "Fechas Ingresadas invalidas, de be ser una semana completa(Lunes a Domingo)",
+                                                                            NotificationType.Error
+                                                                        ),
+                                                                        If(
+                                                                        /*LookUp(
+                                                                            Empleados;
+                                                                            Codigo = drp_Empleado_HP.Selected.Codigo;
+                                                                            Area
+                                                                        ) = "OPERARIOS" && IsBlank(drpMaquina_1.SelectedText.Value) && IsBlank(drpMaquina2_1.SelectedText.Value) && IsBlank(drpMaquina3_1.SelectedText.Value);
+                                                                        Notify(
+                                                                            "Debe seleccionar al menos una maquina para el Operario";
+                                                                            NotificationType.Error
+                                                                        );*/
+                                                                            Value(txt_HorasT_HP.Text) < 47.5,
+                                                                            Notify(
+                                                                                "Debe de cumplir con minimo 47.5 horas trabajadas",
+                                                                                NotificationType.Error
+                                                                            ),
+                                                                            With(
+                                                                                {
+                                                                                    L: LookUp(
+                                                                                        glr_Horarios_HP.AllItems,
+                                                                                        name = "Lunes"
+                                                                                    ),
+                                                                                    K: LookUp(
+                                                                                        glr_Horarios_HP.AllItems,
+                                                                                        name = "Martes"
+                                                                                    ),
+                                                                                    M: LookUp(
+                                                                                        glr_Horarios_HP.AllItems,
+                                                                                        name = "Miercoles"
+                                                                                    ),
+                                                                                    J: LookUp(
+                                                                                        glr_Horarios_HP.AllItems,
+                                                                                        name = "Jueves"
+                                                                                    ),
+                                                                                    V: LookUp(
+                                                                                        glr_Horarios_HP.AllItems,
+                                                                                        name = "Viernes"
+                                                                                    ),
+                                                                                    S: LookUp(
+                                                                                        glr_Horarios_HP.AllItems,
+                                                                                        name = "Sabado"
+                                                                                    ),
+                                                                                    D: LookUp(
+                                                                                        glr_Horarios_HP.AllItems,
+                                                                                        name = "Domingo"
+                                                                                    )
+                                                                                },
+                                                                                If(
+                                                                                    !Mostrar,
+                                                                                    Collect(
+                                                                                        HorarioSemanals,
+                                                                                        {
+                                                                                            Empleado: Drp_Empleado_HP.Selected.Nombre,
+                                                                                            Codigo: Drp_Empleado_HP.Selected.Codigo,
+                                                                                            Lunes: L.drpTurno.Selected.Turno_Op & " - " & L.lblHorario.Text,
+                                                                                            Martes: K.drpTurno.Selected.Turno_Op & " - " & K.lblHorario.Text,
+                                                                                            Miercoles: M.drpTurno.Selected.Turno_Op & " - " & M.lblHorario.Text,
+                                                                                            Jueves: J.drpTurno.Selected.Turno_Op & " - " & J.lblHorario.Text,
+                                                                                            Viernes: V.drpTurno.Selected.Turno_Op & " - " & V.lblHorario.Text,
+                                                                                            Sabado: S.drpTurno.Selected.Turno_Op & " - " & S.lblHorario.Text,
+                                                                                            Domingo: D.drpTurno.Selected.Turno_Op & " - " & D.lblHorario.Text,
+                                                                                            Horas_Trabajadas: Value(txt_HorasT_HP.Text),
+                                                                                            Total_Horas: txt_HorasT_HP.Text,
+                                                                                            Horas_Pagadas: Value(txt_HorasP_HP.Text),
+                                                                                            Total_Horas_Pagadas: txt_HorasP_HP.Text,
+                                                                                            Fecha_Inicio: DateValue(dp_FechaInicio_HP.SelectedDate),
+                                                                                            Fecha_Fin: DateValue(dp_fechaFin_HP.Text),
+                                                                                            Maquina: drp_Maquina1_HP.SelectedText.Value,
+                                                                                            'Maquina 2': drp_Maquina2_HP.SelectedText.Value,
+                                                                                            'Maquina 3': drp_Maquina3_HP.SelectedText.Value,
+                                                                                            'Maquina 4': drp_Maquina4_HP.SelectedText.Value,
+                                                                                            Zona: drp_Zona_HP.SelectedText.Texto
+                                                                                        }
+                                                                                    );
+                                                                                    Notify(
+                                                                                        "Se Guardo Correctamente",
+                                                                                        NotificationType.Success
+                                                                                    );
+                                                                                    If(
+                                                                                        dp_FechaInicio_HP.SelectedDate > Today() || (dp_FechaInicio_HP.SelectedDate <= Today() && DateValue(dp_fechaFin_HP.Text) >= Today()),
+                                                                                        CorreoConPDF.Run(
+                                                                                            HtmlPDF_HP_1.HtmlText,
+                                                                                            LookUp(
+                                                                                                Empleados,
+                                                                                                Nombre = drp_Empleado_HP.SelectedText.Value,
+                                                                                                Correo
+                                                                                            ),
+                                                                                            "Horario Semanal",
+                                                                                            HtmlCuerpo_HP_1.HtmlText
+                                                                                        );
+                                                                                    );
+                                                                                    UpdateContext(
+                                                                                        {
+                                                                                            Mostrar: false,
+                                                                                            reset: true
+                                                                                        }
+                                                                                    );
+                                                                                    Reset(glr_Horarios_HP);
+                                                                                    Reset(dp_FechaInicio_HP);
+                                                                                    UpdateContext({reset: false}),
+                                                                                    Patch(
+                                                                                        HorarioSemanals,
+                                                                                        glr_InfoHorarios_HP.Selected,
+                                                                                        {
+                                                                                            Lunes: L.drpTurno.Selected.Turno_Op & " - " & L.lblHorario.Text,
+                                                                                            Martes: K.drpTurno.Selected.Turno_Op & " - " & K.lblHorario.Text,
+                                                                                            Miercoles: M.drpTurno.Selected.Turno_Op & " - " & M.lblHorario.Text,
+                                                                                            Jueves: J.drpTurno.Selected.Turno_Op & " - " & J.lblHorario.Text,
+                                                                                            Viernes: V.drpTurno.Selected.Turno_Op & " - " & V.lblHorario.Text,
+                                                                                            Sabado: S.drpTurno.Selected.Turno_Op & " - " & S.lblHorario.Text,
+                                                                                            Domingo: D.drpTurno.Selected.Turno_Op & " - " & D.lblHorario.Text,
+                                                                                            Horas_Trabajadas: Value(txt_HorasT_HP.Text),
+                                                                                            Total_Horas: txt_HorasT_HP.Text,
+                                                                                            Horas_Pagadas: Value(txt_HorasP_HP.Text),
+                                                                                            Total_Horas_Pagadas: txt_HorasP_HP.Text,
+                                                                                            Fecha_Inicio: DateValue(dp_FechaInicio_HP.SelectedDate),
+                                                                                            Fecha_Fin: DateValue(dp_fechaFin_HP.Text),
+                                                                                            Maquina: drp_Maquina1_HP.SelectedText.Value,
+                                                                                            'Maquina 2': drp_Maquina2_HP.SelectedText.Value,
+                                                                                            'Maquina 3': drp_Maquina3_HP.SelectedText.Value,
+                                                                                            'Maquina 4': drp_Maquina4_HP.SelectedText.Value,
+                                                                                            Zona: drp_Zona_HP.SelectedText.Texto
+                                                                                        }
+                                                                                    );
+                                                                                    Notify(
+                                                                                        "Se Edito Correctamente",
+                                                                                        NotificationType.Success
+                                                                                    );
+                                                                                    If(
+                                                                                        dpFechaInicio.SelectedDate > Today() || (dpFechaInicio.SelectedDate <= Today() && dpFechaFin.SelectedDate >= Today()),
+                                                                                        CorreoConPDF.Run(
+                                                                                            HtmlPDF_HP.HtmlText,
+                                                                                            LookUp(
+                                                                                                Empleados,
+                                                                                                Nombre = Drp_Empleado_HP.SelectedText.Value,
+                                                                                                Correo
+                                                                                            ),
+                                                                                            "Horario Proxima Semana",
+                                                                                            HtmlCuerpo_HP.HtmlText
+                                                                                        )
+                                                                                    );
+                                                                                    UpdateContext(
+                                                                                        {
+                                                                                            Mostrar: false,
+                                                                                            reset: true
+                                                                                        }
+                                                                                    );
+                                                                                    Reset(glr_Horarios_HP);
+                                                                                    Reset(dp_FechaInicio_HP);
+                                                                                    UpdateContext({reset: false})
+                                                                                )
+                                                                            )
+                                                                        )
+                                                                    )
+                                                                )
+                                                            )
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =18
+                                          Text: =If(Mostrar,"Editar", "Guardar")
+                                          Width: =If(Mostrar, 100, 160)
+                                          X: =1180
+                                          Y: =5
                               - ctn_Horario_HP:
                                   Control: GroupContainer@1.3.0
                                   Variant: ManualLayout
@@ -496,7 +614,7 @@ Screens:
                                           Width: =720
                                           Y: =30
                                         Children:
-                                          - lblHorario_L_2:
+                                          - lbl_Dia:
                                               Control: Label@2.5.1
                                               Properties:
                                                 Align: =Align.Center
@@ -872,7 +990,15 @@ Screens:
                                           FontWeight: =FontWeight.Bold
                                           Size: =15
                                           Text: ="Maquinas"
-                                          Visible: =If(LookUp(Empleados, Nombre = drp_Empleado_HP.SelectedText.Value, Departamento) = "PRODUCCION", true, false)
+                                          Visible: |-
+                                            =With(
+                                                {Empleado: drp_Empleado_HP.Selected},
+                                                If(
+                                                    Empleado.Departamento = "PRODUCCION" && !("Supervi" in Empleado.Puesto) && !(Empleado.Puesto in ["Gerente de Produccion"]),
+                                                    true,
+                                                    false
+                                                )
+                                            )
                                           Width: =111
                                           Wrap: =false
                                           Y: =390
@@ -918,7 +1044,15 @@ Screens:
                                           Reset: =reset
                                           SelectionColor: =RGBA(255, 255, 255, 1)
                                           Size: =11
-                                          Visible: =If(LookUp(Empleados, Nombre = drp_Empleado_HP.SelectedText.Value, Departamento) = "PRODUCCION", true, false)
+                                          Visible: |-
+                                            =With(
+                                                {Empleado: drp_Empleado_HP.Selected},
+                                                If(
+                                                    Empleado.Departamento = "PRODUCCION" && !("Supervi" in Empleado.Puesto) && !(Empleado.Puesto in ["Gerente de Produccion"]),
+                                                    true,
+                                                    false
+                                                )
+                                            )
                                           Width: =152
                                           X: =111
                                           Y: =390
@@ -944,7 +1078,15 @@ Screens:
                                           Reset: =reset
                                           SelectionColor: =RGBA(255, 255, 255, 1)
                                           Size: =11
-                                          Visible: =If(LookUp(Empleados, Nombre = drp_Empleado_HP.SelectedText.Value, Departamento) = "PRODUCCION", true, false)
+                                          Visible: |-
+                                            =With(
+                                                {Empleado: drp_Empleado_HP.Selected},
+                                                If(
+                                                    Empleado.Departamento = "PRODUCCION" && !("Supervi" in Empleado.Puesto) && !(Empleado.Puesto in ["Gerente de Produccion"]),
+                                                    true,
+                                                    false
+                                                )
+                                            )
                                           Width: =152
                                           X: =263
                                           Y: =390
@@ -970,7 +1112,15 @@ Screens:
                                           Reset: =reset
                                           SelectionColor: =RGBA(255, 255, 255, 1)
                                           Size: =11
-                                          Visible: =If(LookUp(Empleados, Nombre = drp_Empleado_HP.SelectedText.Value, Departamento) = "PRODUCCION", true, false)
+                                          Visible: |-
+                                            =With(
+                                                {Empleado: drp_Empleado_HP.Selected},
+                                                If(
+                                                    Empleado.Departamento = "PRODUCCION" && !("Supervi" in Empleado.Puesto) && !(Empleado.Puesto in ["Gerente de Produccion"]),
+                                                    true,
+                                                    false
+                                                )
+                                            )
                                           Width: =152
                                           X: =415
                                           Y: =390
@@ -996,9 +1146,93 @@ Screens:
                                           Reset: =reset
                                           SelectionColor: =RGBA(255, 255, 255, 1)
                                           Size: =11
-                                          Visible: =If(LookUp(Empleados, Nombre = drp_Empleado_HP.SelectedText.Value, Departamento) = "PRODUCCION", true, false)
+                                          Visible: |-
+                                            =With(
+                                                {Empleado: drp_Empleado_HP.Selected},
+                                                If(
+                                                    Empleado.Departamento = "PRODUCCION" && !("Supervi" in Empleado.Puesto) && !(Empleado.Puesto in ["Gerente de Produccion"]),
+                                                    true,
+                                                    false
+                                                )
+                                            )
                                           Width: =152
                                           X: =567
+                                          Y: =390
+                                    - DataCardKey153_7:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          Align: =Align.Center
+                                          BorderColor: =RGBA(40, 134, 222, 1)
+                                          BorderThickness: =1
+                                          Fill: =RGBA(180, 214, 250, 1)
+                                          FontWeight: =FontWeight.Bold
+                                          Size: =15
+                                          Text: ="Encargado de Zona"
+                                          Visible: |-
+                                            =With(
+                                                {Empleado: drp_Empleado_HP.Selected},
+                                                If(
+                                                    ("Supervi" in Empleado.Puesto) && !(Empleado.Puesto in ["Gerente de Produccion"]),
+                                                    true,
+                                                    false
+                                                )
+                                            )
+                                          Width: =200
+                                          Wrap: =false
+                                          Y: =390
+                                    - drp_Zona_HP:
+                                        Control: Classic/DropDown@2.3.1
+                                        Properties:
+                                          AllowEmptySelection: =true
+                                          BorderColor: =RGBA(0, 134, 208, 1)
+                                          BorderThickness: =1
+                                          ChevronBackground: =RGBA(153, 201, 238, 1)
+                                          ChevronDisabledFill: =RGBA(204, 228, 246, 1)
+                                          ChevronFill: =RGBA(255, 255, 255, 1)
+                                          ChevronHoverBackground: =RGBA(153, 201, 238, 1)
+                                          ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                                          Default: =If(Mostrar,glr_InfoHorarios_HP.Selected.Zona)
+                                          DisabledColor: =RGBA(0, 0, 0, 1)
+                                          DisabledFill: =RGBA(204, 228, 246, 1)
+                                          DisplayMode: |-
+                                            =If(
+                                                LookUp(Empleados, VarName = Codigo).Rol in ["ADM", "ADMIN", "SUP"],
+                                                DisplayMode.Edit,
+                                                DisplayMode.View
+                                            )
+                                          FontWeight: =If(drp_Zona_HP.SelectedText.Value <> LookUp(Tipo_Turnos, Id_Turno = "6", Turno_Op), FontWeight.Bold, FontWeight.Normal)
+                                          HoverBorderColor: =RGBA(102, 182, 227, 1)
+                                          HoverFill: =RGBA(204, 228, 246, 1)
+                                          Items: =ZonaPlannings
+                                          Items.Value: =crfb9_texto
+                                          OnChange: |-
+                                            =/*Patch(
+                                                Horario;
+                                                LookUp(Horario; name = ThisItem.name);
+                                                {
+                                                    turno: Self.Selected.Turno_Op;
+                                                    Horario: Self.Selected.Turno_Horas;
+                                                    HTrabajadas: Self.Selected.Horas_Trabajadas;
+                                                    HPagadas: Self.Selected.Horas_Pagadas
+                                                }
+                                            )*/
+                                          PressedBorderColor: =RGBA(102, 174, 229, 1)
+                                          PressedColor: =RGBA(255, 255, 255, 1)
+                                          PressedFill: =RGBA(102, 174, 229, 1)
+                                          Reset: =reset
+                                          SelectionColor: =RGBA(255, 255, 255, 1)
+                                          Size: =15
+                                          Visible: |-
+                                            =With(
+                                                {Empleado: drp_Empleado_HP.Selected},
+                                                If(
+                                                    ("Supervi" in Empleado.Puesto),
+                                                    true,
+                                                    false
+                                                )
+                                            )
+                                          Width: =150
+                                          X: =197
                                           Y: =390
                               - ctn_InfoEmpleado_HP:
                                   Control: GroupContainer@1.3.0
@@ -1023,12 +1257,184 @@ Screens:
                                           Align: =Align.Center
                                           BorderColor: =RGBA(0, 120, 212, 1)
                                           BorderThickness: =1
-                                          Fill: =RGBA(180, 214, 250, 1)
+                                          Color: =RGBA(255, 255, 255, 1)
+                                          Fill: =RGBA(40, 134, 222, 1)
                                           FontWeight: =FontWeight.Semibold
                                           Height: =30
                                           Size: =15
                                           Text: ="Informacion del Empleado"
                                           Width: =720
+                                    - TextInput1_131:
+                                        Control: Classic/TextInput@2.3.2
+                                        Properties:
+                                          Align: =Align.Center
+                                          Default: ="Codigo"
+                                          DisplayMode: =DisplayMode.View
+                                          Height: =20
+                                          OnSelect: =
+                                          PaddingLeft: =5
+                                          RadiusBottomLeft: =8
+                                          RadiusBottomRight: =8
+                                          RadiusTopLeft: =8
+                                          RadiusTopRight: =8
+                                          Width: =80
+                                          X: =10
+                                          Y: =40
+                                    - TextInput1_132:
+                                        Control: Classic/TextInput@2.3.2
+                                        Properties:
+                                          Align: =Align.Center
+                                          Default: =drp_Empleado_HP.Selected.Codigo
+                                          DisplayMode: =DisplayMode.View
+                                          Fill: =RGBA(180, 214, 250, 1)
+                                          FontWeight: =FontWeight.Bold
+                                          Height: =30
+                                          OnSelect: =
+                                          PaddingLeft: =5
+                                          RadiusBottomLeft: =10
+                                          RadiusBottomRight: =10
+                                          RadiusTopLeft: =10
+                                          RadiusTopRight: =10
+                                          Width: =80
+                                          X: =10
+                                          Y: =60
+                                    - TextInput1_133:
+                                        Control: Classic/TextInput@2.3.2
+                                        Properties:
+                                          Align: =Align.Center
+                                          Default: ="Nombre"
+                                          DisplayMode: =DisplayMode.View
+                                          Height: =20
+                                          OnSelect: =
+                                          PaddingLeft: =5
+                                          RadiusBottomLeft: =8
+                                          RadiusBottomRight: =8
+                                          RadiusTopLeft: =8
+                                          RadiusTopRight: =8
+                                          Width: =610
+                                          X: =100
+                                          Y: =40
+                                    - TextInput1_134:
+                                        Control: Classic/TextInput@2.3.2
+                                        Properties:
+                                          Align: =Align.Center
+                                          Default: =drp_Empleado_HP.Selected.Nombre
+                                          DisplayMode: =DisplayMode.View
+                                          Fill: =RGBA(180, 214, 250, 1)
+                                          FontWeight: =FontWeight.Bold
+                                          Height: =30
+                                          OnSelect: =
+                                          PaddingLeft: =5
+                                          RadiusBottomLeft: =10
+                                          RadiusBottomRight: =10
+                                          RadiusTopLeft: =10
+                                          RadiusTopRight: =10
+                                          Width: =610
+                                          X: =100
+                                          Y: =60
+                                    - TextInput1_139:
+                                        Control: Classic/TextInput@2.3.2
+                                        Properties:
+                                          Align: =Align.Center
+                                          Default: ="Area"
+                                          DisplayMode: =DisplayMode.View
+                                          Height: =20
+                                          OnSelect: =
+                                          PaddingLeft: =5
+                                          RadiusBottomLeft: =8
+                                          RadiusBottomRight: =8
+                                          RadiusTopLeft: =8
+                                          RadiusTopRight: =8
+                                          Size: =12
+                                          Width: =180
+                                          X: =10
+                                          Y: =95
+                                    - TextInput1_140:
+                                        Control: Classic/TextInput@2.3.2
+                                        Properties:
+                                          Align: =Align.Center
+                                          Default: =drp_Empleado_HP.Selected.Area
+                                          DisplayMode: =DisplayMode.View
+                                          Fill: =RGBA(180, 214, 250, 1)
+                                          FontWeight: =FontWeight.Bold
+                                          Height: =30
+                                          OnSelect: =
+                                          PaddingLeft: =5
+                                          RadiusBottomLeft: =10
+                                          RadiusBottomRight: =10
+                                          RadiusTopLeft: =10
+                                          RadiusTopRight: =10
+                                          Width: =180
+                                          X: =10
+                                          Y: =115
+                                    - TextInput1_141:
+                                        Control: Classic/TextInput@2.3.2
+                                        Properties:
+                                          Align: =Align.Center
+                                          Default: ="Departamento"
+                                          DisplayMode: =DisplayMode.View
+                                          Height: =20
+                                          OnSelect: =
+                                          PaddingLeft: =5
+                                          RadiusBottomLeft: =8
+                                          RadiusBottomRight: =8
+                                          RadiusTopLeft: =8
+                                          RadiusTopRight: =8
+                                          Size: =12
+                                          Width: =180
+                                          X: =200
+                                          Y: =95
+                                    - TextInput1_142:
+                                        Control: Classic/TextInput@2.3.2
+                                        Properties:
+                                          Align: =Align.Center
+                                          Default: =drp_Empleado_HP.Selected.Departamento
+                                          DisplayMode: =DisplayMode.View
+                                          Fill: =RGBA(180, 214, 250, 1)
+                                          FontWeight: =FontWeight.Bold
+                                          Height: =30
+                                          OnSelect: =
+                                          PaddingLeft: =5
+                                          RadiusBottomLeft: =10
+                                          RadiusBottomRight: =10
+                                          RadiusTopLeft: =10
+                                          RadiusTopRight: =10
+                                          Width: =180
+                                          X: =200
+                                          Y: =115
+                                    - TextInput1_143:
+                                        Control: Classic/TextInput@2.3.2
+                                        Properties:
+                                          Align: =Align.Center
+                                          Default: ="Puesto"
+                                          DisplayMode: =DisplayMode.View
+                                          Height: =20
+                                          OnSelect: =
+                                          PaddingLeft: =5
+                                          RadiusBottomLeft: =8
+                                          RadiusBottomRight: =8
+                                          RadiusTopLeft: =8
+                                          RadiusTopRight: =8
+                                          Size: =12
+                                          X: =390
+                                          Y: =95
+                                    - TextInput1_144:
+                                        Control: Classic/TextInput@2.3.2
+                                        Properties:
+                                          Align: =Align.Center
+                                          Default: =drp_Empleado_HP.Selected.Puesto
+                                          DisplayMode: =DisplayMode.View
+                                          Fill: =RGBA(180, 214, 250, 1)
+                                          FontWeight: =FontWeight.Bold
+                                          Height: =30
+                                          OnSelect: =
+                                          PaddingLeft: =5
+                                          RadiusBottomLeft: =10
+                                          RadiusBottomRight: =10
+                                          RadiusTopLeft: =10
+                                          RadiusTopRight: =10
+                                          X: =390
+                                          Y: =115
                               - ctn_InfoHorarios_HP:
                                   Control: GroupContainer@1.3.0
                                   Variant: ManualLayout
@@ -1070,7 +1476,15 @@ Screens:
                                           OnSelect: =
                                           ShowScrollbar: =false
                                           TemplatePadding: =10
-                                          TemplateSize: =If(LookUp(Empleados, Nombre = drp_Empleado_HP.SelectedText.Value, Departamento) = "PRODUCCION", 315, 255)
+                                          TemplateSize: |-
+                                            =With(
+                                                {Empleado: drp_Empleado_HP.Selected},
+                                                If(
+                                                    Empleado.Departamento = "PRODUCCION" && !(Empleado.Puesto in ["Gerente de Produccion"]),
+                                                    315,
+                                                    255
+                                                )
+                                            )
                                           Width: =590
                                           Y: =30
                                         Children:
@@ -1082,7 +1496,15 @@ Screens:
                                                 BorderThickness: =3
                                                 DropShadow: =DropShadow.None
                                                 Fill: =RGBA(180, 214, 250, 1)
-                                                Height: =If(LookUp(Empleados, Nombre = drp_Empleado_HP.SelectedText.Value, Departamento) = "PRODUCCION", 315, 255)
+                                                Height: |-
+                                                  =With(
+                                                      {Empleado: drp_Empleado_HP.Selected},
+                                                      If(
+                                                          Empleado.Departamento = "PRODUCCION" && !(Empleado.Puesto in ["Gerente de Produccion"]),
+                                                          315,
+                                                          255
+                                                      )
+                                                  )
                                                 RadiusBottomLeft: =10
                                                 RadiusBottomRight: =10
                                                 RadiusTopLeft: =10
@@ -1518,7 +1940,15 @@ Screens:
                                                       RadiusBottomRight: =8
                                                       RadiusTopLeft: =8
                                                       RadiusTopRight: =8
-                                                      Visible: =If(LookUp(Empleados, Nombre = drp_Empleado_HP.SelectedText.Value, Departamento) = "PRODUCCION", true, false)
+                                                      Visible: |-
+                                                        =With(
+                                                            {Empleado: drp_Empleado_HP.Selected},
+                                                            If(
+                                                                Empleado.Departamento = "PRODUCCION" && !("Supervi" in Empleado.Puesto) && !(Empleado.Puesto in ["Gerente de Produccion"]),
+                                                                true,
+                                                                false
+                                                            )
+                                                        )
                                                       Width: =540
                                                       X: =14
                                                       Y: =247
@@ -1532,7 +1962,15 @@ Screens:
                                                       RadiusBottomRight: =8
                                                       RadiusTopLeft: =8
                                                       RadiusTopRight: =8
-                                                      Visible: =If(LookUp(Empleados, Nombre = drp_Empleado_HP.SelectedText.Value, Departamento) = "PRODUCCION", true, false)
+                                                      Visible: |-
+                                                        =With(
+                                                            {Empleado: drp_Empleado_HP.Selected},
+                                                            If(
+                                                                Empleado.Departamento = "PRODUCCION" && !("Supervi" in Empleado.Puesto) && !(Empleado.Puesto in ["Gerente de Produccion"]),
+                                                                true,
+                                                                false
+                                                            )
+                                                        )
                                                       Width: =550
                                                       X: =9
                                                       Y: =267
@@ -1605,6 +2043,59 @@ Screens:
                                                             Width: =130
                                                             X: =413
                                                             Y: =5
+                                                - TextInput1_145:
+                                                    Control: Classic/TextInput@2.3.2
+                                                    Properties:
+                                                      Align: =Align.Center
+                                                      Default: ="Zona Encargada"
+                                                      DisplayMode: =DisplayMode.View
+                                                      Fill: =RGBA(180, 214, 250, 1)
+                                                      Height: =20
+                                                      OnSelect: =
+                                                      PaddingLeft: =5
+                                                      RadiusBottomLeft: =8
+                                                      RadiusBottomRight: =8
+                                                      RadiusTopLeft: =8
+                                                      RadiusTopRight: =8
+                                                      Visible: |-
+                                                        =With(
+                                                            {Empleado: drp_Empleado_HP.Selected},
+                                                            If(
+                                                                ("Supervi" in Empleado.Puesto) && !(Empleado.Puesto in ["Gerente de Produccion"]),
+                                                                true,
+                                                                false
+                                                            )
+                                                        )
+                                                      Width: =240
+                                                      X: =165
+                                                      Y: =252
+                                                - TextInput1_146:
+                                                    Control: Classic/TextInput@2.3.2
+                                                    Properties:
+                                                      Align: =Align.Center
+                                                      Default: =ThisItem.Zona
+                                                      DisplayMode: =DisplayMode.View
+                                                      FontWeight: =FontWeight.Bold
+                                                      Height: =30
+                                                      OnSelect: =
+                                                      PaddingLeft: =5
+                                                      RadiusBottomLeft: =10
+                                                      RadiusBottomRight: =10
+                                                      RadiusTopLeft: =10
+                                                      RadiusTopRight: =10
+                                                      Size: =11.5
+                                                      Visible: |-
+                                                        =With(
+                                                            {Empleado: drp_Empleado_HP.Selected},
+                                                            If(
+                                                                ("Supervi" in Empleado.Puesto) && !(Empleado.Puesto in ["Gerente de Produccion"]),
+                                                                true,
+                                                                false
+                                                            )
+                                                        )
+                                                      Width: =240
+                                                      X: =165
+                                                      Y: =272
                                                 - Icn_SelectInfo_HP_1:
                                                     Control: Classic/Icon@2.5.0
                                                     Properties:
@@ -1612,7 +2103,15 @@ Screens:
                                                       Color: =RGBA(0, 0, 0, 0)
                                                       DisabledColor: =RGBA(0, 94, 146, 1)
                                                       Fill: =If(ThisItem.IsSelected && Mostrar, RGBA(0, 134, 208, 0.20),RGBA(0, 0, 0, 0))
-                                                      Height: =If(LookUp(Empleados, Nombre = drp_Empleado_HP.SelectedText.Value, Departamento) = "PRODUCCION", 315, 255)
+                                                      Height: |-
+                                                        =With(
+                                                            {Empleado: drp_Empleado_HP.Selected},
+                                                            If(
+                                                                Empleado.Departamento = "PRODUCCION" && !(Empleado.Puesto in ["Gerente de Produccion"]),
+                                                                315,
+                                                                255
+                                                            )
+                                                        )
                                                       HoverBorderColor: =
                                                       HoverColor: =RGBA(0, 134, 208, 1)
                                                       HoverFill: =RGBA(0, 134, 208, 0.2)
@@ -1623,7 +2122,7 @@ Screens:
                                                       PaddingLeft: =90
                                                       PaddingRight: =90
                                                       PaddingTop: =90
-                                                      Width: =570
+                                                      Width: =569
                                     - Icn_ViewHorarios_HP_1:
                                         Control: Classic/Icon@2.5.0
                                         Properties:
@@ -1642,7 +2141,190 @@ Screens:
             DisabledBorderColor: =RGBA(56, 56, 56, 1)
             Font: =Font.'Open Sans'
             Height: =14
-            HtmlText: "=Concatenate(\n  \"<!DOCTYPE html>\",\n  \"<html>\",\n  \"<head>\",\n    \"<title>Horarios</title>\",\n    \"<style>\",\n      \"body { font-family: Arial, sans-serif; margin: 20px; }\",\n      \"h1 { color: #333; font-weight: bold; margin-bottom: 10px; }\",\n      \"table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }\",\n      \"th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }\",\n      \"th { background-color: #f0f0f0; }\",\n      \".cell { padding: 10px; border-bottom: 1px solid #ddd; }\",\n      \".button { background-color: #4CAF50; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }\",\n      \".button:hover { background-color: #3e8e41; }\",\n    \"</style>\",\n  \"</head>\",\n  \"<body>\",\n    \"<h1>Horario</h1>\",\n    \"<table>\",\n      \"<tr>\",\n        \"<th>Día</th>\",\n        \"<th>Turno</th>\",\n        \"<th>Horario</th>\",\n      \"</tr>\",\n      \"<tr>\",\n        \"<td class='cell'>Lunes</td>\",\n        \"<td class='cell'>\", drpTurno_L_1.SelectedText.Value, \"</td>\",\n        \"<td class='cell'>\", lblHorario_L_1.Text, \"</td>\",\n      \"</tr>\",\n      \"<tr>\",\n        \"<td class='cell'>Martes</td>\",\n        \"<td class='cell'>\", drpTurno_K_1.SelectedText.Value, \"</td>\",\n        \"<td class='cell'>\", lblHorario_K_1.Text, \"</td>\",\n      \"</tr>\",\n      \"<tr>\",\n        \"<td class='cell'>Miércoles</td>\",\n        \"<td class='cell'>\", drpTurno__M_1.SelectedText.Value, \"</td>\",\n        \"<td class='cell'>\", lblHorario_M_1.Text, \"</td>\",\n      \"</tr>\",\n      \"<tr>\",\n        \"<td class='cell'>Jueves</td>\",\n        \"<td class='cell'>\", drpTurno_J.SelectedText.Value, \"</td>\",\n        \"<td class='cell'>\", lblHorario_J.Text, \"</td>\",\n      \"</tr>\",\n      \"<tr>\",\n        \"<td class='cell'>Viernes</td>\",\n        \"<td class='cell'>\", drpTurno_V.SelectedText.Value, \"</td>\",\n        \"<td class='cell'>\", lblHorario_V.Text, \"</td>\",\n      \"</tr>\",\n      \"<tr>\",\n        \"<td class='cell'>Sábado</td>\",\n        \"<td class='cell'>\", drpTurno_S.SelectedText.Value, \"</td>\",\n        \"<td class='cell'>\", lblHorario_S.Text, \"</td>\",\n      \"</tr>\",\n      \"<tr>\",\n        \"<td class='cell'>Domingo</td>\",\n        \"<td class='cell'>\", drpTurno_D.SelectedText.Value, \"</td>\",\n        \"<td class='cell'>\", lblHorario_D.Text, \"</td>\",\n      \"</tr>\",\n    \"</table>\",\n    \n    \"<h1>Máquinas Asignadas</h1>\",\n    \"<table>\",\n      \"<tr>\",\n        \"<th>Máquina 1</th>\",\n        \"<th>Máquina 2</th>\",\n        \"<th>Máquina 3</th>\",\n        \"<th>Máquina 4</th>\",\n      \"</tr>\",\n      \"<tr>\",\n        \"<td class='cell'>\", drpMaquina.SelectedText.Value, \"</td>\",\n        \"<td class='cell'>\", drpMaquina2.SelectedText.Value, \"</td>\",\n        \"<td class='cell'>\", drpMaquina3.SelectedText.Value, \"</td>\",\n        \"<td class='cell'>\", drpMaquina4.SelectedText.Value, \"</td>\",\n      \"</tr>\",\n    \"</table>\",\n    \n    \"<h1>Información Adicional</h1>\",\n    \"<table>\",\n      \"<tr>\",\n        \"<th>Empleado</th>\",\n        \"<th>Fecha Inicio</th>\",\n        \"<th>Fecha Fin</th>\",\n        \"<th>Semana</th>\",\n        \"<th>Horas Trabajadas</th>\",\n        \"<th>Horas Pagadas</th>\",\n      \"</tr>\",\n      \"<tr>\",\n        \"<td class='cell'>\", Drp_Empleado_HP.SelectedText.Value, \"</td>\",\n        \"<td class='cell'>\", Text(dpFechaInicio.SelectedDate, \"[$-en-US]yyyy-mm-dd\"), \"</td>\",\n        \"<td class='cell'>\", Text(dpFechaFin.SelectedDate, \"[$-en-US]yyyy-mm-dd\"), \"</td>\",\n        \"<td class='cell'>\", Text(WeekNum(dpFechaInicio.SelectedDate)), \"</td>\",\n        \"<td class='cell'>\", txtHorasTrabajadas.Text, \"</td>\",\n        \"<td class='cell'>\", txtHorasPagadas.Text, \"</td>\",\n      \"</tr>\",\n    \"</table>\",\n  \"</body>\",\n  \"</html>\"\n)"
+            HtmlText: |-
+              =With(
+                  {
+                      L: LookUp(
+                          glr_Horarios_HP.AllItems,
+                          name = "Lunes"
+                      ),
+                      K: LookUp(
+                          glr_Horarios_HP.AllItems,
+                          name = "Martes"
+                      ),
+                      M: LookUp(
+                          glr_Horarios_HP.AllItems,
+                          name = "Miercoles"
+                      ),
+                      J: LookUp(
+                          glr_Horarios_HP.AllItems,
+                          name = "Jueves"
+                      ),
+                      V: LookUp(
+                          glr_Horarios_HP.AllItems,
+                          name = "Viernes"
+                      ),
+                      S: LookUp(
+                          glr_Horarios_HP.AllItems,
+                          name = "Sabado"
+                      ),
+                      D: LookUp(
+                          glr_Horarios_HP.AllItems,
+                          name = "Domingo"
+                      )
+                  },
+                  Concatenate(
+                      "<!DOCTYPE html>",
+                      "<html>",
+                      "<head>",
+                      "<title>Horarios</title>",
+                      "<style>",
+                      "body { font-family: Arial, sans-serif; margin: 20px; }",
+                      "h1 { color: #333; font-weight: bold; margin-bottom: 10px; }",
+                      "table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }",
+                      "th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }",
+                      "th { background-color: #f0f0f0; }",
+                      ".cell { padding: 10px; border-bottom: 1px solid #ddd; }",
+                      ".button { background-color: #4CAF50; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }",
+                      ".button:hover { background-color: #3e8e41; }",
+                      "</style>",
+                      "</head>",
+                      "<body>",
+                      "<h1>Horario</h1>",
+                      "<table>",
+                      "<tr>",
+                      "<th>Día</th>",
+                      "<th>Turno</th>",
+                      "<th>Horario</th>",
+                      "</tr>",
+                      "<tr>",
+                      "<td class='cell'>Lunes</td>",
+                      "<td class='cell'>",
+                      L.drpTurno.SelectedText.Value,
+                      "</td>",
+                      "<td class='cell'>",
+                      L.lblHorario.Text,
+                      "</td>",
+                      "</tr>",
+                      "<tr>",
+                      "<td class='cell'>Martes</td>",
+                      "<td class='cell'>",
+                      K.drpTurno.SelectedText.Value,
+                      "</td>",
+                      "<td class='cell'>",
+                      K.lblHorario.Text,
+                      "</td>",
+                      "</tr>",
+                      "<tr>",
+                      "<td class='cell'>Miércoles</td>",
+                      "<td class='cell'>",
+                      M.drpTurno.SelectedText.Value,
+                      "</td>",
+                      "<td class='cell'>",
+                      M.lblHorario.Text,
+                      "</td>",
+                      "</tr>",
+                      "<tr>",
+                      "<td class='cell'>Jueves</td>",
+                      "<td class='cell'>",
+                      J.drpTurno.SelectedText.Value,
+                      "</td>",
+                      "<td class='cell'>",
+                      J.lblHorario.Text,
+                      "</td>",
+                      "</tr>",
+                      "<tr>",
+                      "<td class='cell'>Viernes</td>",
+                      "<td class='cell'>",
+                      V.drpTurno.SelectedText.Value,
+                      "</td>",
+                      "<td class='cell'>",
+                      V.lblHorario.Text,
+                      "</td>",
+                      "</tr>",
+                      "<tr>",
+                      "<td class='cell'>Sábado</td>",
+                      "<td class='cell'>",
+                      S.drpTurno.SelectedText.Value,
+                      "</td>",
+                      "<td class='cell'>",
+                      S.lblHorario.Text,
+                      "</td>",
+                      "</tr>",
+                      "<tr>",
+                      "<td class='cell'>Domingo</td>",
+                      "<td class='cell'>",
+                      D.drpTurno.SelectedText.Value,
+                      "</td>",
+                      "<td class='cell'>",
+                      D.lblHorario.Text,
+                      "</td>",
+                      "</tr>",
+                      "</table>",
+                      "<h1>Máquinas Asignadas</h1>",
+                      "<table>",
+                      "<tr>",
+                      "<th>Máquina 1</th>",
+                      "<th>Máquina 2</th>",
+                      "<th>Máquina 3</th>",
+                      "<th>Máquina 4</th>",
+                      "</tr>",
+                      "<tr>",
+                      "<td class='cell'>",
+                      drp_Maquina1_HP.SelectedText.Value,
+                      "</td>",
+                      "<td class='cell'>",
+                      drp_Maquina2_HP.SelectedText.Value,
+                      "</td>",
+                      "<td class='cell'>",
+                      drp_Maquina3_HP.SelectedText.Value,
+                      "</td>",
+                      "<td class='cell'>",
+                      drp_Maquina4_HP.SelectedText.Value,
+                      "</td>",
+                      "</tr>",
+                      "</table>",
+                      "<h1>Información Adicional</h1>",
+                      "<table>",
+                      "<tr>",
+                      "<th>Empleado</th>",
+                      "<th>Fecha Inicio</th>",
+                      "<th>Fecha Fin</th>",
+                      "<th>Semana</th>",
+                      "<th>Horas Trabajadas</th>",
+                      "<th>Horas Pagadas</th>",
+                      "</tr>",
+                      "<tr>",
+                      "<td class='cell'>",
+                      drp_Empleado_HP.SelectedText.Value,
+                      "</td>",
+                      "<td class='cell'>",
+                      Text(
+                          dp_FechaInicio_HP.SelectedDate,
+                          "[$-en-US]yyyy-mm-dd"
+                      ),
+                      "</td>",
+                      "<td class='cell'>",
+                      Text(
+                          dp_fechaFin_HP.Text,
+                          "[$-en-US]yyyy-mm-dd"
+                      ),
+                      "</td>",
+                      "<td class='cell'>",
+                      Text(WeekNum(dp_FechaInicio_HP.SelectedDate)),
+                      "</td>",
+                      "<td class='cell'>",
+                      txt_HorasT_HP.Text,
+                      "</td>",
+                      "<td class='cell'>",
+                      txt_HorasP_HP.Text,
+                      "</td>",
+                      "</tr>",
+                      "</table>",
+                      "</body>",
+                      "</html>"
+                  )
+              )
             Visible: =false
             Width: =143
       - HtmlCuerpo_HP_1:
@@ -1680,14 +2362,14 @@ Screens:
                     ="El empleado tiene un permiso para faltar del " & Text(
                         LookUp(
                             TramitesSolicitudes,
-                            Codigo = Drp_Empleado_HP_1.Selected.Codigo && Fecha_Inicio <= DateValue(dp_fechaFin_HP.Text) && Fecha_Fin >= dp_FechaInicio_HP.SelectedDate && EstadoDeProceso = "Aprobado",
+                            Codigo = drp_Empleado_HP.Selected.Codigo && Fecha_Inicio <= DateValue(dp_fechaFin_HP.Text) && Fecha_Fin >= dp_FechaInicio_HP.SelectedDate && EstadoDeProceso = "Aprobado",
                             Fecha_Inicio
                         ),
                         "dd/mmm/yyyy"
                     ) & " al " & Text(
                         LookUp(
                             TramitesSolicitudes,
-                            Codigo = Drp_Empleado_HP_1.Selected.Codigo && Fecha_Inicio <= DateValue(dp_fechaFin_HP.Text) && Fecha_Fin >= dp_FechaInicio_HP.SelectedDate && EstadoDeProceso = "Aprobado",
+                            Codigo = drp_Empleado_HP.Selected.Codigo && Fecha_Inicio <= DateValue(dp_fechaFin_HP.Text) && Fecha_Fin >= dp_FechaInicio_HP.SelectedDate && EstadoDeProceso = "Aprobado",
                             Fecha_Fin
                         ),
                         "dd/mmm/yyyy"
