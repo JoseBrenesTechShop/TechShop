@@ -1584,7 +1584,8 @@
                                             Now(),
                                             "mm/dd/yyyy hh:mm AM/PM"
                                         ),
-                                        Hora: drp_Hora_HxH2.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                                        Hora: drp_Hora_HxH2.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor',
+                                        Usuario_Fin: txt_Sup_HxH2.Text
                                     }
                                 );
                                 Patch(
@@ -1794,77 +1795,383 @@
                     Y: =626
                     ZIndex: =52
 
-                txt_Supervisor_HxH2 As text:
+                txt_Sup_HxH2 As text:
                     Align: =Align.Center
                     BorderColor: =RGBA(0, 18, 107, 1)
                     BorderStyle: =BorderStyle.None
                     BorderThickness: =2
                     Color: =RGBA(0, 0, 0, 1)
                     Default: |-
-                        =With(
-                            {
-                                supervisores: Filter(
-                                    HorarioSemanals,
-                                    Fecha_Inicio <= FechaHorario && Fecha_Fin >= FechaHorario && Zona = LookUp(
-                                        Maquinas,
-                                        Maquina = txt_Maquina_HxH2.Text,
-                                        Ubicacion_Bono
+                        =If(
+                            HoraValor >= 0 && HoraValor <= 6 && Dia = 2,
+                            With(
+                                {
+                                    supervisores: Filter(
+                                        HorarioSemanals,
+                                        (Fecha_Fin = DateAdd(
+                                            FechaHorario,
+                                            -1,
+                                            TimeUnit.Days
+                                        )) && Zona = LookUp(
+                                            Maquinas,
+                                            Maquina = txt_Maquina_HxH2.Text,
+                                            Ubicacion_Bono
+                                        )
+                                    )
+                                },
+                                LookUp(
+                                    supervisores,
+                                    With(
+                                        {Turno: ThisRecord.Domingo},
+                                        !IsBlank(
+                                            LookUp(
+                                                Tipo_Turnos,
+                                                Horario = Turno && ((Hora_Inicio <= HoraValor && HoraValor <= 23 && Hora_Inicio >= 18) || (Hora_Fin >= HoraValor && HoraValor >= 0 && Hora_Fin <= 6))
+                                            )
+                                        )
+                                    )
+                                ).Empleado
+                            ),
+                            If(
+                                HoraValor >= 0 && HoraValor <= 6,
+                                With(
+                                    {
+                                        supervisores: Filter(
+                                            HorarioSemanals,
+                                            Fecha_Inicio <= FechaHorario && Fecha_Fin >= FechaHorario && Zona = LookUp(
+                                                Maquinas,
+                                                Maquina = txt_Maquina_HxH2.Text,
+                                                Ubicacion_Bono
+                                            )
+                                        )
+                                    },
+                                    Switch(
+                                        Dia,
+                                        1,
+                                        LookUp(
+                                            supervisores,
+                                            With(
+                                                {Turno: ThisRecord.Sabado},
+                                                !IsBlank(
+                                                    LookUp(
+                                                        Tipo_Turnos,
+                                                        Horario = Turno && ((Hora_Inicio <= HoraValor && HoraValor <= 23 && Hora_Inicio >= 18) || (Hora_Fin >= HoraValor && HoraValor >= 0 && Hora_Fin <= 6))
+                                                    )
+                                                )
+                                            )
+                                        ).Empleado,
+                                        3,
+                                        LookUp(
+                                            supervisores,
+                                            With(
+                                                {Turno: ThisRecord.Lunes},
+                                                !IsBlank(
+                                                    LookUp(
+                                                        Tipo_Turnos,
+                                                        Horario = Turno && ((Hora_Inicio <= HoraValor && HoraValor <= 23 && Hora_Inicio >= 18) || (Hora_Fin >= HoraValor && HoraValor >= 0 && Hora_Fin <= 6))
+                                                    )
+                                                )
+                                            )
+                                        ).Empleado,
+                                        4,
+                                        LookUp(
+                                            supervisores,
+                                            With(
+                                                {Turno: ThisRecord.Martes},
+                                                !IsBlank(
+                                                    LookUp(
+                                                        Tipo_Turnos,
+                                                        Horario = Turno && ((Hora_Inicio <= HoraValor && HoraValor <= 23 && Hora_Inicio >= 18) || (Hora_Fin >= HoraValor && HoraValor >= 0 && Hora_Fin <= 6))
+                                                    )
+                                                )
+                                            )
+                                        ).Empleado,
+                                        5,
+                                        LookUp(
+                                            supervisores,
+                                            With(
+                                                {Turno: ThisRecord.Miercoles},
+                                                !IsBlank(
+                                                    LookUp(
+                                                        Tipo_Turnos,
+                                                        Horario = Turno && ((Hora_Inicio <= HoraValor && HoraValor <= 23 && Hora_Inicio >= 18) || (Hora_Fin >= HoraValor && HoraValor >= 0 && Hora_Fin <= 6))
+                                                    )
+                                                )
+                                            )
+                                        ).Empleado,
+                                        6,
+                                        LookUp(
+                                            supervisores,
+                                            With(
+                                                {Turno: ThisRecord.Jueves},
+                                                !IsBlank(
+                                                    LookUp(
+                                                        Tipo_Turnos,
+                                                        Horario = Turno && ((Hora_Inicio <= HoraValor && HoraValor <= 23 && Hora_Inicio >= 18) || (Hora_Fin >= HoraValor && HoraValor >= 0 && Hora_Fin <= 6))
+                                                    )
+                                                )
+                                            )
+                                        ).Empleado,
+                                        7,
+                                        LookUp(
+                                            supervisores,
+                                            With(
+                                                {Turno: ThisRecord.Viernes},
+                                                !IsBlank(
+                                                    LookUp(
+                                                        Tipo_Turnos,
+                                                        Horario = Turno && ((Hora_Inicio <= HoraValor && HoraValor <= 23 && Hora_Inicio >= 18) || (Hora_Fin >= HoraValor && HoraValor >= 0 && Hora_Fin <= 6))
+                                                    )
+                                                )
+                                            )
+                                        ).Empleado
+                                    )
+                                ),
+                                If(
+                                    HoraValor >= 18 && HoraValor <= 23,
+                                    With(
+                                        {
+                                            supervisores: Filter(
+                                                HorarioSemanals,
+                                                Fecha_Inicio <= FechaHorario && Fecha_Fin >= FechaHorario && Zona = LookUp(
+                                                    Maquinas,
+                                                    Maquina = txt_Maquina_HxH2.Text,
+                                                    Ubicacion_Bono
+                                                )
+                                            )
+                                        },
+                                        Switch(
+                                            Dia,
+                                            1,
+                                            LookUp(
+                                                supervisores,
+                                                With(
+                                                    {Turno: ThisRecord.Domingo},
+                                                    !IsBlank(
+                                                        LookUp(
+                                                            Tipo_Turnos,
+                                                            Horario = Turno && If(
+                                                                Hora_Inicio < 18 && Hora_Inicio >= 14,
+                                                                Hora_Inicio <= HoraValor && Hora_Fin >= HoraValor,
+                                                                ((Hora_Inicio <= HoraValor && HoraValor <= 23 && Hora_Inicio >= 18) || (Hora_Fin >= HoraValor && HoraValor >= 0 && Hora_Fin <= 6))
+                                                            )
+                                                        )
+                                                    )
+                                                )
+                                            ).Empleado,
+                                            2,
+                                            LookUp(
+                                                supervisores,
+                                                With(
+                                                    {Turno: ThisRecord.Lunes},
+                                                    !IsBlank(
+                                                        LookUp(
+                                                            Tipo_Turnos,
+                                                            Horario = Turno && If(
+                                                                Hora_Inicio < 18 && Hora_Inicio >= 14,
+                                                                Hora_Inicio <= HoraValor && Hora_Fin >= HoraValor,
+                                                                ((Hora_Inicio <= HoraValor && HoraValor <= 23 && Hora_Inicio >= 18) || (Hora_Fin >= HoraValor && HoraValor >= 0 && Hora_Fin <= 6))
+                                                            )
+                                                        )
+                                                    )
+                                                )
+                                            ).Empleado,
+                                            3,
+                                            LookUp(
+                                                supervisores,
+                                                With(
+                                                    {Turno: ThisRecord.Maquina},
+                                                    !IsBlank(
+                                                        LookUp(
+                                                            Tipo_Turnos,
+                                                            Horario = Turno && If(
+                                                                Hora_Inicio < 18 && Hora_Inicio >= 14,
+                                                                Hora_Inicio <= HoraValor && Hora_Fin >= HoraValor,
+                                                                ((Hora_Inicio <= HoraValor && HoraValor <= 23 && Hora_Inicio >= 18) || (Hora_Fin >= HoraValor && HoraValor >= 0 && Hora_Fin <= 6))
+                                                            )
+                                                        )
+                                                    )
+                                                )
+                                            ).Empleado,
+                                            4,
+                                            LookUp(
+                                                supervisores,
+                                                With(
+                                                    {Turno: ThisRecord.Miercoles},
+                                                    !IsBlank(
+                                                        LookUp(
+                                                            Tipo_Turnos,
+                                                            Horario = Turno && If(
+                                                                Hora_Inicio < 18 && Hora_Inicio >= 14,
+                                                                Hora_Inicio <= HoraValor && Hora_Fin >= HoraValor,
+                                                                ((Hora_Inicio <= HoraValor && HoraValor <= 23 && Hora_Inicio >= 18) || (Hora_Fin >= HoraValor && HoraValor >= 0 && Hora_Fin <= 6))
+                                                            )
+                                                        )
+                                                    )
+                                                )
+                                            ).Empleado,
+                                            5,
+                                            LookUp(
+                                                supervisores,
+                                                With(
+                                                    {Turno: ThisRecord.Jueves},
+                                                    !IsBlank(
+                                                        LookUp(
+                                                            Tipo_Turnos,
+                                                            Horario = Turno && If(
+                                                                Hora_Inicio < 18 && Hora_Inicio >= 14,
+                                                                Hora_Inicio <= HoraValor && Hora_Fin >= HoraValor,
+                                                                ((Hora_Inicio <= HoraValor && HoraValor <= 23 && Hora_Inicio >= 18) || (Hora_Fin >= HoraValor && HoraValor >= 0 && Hora_Fin <= 6))
+                                                            )
+                                                        )
+                                                    )
+                                                )
+                                            ).Empleado,
+                                            6,
+                                            LookUp(
+                                                supervisores,
+                                                With(
+                                                    {Turno: ThisRecord.Viernes},
+                                                    !IsBlank(
+                                                        LookUp(
+                                                            Tipo_Turnos,
+                                                            Horario = Turno && If(
+                                                                Hora_Inicio < 18 && Hora_Inicio >= 14,
+                                                                Hora_Inicio <= HoraValor && Hora_Fin >= HoraValor,
+                                                                ((Hora_Inicio <= HoraValor && HoraValor <= 23 && Hora_Inicio >= 18) || (Hora_Fin >= HoraValor && HoraValor >= 0 && Hora_Fin <= 6))
+                                                            )
+                                                        )
+                                                    )
+                                                )
+                                            ).Empleado,
+                                            7,
+                                            LookUp(
+                                                supervisores,
+                                                With(
+                                                    {Turno: ThisRecord.Sabado},
+                                                    !IsBlank(
+                                                        LookUp(
+                                                            Tipo_Turnos,
+                                                            Horario = Turno && If(
+                                                                Hora_Inicio < 18 && Hora_Inicio >= 14,
+                                                                Hora_Inicio <= HoraValor && Hora_Fin >= HoraValor,
+                                                                ((Hora_Inicio <= HoraValor && HoraValor <= 23 && Hora_Inicio >= 18) || (Hora_Fin >= HoraValor && HoraValor >= 0 && Hora_Fin <= 6))
+                                                            )
+                                                        )
+                                                    )
+                                                )
+                                            ).Empleado
+                                        )
+                                    ),
+                                    With(
+                                        {
+                                            supervisores: Filter(
+                                                HorarioSemanals,
+                                                Fecha_Inicio <= FechaHorario && Fecha_Fin >= FechaHorario && Zona = LookUp(
+                                                    Maquinas,
+                                                    Maquina = txt_Maquina_HxH2.Text,
+                                                    Ubicacion_Bono
+                                                )
+                                            )
+                                        },
+                                        Switch(
+                                            Dia,
+                                            1,
+                                            LookUp(
+                                                supervisores,
+                                                With(
+                                                    {Turno: ThisRecord.Domingo},
+                                                    !IsBlank(
+                                                        LookUp(
+                                                            Tipo_Turnos,
+                                                            Horario = Turno && Hora_Inicio <= HoraValor && Hora_Fin >= HoraValor
+                                                        )
+                                                    )
+                                                )
+                                            ).Empleado,
+                                            2,
+                                            LookUp(
+                                                supervisores,
+                                                With(
+                                                    {Turno: ThisRecord.Lunes},
+                                                    !IsBlank(
+                                                        LookUp(
+                                                            Tipo_Turnos,
+                                                            Horario = Turno && Hora_Inicio <= HoraValor && Hora_Fin >= HoraValor
+                                                        )
+                                                    )
+                                                )
+                                            ).Empleado,
+                                            3,
+                                            LookUp(
+                                                supervisores,
+                                                With(
+                                                    {Turno: ThisRecord.Martes},
+                                                    !IsBlank(
+                                                        LookUp(
+                                                            Tipo_Turnos,
+                                                            Horario = Turno && Hora_Inicio <= HoraValor && Hora_Fin >= HoraValor
+                                                        )
+                                                    )
+                                                )
+                                            ).Empleado,
+                                            4,
+                                            LookUp(
+                                                supervisores,
+                                                With(
+                                                    {Turno: ThisRecord.Miercoles},
+                                                    !IsBlank(
+                                                        LookUp(
+                                                            Tipo_Turnos,
+                                                            Horario = Turno && Hora_Inicio <= HoraValor && Hora_Fin >= HoraValor
+                                                        )
+                                                    )
+                                                )
+                                            ).Empleado,
+                                            5,
+                                            LookUp(
+                                                supervisores,
+                                                With(
+                                                    {Turno: ThisRecord.Jueves},
+                                                    !IsBlank(
+                                                        LookUp(
+                                                            Tipo_Turnos,
+                                                            Horario = Turno && Hora_Inicio <= HoraValor && Hora_Fin >= HoraValor
+                                                        )
+                                                    )
+                                                )
+                                            ).Empleado,
+                                            6,
+                                            LookUp(
+                                                supervisores,
+                                                With(
+                                                    {Turno: ThisRecord.Viernes},
+                                                    !IsBlank(
+                                                        LookUp(
+                                                            Tipo_Turnos,
+                                                            Horario = Turno && Hora_Inicio <= HoraValor && Hora_Fin >= HoraValor
+                                                        )
+                                                    )
+                                                )
+                                            ).Empleado,
+                                            7,
+                                            LookUp(
+                                                supervisores,
+                                                With(
+                                                    {Turno: ThisRecord.Sabado},
+                                                    !IsBlank(
+                                                        LookUp(
+                                                            Tipo_Turnos,
+                                                            Horario = Turno && Hora_Inicio <= HoraValor && Hora_Fin >= HoraValor
+                                                        )
+                                                    )
+                                                )
+                                            ).Empleado
+                                        )
                                     )
                                 )
-                            },
-                            Switch(
-                                Dia,
-                                1,
-                                "",
-                                2,
-                                "",
-                                3,
-                                "",
-                                4,
-                                "",
-                                5,
-                                "",
-                                6,
-                                LookUp(supervisores, Codigo = "2692", Empleado),
-                                7,
-                                ""
                             )
                         )
-                        /*LookUp(
-                            HorarioSemanals;
-                            Fecha_Inicio <= FechaHorario && Fecha_Fin >= FechaHorario && Zona = LookUp(
-                                Maquinas;
-                                Maquina = txt_Maquina_HxH2.Text;
-                                Ubicacion_Bono
-                            ) && With(
-                                {
-                                    D: ThisRecord.Domingo;
-                                    L: ThisRecord.Lunes;
-                                    K: ThisRecord.Martes;
-                                    M: ThisRecord.Miercoles;
-                                    J: ThisRecord.Jueves;
-                                    V: ThisRecord.Viernes;
-                                    S: ThisRecord.Sabado
-                                };
-                                Switch(
-                                    Dia;
-                                    1;
-                                    D = drp_Operario_HxH2.Selected.Domingo;
-                                    2;
-                                    L = drp_Operario_HxH2.Selected.Lunes;
-                                    3;
-                                    K = drp_Operario_HxH2.Selected.Martes;
-                                    4;
-                                    M = drp_Operario_HxH2.Selected.Miercoles;
-                                    5;
-                                    J = drp_Operario_HxH2.Selected.Jueves;
-                                    6;
-                                    V = drp_Operario_HxH2.Selected.Viernes;
-                                    7;
-                                    S = drp_Operario_HxH2.Selected.Sabado
-                                )
-                            )
-                        ).Empleado*/
                     DisabledBorderColor: =RGBA(166, 166, 166, 1)
                     DisabledColor: =RGBA(166, 166, 166, 1)
                     DisabledFill: =RGBA(244, 244, 244, 1)
