@@ -978,9 +978,9 @@
                         Color: =RGBA(0, 0, 0, 1)
                         Default: |-
                             =If(
-                                Weekday(FechaHorario) = 1,
-                                WeekNum(FechaHorario)-1,
-                                WeekNum(FechaHorario)
+                                Weekday(DateValue(FechaHorario)) = 1,
+                                WeekNum(DateValue(FechaHorario))-1,
+                                WeekNum(DateValue(FechaHorario))
                             )
                         DisabledBorderColor: =RGBA(166, 166, 166, 1)
                         DisabledColor: =RGBA(166, 166, 166, 1)
@@ -999,8 +999,8 @@
                         RadiusTopLeft: =20
                         RadiusTopRight: =20
                         Size: =15
-                        Width: =126
-                        X: =510
+                        Width: =100
+                        X: =536
                         Y: =45
                         ZIndex: =3
 
@@ -1012,7 +1012,7 @@
                         Size: =18
                         Text: ="Semana"
                         Width: =105
-                        X: =405
+                        X: =428
                         Y: =45
                         ZIndex: =4
 
@@ -1049,7 +1049,7 @@
                         Size: =13
                         Tooltip: =
                         Width: =100
-                        X: =297
+                        X: =325
                         Y: =45
                         ZIndex: =5
 
@@ -1073,7 +1073,7 @@
                         Size: =18
                         Text: ="Hora"
                         Width: =70
-                        X: =227
+                        X: =255
                         Y: =45
                         ZIndex: =8
 
@@ -1226,26 +1226,11 @@
                         HoverFill: =App.Theme.Colors.Lighter70
                         Items: |-
                             =[
-                                Text(
-                                    Now(),
-                                    "mm/dd/yyyy"
-                                ),
-                                Text(
-                                    Now()-1,
-                                    "mm/dd/yyyy"
-                                ),
-                                Text(
-                                    Now()-2,
-                                    "mm/dd/yyyy"
-                                ),
-                                Text(
-                                    Now()-3,
-                                    "mm/dd/yyyy"
-                                ),
-                                Text(
-                                    Now()-4,
-                                    "mm/dd/yyyy"
-                                )
+                                DateValue(Now()),
+                                DateValue(Now() - 1),
+                                DateValue(Now() - 2),
+                                DateValue(Now() - 3),
+                                DateValue(Now() - 4)
                             ]
                         OnChange: |
                             =UpdateContext(
@@ -1268,7 +1253,7 @@
                                             "[$-en-US]yyyy-mm-dd"
                                         ) & " 23:59:59"
                                     ),
-                                    FechaHorario: DateValue(Self.SelectedText.Value),
+                                    FechaHorario: DateValue(Self.Selected.Value),
                                     turnoFinal: Blank()
                                 }
                             );
@@ -1280,7 +1265,7 @@
                         SelectionFill: =RGBA(40, 134, 222, 1)
                         Size: =12
                         Tooltip: =
-                        Width: =140
+                        Width: =165
                         X: =90
                         Y: =45
                         ZIndex: =13
@@ -1816,29 +1801,41 @@
                     BorderThickness: =2
                     Color: =RGBA(0, 0, 0, 1)
                     Default: |-
-                        =If(
-                            HoraValor >= 0 && HoraValor <= 6 && Dia = 2,
-                            LookUp(
-                                HorarioSemanals,
-                                (Fecha_Fin = DateAdd(FechaHorario, -1, TimeUnit.Days))
-                            ).Empleado,
-                            LookUp(
-                                HorarioSemanals,
-                                (Fecha_Inicio <= FechaHorario && Fecha_Fin >= FechaHorario) && 
-                                Zona = LookUp(Maquinas, Maquina = txt_Maquina_HxH2.Text).Ubicacion_Bono && 
+                        =LookUp(
+                            HorarioSemanals,
+                            Fecha_Inicio <= FechaHorario && Fecha_Fin >= FechaHorario && Zona = LookUp(
+                                Maquinas,
+                                Maquina = txt_Maquina_HxH2.Text,
+                                Ubicacion_Bono
+                            ) && With(
+                                {
+                                    D: ThisRecord.Domingo,
+                                    L: ThisRecord.Lunes,
+                                    K: ThisRecord.Martes,
+                                    M: ThisRecord.Miercoles,
+                                    J: ThisRecord.Jueves,
+                                    V: ThisRecord.Viernes,
+                                    S: ThisRecord.Sabado
+                                },
                                 Switch(
                                     Dia,
-                                    1, Domingo = drp_Operario_HxH2.Selected.Domingo,
-                                    2, Lunes = drp_Operario_HxH2.Selected.Lunes,
-                                    3, Martes = drp_Operario_HxH2.Selected.Martes,
-                                    4, Miercoles = drp_Operario_HxH2.Selected.Miercoles,
-                                    5, Jueves = drp_Operario_HxH2.Selected.Jueves,
-                                    6, Viernes = drp_Operario_HxH2.Selected.Viernes,
-                                    7, Sabado = drp_Operario_HxH2.Selected.Sabado
-                                ) && 
-                                "SUPERVI" in With({Cod: ThisRecord.Codigo}, LookUp(Empleados, Codigo = Cod, Puesto))
-                            ).Empleado
-                        )
+                                    1,
+                                    D = drp_Operario_HxH2.Selected.Domingo,
+                                    2,
+                                    L = drp_Operario_HxH2.Selected.Lunes,
+                                    3,
+                                    K = drp_Operario_HxH2.Selected.Martes,
+                                    4,
+                                    M = drp_Operario_HxH2.Selected.Miercoles,
+                                    5,
+                                    J = drp_Operario_HxH2.Selected.Jueves,
+                                    6,
+                                    V = drp_Operario_HxH2.Selected.Viernes,
+                                    7,
+                                    S = drp_Operario_HxH2.Selected.Sabado
+                                )
+                            )
+                        ).Empleado
                     DisabledBorderColor: =RGBA(166, 166, 166, 1)
                     DisabledColor: =RGBA(166, 166, 166, 1)
                     DisabledFill: =RGBA(244, 244, 244, 1)
