@@ -797,14 +797,14 @@ Screens:
                               BorderThickness: =4
                               DropShadow: =DropShadow.Regular
                               Fill: =RGBA(71, 158, 245, 0.31)
-                              Height: =161
+                              Height: =142
                               RadiusBottomLeft: =10
                               RadiusBottomRight: =10
                               RadiusTopLeft: =10
                               RadiusTopRight: =10
                               Width: =647
                               X: =685
-                              Y: =8
+                              Y: =17
                             Children:
                               - txt_Turno_HxH2:
                                   Control: Classic/TextInput@2.3.2
@@ -1077,38 +1077,57 @@ Screens:
                                     HoverBorderColor: =RGBA(40, 134, 222, 1)
                                     Items: |-
                                       =[
-                                          DateValue(Now()),
-                                          DateValue(Now() - 1),
-                                          DateValue(Now() - 2),
-                                          DateValue(Now() - 3),
-                                          DateValue(Now() - 4)
+                                          {
+                                              texto: Text(Now(), "dd/mmm/yyyy"),
+                                          fecha: DateValue(Now())
+                                          }, {
+                                              texto: Text(Now() - 1, "dd/mmm/yyyy"),
+                                          fecha: DateValue(Now() - 1)
+                                          }, {
+                                              texto: Text(Now() - 2, "dd/mmm/yyyy"),
+                                          fecha: DateValue(Now() - 2)
+                                          }, {
+                                              texto: Text(Now() - 3, "dd/mmm/yyyy"),
+                                          fecha: DateValue(Now() - 3)
+                                          }, {
+                                              texto: Text(Now() - 4, "dd/mmm/yyyy"),
+                                          fecha: DateValue(Now() - 4)
+                                          }
                                       ]
+                                    Items.Value: =texto
                                     OnChange: |
                                       =UpdateContext(
                                           {
                                               FechaSup: DateTimeValue(
                                                   Text(
-                                                      Self.SelectedText.Value,
+                                                      Self.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1Bfecha',
                                                       "[$-en-US]yyyy-mm-dd"
                                                   ) & " 12:00:00"
                                               ),
                                               Fecha1: DateTimeValue(
                                                   Text(
-                                                      Self.SelectedText.Value,
+                                                      Self.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1Bfecha',
                                                       "[$-en-US]yyyy-mm-dd"
                                                   ) & " 00:00:00"
                                               ),
                                               Fecha2: DateTimeValue(
                                                   Text(
-                                                      Self.SelectedText.Value,
+                                                      Self.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1Bfecha',
                                                       "[$-en-US]yyyy-mm-dd"
                                                   ) & " 23:59:59"
                                               ),
-                                              FechaHorario: DateValue(Self.Selected.Value),
+                                              FechaHorario: DateValue(Self.Selected.fecha),
                                               turnoFinal: Blank()
                                           }
                                       );
                                       UpdateContext({Dia: Weekday(FechaHorario)});
+                                      UpdateContext(
+                                          {
+                                              Hora: Blank(),
+                                              HoraValor: Blank(),
+                                              turnoFinal: Blank()
+                                          }
+                                      );
                                       Reset(drp_Hora_HxH2);
                                       Reset(drp_Operario_HxH2);
                                     PressedColor: =RGBA(255, 255, 255, 1)
@@ -2098,7 +2117,8 @@ Screens:
                                     Now(),
                                     "mm/dd/yyyy hh:mm AM/PM"
                                 ),
-                                Hora: drp_Hora_HxH2.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor'
+                                Hora: drp_Hora_HxH2.SelectedText.'data-ADB4D7A662F548B49FAC2B986E348A1BValor',
+                                Usuario_Fin: txt_Sup_HxH2.Text
                             }
                         );
                         Patch(
