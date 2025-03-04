@@ -1186,7 +1186,7 @@ Screens:
                                     PaddingTop: =5
                                     Width: =55
                                     X: =1297
-      - cnt_Aviso_HxH_4:
+      - cnt_MotivoRechazo_AH:
           Control: GroupContainer@1.3.0
           Variant: ManualLayout
           Properties:
@@ -1423,3 +1423,165 @@ Screens:
                   Width: =505
                   X: =35
                   Y: =30
+      - cnt_MotivoAprovacion_AH:
+          Control: GroupContainer@1.3.0
+          Variant: ManualLayout
+          Properties:
+            BorderColor: =RGBA(52, 152, 47, 1)
+            BorderThickness: =5
+            DropShadow: =DropShadow.ExtraBold
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =304
+            RadiusBottomLeft: =20
+            RadiusBottomRight: =20
+            RadiusTopLeft: =20
+            RadiusTopRight: =20
+            Visible: =
+            X: =432
+            Y: =283
+          Children:
+            - btn_ContinuarAviso_HxH_19:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =ColorFade(Self.Fill, -15%)
+                  Color: =RGBA(255, 255, 255, 1)
+                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                  Fill: =RGBA(52, 152, 47, 1)
+                  Font: =Font.'Open Sans'
+                  HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =RGBA(52, 152, 47, 1)
+                  OnSelect: |-
+                    =ClearCollect(
+                        Verificacion2,
+                        ForAll(
+                            glr_Herramientas_AH.AllItems,
+                            With(
+                                {item: ThisRecord},
+                                {err: item.CantxInserto = 0}
+                            )
+                        )
+                    );
+                    If(
+                        CountRows(
+                            Filter(
+                                Verificacion2,
+                                err
+                            )
+                        ) = 0,
+                        Patch(
+                            SolicitudHerramientas,
+                            glr_Solicitudes_AH.Selected,
+                            {
+                                'Estado (crfb9_estado)': "Aprobado",
+                                UserAprobacion: LookUp(
+                                    Empleados,
+                                    Codigo = VarName,
+                                    Nombre
+                                )
+                            }
+                        );
+                        ForAll(
+                            glr_Herramientas_AH.AllItems,
+                            Patch(
+                                Herramientas,
+                                ThisRecord,
+                                {'Estado (crfb9_estado)': "Aprobado"}
+                            )
+                        );
+                        With(
+                            {
+                                CuerpoCorreo: "<p>Estimado equipo;</p>" & "<p>Se ha procesado una solicitud de herramientas y ha sido despachada con los siguientes detalles:</p>" & "<table border='1' cellpadding='5' cellspacing='0'>" & "<tr><td><strong>Solicitud ID</strong></td><td>" & varSolicitudID & "</td></tr>" & "<tr><td><strong>Máquina</strong></td><td>" & glr_Solicitudes_AH.Selected.Maquina & "</td></tr>" & "<tr><td><strong>Orden</strong></td><td>" & glr_Solicitudes_AH.Selected.Orden & "</td></tr>" & "<tr><td><strong>Operario</strong></td><td>" & glr_Solicitudes_AH.Selected.Operario & "</td></tr>" & "<tr><td><strong>Usuario</strong></td><td>" & LookUp(
+                                    Empleados,
+                                    Codigo = VarName,
+                                    Nombre
+                                ) & "</td></tr>" & "<tr><td><strong>Operación</strong></td><td>" & glr_Solicitudes_AH.Selected.Operacion & "</td></tr>" & "<tr><td><strong>Causa</strong></td><td>" & glr_Solicitudes_AH.Selected.Causa & "</td></tr>" & "<tr><td><strong>Razón de la causa</strong></td><td>" & glr_Solicitudes_AH.Selected.RazonCausa & "</td></tr>" & "<tr><td><strong>Fecha de Solicitud</strong></td><td>" & Text(Today()) & "</td></tr>" & "</table>" & "<p>Esta solicitud ha sido actualizada en el sistema como <strong>Despachada</strong>. Por favor tome nota de los cambios realizados.</p>" & "<p>Saludos cordiales;</p>" & "<p>El equipo de desarrollo</p>" & "<p><em>Nota: Por favor, no responda a este correo.</em></p>"
+                            },
+                            EnviarCorreo.Run(
+                                "controlherramientas@tsicr.com; produccionyherramientas@tsicr.com",
+                                "Actualización de Solicitud de Herramientas",
+                                CuerpoCorreo
+                            )
+                        );
+                        UpdateContext(
+                            {
+                                Disable: false,
+                                Mostrar: false
+                            }
+                        ),
+                        UpdateContext(
+                            {
+                                Aviso: true,
+                                TextoAdvertencia: "Asegúrese de que todos los datos de la lista a la izquierda estén completos. Llene la cantidad de piezas por inserto. Una vez que todos los materiales estén en blanco, puede continuar."
+                            }
+                        )
+                    )
+                  PressedBorderColor: =Self.Fill
+                  PressedColor: =Self.Fill
+                  PressedFill: =Self.Color
+                  Text: ="Guardar"
+                  Width: =130
+                  X: =264
+                  Y: =246
+            - Label15_20:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Height: =67
+                  Size: =20
+                  Text: ="Indique el motivo del aprobacion"
+                  Width: =480
+                  X: =10
+                  Y: =10
+            - btn_ContinuarAviso_HxH_14:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =ColorFade(Self.Fill, -15%)
+                  Color: =RGBA(255, 255, 255, 1)
+                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                  Fill: =RGBA(233, 79, 76, 1)
+                  Font: =Font.'Open Sans'
+                  FontWeight: =FontWeight.Bold
+                  HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =RGBA(184, 36, 33, 1)
+                  OnSelect: |-
+                    =UpdateContext({rechazo: false}); 
+                    Reset(txt_MotivoAprovacion_AH)
+                  PressedBorderColor: =Self.Fill
+                  PressedColor: =Self.Fill
+                  PressedFill: =Self.Color
+                  Text: ="Cancelar"
+                  Width: =130
+                  X: =106
+                  Y: =246
+            - txt_MotivoAprovacion_AH:
+                Control: Classic/TextInput@2.3.2
+                Properties:
+                  Align: =Align.Center
+                  BorderStyle: =BorderStyle.None
+                  Default: =
+                  Fill: =RGBA(180, 214, 250, 0.3)
+                  Height: =167
+                  HintText: ="Motivo del Aprobacion"
+                  MaxLength: =200
+                  Mode: =TextMode.MultiLine
+                  PaddingLeft: =5
+                  RadiusBottomLeft: =20
+                  RadiusBottomRight: =20
+                  RadiusTopLeft: =20
+                  RadiusTopRight: =20
+                  Size: =16
+                  Width: =414
+                  X: =43
+                  Y: =65
+            - Label15_22:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Height: =25
+                  Size: =10
+                  Text: =Len(txt_MotivoAprovacion_AH.Text) & " / 200"
+                  Width: =71
+                  X: =386
+                  Y: =207
