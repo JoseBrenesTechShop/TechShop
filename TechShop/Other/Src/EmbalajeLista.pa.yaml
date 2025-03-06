@@ -263,7 +263,7 @@ Screens:
                                                 RadiusTopLeft: =0
                                                 RadiusTopRight: =0
                                                 Size: =15
-                                                Width: =80
+                                                Width: =70
                                                 X: =290
                                           - txt_Cantidad_EM_12:
                                               Control: Classic/TextInput@2.3.2
@@ -285,7 +285,7 @@ Screens:
                                                 RadiusTopRight: =0
                                                 Size: =15
                                                 Width: =200
-                                                X: =370
+                                                X: =360
                                           - txt_Cantidad_EM_13:
                                               Control: Classic/TextInput@2.3.2
                                               Properties:
@@ -305,8 +305,8 @@ Screens:
                                                 RadiusTopLeft: =0
                                                 RadiusTopRight: =0
                                                 Size: =15
-                                                Width: =120
-                                                X: =570
+                                                Width: =110
+                                                X: =560
                                           - txt_Cantidad_EM_14:
                                               Control: Classic/TextInput@2.3.2
                                               Properties:
@@ -326,8 +326,8 @@ Screens:
                                                 RadiusTopLeft: =0
                                                 RadiusTopRight: =0
                                                 Size: =15
-                                                Width: =125
-                                                X: =690
+                                                Width: =110
+                                                X: =670
                                           - txt_Cantidad_EM_15:
                                               Control: Classic/TextInput@2.3.2
                                               Properties:
@@ -355,7 +355,7 @@ Screens:
                                                 Align: =Align.Center
                                                 BorderColor: =RGBA(40, 134, 222, 1)
                                                 BorderThickness: =0.5
-                                                Default: =ThisItem.Valor_Total
+                                                Default: ="$" & Text(ThisItem.Valor_Total, "###,###,##0.0#")
                                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                                 DisabledColor: =If(ThisItem.Nomenclatura = ItemEliminar.Nomenclatura, RGBA(255, 255, 255, 1))
                                                 DisabledFill: =If(ThisItem.Nomenclatura = ItemEliminar.Nomenclatura, RGBA(215, 58, 60, 1), RGBA(255, 255, 255, 1))
@@ -485,7 +485,7 @@ Screens:
                                           Size: =16
                                           Text: ="Semana"
                                           Weight: ='TextCanvas.Weight'.Semibold
-                                          Width: =80
+                                          Width: =70
                                           X: =290
                                     - lbl_PNDato_EM_33:
                                         Control: Text@0.0.50
@@ -628,7 +628,7 @@ Screens:
                                           Size: =16
                                           Text: ="Cantidad Total"
                                           Weight: ='TextCanvas.Weight'.Semibold
-                                          Width: =125
+                                          Width: =110
                                           X: =690
                                     - lbl_PNDato_EM_42:
                                         Control: Text@0.0.50
@@ -1118,6 +1118,24 @@ Screens:
             Visible: =add
             Width: =1366
             Y: =90
+          Children:
+            - Timer3:
+                Control: Timer@2.1.0
+                Properties:
+                  Duration: =3000
+                  OnTimerEnd: |-
+                    =UpdateContext(
+                        {
+                            MostrarAviso: false,
+                            Disable: false,
+                            mensajeNotificacion: ""
+                        }
+                    );
+                    Reset(txt_ScanPN_LE);
+                    SetFocus(txt_ScanPN_LE)
+                  Start: =MostrarAviso
+                  X: =12
+                  Y: =20
       - cnt_Eliminar_EM:
           Control: GroupContainer@1.3.0
           Variant: ManualLayout
@@ -1375,14 +1393,14 @@ Screens:
                               VerticalAlign: =VerticalAlign.Middle
                               Weight: ='TextCanvas.Weight'.Regular
                               Width: =80
-                              X: =284
+                              X: =464
                         - txt_Valor_EC_8:
                             Control: Classic/TextInput@2.3.2
                             Properties:
                               Align: =Align.Center
                               BorderColor: =RGBA(40, 134, 222, 1)
                               BorderThickness: =4
-                              Default: =ThisItem.CantidadActual * ThisItem.Cantidad_Tarima
+                              Default: =ThisItem.CantidadActual * ThisItem.Cantidad
                               DisplayMode: =DisplayMode.View
                               FontWeight: =FontWeight.Semibold
                               Height: =30
@@ -1419,7 +1437,7 @@ Screens:
                               Align: =Align.Center
                               BorderColor: =RGBA(40, 134, 222, 1)
                               BorderThickness: =4
-                              Default: =ThisItem.Cantidad
+                              Default: =ThisItem.Cantidad_Total
                               DisplayMode: =DisplayMode.View
                               FontWeight: =FontWeight.Semibold
                               Height: =30
@@ -1433,7 +1451,7 @@ Screens:
                               RadiusTopRight: =10
                               Size: =15
                               Width: =110
-                              X: =364
+                              X: =544
                               Y: =5
                         - lbl_PNDato_EC_15:
                             Control: Text@0.0.50
@@ -1449,7 +1467,7 @@ Screens:
                               VerticalAlign: =VerticalAlign.Middle
                               Weight: ='TextCanvas.Weight'.Regular
                               Width: =70
-                              X: =474
+                              X: =284
                         - txt_Valor_EC_10:
                             Control: Classic/TextInput@2.3.2
                             Properties:
@@ -1470,7 +1488,7 @@ Screens:
                               RadiusTopRight: =10
                               Size: =15
                               Width: =110
-                              X: =544
+                              X: =354
                               Y: =5
             - txt_OrdenView_HxH_26:
                 Control: Classic/TextInput@2.3.2
@@ -1655,10 +1673,41 @@ Screens:
                         OnChange: |-
                           =With(
                               {
-                                  PNCorregido: Substitute(Upper(Self.Text), "'", "-"),
+                                  PNCorregido: Substitute(
+                                      Upper(
+                                          Left(
+                                              Self.Text,
+                                              Find(
+                                                  "/",
+                                                  Self.Text
+                                              ) - 1
+                                          )
+                                      ),
+                                      "'",
+                                      "-"
+                                  ),
+                                  ident: Mid(
+                                      Self.Text,
+                                      Find(
+                                          "/",
+                                          Self.Text
+                                      ) + 1
+                                  ),
                                   item: LookUp(
                                       ContenedorPNS_2,
-                                      Nomenclatura = gl_ListaContenedores_LE.Selected.Nomenclatura && 'P/N' = Substitute(Upper(Self.Text), "'", "-")
+                                      Nomenclatura = gl_ListaContenedores_LE.Selected.Nomenclatura && 'P/N' = Substitute(
+                                          Upper(
+                                              Left(
+                                                  Self.Text,
+                                                  Find(
+                                                      "/",
+                                                      Self.Text
+                                                  ) - 1
+                                              )
+                                          ),
+                                          "'",
+                                          "-"
+                                      )
                                   )
                               },
                               If(
@@ -1670,10 +1719,18 @@ Screens:
                                           Disable: true
                                       }
                                   ),
-                                  item.Cantidad <= item.CantidadActual,
+                                  item.Cantidad_Tarima <= item.CantidadActual,
                                   UpdateContext(
                                       {
-                                          mensajeNotificacion: "Ya se alcanzo la cantidad maxima de piezas de ese P/N para este contenedor",
+                                          mensajeNotificacion: "Ya se alcanzo la cantidad maxima de tarimas de ese P/N para este contenedor",
+                                          MostrarAviso: true,
+                                          Disable: true
+                                      }
+                                  ),
+                                  ident in Split(item.'P/N_Codigo', ","),
+                                  UpdateContext(
+                                      {
+                                          mensajeNotificacion: "La tarima escaneada ya fue agregada",
                                           MostrarAviso: true,
                                           Disable: true
                                       }
@@ -1681,7 +1738,8 @@ Screens:
                                   Patch(
                                       ContenedorPNS_2,
                                       item,
-                                      {CantidadActual: item.CantidadActual + 1}
+                                      {CantidadActual: item.CantidadActual + 1,
+                                      'P/N_Codigo': item.'P/N_Codigo' & ident & ","}
                                   );
                                   UpdateContext({good: true}),
                                   Refresh(ContenedorPNS_2);
@@ -1767,54 +1825,24 @@ Screens:
             BorderThickness: =5
             DropShadow: =DropShadow.ExtraBold
             Fill: =RGBA(255, 255, 255, 1)
-            Height: =210
+            Height: =318
             RadiusBottomLeft: =20
             RadiusBottomRight: =20
             RadiusTopLeft: =20
             RadiusTopRight: =20
             Visible: =MostrarAviso
-            Width: =648
-            X: =359
-            Y: =279
+            Width: =712
+            X: =327
+            Y: =272
           Children:
             - txt_MensajeNoti_EM_2:
                 Control: Label@2.5.1
                 Properties:
                   Align: =Align.Center
                   Font: =Font.Arial
-                  Height: =129
-                  Size: =20
+                  Height: =291
+                  Size: =32
                   Text: =mensajeNotificacion
-                  Width: =619
+                  Width: =675
                   X: =18
                   Y: =11
-            - btn_Aceptar_EM_2:
-                Control: Classic/Button@2.2.0
-                Properties:
-                  BorderColor: =RGBA(255, 191, 0, 1)
-                  Color: =RGBA(255, 255, 255, 1)
-                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
-                  Fill: =RGBA(255, 191, 0, 1)
-                  Font: =Font.'Open Sans'
-                  FontWeight: =FontWeight.Bold
-                  Height: =50
-                  HoverBorderColor: =RGBA(255, 191, 0, 1)
-                  HoverColor: =RGBA(255, 255, 255, 1)
-                  HoverFill: =RGBA(84, 63, 0, 1)
-                  OnSelect: |-
-                    =UpdateContext(
-                        {
-                            MostrarAviso: false,
-                            Disable: false,
-                            mensajeNotificacion: ""
-                        }
-                    );
-                    Reset(txt_ScanPN_LE);
-                    SetFocus(txt_ScanPN_LE)
-                  PressedBorderColor: =RGBA(255, 191, 0, 1)
-                  PressedColor: =Self.Fill
-                  PressedFill: =Self.Color
-                  Text: ="Aceptar"
-                  Width: =180
-                  X: =235
-                  Y: =150
