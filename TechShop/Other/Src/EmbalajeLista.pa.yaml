@@ -1122,18 +1122,19 @@ Screens:
             - Timer3:
                 Control: Timer@2.1.0
                 Properties:
-                  Duration: =3000
+                  Duration: =If(MostrarAviso, 3000, 2000)
                   OnTimerEnd: |-
                     =UpdateContext(
                         {
                             MostrarAviso: false,
                             Disable: false,
-                            mensajeNotificacion: ""
+                            mensajeNotificacion: "",
+                            good: false
                         }
                     );
                     Reset(txt_ScanPN_LE);
                     SetFocus(txt_ScanPN_LE)
-                  Start: =MostrarAviso
+                  Start: =MostrarAviso || good
                   X: =12
                   Y: =20
       - cnt_Eliminar_EM:
@@ -1400,7 +1401,7 @@ Screens:
                               Align: =Align.Center
                               BorderColor: =RGBA(40, 134, 222, 1)
                               BorderThickness: =4
-                              Default: =ThisItem.CantidadActual * ThisItem.Cantidad
+                              Default: =ThisItem.CantidadActual * ThisItem.Cantidad_Tarima
                               DisplayMode: =DisplayMode.View
                               FontWeight: =FontWeight.Semibold
                               Height: =30
@@ -1674,77 +1675,87 @@ Screens:
                           =With(
                               {
                                   PNCorregido: Substitute(
-                                      Upper(
-                                          Left(
-                                              Self.Text,
-                                              Find(
-                                                  "/",
-                                                  Self.Text
-                                              ) - 1
-                                          )
+                                      Substitute(
+                                          Upper(
+                                              Self.Text
+                                          ),
+                                          "&",
+                                          "/"
                                       ),
                                       "'",
                                       "-"
-                                  ),
-                                  ident: Mid(
-                                      Self.Text,
-                                      Find(
-                                          "/",
-                                          Self.Text
-                                      ) + 1
-                                  ),
-                                  item: LookUp(
-                                      ContenedorPNS_2,
-                                      Nomenclatura = gl_ListaContenedores_LE.Selected.Nomenclatura && 'P/N' = Substitute(
-                                          Upper(
-                                              Left(
-                                                  Self.Text,
-                                                  Find(
-                                                      "/",
-                                                      Self.Text
-                                                  ) - 1
-                                              )
-                                          ),
-                                          "'",
-                                          "-"
-                                      )
                                   )
                               },
-                              If(
-                                  IsBlank(item),
-                                  UpdateContext(
-                                      {
-                                          mensajeNotificacion: "El P/N escaneado no exite en este contenedor.",
-                                          MostrarAviso: true,
-                                          Disable: true
-                                      }
-                                  ),
-                                  item.Cantidad_Tarima <= item.CantidadActual,
-                                  UpdateContext(
-                                      {
-                                          mensajeNotificacion: "Ya se alcanzo la cantidad maxima de tarimas de ese P/N para este contenedor",
-                                          MostrarAviso: true,
-                                          Disable: true
-                                      }
-                                  ),
-                                  ident in Split(item.'P/N_Codigo', ","),
-                                  UpdateContext(
-                                      {
-                                          mensajeNotificacion: "La tarima escaneada ya fue agregada",
-                                          MostrarAviso: true,
-                                          Disable: true
-                                      }
-                                  ),
-                                  Patch(
-                                      ContenedorPNS_2,
-                                      item,
-                                      {CantidadActual: item.CantidadActual + 1,
-                                      'P/N_Codigo': item.'P/N_Codigo' & ident & ","}
-                                  );
-                                  UpdateContext({good: true}),
-                                  Refresh(ContenedorPNS_2);
-                                  Reset(txt_ScanPN_LE);
-                                  SetFocus(txt_ScanPN_LE)
+                              With(
+                                  {
+                                      ident: If(
+                                          Find(
+                                              "/",
+                                              PNCorregido
+                                          ) > 0,
+                                          Mid(
+                                              PNCorregido,
+                                              Find(
+                                                  "/",
+                                                  PNCorregido
+                                              ) + 1
+                                          ),
+                                          Blank()
+                                      ),
+                                      item: LookUp(
+                                          ContenedorPNS_2,
+                                          Nomenclatura = gl_ListaContenedores_LE.Selected.Nomenclatura && 'P/N' = Left(PNCorregido, Find("/", PNCorregido) -1)
+                                      )
+                                  },
+                                  If(
+                                      IsBlank(ident),
+                                      UpdateContext(
+                                          {
+                                              mensajeNotificacion: "Debe indicar el identificador de la tarima",
+                                              MostrarAviso: true,
+                                              Disable: true
+                                          }
+                                      ),
+                                      IsBlank(item),
+                                      UpdateContext(
+                                          {
+                                              mensajeNotificacion: "El P/N escaneado no exite en este contenedor.",
+                                              MostrarAviso: true,
+                                              Disable: true
+                                          }
+                                      ),
+                                      item.Cantidad <= item.CantidadActual,
+                                      UpdateContext(
+                                          {
+                                              mensajeNotificacion: "Ya se alcanzo la cantidad maxima de tarimas de ese P/N para este contenedor",
+                                              MostrarAviso: true,
+                                              Disable: true
+                                          }
+                                      ),
+                                      ident in Split(
+                                          item.'P/N_Codigo',
+                                          ","
+                                      ),
+                                      UpdateContext(
+                                          {
+                                              mensajeNotificacion: "La tarima escaneada ya fue agregada",
+                                              MostrarAviso: true,
+                                              Disable: true
+                                          }
+                                      ),
+                                      Patch(
+                                          ContenedorPNS_2,
+                                          item,
+                                          {
+                                              CantidadActual: item.CantidadActual + 1,
+                                              'P/N_Codigo': item.'P/N_Codigo' & ident & ","
+                                          }
+                                      );
+                                      UpdateContext({good: true}),
+                                      Refresh(ContenedorPNS_2);
+                                      Reset(txt_ScanPN_LE);
+                                      SetFocus(txt_ScanPN_LE)
+                                  )
                               )
                           )
                         OnSelect: |-
@@ -1770,7 +1781,7 @@ Screens:
                   BorderThickness: =5
                   DropShadow: =DropShadow.ExtraBold
                   Fill: =RGBA(255, 255, 255, 1)
-                  Height: =152
+                  Height: =87
                   RadiusBottomLeft: =20
                   RadiusBottomRight: =20
                   RadiusTopLeft: =20
@@ -1789,34 +1800,6 @@ Screens:
                         Size: =20
                         Text: ="El P/N se agrego exitosamente"
                         Width: =318
-                  - btn_Aceptar_EM_3:
-                      Control: Classic/Button@2.2.0
-                      Properties:
-                        BorderColor: =RGBA(52, 152, 47, 1)
-                        Color: =RGBA(255, 255, 255, 1)
-                        DisabledBorderColor: =RGBA(166, 166, 166, 1)
-                        Fill: =RGBA(52, 152, 47, 1)
-                        Font: =Font.'Open Sans'
-                        FontWeight: =FontWeight.Bold
-                        Height: =50
-                        HoverBorderColor: =RGBA(52, 152, 47, 1)
-                        HoverColor: =RGBA(255, 255, 255, 1)
-                        HoverFill: =RGBA(21, 68, 18, 1)
-                        OnSelect: |-
-                          =UpdateContext(
-                              {
-                                  good: false
-                              }
-                          );
-                          Reset(txt_ScanPN_LE);
-                          SetFocus(txt_ScanPN_LE)
-                        PressedBorderColor: =RGBA(52, 152, 47, 1)
-                        PressedColor: =Self.Fill
-                        PressedFill: =Self.Color
-                        Text: ="Aceptar"
-                        Width: =180
-                        X: =69
-                        Y: =90
       - cnt_Aviso_LE:
           Control: GroupContainer@1.3.0
           Variant: ManualLayout
