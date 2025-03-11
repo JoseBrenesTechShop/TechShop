@@ -615,7 +615,7 @@ Screens:
                                                                   OperacionNum: material.Operacion,
                                                                   Ubicacion: material.Ubicacion,
                                                                   Estado_SetUp: "Incompleto",
-                                                                  Cantidad_Material: Value(txt_Cantidad_Material_SU_5.Text),
+                                                                  Cantidad_Material: material.cantidad,
                                                                   User: LookUp(Empleados, Codigo = VarName, Nombre)
                                                               }
                                                           ),
@@ -630,7 +630,7 @@ Screens:
                                                                   OperacionNum: material.Operacion,
                                                                   Ubicacion: material.Ubicacion,
                                                                   Estado_SetUp: "Incompleto",
-                                                                  Cantidad_Material: Value(txt_Cantidad_Material_SU_5.Text),
+                                                                  Cantidad_Material: material.cantidad,
                                                                    User: LookUp(Empleados, Codigo = VarName, Nombre)
                                                               }
                                                           )
@@ -1198,7 +1198,7 @@ Screens:
                                                       BorderColor: =RGBA(0, 0, 0, 1)
                                                       Fill: =RGBA(255, 255, 255, 1)
                                                       Font: =Font.'Open Sans'
-                                                      Height: =30
+                                                      Height: =20
                                                       LineHeight: =1.5
                                                       OnSelect: =
                                                       PaddingBottom: =0
@@ -1208,7 +1208,7 @@ Screens:
                                                       Text: ="Ubicaciones:"
                                                       Width: =121
                                                       X: =7
-                                                      Y: =88
+                                                      Y: =108
                                                 - txt_Cant_Insertos_SH_10:
                                                     Control: Label@2.5.1
                                                     Properties:
@@ -1237,7 +1237,24 @@ Screens:
                                                         )
                                                       Width: =377
                                                       X: =7
-                                                      Y: =118
+                                                      Y: =128
+                                                - lbl_IDMaterial_SH_13:
+                                                    Control: Label@2.5.1
+                                                    Properties:
+                                                      BorderColor: =RGBA(0, 0, 0, 1)
+                                                      Font: =Font.'Open Sans'
+                                                      Height: =25
+                                                      LineHeight: =1.5
+                                                      OnSelect: =
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =0
+                                                      PaddingRight: =0
+                                                      PaddingTop: =0
+                                                      Text: |-
+                                                        = "Cantidad: " & RoundUp(If(ThisItem.matl_qty = 0 || IsBlank(ThisItem.matl_qty), 1, info.Cantidad * ThisItem.matl_qty), 0)
+                                                      Width: =250
+                                                      X: =7
+                                                      Y: =83
                                           - btn_agregar_sh_3:
                                               Control: Classic/Button@2.2.0
                                               Properties:
@@ -1292,7 +1309,8 @@ Screens:
                                                               loc,
                                                               ", "
                                                           ),
-                                                          qty: ThisItem.matl_qty
+                                                          qty: ThisItem.matl_qty,
+                                                          cantidad: RoundUp(If(ThisItem.matl_qty = 0 || IsBlank(ThisItem.matl_qty), 1, info.Cantidad * ThisItem.matl_qty), 0)
                                                       }
                                                   )
                                                 PressedBorderColor: =Self.Fill
@@ -1428,15 +1446,16 @@ Screens:
                                                       HoverColor: =RGBA(255, 255, 255, 1)
                                                       HoverFill: =RGBA(40, 134, 222, 1)
                                                       Icon: =Icon.Save
-                                                      OnSelect: =
+                                                      OnSelect: |-
+                                                        =Patch(Materiales_SetUp, ThisItem, {cantidad: Value(txt_Cantidad_Material_SU_5.Text)})
                                                       PaddingBottom: =5
                                                       PaddingLeft: =5
                                                       PaddingRight: =5
                                                       PaddingTop: =5
-                                                      Visible: =mostrar && ThisItem.IsSelected
+                                                      Visible: =Value(txt_Cantidad_Material_SU_5.Text) <> ThisItem.cantidad
                                                       Width: =30
-                                                      X: =121
-                                                      Y: =85
+                                                      X: =134
+                                                      Y: =84
                                                 - Icon3_55:
                                                     Control: Classic/Icon@2.5.0
                                                     Properties:
@@ -1451,16 +1470,15 @@ Screens:
                                                       HoverColor: =RGBA(255, 255, 255, 1)
                                                       HoverFill: =RGBA(40, 134, 222, 1)
                                                       Icon: =Icon.Reload
-                                                      OnSelect: =UpdateContext({mostrar:false})
+                                                      OnSelect: =Reset(txt_Cantidad_Material_SU_5)
                                                       PaddingBottom: =5
                                                       PaddingLeft: =5
                                                       PaddingRight: =5
                                                       PaddingTop: =5
-                                                      Visible: |
-                                                        =mostrar && ThisItem.IsSelected
+                                                      Visible: =Value(txt_Cantidad_Material_SU_5.Text) <> ThisItem.cantidad
                                                       Width: =30
-                                                      X: =165
-                                                      Y: =85
+                                                      X: =164
+                                                      Y: =84
                                                 - lbl_CantInsertos_SH_18:
                                                     Control: Label@2.5.1
                                                     Properties:
@@ -1483,8 +1501,7 @@ Screens:
                                                       BorderColor: =RGBA(0, 18, 107, 1)
                                                       BorderStyle: =BorderStyle.None
                                                       BorderThickness: =0
-                                                      Default: =RoundUp(If(ThisItem.qty = 0 || IsBlank(ThisItem.qty), 1, info.Cantidad * ThisItem.qty), 0)
-                                                      DisplayMode: =DisplayMode.View
+                                                      Default: =ThisItem.cantidad
                                                       Fill: |-
                                                         =If(
                                                             IsBlank(txt_Cantidad_Material_SU_5.Text) || Value(txt_Cantidad_Material_SU_5.Text) = 0,

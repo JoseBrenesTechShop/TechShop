@@ -678,7 +678,7 @@ SetUpRegistro As screen:
                                                         OperacionNum: material.Operacion,
                                                         Ubicacion: material.Ubicacion,
                                                         Estado_SetUp: "Incompleto",
-                                                        Cantidad_Material: Value(txt_Cantidad_Material_SU_5.Text),
+                                                        Cantidad_Material: material.cantidad,
                                                         User: LookUp(Empleados, Codigo = VarName, Nombre)
                                                     }
                                                 ),
@@ -693,7 +693,7 @@ SetUpRegistro As screen:
                                                         OperacionNum: material.Operacion,
                                                         Ubicacion: material.Ubicacion,
                                                         Estado_SetUp: "Incompleto",
-                                                        Cantidad_Material: Value(txt_Cantidad_Material_SU_5.Text),
+                                                        Cantidad_Material: material.cantidad,
                                                          User: LookUp(Empleados, Codigo = VarName, Nombre)
                                                     }
                                                 )
@@ -1359,7 +1359,7 @@ SetUpRegistro As screen:
                                     Color: =RGBA(0, 0, 0, 1)
                                     DisabledColor: =RGBA(166, 166, 166, 1)
                                     Fill: =RGBA(255, 255, 255, 1)
-                                    Height: =30
+                                    Height: =20
                                     LineHeight: =1.5
                                     OnSelect: =
                                     PaddingBottom: =0
@@ -1371,7 +1371,7 @@ SetUpRegistro As screen:
                                         ="Ubicaciones:"
                                     Width: =121
                                     X: =7
-                                    Y: =88
+                                    Y: =108
                                     ZIndex: =53
 
                                 txt_Cant_Insertos_SH_10 As label:
@@ -1399,8 +1399,26 @@ SetUpRegistro As screen:
                                         )
                                     Width: =377
                                     X: =7
-                                    Y: =118
+                                    Y: =128
                                     ZIndex: =54
+
+                                lbl_IDMaterial_SH_13 As label:
+                                    Color: =RGBA(0, 0, 0, 1)
+                                    DisabledColor: =RGBA(166, 166, 166, 1)
+                                    Height: =25
+                                    LineHeight: =1.5
+                                    OnSelect: =
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =13
+                                    Text: |-
+                                        = "Cantidad: " & RoundUp(If(ThisItem.matl_qty = 0 || IsBlank(ThisItem.matl_qty), 1, info.Cantidad * ThisItem.matl_qty), 0)
+                                    Width: =250
+                                    X: =7
+                                    Y: =83
+                                    ZIndex: =55
 
                             btn_agregar_sh_3 As button:
                                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
@@ -1453,7 +1471,8 @@ SetUpRegistro As screen:
                                                 loc,
                                                 ", "
                                             ),
-                                            qty: ThisItem.matl_qty
+                                            qty: ThisItem.matl_qty,
+                                            cantidad: RoundUp(If(ThisItem.matl_qty = 0 || IsBlank(ThisItem.matl_qty), 1, info.Cantidad * ThisItem.matl_qty), 0)
                                         }
                                     )
                                 Size: =15
@@ -1595,15 +1614,16 @@ SetUpRegistro As screen:
                                     HoverColor: =RGBA(255, 255, 255, 1)
                                     HoverFill: =RGBA(40, 134, 222, 1)
                                     Icon: =Icon.Save
-                                    OnSelect: =
+                                    OnSelect: |-
+                                        =Patch(Materiales_SetUp, ThisItem, {cantidad: Value(txt_Cantidad_Material_SU_5.Text)})
                                     PaddingBottom: =5
                                     PaddingLeft: =5
                                     PaddingRight: =5
                                     PaddingTop: =5
-                                    Visible: =mostrar && ThisItem.IsSelected
+                                    Visible: =Value(txt_Cantidad_Material_SU_5.Text) <> ThisItem.cantidad
                                     Width: =30
-                                    X: =121
-                                    Y: =85
+                                    X: =134
+                                    Y: =84
                                     ZIndex: =63
 
                                 Icon3_55 As icon.Erase:
@@ -1620,17 +1640,15 @@ SetUpRegistro As screen:
                                     HoverColor: =RGBA(255, 255, 255, 1)
                                     HoverFill: =RGBA(40, 134, 222, 1)
                                     Icon: =Icon.Reload
-                                    OnSelect: |-
-                                        =UpdateContext({mostrar:false})
+                                    OnSelect: =Reset(txt_Cantidad_Material_SU_5)
                                     PaddingBottom: =5
                                     PaddingLeft: =5
                                     PaddingRight: =5
                                     PaddingTop: =5
-                                    Visible: |
-                                        =mostrar && ThisItem.IsSelected
+                                    Visible: =Value(txt_Cantidad_Material_SU_5.Text) <> ThisItem.cantidad
                                     Width: =30
-                                    X: =165
-                                    Y: =85
+                                    X: =164
+                                    Y: =84
                                     ZIndex: =64
 
                                 lbl_CantInsertos_SH_18 As label:
@@ -1656,11 +1674,10 @@ SetUpRegistro As screen:
                                     BorderStyle: =BorderStyle.None
                                     BorderThickness: =0
                                     Color: =RGBA(0, 0, 0, 1)
-                                    Default: =RoundUp(If(ThisItem.qty = 0 || IsBlank(ThisItem.qty), 1, info.Cantidad * ThisItem.qty), 0)
+                                    Default: =ThisItem.cantidad
                                     DisabledBorderColor: =RGBA(166, 166, 166, 1)
                                     DisabledColor: =RGBA(166, 166, 166, 1)
                                     DisabledFill: =RGBA(244, 244, 244, 1)
-                                    DisplayMode: =DisplayMode.View
                                     Fill: |-
                                         =If(
                                             IsBlank(txt_Cantidad_Material_SU_5.Text) || Value(txt_Cantidad_Material_SU_5.Text) = 0,
