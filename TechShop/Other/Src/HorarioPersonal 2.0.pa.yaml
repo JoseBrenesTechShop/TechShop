@@ -399,7 +399,7 @@ Screens:
                                                                         NotificationType.Error
                                                                     ),
                                                                     If(
-                                                                        dp_FechaInicio_HP.SelectedDate + 6 <> DateValue(dp_fechaFin_HP.Text),
+                                                                        dp_FechaInicio_HP.SelectedDate + 6 <> DateValue(dp_fechaFin_HP.SelectedDate),
                                                                         Notify(
                                                                             "Fechas Ingresadas invalidas, de be ser una semana completa(Lunes a Domingo)",
                                                                             NotificationType.Error
@@ -469,7 +469,7 @@ Screens:
                                                                                             Horas_Pagadas: Value(txt_HorasP_HP.Text),
                                                                                             Total_Horas_Pagadas: txt_HorasP_HP.Text,
                                                                                             Fecha_Inicio: DateValue(dp_FechaInicio_HP.SelectedDate),
-                                                                                            Fecha_Fin: DateValue(dp_fechaFin_HP.Text),
+                                                                                            Fecha_Fin: DateValue(dp_fechaFin_HP.SelectedDate),
                                                                                             Maquina: drp_Maquina1_HP.SelectedText.Value,
                                                                                             'Maquina 2': drp_Maquina2_HP.SelectedText.Value,
                                                                                             'Maquina 3': drp_Maquina3_HP.SelectedText.Value,
@@ -482,7 +482,7 @@ Screens:
                                                                                         NotificationType.Success
                                                                                     );
                                                                                     If(
-                                                                                        dp_FechaInicio_HP.SelectedDate > Today() || (dp_FechaInicio_HP.SelectedDate <= Today() && DateValue(dp_fechaFin_HP.Text) >= Today()),
+                                                                                        dp_FechaInicio_HP.SelectedDate > Today() || (dp_FechaInicio_HP.SelectedDate <= Today() && DateValue(dp_fechaFin_HP.SelectedDate) >= Today()),
                                                                                         CorreoConPDF.Run(
                                                                                             HtmlPDF_HP_1.HtmlText,
                                                                                             LookUp(
@@ -519,7 +519,7 @@ Screens:
                                                                                             Horas_Pagadas: Value(txt_HorasP_HP.Text),
                                                                                             Total_Horas_Pagadas: txt_HorasP_HP.Text,
                                                                                             Fecha_Inicio: DateValue(dp_FechaInicio_HP.SelectedDate),
-                                                                                            Fecha_Fin: DateValue(dp_fechaFin_HP.Text),
+                                                                                            Fecha_Fin: DateValue(dp_fechaFin_HP.SelectedDate),
                                                                                             Maquina: drp_Maquina1_HP.SelectedText.Value,
                                                                                             'Maquina 2': drp_Maquina2_HP.SelectedText.Value,
                                                                                             'Maquina 3': drp_Maquina3_HP.SelectedText.Value,
@@ -532,7 +532,7 @@ Screens:
                                                                                         NotificationType.Success
                                                                                     );
                                                                                     If(
-                                                                                        dp_FechaInicio_HP.SelectedDate > Today() || (dp_FechaInicio_HP.SelectedDate <= Today() && DateValue(dp_fechaFin_HP.Text) >= Today()),
+                                                                                        dp_FechaInicio_HP.SelectedDate > Today() || (dp_FechaInicio_HP.SelectedDate <= Today() && DateValue(dp_fechaFin_HP.SelectedDate) >= Today()),
                                                                                         CorreoConPDF.Run(
                                                                                             HtmlPDF_HP_1.HtmlText,
                                                                                             LookUp(
@@ -955,31 +955,6 @@ Screens:
                                           Wrap: =false
                                           X: =360
                                           Y: =350
-                                    - dp_fechaFin_HP:
-                                        Control: Classic/TextInput@2.3.2
-                                        Properties:
-                                          BorderColor: =RGBA(40, 134, 222, 1)
-                                          BorderThickness: =1
-                                          Default: =Text(dp_FechaInicio_HP.SelectedDate + 6, "dd/mm/yyyy")
-                                          DelayOutput: =true
-                                          DisabledBorderColor: =RGBA(40, 134, 222, 1)
-                                          DisabledColor: =RGBA(0, 0, 0, 1)
-                                          DisabledFill: =RGBA(255, 255, 255, 1)
-                                          DisplayMode: =DisplayMode.Disabled
-                                          FontWeight: =FontWeight.Semibold
-                                          HintText: ="Fecha Fin"
-                                          PaddingBottom: =8
-                                          PaddingLeft: =8
-                                          PaddingRight: =8
-                                          PaddingTop: =8
-                                          RadiusBottomLeft: =0
-                                          RadiusBottomRight: =0
-                                          RadiusTopLeft: =0
-                                          RadiusTopRight: =0
-                                          Tooltip: =
-                                          Width: =230
-                                          X: =490
-                                          Y: =350
                                     - DataCardKey156_37:
                                         Control: Label@2.5.1
                                         Properties:
@@ -1234,6 +1209,17 @@ Screens:
                                           Width: =150
                                           X: =197
                                           Y: =390
+                                    - dp_fechaFin_HP:
+                                        Control: Classic/DatePicker@2.6.0
+                                        Properties:
+                                          DefaultDate: =dp_FechaInicio_HP.SelectedDate
+                                          DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                                          DisabledColor: =RGBA(0, 0, 0, 1)
+                                          DisabledFill: =RGBA(255, 255, 255, 1)
+                                          DisplayMode: =DisplayMode.Disabled
+                                          Width: =230
+                                          X: =490
+                                          Y: =350
                               - ctn_InfoEmpleado_HP:
                                   Control: GroupContainer@1.3.0
                                   Variant: ManualLayout
@@ -2306,7 +2292,7 @@ Screens:
                       "</td>",
                       "<td class='cell'>",
                       Text(
-                          DateValue(dp_fechaFin_HP.Text),
+                          DateValue(dp_fechaFin_HP.SelectedDate),
                           "[$-en-US]yyyy-mm-dd"
                       ),
                       "</td>",
@@ -2362,14 +2348,14 @@ Screens:
                     ="El empleado tiene un permiso para faltar del " & Text(
                         LookUp(
                             TramitesSolicitudes,
-                            Codigo = drp_Empleado_HP.Selected.Codigo && Fecha_Inicio <= DateValue(dp_fechaFin_HP.Text) && Fecha_Fin >= dp_FechaInicio_HP.SelectedDate && EstadoDeProceso = "Aprobado",
+                            Codigo = drp_Empleado_HP.Selected.Codigo && Fecha_Inicio <= DateValue(dp_fechaFin_HP.SelectedDate) && Fecha_Fin >= dp_FechaInicio_HP.SelectedDate && EstadoDeProceso = "Aprobado",
                             Fecha_Inicio
                         ),
                         "dd/mmm/yyyy"
                     ) & " al " & Text(
                         LookUp(
                             TramitesSolicitudes,
-                            Codigo = drp_Empleado_HP.Selected.Codigo && Fecha_Inicio <= DateValue(dp_fechaFin_HP.Text) && Fecha_Fin >= dp_FechaInicio_HP.SelectedDate && EstadoDeProceso = "Aprobado",
+                            Codigo = drp_Empleado_HP.Selected.Codigo && Fecha_Inicio <= DateValue(dp_fechaFin_HP.SelectedDate) && Fecha_Fin >= dp_FechaInicio_HP.SelectedDate && EstadoDeProceso = "Aprobado",
                             Fecha_Fin
                         ),
                         "dd/mmm/yyyy"
