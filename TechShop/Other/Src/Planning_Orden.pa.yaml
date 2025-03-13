@@ -1654,7 +1654,22 @@ Screens:
                                     HoverBorderColor: =RGBA(15, 108, 189, 1)
                                     HoverFill: =RGBA(15, 108, 189, 1)
                                     Image: ='xls-file (2)'
-                                    OnSelect: =Notify("En desarrollo")
+                                    OnSelect: |-
+                                      =With(
+                                          {
+                                              correo: LookUp(
+                                                  Empleados,
+                                                  Codigo = VarName,
+                                                  Correo
+                                              )
+                                          },
+                                          If(
+                                              IsBlank(correo),
+                                              Notify("Debe tener un correo registrado"),
+                                              Excel_OrdenMaquinas.Run(correo);
+                                              Notify("Reporte Plannig enviado exitosamente", NotificationType.Success)
+                                          )
+                                      )
                                     PaddingBottom: =4
                                     PaddingLeft: =4
                                     PaddingRight: =4
