@@ -138,7 +138,7 @@ Listado_Despacho As screen:
                 HoverColor: =RGBA(255, 255, 255, 1)
                 HoverFill: =RGBA(0, 134, 208, 1)
                 Icon: =Icon.Home
-                OnSelect: |
+                OnSelect: |-
                     =UpdateContext({
                         AbrirCont: false,
                         AbrirLisDespacho: false,
@@ -147,8 +147,7 @@ Listado_Despacho As screen:
                         NuevoListado: Blank(),
                         TieneFaltantes: false
                     });
-                    Clear(DespachoCollection);
-                    Clear(colOverrides)
+                    Clear(DespachoCollection)
                 PaddingBottom: =5
                 PaddingLeft: =5
                 PaddingRight: =5
@@ -1551,33 +1550,37 @@ Listado_Despacho As screen:
                     ),
                     UpdateContext(
                         {
-                            UltimoListado: "L" & Text(
-                                If(
-                                    IsEmpty(
-                                        Filter(
-                                            LogisticDespachos,
-                                            POT = gl_LogisticaDespacho_LD.Selected.POT
-                                        )
-                                    ),
-                                    1,
-                                    Max(
-                                        AddColumns(
+                            UltimoListado: If(
+                                IsBlank(ListadoSeleccionado),
+                                "L" & Text(
+                                    If(
+                                        IsEmpty(
                                             Filter(
                                                 LogisticDespachos,
                                                 POT = gl_LogisticaDespacho_LD.Selected.POT
-                                            ),
-                                            NumListado,
-                                            Value(
-                                                Mid(
-                                                    Listado,
-                                                    2,
-                                                    Len(Listado) - 1
-                                                )
                                             )
                                         ),
-                                        NumListado
-                                    ) + 1
-                                )
+                                        1,
+                                        Max(
+                                            AddColumns(
+                                                Filter(
+                                                    LogisticDespachos,
+                                                    POT = gl_LogisticaDespacho_LD.Selected.POT
+                                                ),
+                                                NumListado,
+                                                Value(
+                                                    Mid(
+                                                        Listado,
+                                                        2,
+                                                        Len(Listado) - 1
+                                                    )
+                                                )
+                                            ),
+                                            NumListado
+                                        ) + 1
+                                    )
+                                ),
+                                ListadoSeleccionado
                             )
                         }
                     );
@@ -1585,7 +1588,14 @@ Listado_Despacho As screen:
                         glr_Listado_LD.AllItems,
                         Patch(
                             LogisticDespachos,
-                            Defaults(LogisticDespachos),
+                            If(
+                                !IsBlank(ListadoSeleccionado),
+                                LookUp(
+                                    LogisticDespachos,
+                                    id_item = ThisRecord.id_item && Listado = ListadoSeleccionado
+                                ),
+                                Defaults(LogisticDespachos)
+                            ),
                             {
                                 Requisicion: gl_LogisticaDespacho_LD.Selected.Requisicion,
                                 POT: gl_LogisticaDespacho_LD.Selected.POT,
@@ -1689,13 +1699,12 @@ Listado_Despacho As screen:
                         }
                     );
                     Clear(DespachoCollection);
-                    Refresh(LogisticDespachos);
-                    Clear(colOverrides)
+                    Refresh(LogisticDespachos)
                 )
             Size: =15
             Text: ="Guardar"
             Width: =225
-            X: =936
+            X: =814
             Y: =554
             ZIndex: =13
 
@@ -1719,12 +1728,11 @@ Listado_Despacho As screen:
                     NuevoListado: Blank(),
                     TieneFaltantes: false
                 });
-                Clear(DespachoCollection);
-                Clear(colOverrides)
+                Clear(DespachoCollection)
             Size: =15
             Text: ="Volver"
             Width: =225
-            X: =693
+            X: =571
             Y: =552
             ZIndex: =14
 
@@ -1796,52 +1804,6 @@ Listado_Despacho As screen:
             Y: =8
             ZIndex: =17
 
-        btn_Guardar_EC_11 As button:
-            BorderColor: =RGBA(180, 214, 250, 1)
-            DisabledBorderColor: =RGBA(166, 166, 166, 1)
-            DisabledColor: =RGBA(166, 166, 166, 1)
-            DisabledFill: =RGBA(244, 244, 244, 1)
-            DisplayMode: |
-                =If(
-                    Max(
-                        Filter(
-                            LogisticDespachos,
-                            POT = gl_LogisticaDespacho_LD.Selected.POT
-                        ),
-                        Value(Right(Listado, 1))  // Asegurar que sea valor numérico
-                    ) <> Value(Right(ListadoSeleccionado, 1)) ||
-                    !IsEmpty(
-                        Filter(
-                            Compras_Pots,
-                            'Estado (crfb9_estado)' = "Despachado" && POT = gl_LogisticaDespacho_LD.Selected.POT
-                        )
-                    ),
-                    DisplayMode.Disabled, 
-                    DisplayMode.Edit  
-                )
-            Fill: =RGBA(180, 214, 250, 1)
-            FontWeight: =FontWeight.Semibold
-            Height: =47
-            HoverColor: =RGBA(255, 255, 255, 1)
-            HoverFill: =
-            OnSelect: |-
-                =ClearCollect(
-                    colOverrides,
-                    ForAll(
-                        glr_Listado_LD.AllItems,
-                        {
-                            id_item: ThisRecord.id_items,
-                            OverrideValue: Value(ThisRecord.txt_Cantidad_LD.Text)
-                        }
-                    )
-                )
-            Size: =15
-            Text: ="Autocompletar "
-            Width: =225
-            X: =200
-            Y: =554
-            ZIndex: =18
-
         btn_Guardar_EC_12 As button:
             BorderColor: =RGBA(166, 215, 153, 1)
             DisabledBorderColor: =RGBA(166, 166, 166, 1)
@@ -1857,7 +1819,7 @@ Listado_Despacho As screen:
             Size: =15
             Text: ="Refrescar tabla"
             Width: =225
-            X: =446
+            X: =324
             Y: =554
             ZIndex: =19
 
@@ -1871,7 +1833,7 @@ Listado_Despacho As screen:
             Height: =60
             Icon: =Icon.VerticalLine
             Width: =3
-            X: =434
+            X: =312
             Y: =547
             ZIndex: =20
 
@@ -1885,7 +1847,7 @@ Listado_Despacho As screen:
             Height: =60
             Icon: =Icon.VerticalLine
             Width: =3
-            X: =680
+            X: =558
             Y: =546
             ZIndex: =21
 
@@ -1899,7 +1861,7 @@ Listado_Despacho As screen:
             Height: =60
             Icon: =Icon.VerticalLine
             Width: =3
-            X: =926
+            X: =804
             Y: =547
             ZIndex: =22
 
