@@ -1310,37 +1310,37 @@ Listado_Despacho As screen:
                 BorderColor: =RGBA(40, 134, 222, 1)
                 BorderThickness: =0.5
                 Color: =RGBA(0, 0, 0, 1)
-                Default: |-
-                    =Value(
-                        Coalesce(
-                            LookUp(
-                                colOverrides,
-                                id_item = ThisItem.id_items,
-                                OverrideValue
+                Default: |
+                    =With(
+                        {
+                            registro: LookUp(
+                                LogisticDespachos,
+                                POT = gl_LogisticaDespacho_LD.Selected.POT 
+                                    && id_item = ThisItem.id_items 
+                                    && Listado = ListadoSeleccionado 
+                                    && Requisicion = gl_LogisticaDespacho_LD.Selected.Requisicion,
+                                'Cantidad Recibida'
                             ),
-                            With(
-                                {
-                                    maxListado: Max(
-                                        Filter(
-                                            LogisticDespachos,
-                                            POT = gl_LogisticaDespacho_LD.Selected.POT &&
-                                            id_item = ThisItem.id_items
-                                        ),
-                                        Value(Right(Listado, 1))
-                            )},
-                                If(
-                                    Value(Right(ListadoSeleccionado, 1)) > maxListado,
-                                    0, 
-                                    Sum(
-                                        Filter(
-                                            LogisticDespachos,
-                                            POT = gl_LogisticaDespacho_LD.Selected.POT &&
-                                            id_item = ThisItem.id_items &&
-                                            Listado = ListadoSeleccionado
-                                        ),
-                                        'Cantidad Recibida'
-                                    )
-                                )
+                            maxListado: Max(
+                                Filter(
+                                    LogisticDespachos,
+                                    POT = gl_LogisticaDespacho_LD.Selected.POT 
+                                        && id_item = ThisItem.id_items 
+                                        && Requisicion = gl_LogisticaDespacho_LD.Selected.Requisicion
+                                ),
+                                Value(Listado) 
+                            )
+                        },
+                        If(
+                            drp_Tipo_LD.SelectedText.Value = "Despachado",
+                            Text(registro, "0"),
+                            If(
+                                Or(
+                                    IsBlank(ListadoSeleccionado),
+                                    Value(ListadoSeleccionado) >= maxListado  
+                                ),
+                                "",
+                                Text(registro, "0")
                             )
                         )
                     )
@@ -1552,33 +1552,25 @@ Listado_Despacho As screen:
                         {
                             UltimoListado: If(
                                 IsBlank(ListadoSeleccionado),
-                                "L" & Text(
-                                    If(
-                                        IsEmpty(
+                                If(
+                                    IsEmpty(
+                                        Filter(
+                                            LogisticDespachos,
+                                            POT = gl_LogisticaDespacho_LD.Selected.POT
+                                        )
+                                    ),
+                                    1,
+                                    Max(
+                                        AddColumns(
                                             Filter(
                                                 LogisticDespachos,
                                                 POT = gl_LogisticaDespacho_LD.Selected.POT
-                                            )
-                                        ),
-                                        1,
-                                        Max(
-                                            AddColumns(
-                                                Filter(
-                                                    LogisticDespachos,
-                                                    POT = gl_LogisticaDespacho_LD.Selected.POT
-                                                ),
-                                                NumListado,
-                                                Value(
-                                                    Mid(
-                                                        Listado,
-                                                        2,
-                                                        Len(Listado) - 1
-                                                    )
-                                                )
                                             ),
-                                            NumListado
-                                        ) + 1
-                                    )
+                                            NumListado,
+                                            Value(Listado)
+                                        ),
+                                        NumListado
+                                    ) + 1
                                 ),
                                 ListadoSeleccionado
                             )
@@ -1592,7 +1584,7 @@ Listado_Despacho As screen:
                                 !IsBlank(ListadoSeleccionado),
                                 LookUp(
                                     LogisticDespachos,
-                                    id_item = ThisRecord.id_item && Listado = ListadoSeleccionado
+                                    id_item = ThisRecord.id_item && Listado = Text(ListadoSeleccionado) && Requisicion = gl_LogisticaDespacho_LD.Selected.Requisicion
                                 ),
                                 Defaults(LogisticDespachos)
                             ),
@@ -1626,19 +1618,7 @@ Listado_Despacho As screen:
                     );
                     If(
                         TieneFaltantes,
-                        UpdateContext(
-                            {
-                                NuevoListado: "L" & Text(
-                                    Value(
-                                        Mid(
-                                            UltimoListado,
-                                            2,
-                                            Len(UltimoListado) - 1
-                                        )
-                                    ) + 1
-                                )
-                            }
-                        );
+                        UpdateContext({NuevoListado: UltimoListado + 1});
                         ForAll(
                             Filter(
                                 glr_Listado_LD.AllItems,
@@ -1719,7 +1699,7 @@ Listado_Despacho As screen:
             Height: =47
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =
-            OnSelect: |
+            OnSelect: |-
                 =UpdateContext({
                     AbrirCont: false,
                     AbrirLisDespacho: false,
@@ -1728,7 +1708,8 @@ Listado_Despacho As screen:
                     NuevoListado: Blank(),
                     TieneFaltantes: false
                 });
-                Clear(DespachoCollection)
+                Clear(DespachoCollection);
+                Refresh(LogisticDespachos)
             Size: =15
             Text: ="Volver"
             Width: =225
@@ -1769,7 +1750,7 @@ Listado_Despacho As screen:
                 =If(
                     IsBlank(ListadoSeleccionado),
                     "Estás ubicado en el listado N.º 1",
-                    "Estás ubicado en el listado N.º " & Mid(ListadoSeleccionado, 2, Len(ListadoSeleccionado) - 1)
+                    "Estás ubicado en el listado N.º " & ListadoSeleccionado
                 )
             Weight: ='TextCanvas.Weight'.Bold
             Width: =382
@@ -1875,7 +1856,7 @@ Listado_Despacho As screen:
         RadiusTopRight: =4
         Visible: =AbrirLisDespacho
         Width: =1352
-        X: =14
+        X: =8
         Y: =146
         ZIndex: =4
 
@@ -1904,13 +1885,13 @@ Listado_Despacho As screen:
             BorderColor: =RGBA(0, 18, 107, 1)
             DelayItemLoading: =true
             Height: =433
-            Items: |-
+            Items: |
                 =Sort(
                     Distinct(
                         Filter(LogisticDespachos, POT = gl_LogisticaDespacho_LD.Selected.POT),
                         Listado
                     ),
-                    Mid(ThisRecord.Value, 2, Len(ThisRecord.Value) - 1),
+                    Value(ThisRecord.Value),
                     SortOrder.Descending
                 )
             Layout: =Layout.Vertical
@@ -1927,7 +1908,7 @@ Listado_Despacho As screen:
                 BorderColor: =RGBA(40, 134, 222, 1)
                 BorderThickness: =0.5
                 Color: =RGBA(0, 0, 0, 1)
-                Default: ="Listado N.º " & Mid(ThisItem.Value, 2, Len(ThisItem.Value) - 1)
+                Default: ="Listado N.º " & ThisItem.Value
                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                 DisabledColor: =
                 DisabledFill: =
@@ -1981,7 +1962,7 @@ Listado_Despacho As screen:
                             RenameColumns(
                                 Filter(
                                     LogisticDespachos,
-                                    POT = SelectedPOT && Listado = ListadoSeleccionado
+                                    POT = SelectedPOT && Listado = Text(ListadoSeleccionado)
                                 ),
                                 descripcion, Descripcion,
                                 Cantidad, Cantidades,
