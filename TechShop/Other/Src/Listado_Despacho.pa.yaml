@@ -131,7 +131,8 @@ Screens:
                               NuevoListado: Blank(),
                               TieneFaltantes: false
                           });
-                          Clear(DespachoCollection)
+                          Clear(DespachoCollection);
+                          Back()
                         PaddingBottom: =5
                         PaddingLeft: =5
                         PaddingRight: =5
@@ -1035,7 +1036,8 @@ Screens:
                   BorderColor: =RGBA(0, 18, 107, 1)
                   BorderThickness: =1
                   Height: =408
-                  Items: =DespachoCollection
+                  Items: |
+                    =DespachoCollection
                   ShowScrollbar: =false
                   TemplateSize: =30
                   Width: =1352
@@ -1147,41 +1149,18 @@ Screens:
                         Align: =Align.Center
                         BorderColor: =RGBA(40, 134, 222, 1)
                         BorderThickness: =0.5
-                        Default: |
+                        Default: |-
                           =With(
                               {
-                                  registro: Coalesce(
-                                      LookUp(
-                                          LogisticDespachos,
-                                          POT = gl_LogisticaDespacho_LD.Selected.POT 
-                                              && id_item = ThisItem.id_items 
-                                              && Listado = ListadoSeleccionado 
-                                              && Requisicion = gl_LogisticaDespacho_LD.Selected.Requisicion,
-                                          'Cantidad Recibida'
-                                      ), 
-                                      0
-                                  ),
-                                  maxListado: Max(
-                                      Filter(
-                                          LogisticDespachos,
-                                          POT = gl_LogisticaDespacho_LD.Selected.POT 
-                                              && id_item = ThisItem.id_items 
-                                              && Requisicion = gl_LogisticaDespacho_LD.Selected.Requisicion
-                                      ),
-                                      Value(Listado) 
+                                  registro: LookUp(
+                                      LogisticDespachos,
+                                      id_item = ThisItem.id_items && descripcion = ThisItem.Descripcion && Listado = ListadoSeleccionado
                                   )
                               },
                               If(
-                                  drp_Tipo_LD.SelectedText.Value = "Despachado",
-                                  Text(registro, "0"),
-                                  If(
-                                      Or(
-                                          IsBlank(ListadoSeleccionado),
-                                          Value(ListadoSeleccionado) >= maxListado  
-                                      ),
-                                      "",
-                                      Text(registro, "0")
-                                  )
+                                  IsBlank(registro),
+                                  0,
+                                  registro.'Cantidad Recibida'
                               )
                           )
                         DisabledBorderColor: =RGBA(40, 134, 222, 1)
@@ -1414,9 +1393,12 @@ Screens:
                                 LogisticDespachos,
                                 If(
                                     !IsBlank(ListadoSeleccionado),
-                                    LookUp(
-                                        LogisticDespachos,
-                                        id_item = ThisRecord.id_item && Listado = Text(ListadoSeleccionado) && Requisicion = gl_LogisticaDespacho_LD.Selected.Requisicion
+                                    With(
+                                        {registro: ThisRecord},
+                                        LookUp(
+                                            LogisticDespachos,
+                                            id_item = registro.id_items && Listado = Text(ListadoSeleccionado) && Requisicion = gl_LogisticaDespacho_LD.Selected.Requisicion && descripcion = registro.Descripcion
+                                        )
                                     ),
                                     Defaults(LogisticDespachos)
                                 ),
@@ -1473,7 +1455,6 @@ Screens:
                                         id_item: ThisRecord.id_items,
                                         descripcion: ThisRecord.Descripcion,
                                         Cantidad: Value(ThisRecord.txt_cantidadFaltante_LD.Text),
-                                        'Cantidad Recibida': Value(ThisRecord.txt_cantidaRecibida_LD.Text),
                                         'Cantidad Faltante': Value(ThisRecord.txt_cantidadFaltante_LD.Text),
                                         Listado: NuevoListado
                                     }
@@ -1760,9 +1741,8 @@ Screens:
                         HoverColor: =
                         HoverFill: =RGBA(255, 255, 255, 255)
                         Icon: =Icon.More
-                        OnSelect: |-
-                          =
-                          UpdateContext(
+                        OnSelect: |
+                          =UpdateContext(
                               {
                                   AbrirCont: true,
                                   AbrirLisDespacho: false,
@@ -1777,7 +1757,7 @@ Screens:
                                   RenameColumns(
                                       Filter(
                                           LogisticDespachos,
-                                          POT = SelectedPOT && Listado = Text(ListadoSeleccionado)
+                                          POT = SelectedPOT && Listado = ListadoSeleccionado
                                       ),
                                       descripcion, Descripcion,
                                       Cantidad, Cantidades,
@@ -1792,7 +1772,7 @@ Screens:
                                       ),
                                       description, Descripcion,
                                       qty_ordered, Cantidades,
-                                      item, id_items
+                                      item, id_items     
                                   )
                               )
                           );
