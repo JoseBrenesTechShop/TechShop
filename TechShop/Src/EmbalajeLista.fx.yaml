@@ -1906,35 +1906,39 @@ EmbalajeLista As screen:
                         {
                             PNCorregido: Substitute(
                                 Substitute(
-                                    Upper(
-                                        Self.Text
-                                    ),
+                                    Upper(Self.Text),
                                     "&",
                                     "/"
                                 ),
                                 "'",
                                 "-"
+                            ),
+                            PNSplit: Split(
+                                Substitute(
+                                    Substitute(
+                                        Upper(Self.Text),
+                                        "&",
+                                        "/"
+                                    ),
+                                    "'",
+                                    "-"
+                                ),
+                                "/"
                             )
                         },
                         With(
                             {
-                                ident: If(
-                                    Find(
-                                        "/",
-                                        PNCorregido
-                                    ) > 0,
-                                    Mid(
-                                        PNCorregido,
-                                        Find(
-                                            "/",
-                                            PNCorregido
-                                        ) + 1
-                                    ),
-                                    Blank()
-                                ),
+                                ident: Last(
+                                    FirstN(
+                                        PNSplit,
+                                        2
+                                    )
+                                ).Value,
+                                PN: First(PNSplit).Value,
+                                PO: Last(PNSplit).Value,
                                 item: LookUp(
                                     ContenedorPNS_2,
-                                    Nomenclatura = gl_ListaContenedores_LE.Selected.Nomenclatura && 'P/N' = Left(PNCorregido, Find("/", PNCorregido) -1)
+                                    Nomenclatura = gl_ListaContenedores_LE.Selected.Nomenclatura && 'P/N' = First(PNSplit).Value
                                 )
                             },
                             If(
@@ -1942,6 +1946,14 @@ EmbalajeLista As screen:
                                 UpdateContext(
                                     {
                                         mensajeNotificacion: "Debe indicar el identificador de la tarima",
+                                        MostrarAviso: true,
+                                        Disable: true
+                                    }
+                                ),
+                                IsBlank(PO),
+                                UpdateContext(
+                                    {
+                                        mensajeNotificacion: "Debe indicar la PO",
                                         MostrarAviso: true,
                                         Disable: true
                                     }
@@ -1978,7 +1990,15 @@ EmbalajeLista As screen:
                                     item,
                                     {
                                         CantidadActual: item.CantidadActual + 1,
-                                        'P/N_Codigo': item.'P/N_Codigo' & ident & ","
+                                        'P/N_Codigo': item.'P/N_Codigo' & ident & ",",
+                                        POS: If(
+                                            PO in Split(
+                                                item.POS,
+                                                ","
+                                            ),
+                                            item.POS,
+                                            item.POS & PO & ","
+                                        )
                                     }
                                 );
                                 UpdateContext({good: true}),
