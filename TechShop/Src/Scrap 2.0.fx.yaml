@@ -152,6 +152,13 @@
                     Reset(drp_Insepccion_SP);
                     Reset(drp_Incoformidad_SP);
                     Reset(txt_Item_SP);
+                    Reset(drp_Edit_Maquina_SP);
+                    Reset(drp_Edit_Operario_SP);
+                    Reset(drp_Edit_Turno_SP);
+                    Reset(drp_Edit_Zona_SP);
+                    Reset(txt_Edit_Bache_SP);
+                    Reset(txt_Edit_Cant_SP);
+                    UpdateContext({aviso: false, Editar: false});
                     Back()
                 PaddingBottom: =5
                 PaddingLeft: =5
@@ -1188,7 +1195,9 @@
                             {
                                 tarima: LookUp(
                                     Scrap_Tarimas,
-                                    Tarima = txt_Tarima_SP.Text
+                                    Tarima = txt_Tarima_SP.Text &&
+                                    Orden = drp_Orden_SP.Selected.Value &&
+                                    Operacion = drp_OP_SP.Selected.Operacion
                                 )
                             },
                             If(
@@ -1893,10 +1902,21 @@
 
     cnt_cubrir_SP As rectangle:
         BorderColor: =App.Theme.Colors.Darker40
-        Fill: =RGBA(214, 221, 224, 0.21)
+        Fill: =RGBA(214, 221, 224, 0.35)
         Height: =660
-        OnSelect: |-
-            =UpdateContext({aviso: false, Editar:false})
+        OnSelect: |
+            =UpdateContext(
+                {
+                    aviso: false,
+                    Editar: false
+                }
+            );
+            Reset(drp_Edit_Maquina_SP);
+            Reset(drp_Edit_Operario_SP);
+            Reset(drp_Edit_Turno_SP);
+            Reset(drp_Edit_Zona_SP);
+            Reset(txt_Edit_Bache_SP);
+            Reset(txt_Edit_Cant_SP);
         Visible: =aviso || Editar
         Width: =1350
         X: =8
@@ -1908,7 +1928,7 @@
         BorderThickness: =5
         DropShadow: =DropShadow.ExtraBold
         Fill: =RGBA(255, 255, 255, 1)
-        Height: =413
+        Height: =261
         RadiusBottomLeft: =20
         RadiusBottomRight: =20
         RadiusTopLeft: =20
@@ -1916,7 +1936,7 @@
         Visible: =Editar
         Width: =622
         X: =411
-        Y: =256
+        Y: =253
         ZIndex: =4
 
         btn_ContinuarAviso_HxH_21 As button:
@@ -1926,13 +1946,64 @@
             Fill: =RGBA(72, 163, 62, 1)
             FontWeight: =FontWeight.Semibold
             HoverColor: =RGBA(255, 255, 255, 1)
-            HoverFill: =RGBA(52, 152, 47, 1)
+            HoverFill: =RGBA(21, 68, 18, 1)
             OnSelect: |-
-                =UpdateContext({Editar: false})
+                =If(
+                    IsBlank(drp_Edit_Maquina_SP.Selected) || IsBlank(drp_Edit_Turno_SP.Selected) || IsBlank(drp_Edit_Zona_SP.Selected) || IsBlank(drp_Edit_Operario_SP.Selected) || IsBlank(txt_Edit_Bache_SP.Text) || IsBlank(txt_Edit_Cant_SP.Text),
+                    UpdateContext(
+                        {
+                            aviso: true,
+                            TextoAviso: "Debe llenar todos los campos"
+                        }
+                    ),
+                    With(
+                        {
+                            tarimaScrap: LookUp(
+                                Scrap_Tarimas,
+                                Tarima = tbl_Scrap_SP.Selected.Tarima && Orden = tbl_Scrap_SP.Selected.Orden && Operacion = Text(tbl_Scrap_SP.Selected.OP)
+                            )
+                        },
+                        If(
+                            ((tarimaScrap.Cantidad - tbl_Scrap_SP.Selected.Cantidad) + txt_Edit_Cant_SP.Text) > 50,
+                            UpdateContext(
+                                {
+                                    aviso: true,
+                                    TextoAviso: "La cantidad maxima por tarima es de 50 unidades"
+                                }
+                            ),
+                            Patch(
+                                Scrap_Tarimas,
+                                tarimaScrap,
+                                {Cantidad: (tarimaScrap.Cantidad - tbl_Scrap_SP.Selected.Cantidad) + txt_Edit_Cant_SP.Text}
+                            );
+                            Patch(
+                                Scrap_1,
+                                tbl_Scrap_SP.Selected,
+                                {
+                                    Operario: drp_Edit_Operario_SP.Selected.Nombre,
+                                    Turno: drp_Edit_Turno_SP.Selected.Turno_Op,
+                                    Ubicacion: drp_Edit_Zona_SP.Selected.Texto,
+                                    Maquina: drp_Edit_Maquina_SP.Selected.M,
+                                    Bache: Value(txt_Edit_Bache_SP.Text),
+                                    Cantidad: Value(txt_Edit_Cant_SP.Text),
+                                    Usuario: txt_User_Sp.Text
+                                }
+                            );
+                            Reset(drp_Edit_Maquina_SP);
+                            Reset(drp_Edit_Operario_SP);
+                            Reset(drp_Edit_Turno_SP);
+                            Reset(drp_Edit_Zona_SP);
+                            Reset(txt_Edit_Bache_SP);
+                            Reset(txt_Edit_Cant_SP);
+                            UpdateContext({Editar: false})
+                        )
+                    );
+                    
+                )
             Size: =15
-            Text: ="OK"
-            X: =330
-            Y: =340
+            Text: ="Guardar"
+            X: =421
+            Y: =208
             ZIndex: =79
 
         txt_Edit_Orden_SP As text:
@@ -2116,7 +2187,7 @@
             Y: =80
             ZIndex: =86
 
-        "dp_Edit_Operario_SP As 'Cuadro combinado'.pcfdataset":
+        "drp_Edit_Operario_SP As 'Cuadro combinado'.pcfdataset":
             Appearance: ='ComboboxCanvas.Appearance'.Outline
             BasePaletteColor: =RGBA(5, 102, 178, 1)
             BorderColor: =RGBA(40, 134, 222, 1)
@@ -2159,7 +2230,7 @@
             HoverColor: =RGBA(15, 108, 189, 1)
             HoverFill: =RGBA(0, 0, 0, 0)
             Icon: =Icon.Reload
-            OnSelect: =Reset(dp_Edit_Operario_SP)
+            OnSelect: =Reset(drp_Edit_Operario_SP)
             PaddingBottom: =2
             PaddingTop: =2
             Width: =18
@@ -2191,7 +2262,7 @@
             Y: =80
             ZIndex: =89
 
-        "dp_Edit_Turno_SP As 'Cuadro combinado'.pcfdataset":
+        "drp_Edit_Turno_SP As 'Cuadro combinado'.pcfdataset":
             Appearance: ='ComboboxCanvas.Appearance'.Outline
             BasePaletteColor: =RGBA(5, 102, 178, 1)
             BorderColor: =RGBA(40, 134, 222, 1)
@@ -2263,29 +2334,38 @@
             HoverColor: =RGBA(0, 0, 0, 1)
             HoverFill: =App.Theme.Colors.Lighter70
             Size: =12
-            Width: =230
+            Width: =252
             X: =18
-            Y: =164
+            Y: =140
             ZIndex: =91
 
-        "dp_Maquina_SP_1 As 'Cuadro combinado'.pcfdataset":
+        "drp_Edit_Maquina_SP As 'Cuadro combinado'.pcfdataset":
             Appearance: ='ComboboxCanvas.Appearance'.Outline
             BasePaletteColor: =RGBA(5, 102, 178, 1)
             BorderColor: =RGBA(40, 134, 222, 1)
             BorderRadius: =10
             BorderStyle: =BorderStyle.Solid
             BorderThickness: =3
+            DefaultSelectedItems: |-
+                =RenameColumns(
+                    LookUp(
+                        Maquinas,
+                        Maquina = tbl_Scrap_SP.Selected.Maquina
+                    ),
+                    Maquina,
+                    M
+                )
             DisplayMode: =DisplayMode.Edit
-            Fill: =RGBA(255, 255, 255, 1)
+            Fill: =RGBA(180, 214, 250, 0.4)
             FontColor: =RGBA(0, 0, 0, 1)
             FontSize: =16
             Height: =30
             InputTextPlaceholder: ="Buscar Maquina"
             Items: =If(IsBlank(drp_Orden_SP.Selected), Sort(RenameColumns(Maquinas, Maquina, M), M), Sort(RenameColumns(Filter(Orden_MaquinasLists_1, Orden = drp_Orden_SP.Selected.Value, IsBlank(drp_OP_SP.Selected) || Operacion = drp_OP_SP.Selected.Operacion), Maquina, M), M))
             OnChange: =false
-            Width: =230
+            Width: =252
             X: =18
-            Y: =184
+            Y: =160
             ZIndex: =92
 
             M1_1 As PowerApps_CoreControls_ComboboxCanvasTemplate_dataField.textualColumn:
@@ -2308,12 +2388,12 @@
             HoverColor: =RGBA(15, 108, 189, 1)
             HoverFill: =RGBA(0, 0, 0, 0)
             Icon: =Icon.Reload
-            OnSelect: =Reset(dp_Maquina_SP_1)
+            OnSelect: =Reset(drp_Edit_Maquina_SP)
             PaddingBottom: =2
             PaddingTop: =2
             Width: =18
-            X: =230
-            Y: =164
+            X: =252
+            Y: =140
             ZIndex: =93
 
         lbl_SP_22 As text:
@@ -2340,7 +2420,7 @@
             Y: =80
             ZIndex: =94
 
-        "dp_Edit_Zona_SP As 'Cuadro combinado'.pcfdataset":
+        "drp_Edit_Zona_SP As 'Cuadro combinado'.pcfdataset":
             Appearance: ='ComboboxCanvas.Appearance'.Outline
             BasePaletteColor: =RGBA(5, 102, 178, 1)
             BorderColor: =RGBA(40, 134, 222, 1)
@@ -2389,7 +2469,7 @@
             HoverColor: =RGBA(15, 108, 189, 1)
             HoverFill: =RGBA(0, 0, 0, 0)
             Icon: =Icon.Reload
-            OnSelect: =Reset(dp_Edit_Zona_SP)
+            OnSelect: =Reset(drp_Edit_Zona_SP)
             PaddingBottom: =2
             PaddingTop: =2
             Width: =18
@@ -2409,13 +2489,176 @@
             HoverColor: =RGBA(15, 108, 189, 1)
             HoverFill: =RGBA(0, 0, 0, 0)
             Icon: =Icon.Reload
-            OnSelect: =Reset(dp_Edit_Turno_SP)
+            OnSelect: =Reset(drp_Edit_Turno_SP)
             PaddingBottom: =2
             PaddingTop: =2
             Width: =18
             X: =448
             Y: =80
             ZIndex: =97
+
+        txt_Edit_Bache_SP As text:
+            Align: =Align.Center
+            BorderColor: =RGBA(40, 134, 222, 1)
+            BorderThickness: =If(Self.DisplayMode = DisplayMode.Disabled, 1, 3)
+            Color: =RGBA(0, 0, 0, 1)
+            Default: =tbl_Scrap_SP.Selected.Bache
+            DisabledBorderColor: =RGBA(40, 134, 222, 1)
+            DisabledColor: =RGBA(0, 0, 0, 1)
+            DisabledFill: =RGBA(180, 214, 250, 0.41)
+            Fill: =RGBA(180, 214, 250, 0.4)
+            FocusedBorderThickness: =4
+            Font: =App.Theme.Font
+            Height: =30
+            HintText: ="Orden"
+            HoverBorderColor: =RGBA(40, 134, 222, 1)
+            HoverColor: =RGBA(0, 0, 0, 1)
+            HoverFill: =App.Theme.Colors.Lighter70
+            RadiusBottomLeft: =10
+            RadiusBottomRight: =10
+            RadiusTopLeft: =10
+            RadiusTopRight: =10
+            Size: =12
+            Width: =150
+            X: =284
+            Y: =160
+            ZIndex: =98
+
+        lbl_SP_23 As text:
+            Align: =Align.Center
+            BorderColor: =App.Theme.Colors.Darker40
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            Color: =RGBA(0, 0, 0, 1)
+            Default: ="Bache"
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            DisplayMode: =DisplayMode.View
+            Fill: =RGBA(0, 0, 0, 0)
+            FocusedBorderThickness: =4
+            Font: =App.Theme.Font
+            Height: =20
+            HoverBorderColor: =App.Theme.Colors.Darker40
+            HoverColor: =RGBA(0, 0, 0, 1)
+            HoverFill: =App.Theme.Colors.Lighter70
+            Size: =12
+            Width: =150
+            X: =284
+            Y: =140
+            ZIndex: =99
+
+        txt_Edit_Cant_SP As text:
+            Align: =Align.Center
+            BorderColor: =RGBA(40, 134, 222, 1)
+            BorderThickness: =If(Self.DisplayMode = DisplayMode.Disabled, 1, 3)
+            Color: =RGBA(0, 0, 0, 1)
+            Default: =tbl_Scrap_SP.Selected.Cantidad
+            DisabledBorderColor: =RGBA(40, 134, 222, 1)
+            DisabledColor: =RGBA(0, 0, 0, 1)
+            DisabledFill: =RGBA(180, 214, 250, 0.41)
+            Fill: =RGBA(180, 214, 250, 0.4)
+            FocusedBorderThickness: =4
+            Font: =App.Theme.Font
+            Height: =30
+            HintText: ="Orden"
+            HoverBorderColor: =RGBA(40, 134, 222, 1)
+            HoverColor: =RGBA(0, 0, 0, 1)
+            HoverFill: =App.Theme.Colors.Lighter70
+            RadiusBottomLeft: =10
+            RadiusBottomRight: =10
+            RadiusTopLeft: =10
+            RadiusTopRight: =10
+            Size: =12
+            Width: =150
+            X: =449
+            Y: =160
+            ZIndex: =100
+
+        lbl_SP_24 As text:
+            Align: =Align.Center
+            BorderColor: =App.Theme.Colors.Darker40
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =0
+            Color: =RGBA(0, 0, 0, 1)
+            Default: ="Scrap"
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            DisplayMode: =DisplayMode.View
+            Fill: =RGBA(0, 0, 0, 0)
+            FocusedBorderThickness: =4
+            Font: =App.Theme.Font
+            Height: =20
+            HoverBorderColor: =App.Theme.Colors.Darker40
+            HoverColor: =RGBA(0, 0, 0, 1)
+            HoverFill: =App.Theme.Colors.Lighter70
+            Size: =12
+            Width: =150
+            X: =449
+            Y: =140
+            ZIndex: =101
+
+        btn_ContinuarAviso_HxH_22 As button:
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            Fill: =RGBA(122, 138, 143, 1)
+            FontWeight: =FontWeight.Semibold
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(79, 90, 94, 1)
+            OnSelect: |-
+                =Reset(drp_Edit_Maquina_SP);
+                Reset(drp_Edit_Operario_SP);
+                Reset(drp_Edit_Turno_SP);
+                Reset(drp_Edit_Zona_SP);
+                Reset(txt_Edit_Bache_SP);
+                Reset(txt_Edit_Cant_SP);
+                UpdateContext({Editar: false})
+            Size: =15
+            Text: ="Cancelar"
+            X: =236
+            Y: =208
+            ZIndex: =102
+
+        btn_ContinuarAviso_HxH_23 As button:
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            Fill: =RGBA(215, 58, 60, 1)
+            FontWeight: =FontWeight.Semibold
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(132, 40, 38, 1)
+            OnSelect: |
+                =With(
+                    {
+                        tarimaScrap: LookUp(
+                            Scrap_Tarimas,
+                            Tarima = tbl_Scrap_SP.Selected.Tarima && Orden = tbl_Scrap_SP.Selected.Orden && Operacion = Text(tbl_Scrap_SP.Selected.OP)
+                        )
+                    },
+                    Patch(
+                        Scrap_Tarimas,
+                        tarimaScrap,
+                        {Cantidad: (tarimaScrap.Cantidad - tbl_Scrap_SP.Selected.Cantidad)}
+                    );
+                    Remove(
+                        Scrap_1,
+                        tbl_Scrap_SP.Selected
+                    );
+                    Reset(drp_Edit_Maquina_SP);
+                    Reset(drp_Edit_Operario_SP);
+                    Reset(drp_Edit_Turno_SP);
+                    Reset(drp_Edit_Zona_SP);
+                    Reset(txt_Edit_Bache_SP);
+                    Reset(txt_Edit_Cant_SP);
+                    UpdateContext({Editar: false})
+                );
+            Size: =15
+            Text: ="Eliminar"
+            X: =51
+            Y: =208
+            ZIndex: =103
 
     cnt_Aviso_HxH_4 As groupContainer.manualLayoutContainer:
         BorderColor: =RGBA(255, 191, 0, 1)
@@ -2429,8 +2672,8 @@
         RadiusTopRight: =20
         Visible: =aviso
         Width: =581
-        X: =432
-        Y: =287
+        X: =431
+        Y: =247
         ZIndex: =5
 
         Label15_24 As label:
