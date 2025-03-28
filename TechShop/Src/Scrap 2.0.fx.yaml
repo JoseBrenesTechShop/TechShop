@@ -138,7 +138,21 @@
                 HoverColor: =RGBA(255, 255, 255, 1)
                 HoverFill: =RGBA(0, 134, 208, 1)
                 Icon: =Icon.Home
-                OnSelect: =Back()
+                OnSelect: |-
+                    =Reset(drp_Fecha_SP);
+                    Reset(drp_Orden_SP);
+                    Reset(drp_OP_SP);
+                    Reset(drp_Maquina_SP);
+                    Reset(drp_Zona_SP);
+                    Reset(drp_Operario_SP);
+                    Reset(drp_Turno_SP);
+                    Reset(txt_Bache_SP);
+                    Reset(txt_Cant_SP);
+                    Reset(txt_Tarima_SP);
+                    Reset(drp_Insepccion_SP);
+                    Reset(drp_Incoformidad_SP);
+                    Reset(txt_Item_SP);
+                    Back()
                 PaddingBottom: =5
                 PaddingLeft: =5
                 PaddingRight: =5
@@ -992,11 +1006,10 @@
                     BorderThickness: =If(Self.DisplayMode = DisplayMode.Disabled, 1, 3)
                     Clear: =true
                     Color: =RGBA(0, 0, 0, 1)
-                    Default: =50
+                    Default: =
                     DisabledBorderColor: =RGBA(40, 134, 222, 1)
                     DisabledColor: =RGBA(0, 0, 0, 1)
                     DisabledFill: =RGBA(255, 255, 255, 1)
-                    DisplayMode: =DisplayMode.Disabled
                     FocusedBorderThickness: =4
                     Font: =App.Theme.Font
                     Format: =TextFormat.Number
@@ -1474,8 +1487,9 @@
                     HoverBorderColor: =App.Theme.Colors.Darker10
                     HoverColor: =App.Theme.Colors.PrimaryForeground
                     HoverFill: =App.Theme.Colors.Darker10
-                    OnSelect: |
-                        =If(
+                    OnSelect: |+
+                        =
+                        If(
                             IsBlank(drp_Orden_SP.Selected) || IsBlank(drp_OP_SP.Selected) || IsBlank(drp_Maquina_SP.Selected) || IsBlank(drp_Zona_SP.Selected) || IsBlank(drp_Operario_SP.Selected) || IsBlank(drp_Turno_SP.Selected) || IsBlank(txt_Bache_SP.Text) || IsBlank(txt_Cant_SP.Text) || IsBlank(txt_Tarima_SP.Text) || IsBlank(drp_Insepccion_SP.Selected) || IsBlank(drp_Incoformidad_SP.Selected) || IsBlank(txt_Item_SP.Text),
                             UpdateContext(
                                 {
@@ -1506,6 +1520,7 @@
                                     'P/N': txt_PN_SP.Text,
                                     Maquina: drp_Maquina_SP.Selected.M,
                                     Ubicacion: drp_Zona_SP.Selected.Texto,
+                                    Codigo: drp_Operario_SP.Selected.Codigo,
                                     Operario: drp_Operario_SP.Selected.Nombre,
                                     Turno: drp_Turno_SP.Selected.Value,
                                     Bache: Value(txt_Bache_SP.Text),
@@ -1541,8 +1556,23 @@
                                         {Cantidad: TarimaScrap.Cantidad + Value(txt_Cant_SP.Text)}
                                     )
                                 )
-                            )
+                            );
+                            Reset(drp_Fecha_SP);
+                            Reset(drp_Orden_SP);
+                            Reset(drp_OP_SP);
+                            Reset(drp_Maquina_SP);
+                            Reset(drp_Zona_SP);
+                            Reset(drp_Operario_SP);
+                            Reset(drp_Turno_SP);
+                            Reset(txt_Bache_SP);
+                            Reset(txt_Cant_SP);
+                            Reset(txt_Tarima_SP);
+                            Reset(drp_Insepccion_SP);
+                            Reset(drp_Incoformidad_SP);
+                            Reset(txt_Item_SP);
+                            Notify("Guardado exitoso", NotificationType.Success)
                         );
+                        
                     PressedBorderColor: =App.Theme.Colors.Darker40
                     PressedColor: =Self.Color
                     PressedFill: =App.Theme.Colors.Darker40
@@ -1599,9 +1629,9 @@
                 Filter(
                     Scrap_1,
                     IsBlank(drp_Maquina_SP.Selected) || Maquina = drp_Maquina_SP.Selected.M,
-                    DateValue(FechaIngreso) = DateValue(drp_Fecha_SP.Selected.fecha)
+                    FechaIngreso = DateValue(drp_Fecha_SP.Selected.fecha)
                 ),
-                FechaIngreso
+                'Fecha de creación', SortOrder.Descending
             )
         LinkColor: =App.Theme.Colors.Lighter10
         PrimaryColor1: =App.Theme.Colors.Primary
@@ -1644,7 +1674,7 @@
             OnSelect: |-
                 =Set(HideEditScrap, true);
                 Set(VarEditScrap, tbl_Scrap_SP.Selected.Operario)
-            Order: =3
+            Order: =4
             Text: =ThisItem.'P/N'
             Width: =156
             X: =0
@@ -1698,7 +1728,7 @@
             OnSelect: |-
                 =Set(HideEditScrap, true);
                 Set(VarEditScrap, tbl_Scrap_SP.Selected.Operario)
-            Order: =5
+            Order: =6
             Text: =ThisItem.Cantidad
             Width: =109
             X: =0
@@ -1716,7 +1746,7 @@
             OnSelect: |-
                 =Set(HideEditScrap, true);
                 Set(VarEditScrap, tbl_Scrap_SP.Selected.Operario)
-            Order: =6
+            Order: =7
             Text: =ThisItem.Tarima
             Width: =106
             X: =930
@@ -1752,9 +1782,9 @@
             OnSelect: |-
                 =Set(HideEditScrap, true);
                 Set(VarEditScrap, tbl_Scrap_SP.Selected.Operario)
-            Order: =4
+            Order: =5
             Text: =ThisItem.Bache
-            Width: =121
+            Width: =80
             X: =0
             Y: =0
             ZIndex: =15
@@ -1767,7 +1797,7 @@
             FieldVariantName: ="textualColumn"
             Height: =Parent.Height
             LayoutHeight: =Parent.Height
-            Order: =8
+            Order: =9
             Text: =ThisItem.Usuario
             Width: =110
             X: =0
@@ -1797,7 +1827,7 @@
             FieldVariantName: ="textualColumn"
             Height: =Parent.Height
             LayoutHeight: =Parent.Height
-            Order: =7
+            Order: =8
             Text: =ThisItem.Ubicacion
             Width: =90
             X: =0
@@ -1811,7 +1841,7 @@
             FieldVariantName: ="textualColumn"
             Height: =Parent.Height
             LayoutHeight: =Parent.Height
-            Order: =9
+            Order: =10
             Text: =ThisItem.'No-conformidad'
             Width: =100
             X: =0
@@ -1825,7 +1855,7 @@
             FieldVariantName: ="textualColumn"
             Height: =Parent.Height
             LayoutHeight: =Parent.Height
-            Order: =10
+            Order: =11
             Text: =ThisItem.Inspeccion
             Width: =100
             X: =0
@@ -1839,12 +1869,27 @@
             FieldVariantName: ="textualColumn"
             Height: =Parent.Height
             LayoutHeight: =Parent.Height
-            Order: =11
+            Order: =12
             Text: =ThisItem.Item
             Width: =100
             X: =0
             Y: =0
             ZIndex: =21
+
+        OP_Columna1 As dataTableColumn.numberColumn:
+            AutoWidth: =false
+            DisplayMode: =DisplayMode.Edit
+            FieldDisplayName: ="OP"
+            FieldName: ="crfb9_op"
+            FieldVariantName: ="numberColumn"
+            Height: =Parent.Height
+            LayoutHeight: =Parent.Height
+            Order: =3
+            Text: =ThisItem.OP
+            Width: =60
+            X: =0
+            Y: =0
+            ZIndex: =100
 
     cnt_cubrir_SP As rectangle:
         BorderColor: =App.Theme.Colors.Darker40

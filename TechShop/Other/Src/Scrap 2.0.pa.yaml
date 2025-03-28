@@ -121,7 +121,21 @@ Screens:
                         HoverColor: =RGBA(255, 255, 255, 1)
                         HoverFill: =RGBA(0, 134, 208, 1)
                         Icon: =Icon.Home
-                        OnSelect: =Back()
+                        OnSelect: |-
+                          =Reset(drp_Fecha_SP);
+                          Reset(drp_Orden_SP);
+                          Reset(drp_OP_SP);
+                          Reset(drp_Maquina_SP);
+                          Reset(drp_Zona_SP);
+                          Reset(drp_Operario_SP);
+                          Reset(drp_Turno_SP);
+                          Reset(txt_Bache_SP);
+                          Reset(txt_Cant_SP);
+                          Reset(txt_Tarima_SP);
+                          Reset(drp_Insepccion_SP);
+                          Reset(drp_Incoformidad_SP);
+                          Reset(txt_Item_SP);
+                          Back()
                         PaddingBottom: =5
                         PaddingLeft: =5
                         PaddingRight: =5
@@ -865,11 +879,10 @@ Screens:
                               BorderColor: =RGBA(40, 134, 222, 1)
                               BorderThickness: =If(Self.DisplayMode = DisplayMode.Disabled, 1, 3)
                               Clear: =true
-                              Default: =50
+                              Default: =
                               DisabledBorderColor: =RGBA(40, 134, 222, 1)
                               DisabledColor: =RGBA(0, 0, 0, 1)
                               DisabledFill: =RGBA(255, 255, 255, 1)
-                              DisplayMode: =DisplayMode.Disabled
                               Format: =TextFormat.Number
                               Height: =30
                               HintText: ="Bache"
@@ -1240,8 +1253,9 @@ Screens:
                         - Button14:
                             Control: Classic/Button@2.2.0
                             Properties:
-                              OnSelect: |
-                                =If(
+                              OnSelect: |+
+                                =
+                                If(
                                     IsBlank(drp_Orden_SP.Selected) || IsBlank(drp_OP_SP.Selected) || IsBlank(drp_Maquina_SP.Selected) || IsBlank(drp_Zona_SP.Selected) || IsBlank(drp_Operario_SP.Selected) || IsBlank(drp_Turno_SP.Selected) || IsBlank(txt_Bache_SP.Text) || IsBlank(txt_Cant_SP.Text) || IsBlank(txt_Tarima_SP.Text) || IsBlank(drp_Insepccion_SP.Selected) || IsBlank(drp_Incoformidad_SP.Selected) || IsBlank(txt_Item_SP.Text),
                                     UpdateContext(
                                         {
@@ -1272,6 +1286,7 @@ Screens:
                                             'P/N': txt_PN_SP.Text,
                                             Maquina: drp_Maquina_SP.Selected.M,
                                             Ubicacion: drp_Zona_SP.Selected.Texto,
+                                            Codigo: drp_Operario_SP.Selected.Codigo,
                                             Operario: drp_Operario_SP.Selected.Nombre,
                                             Turno: drp_Turno_SP.Selected.Value,
                                             Bache: Value(txt_Bache_SP.Text),
@@ -1307,8 +1322,23 @@ Screens:
                                                 {Cantidad: TarimaScrap.Cantidad + Value(txt_Cant_SP.Text)}
                                             )
                                         )
-                                    )
+                                    );
+                                    Reset(drp_Fecha_SP);
+                                    Reset(drp_Orden_SP);
+                                    Reset(drp_OP_SP);
+                                    Reset(drp_Maquina_SP);
+                                    Reset(drp_Zona_SP);
+                                    Reset(drp_Operario_SP);
+                                    Reset(drp_Turno_SP);
+                                    Reset(txt_Bache_SP);
+                                    Reset(txt_Cant_SP);
+                                    Reset(txt_Tarima_SP);
+                                    Reset(drp_Insepccion_SP);
+                                    Reset(drp_Incoformidad_SP);
+                                    Reset(txt_Item_SP);
+                                    Notify("Guardado exitoso", NotificationType.Success)
                                 );
+
                               Text: ="Guardar"
                               X: =1107
                               Y: =238
@@ -1335,9 +1365,9 @@ Screens:
                   Filter(
                       Scrap_1,
                       IsBlank(drp_Maquina_SP.Selected) || Maquina = drp_Maquina_SP.Selected.M,
-                      DateValue(FechaIngreso) = DateValue(drp_Fecha_SP.Selected.fecha)
+                      FechaIngreso = DateValue(drp_Fecha_SP.Selected.fecha)
                   ),
-                  FechaIngreso
+                  'Fecha de creación', SortOrder.Descending
               )
             SelectedColor: =RGBA(255, 255, 255, 1)
             SelectedFill: =RGBA(40, 134, 222, 1)
@@ -1371,7 +1401,7 @@ Screens:
                   OnSelect: |-
                     =Set(HideEditScrap, true);
                     Set(VarEditScrap, tbl_Scrap_SP.Selected.Operario)
-                  Order: =3
+                  Order: =4
                   Text: =ThisItem.'P/N'
                   Width: =156
             - Orden_Columna3_1:
@@ -1413,7 +1443,7 @@ Screens:
                   OnSelect: |-
                     =Set(HideEditScrap, true);
                     Set(VarEditScrap, tbl_Scrap_SP.Selected.Operario)
-                  Order: =5
+                  Order: =6
                   Text: =ThisItem.Cantidad
                   Width: =109
             - Tarima_Columna1_1:
@@ -1427,7 +1457,7 @@ Screens:
                   OnSelect: |-
                     =Set(HideEditScrap, true);
                     Set(VarEditScrap, tbl_Scrap_SP.Selected.Operario)
-                  Order: =6
+                  Order: =7
                   Text: =ThisItem.Tarima
                   Width: =106
             - Operario_Columna5_1:
@@ -1455,9 +1485,9 @@ Screens:
                   OnSelect: |-
                     =Set(HideEditScrap, true);
                     Set(VarEditScrap, tbl_Scrap_SP.Selected.Operario)
-                  Order: =4
+                  Order: =5
                   Text: =ThisItem.Bache
-                  Width: =121
+                  Width: =80
             - Usuario_Column2_1:
                 Control: DataTableColumn@1.0.1
                 Variant: Textual
@@ -1466,7 +1496,7 @@ Screens:
                   AutoWidth: =false
                   FieldDisplayName: ="Usuario"
                   FieldName: ="crfb9_usuario"
-                  Order: =8
+                  Order: =9
                   Text: =ThisItem.Usuario
                   Width: =110
             - Fecha_Column2_1:
@@ -1488,7 +1518,7 @@ Screens:
                   AutoWidth: =false
                   FieldDisplayName: ="Ubicacion"
                   FieldName: ="crfb9_ubicacion"
-                  Order: =7
+                  Order: =8
                   Text: =ThisItem.Ubicacion
                   Width: =90
             - No-conformidad_Column1_1:
@@ -1498,7 +1528,7 @@ Screens:
                 Properties:
                   FieldDisplayName: ="No-conformidad"
                   FieldName: ="crfb9_noconformidad"
-                  Order: =9
+                  Order: =10
                   Text: =ThisItem.'No-conformidad'
             - Inspeccion_Column1_1:
                 Control: DataTableColumn@1.0.1
@@ -1507,7 +1537,7 @@ Screens:
                 Properties:
                   FieldDisplayName: ="Inspeccion"
                   FieldName: ="crfb9_inspeccion"
-                  Order: =10
+                  Order: =11
                   Text: =ThisItem.Inspeccion
             - Item_Column1_1:
                 Control: DataTableColumn@1.0.1
@@ -1516,8 +1546,19 @@ Screens:
                 Properties:
                   FieldDisplayName: ="Item"
                   FieldName: ="crfb9_item"
-                  Order: =11
+                  Order: =12
                   Text: =ThisItem.Item
+            - OP_Columna1:
+                Control: DataTableColumn@1.0.1
+                Variant: Number
+                IsLocked: true
+                Properties:
+                  AutoWidth: =false
+                  FieldDisplayName: ="OP"
+                  FieldName: ="crfb9_op"
+                  Order: =3
+                  Text: =ThisItem.OP
+                  Width: =60
       - cnt_cubrir_SP:
           Control: Rectangle@2.3.0
           Properties:
