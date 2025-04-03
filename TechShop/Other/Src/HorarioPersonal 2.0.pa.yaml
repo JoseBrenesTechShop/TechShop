@@ -241,49 +241,6 @@ Screens:
                                           Text: ="Empleado"
                                           Width: =104
                                           X: =5
-                                    - Container53:
-                                        Control: GroupContainer@1.3.0
-                                        Variant: ManualLayout
-                                        Properties:
-                                          BorderColor: =RGBA(180, 214, 250, 1)
-                                          BorderThickness: =2
-                                          Fill: =RGBA(255, 255, 255, 1)
-                                          Height: =40
-                                          RadiusBottomLeft: =10
-                                          RadiusBottomRight: =10
-                                          RadiusTopLeft: =10
-                                          RadiusTopRight: =10
-                                          X: =109
-                                          Y: =5
-                                        Children:
-                                          - drp_Empleado_HP:
-                                              Control: Classic/DropDown@2.3.1
-                                              Properties:
-                                                AllowEmptySelection: =true
-                                                BorderColor: =RGBA(180, 214, 250, 1)
-                                                ChevronBackground: =RGBA(255, 255, 255, 1)
-                                                ChevronDisabledFill: =RGBA(0, 0, 0, 0)
-                                                ChevronFill: =RGBA(0, 0, 0, 1)
-                                                ChevronHoverBackground: =RGBA(180, 214, 250, 1)
-                                                ChevronHoverFill: =RGBA(0, 0, 0, 1)
-                                                DisabledBorderColor: =RGBA(0, 0, 0, 0)
-                                                HoverBorderColor: =RGBA(40, 134, 222, 1)
-                                                HoverFill: =RGBA(180, 214, 250, 1)
-                                                Items: |-
-                                                  =//Empleados
-                                                  If(IsBlank(txt_Codigo_HP.Text),
-                                                  Sort(Empleados, Nombre, SortOrder.Ascending), 
-                                                  Filter(Empleados, Codigo = txt_Codigo_HP.Text))
-                                                Items.Value: =crfb9_nombre
-                                                OnChange: |
-                                                  =UpdateContext({Mostrar: false, reset: true});
-                                                  Reset(glr_Horarios_HP);
-                                                  Reset(dp_FechaInicio_HP);
-                                                  UpdateContext({reset: false});
-                                                PressedColor: =RGBA(255, 255, 255, 1)
-                                                SelectionColor: =RGBA(255, 255, 255, 1)
-                                                Size: =15
-                                                Width: =500
                                     - Label13_2:
                                         Control: Label@2.5.1
                                         Properties:
@@ -352,7 +309,7 @@ Screens:
                                           HoverFill: =RGBA(40, 134, 222, 1)
                                           OnSelect: |-
                                             =If(
-                                                IsBlank(drp_Empleado_HP.SelectedText.Value),
+                                                IsBlank(drp_Empleado_HP.Selected),
                                                 Notify(
                                                     "Debe seleccionar a un Empleado",
                                                     NotificationType.Error
@@ -392,7 +349,7 @@ Screens:
                                                                 If(
                                                                     With(
                                                                         {Empleado: drp_Empleado_HP.Selected},
-                                                                        ("Supervi" in Empleado.Puesto) && IsBlank(drp_Zona_HP.Selected.Texto)
+                                                                        ("Supervi" in Empleado.Puesto) && IsBlank(drp_Zona_HP.Selected.Value)
                                                                     ),
                                                                     Notify(
                                                                         "Debe asiganarle una Zona al supervisor",
@@ -474,7 +431,7 @@ Screens:
                                                                                             'Maquina 2': drp_Maquina2_HP.SelectedText.Value,
                                                                                             'Maquina 3': drp_Maquina3_HP.SelectedText.Value,
                                                                                             'Maquina 4': drp_Maquina4_HP.SelectedText.Value,
-                                                                                            Zona: drp_Zona_HP.SelectedText.Texto
+                                                                                            Zona: drp_Zona_HP.SelectedText.Value
                                                                                         }
                                                                                     );
                                                                                     Notify(
@@ -487,7 +444,7 @@ Screens:
                                                                                             HtmlPDF_HP_1.HtmlText,
                                                                                             LookUp(
                                                                                                 Empleados,
-                                                                                                Nombre = drp_Empleado_HP.SelectedText.Value,
+                                                                                                Nombre = drp_Empleado_HP.Selected.Nombre,
                                                                                                 Correo
                                                                                             ),
                                                                                             "Horario Semanal",
@@ -524,7 +481,7 @@ Screens:
                                                                                             'Maquina 2': drp_Maquina2_HP.SelectedText.Value,
                                                                                             'Maquina 3': drp_Maquina3_HP.SelectedText.Value,
                                                                                             'Maquina 4': drp_Maquina4_HP.SelectedText.Value,
-                                                                                            Zona: drp_Zona_HP.SelectedText.Texto
+                                                                                            Zona: drp_Zona_HP.SelectedText.Value
                                                                                         }
                                                                                     );
                                                                                     Notify(
@@ -537,7 +494,7 @@ Screens:
                                                                                             HtmlPDF_HP_1.HtmlText,
                                                                                             LookUp(
                                                                                                 Empleados,
-                                                                                                Nombre = drp_Empleado_HP.SelectedText.Value,
+                                                                                                Nombre = drp_Empleado_HP.Selected.Nombre,
                                                                                                 Correo
                                                                                             ),
                                                                                             "Horario Proxima Semana",
@@ -572,6 +529,75 @@ Screens:
                                           Width: =If(Mostrar, 100, 160)
                                           X: =1180
                                           Y: =5
+                                    - drp_Empleado_HP:
+                                        Control: ComboBox@0.0.49
+                                        Properties:
+                                          BorderColor: =RGBA(180, 214, 250, 1)
+                                          BorderRadius: =10
+                                          BorderStyle: =BorderStyle.Solid
+                                          BorderThickness: =3
+                                          Fill: =RGBA(255, 255, 255, 1)
+                                          FontSize: =18
+                                          Height: =40
+                                          Items: |-
+                                            =//Empleados
+                                            If(IsBlank(txt_Codigo_HP.Text),
+                                            Sort(Empleados, Nombre, SortOrder.Ascending), 
+                                            Filter(Empleados, Codigo = txt_Codigo_HP.Text))
+                                          OnChange: |+
+                                            =UpdateContext({Mostrar: false, reset: true});
+                                            Reset(glr_Horarios_HP);
+                                            Reset(dp_FechaInicio_HP);
+                                            UpdateContext({reset: false});
+                                          Width: =500
+                                          X: =111
+                                          Y: =5
+                                        Children:
+                                          - crfb9_nombre2:
+                                              Control: ComboBoxDataField@1.5.0
+                                              Variant: textualColumn
+                                              IsLocked: true
+                                              Properties:
+                                                FieldDisplayName: ="crfb9_nombre"
+                                                FieldName: ="crfb9_nombre"
+                                                FieldType: ="s"
+                                                Order: =1
+                                          - crfb9_codigo2:
+                                              Control: ComboBoxDataField@1.5.0
+                                              Variant: textualColumn
+                                              IsLocked: true
+                                              Properties:
+                                                FieldDisplayName: ="crfb9_codigo"
+                                                FieldName: ="crfb9_codigo"
+                                                FieldType: ="s"
+                                                Order: =2
+                                          - crfb9_area2:
+                                              Control: ComboBoxDataField@1.5.0
+                                              Variant: textualColumn
+                                              IsLocked: true
+                                              Properties:
+                                                FieldDisplayName: ="crfb9_area"
+                                                FieldName: ="crfb9_area"
+                                                FieldType: ="s"
+                                                Order: =3
+                                          - crfb9_puesto2:
+                                              Control: ComboBoxDataField@1.5.0
+                                              Variant: textualColumn
+                                              IsLocked: true
+                                              Properties:
+                                                FieldDisplayName: ="crfb9_puesto"
+                                                FieldName: ="crfb9_puesto"
+                                                FieldType: ="s"
+                                                Order: =4
+                                          - crfb9_departamento2:
+                                              Control: ComboBoxDataField@1.5.0
+                                              Variant: textualColumn
+                                              IsLocked: true
+                                              Properties:
+                                                FieldDisplayName: ="crfb9_departamento"
+                                                FieldName: ="crfb9_departamento"
+                                                FieldType: ="s"
+                                                Order: =5
                               - ctn_Horario_HP:
                                   Control: GroupContainer@1.3.0
                                   Variant: ManualLayout
@@ -998,7 +1024,7 @@ Screens:
                                                 If(
                                                     LookUp(
                                                         Empleados,
-                                                        Codigo = drp_Empleado_HP.SelectedText.Codigo
+                                                        Codigo = drp_Empleado_HP.Selected.Codigo
                                                     ).Puesto = "INSPECTOR DE PROCESO FINAL",
                                                     "INSPECCIONFINAL",
                                                     glr_InfoHorarios_HP.Selected.Maquina
@@ -1006,7 +1032,7 @@ Screens:
                                                 If(
                                                     LookUp(
                                                         Empleados,
-                                                        Codigo = drp_Empleado_HP.SelectedText.Codigo
+                                                        Codigo = drp_Empleado_HP.Selected.Codigo
                                                     ).Puesto = "INSPECTOR DE PROCESO FINAL",
                                                     "INSPECCIONFINAL",
                                                     "0"
@@ -1178,8 +1204,7 @@ Screens:
                                           FontWeight: =If(drp_Zona_HP.SelectedText.Value <> LookUp(Tipo_Turnos, Id_Turno = "6", Turno_Op), FontWeight.Bold, FontWeight.Normal)
                                           HoverBorderColor: =RGBA(102, 182, 227, 1)
                                           HoverFill: =RGBA(204, 228, 246, 1)
-                                          Items: =ZonaPlannings
-                                          Items.Value: =crfb9_texto
+                                          Items: =["GH", "TSI,TANDEM"]
                                           OnChange: |-
                                             =/*Patch(
                                                 Horario;
@@ -1206,7 +1231,7 @@ Screens:
                                                     false
                                                 )
                                             )
-                                          Width: =150
+                                          Width: =193
                                           X: =197
                                           Y: =390
                                     - dp_fechaFin_HP:
@@ -2082,6 +2107,26 @@ Screens:
                                                       Width: =240
                                                       X: =165
                                                       Y: =272
+                                          - Icn_SelectInfo_HP_1:
+                                              Control: Classic/Icon@2.5.0
+                                              Properties:
+                                                BorderStyle: =BorderStyle.None
+                                                Color: =RGBA(0, 0, 0, 0)
+                                                DisabledColor: =RGBA(0, 94, 146, 1)
+                                                Fill: =If(ThisItem.IsSelected && Mostrar, RGBA(0, 134, 208, 0.24),RGBA(0, 0, 0, 0))
+                                                Height: =Parent.TemplateHeight
+                                                HoverBorderColor: =
+                                                HoverColor: =RGBA(0, 134, 208, 1)
+                                                HoverFill: =RGBA(0, 134, 208, 0.24)
+                                                Icon: =Icon.Edit
+                                                OnSelect: |-
+                                                  =UpdateContext({Mostrar: true});
+                                                  Select(Parent)
+                                                PaddingBottom: =60
+                                                PaddingLeft: =60
+                                                PaddingRight: =60
+                                                PaddingTop: =60
+                                                Width: =Parent.TemplateWidth
                                     - Icn_ViewHorarios_HP_1:
                                         Control: Classic/Icon@2.5.0
                                         Properties:
@@ -2255,7 +2300,7 @@ Screens:
                       "</tr>",
                       "<tr>",
                       "<td class='cell'>",
-                      drp_Empleado_HP.SelectedText.Value,
+                      drp_Empleado_HP.Selected.Nombre,
                       "</td>",
                       "<td class='cell'>",
                       Text(
