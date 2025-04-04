@@ -134,7 +134,7 @@
                 Icon: =Icon.Home
                 OnSelect: |+
                     =Navigate(MenuAdministrativo);
-                    Reset(txt_MotivoRehazo_EstadoPermisos_1);
+                    Reset(txt_Aviso_EP);
                     Reset(drp_Estado_EstadosPermisos_1);
                     Reset(chk_Remunerado_EP);
                     Reset(chk_NoRemunerado_EP);
@@ -463,12 +463,12 @@
                             X: =1181
                             ZIndex: =31
 
-                    "GaleriaEstado_2 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+                    "glr_EstadoPermisos_EP As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
                         BorderColor: =RGBA(215, 223, 240, 1)
                         BorderStyle: =BorderStyle.None
                         DelayItemLoading: =true
                         Fill: =RGBA(204, 231, 246, 0.3)
-                        Height: =571
+                        Height: =584
                         Items: |-
                             =Sort(
                                 If(
@@ -705,7 +705,11 @@
                             Icon: =Icon.Draw
                             OnSelect: |-
                                 =Select(Parent);
-                                UpdateContext({showContainer: true})
+                                If(
+                                    drpEstadoSolicitud_2.SelectedText.Value <> "En proceso",
+                                    UpdateContext({showContainer: true}),
+                                    UpdateContext({showContainerView: true})
+                                )
                             PaddingBottom: =2
                             PaddingLeft: =2
                             PaddingRight: =2
@@ -1054,13 +1058,13 @@
         Fill: =RGBA(214, 221, 224, 0.29)
         Height: =660
         OnSelect: |
-            =UpdateContext({showContainer: false});
+            =UpdateContext({showContainer: false, Aviso: false, textoAviso: Blank(), ConVisible: false});
             Reset(drp_EstadoPermiso_EP);
             Reset(chk_NoRemunerado_EP);
             Reset(chk_Remunerado_EP);
             Reset(pnl_FirmaJefe_EP);
             Reset(txt_MotivoRechazo_EP);
-        Visible: =showContainer
+        Visible: =showContainer || Aviso
         Width: =1350
         X: =8
         Y: =100
@@ -1112,10 +1116,10 @@
                 "<table>",
                 "<tr>",
                 "<td>Fecha: ",
-                GaleriaEstado_2.Selected.FechaTramite,
+                glr_EstadoPermisos_EP.Selected.FechaTramite,
                 "</td>",
                 "<td>Código de empleado: ",
-                GaleriaEstado_2.Selected.Codigo,
+                glr_EstadoPermisos_EP.Selected.Codigo,
                 "</td>",
                 "</tr>",
                 "<tr>",
@@ -1127,7 +1131,7 @@
                 "<table>",
                 "<tr>",
                 "<td><strong>Nombre completo:</strong> ",
-                GaleriaEstado_2.Selected.Nombre,
+                glr_EstadoPermisos_EP.Selected.Nombre,
                 "</td>",
                 "<td><strong>Tipo de solicitud:</strong> ",
                 "Incapacidad",
@@ -1236,12 +1240,12 @@
                 Y: =35
                 ZIndex: =1
 
-            TextInput13 As text:
+            txt_Solicitud_EP As text:
                 Align: =Align.Center
                 BorderColor: =App.Theme.Colors.Darker40
                 BorderThickness: =2
                 Color: =RGBA(0, 0, 0, 1)
-                Default: =GaleriaEstado_2.Selected.Solicitud
+                Default: =glr_EstadoPermisos_EP.Selected.Solicitud
                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                 DisabledColor: =RGBA(0, 0, 0, 1)
                 DisabledFill: =RGBA(180, 214, 250, 0.2)
@@ -1276,12 +1280,12 @@
                 Y: =95
                 ZIndex: =3
 
-            TextInput13_1 As text:
+            txt_Dias_EP As text:
                 Align: =Align.Center
                 BorderColor: =App.Theme.Colors.Darker40
                 BorderThickness: =2
                 Color: =RGBA(0, 0, 0, 1)
-                Default: =GaleriaEstado_2.Selected.DiasSolicitados & " dias"
+                Default: =glr_EstadoPermisos_EP.Selected.DiasSolicitados & " dias"
                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                 DisabledColor: =RGBA(0, 0, 0, 1)
                 DisabledFill: =RGBA(180, 214, 250, 0.2)
@@ -1316,12 +1320,12 @@
                 Y: =156
                 ZIndex: =5
 
-            TextInput13_2 As text:
+            txt_FechaInicio_EP As text:
                 Align: =Align.Center
                 BorderColor: =App.Theme.Colors.Darker40
                 BorderThickness: =2
                 Color: =RGBA(0, 0, 0, 1)
-                Default: =Text(GaleriaEstado_2.Selected.Fecha_Inicio,"[$-es-ES]dd/mm/yyyy")
+                Default: =Text(glr_EstadoPermisos_EP.Selected.Fecha_Inicio,"[$-es-ES]dd/mm/yyyy")
                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                 DisabledColor: =RGBA(0, 0, 0, 1)
                 DisabledFill: =RGBA(180, 214, 250, 0.2)
@@ -1356,12 +1360,12 @@
                 Y: =217
                 ZIndex: =7
 
-            TextInput13_3 As text:
+            txt_FechaFin_EP As text:
                 Align: =Align.Center
                 BorderColor: =App.Theme.Colors.Darker40
                 BorderThickness: =2
                 Color: =RGBA(0, 0, 0, 1)
-                Default: =Text(GaleriaEstado_2.Selected.Fecha_Fin, "[$-es-ES]dd/mm/yyyy")
+                Default: =Text(glr_EstadoPermisos_EP.Selected.Fecha_Fin, "[$-es-ES]dd/mm/yyyy")
                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                 DisabledColor: =RGBA(0, 0, 0, 1)
                 DisabledFill: =RGBA(180, 214, 250, 0.2)
@@ -1396,12 +1400,12 @@
                 Y: =277
                 ZIndex: =9
 
-            TextInput13_4 As text:
+            txt_MotivoSoli_EP As text:
                 Align: =Align.Center
                 BorderColor: =App.Theme.Colors.Darker40
                 BorderThickness: =2
                 Color: =RGBA(0, 0, 0, 1)
-                Default: =GaleriaEstado_2.Selected.Motivo
+                Default: =glr_EstadoPermisos_EP.Selected.Motivo
                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                 DisabledColor: =RGBA(0, 0, 0, 1)
                 DisabledFill: =RGBA(180, 214, 250, 0.2)
@@ -1526,6 +1530,10 @@
             Height: =32
             InputTextPlaceholder: ="Estado de la Solicitud"
             Items: =ProcesosRHS
+            OnChange: |-
+                =Reset(txt_MotivoRechazo_EP);
+                Reset(chk_NoRemunerado_EP);
+                Reset(chk_Remunerado_EP);
             PaddingBottom: =0
             PaddingLeft: =5
             PaddingRight: =5
@@ -1607,9 +1615,7 @@
             HoverFill: =RGBA(180, 214, 250, 0.4)
             MaxLength: =100
             Mode: =TextMode.MultiLine
-            PaddingBottom: =0
             PaddingLeft: =5
-            PaddingTop: =0
             RadiusBottomLeft: =8
             RadiusBottomRight: =8
             RadiusTopLeft: =8
@@ -1651,16 +1657,25 @@
             OnSelect: |
                 =If(
                     IsBlank(drp_EstadoPermiso_EP.Selected),
-                    UpdateContext({Aviso: true, textoAviso: "Debe seleccionar el estado"}),
+                    UpdateContext(
+                        {
+                            Aviso: true,
+                            textoAviso: "Debe seleccionar el estado"
+                        }
+                    ),
                     drp_EstadoPermiso_EP.Selected.Nombre = "Aprobado" && !chk_Remunerado_EP.Value && !chk_NoRemunerado_EP.Value,
-                    Notify(
-                        "Debe seleccionar el tipo de remuneracion",
-                        NotificationType.Error
+                    UpdateContext(
+                        {
+                            Aviso: true,
+                            textoAviso: "Debe seleccionar el tipo de remuneracion"
+                        }
                     ),
                     drp_EstadoPermiso_EP.Selected.Nombre = "Rechazado" && IsBlank(txt_MotivoRechazo_EP.Text),
-                    Notify(
-                        "Debe indicar el motivo del rechazo",
-                        NotificationType.Error
+                    UpdateContext(
+                        {
+                            Aviso: true,
+                            textoAviso: "Debe indicar el motivo del rechazo"
+                        }
                     ),
                     UpdateContext({ConVisible: true});
                     
@@ -1709,8 +1724,8 @@
             Fill: =RGBA(214, 221, 224, 0.29)
             Height: =507
             OnSelect: |-
-                =UpdateContext({ConVisible: false});
-            Visible: =ConVisible
+                =UpdateContext({ConVisible: false, Aviso: false, textoAviso: Blank()});
+            Visible: =ConVisible || Aviso
             Width: =616
             ZIndex: =13
 
@@ -1742,7 +1757,7 @@
                 HoverBorderColor: =RGBA(52, 152, 47, 1)
                 HoverColor: =App.Theme.Colors.PrimaryForeground
                 HoverFill: =RGBA(21, 68, 18, 1)
-                OnSelect: |-
+                OnSelect: |
                     =Set(
                         varFirmaJefe,
                         JSON(
@@ -1759,33 +1774,33 @@
                     );
                     UpdateContext({ConVisible: false});
                     If(
-                        drp_Estado_EstadosPermisos_1.SelectedText.Value = "Aprobado",
+                        drp_EstadoPermiso_EP.Selected.Nombre = "Aprobado",
                         EnviarCorreo.Run(
                             LookUp(
                                 Empleados,
-                                Codigo = GaleriaEstado_2.Selected.Codigo,
+                                Codigo = glr_EstadoPermisos_EP.Selected.Codigo,
                                 Correo
                             ),
                             "Revisión de Solicitudes",
-                            "Estimado/a,<br><br>" & "Le informamos que su solicitud de " & GaleriaEstado_2.Selected.Solicitud & " ha sido " & drp_Estado_EstadosPermisos_1.SelectedText.Value & ".<br><br>" & ".<br><br>" & "La solicitud aprobada comprende un total de " & GaleriaEstado_2.Selected.DiasSolicitados & " días, con fecha de inicio " & lbl_FechaInicioInf_EstadoPermisos_1.Text & " y fecha de fin " & lbl_FechaFinInf_EstadoPermisos_2.Text & ".<br><br>" & "Le solicitamos que se presente en el departamento de Capital Humano para firmar su boleta correspondiente. En caso de no acudir a firmar, su solicitud no será tramitada.<br><br>" & "Gracias.<br>"
+                            "Estimado/a,<br><br>" & "Le informamos que su solicitud de " & glr_EstadoPermisos_EP.Selected.Solicitud & " ha sido APROBADA.<br><br>" & ".<br><br>" & "La solicitud aprobada comprende un total de " & glr_EstadoPermisos_EP.Selected.DiasSolicitados & " días, con fecha de inicio " & txt_FechaInicio_EP.Text & " y fecha de fin " & txt_FechaFin_EP.Text & ".<br><br>" & "Le solicitamos que se presente en el departamento de Capital Humano para firmar su boleta correspondiente. En caso de no acudir a firmar, su solicitud no será tramitada.<br><br>" & "Gracias.<br>"
                         );
                         
                     );
                     If(
-                        drp_Estado_EstadosPermisos_1.SelectedText.Value = "Rechazado",
+                        drp_EstadoPermiso_EP.Selected.Nombre = "Rechazado",
                         EnviarCorreo.Run(
                             LookUp(
                                 Empleados,
-                                Codigo = GaleriaEstado_2.Selected.Codigo,
+                                Codigo = glr_EstadoPermisos_EP.Selected.Codigo,
                                 Correo
                             ),
                             "Revisión de Solicitudes",
-                            "Estimado/a,<br><br>" & "Le informamos que su solicitud de " & GaleriaEstado_2.Selected.Solicitud & " ha sido " & drp_Estado_EstadosPermisos_1.SelectedText.Value & ".<br><br>" & ".<br><br>" & "La solicitud Rechazada comprende un total de " & GaleriaEstado_2.Selected.DiasSolicitados & " días, con fecha de inicio " & lbl_FechaInicioInf_EstadoPermisos_1.Text & " y fecha de fin " & lbl_FechaFinInf_EstadoPermisos_2.Text & ".<br><br>" & "El motivo el cual fue rechazado fue el siguiente: " & txt_MotivoRehazo_EstadoPermisos_1.Text & ".<br><br>" & "Gracias.<br>"
+                            "Estimado/a,<br><br>" & "Le informamos que su solicitud de " & glr_EstadoPermisos_EP.Selected.Solicitud & " ha sido RECHAZADA.<br><br>" & ".<br><br>" & "La solicitud Rechazada comprende un total de " & glr_EstadoPermisos_EP.Selected.DiasSolicitados & " días, con fecha de inicio " & txt_FechaInicio_EP.Text & " y fecha de fin " & txt_FechaFin_EP.Text & ".<br><br>" & "El motivo el cual fue rechazado fue el siguiente: " & txt_MotivoRechazo_EP.Text & ".<br><br>" & "Gracias.<br>"
                         );
                         
                     );
                     If(
-                        drp_Estado_EstadosPermisos_1.SelectedText.Value = "Aprobado",
+                        drp_EstadoPermiso_EP.Selected.Nombre = "Aprobado",
                         CorreoConPDF.Run(
                             htmlPDF_1.HtmlText,
                             LookUp(
@@ -1794,31 +1809,31 @@
                                 Correo
                             ),
                             "Revisión de Solicitudes",
-                            "Estimado/a,<br><br>" & "Se ha aprobado la solicitud del colaborador " & GaleriaEstado_2.Selected.Nombre & ", con el ID " & GaleriaEstado_2.Selected.Codigo & ".<br><br>" & "La solicitud aprobada comprende un total de " & GaleriaEstado_2.Selected.DiasSolicitados & " días, con fecha de inicio " & lbl_FechaInicioInf_EstadoPermisos_1.Text & " y fecha de fin " & lbl_FechaFinInf_EstadoPermisos_2.Text & ".<br><br>" & "Para obtener más detalles sobre la solicitud aceptada, por favor, consulte el PDF adjunto o revise la solicitud desde el módulo correspondiente.<br><br>" & "Gracias,<br>"
+                            "Estimado/a,<br><br>" & "Se ha aprobado la solicitud del colaborador " & glr_EstadoPermisos_EP.Selected.Nombre & ", con el ID " & glr_EstadoPermisos_EP.Selected.Codigo & ".<br><br>" & "La solicitud aprobada comprende un total de " & glr_EstadoPermisos_EP.Selected.DiasSolicitados & " días, con fecha de inicio " & txt_FechaInicio_EP.Text & " y fecha de fin " & txt_FechaFin_EP.Text & ".<br><br>" & "Para obtener más detalles sobre la solicitud aceptada, por favor, consulte el PDF adjunto o revise la solicitud desde el módulo correspondiente.<br><br>" & "Gracias,<br>"
                         );
                         
                     );
                     If(
-                        drp_Estado_EstadosPermisos_1.SelectedText.Value = "Aprobado",
+                        drp_EstadoPermiso_EP.Selected.Nombre = "Aprobado",
                         CorreoConPDF.Run(
                             htmlPDF_1.HtmlText,
                             "rrhh@tsicr.com",
                             "Revisión de Solicitudes",
-                            "Estimado/a,<br><br>" & "Se ha aprobado la solicitud del colaborador " & GaleriaEstado_2.Selected.Nombre & ", con el ID " & GaleriaEstado_2.Selected.Codigo & ".<br><br>" & "<br><br>Aprobado por: " & LookUp(
+                            "Estimado/a,<br><br>" & "Se ha aprobado la solicitud del colaborador " & glr_EstadoPermisos_EP.Selected.Nombre & ", con el ID " & glr_EstadoPermisos_EP.Selected.Codigo & ".<br><br>" & "<br><br>Aprobado por: " & LookUp(
                                 Empleados,
                                 Codigo = VarName,
                                 Nombre
-                            ) & " <br><br>" & "La solicitud aprobada comprende un total de " & GaleriaEstado_2.Selected.DiasSolicitados & " días, con fecha de inicio " & lbl_FechaInicioInf_EstadoPermisos_1.Text & " y fecha de fin " & lbl_FechaFinInf_EstadoPermisos_2.Text & ".<br><br>" & "Para obtener más detalles sobre la solicitud aceptada, por favor, consulte el PDF adjunto o revise la solicitud desde el módulo correspondiente.<br><br>" & "Gracias,<br>"
+                            ) & " <br><br>" & "La solicitud aprobada comprende un total de " & glr_EstadoPermisos_EP.Selected.DiasSolicitados & " días, con fecha de inicio " & txt_FechaInicio_EP.Text & " y fecha de fin " & txt_FechaFin_EP.Text & ".<br><br>" & "Para obtener más detalles sobre la solicitud aceptada, por favor, consulte el PDF adjunto o revise la solicitud desde el módulo correspondiente.<br><br>" & "Gracias,<br>"
                         );
                         
                     );
                     Patch(
                         TramitesSolicitudes,
-                        GaleriaEstado_2.Selected,
+                        glr_EstadoPermisos_EP.Selected,
                         {
-                            EstadoDeProceso: drp_Estado_EstadosPermisos_1.SelectedText.Value,
+                            EstadoDeProceso: drp_EstadoPermiso_EP.Selected.Nombre,
                             Remunerado: If(
-                                chk_Remunerado_EstadoPermisos.Value,
+                                chk_Remunerado_EP.Value,
                                 "SI",
                                 "NO"
                             ),
@@ -1827,22 +1842,19 @@
                                 Codigo = VarName,
                                 Nombre
                             ),
-                            FirmaJefes: pnl_FirmaJefe_EstadoPermisos.Image,
-                            MotivoRechazo: Left(
-                                txt_MotivoRehazo_EstadoPermisos.Text,
-                                100
-                            )
+                            FirmaJefes: pnl_FirmaJefe_EP.Image,
+                            MotivoRechazo: txt_MotivoRechazo_EP.Text
                         }
                     );
                     Notify(
                         "Datos guardados correctamente",
                         NotificationType.Success
                     );
-                    Reset(txt_MotivoRehazo_EstadoPermisos);
-                    Reset(drp_Estado_EstadosPermisos);
-                    Reset(chk_Remunerado_EstadoPermisos);
-                    Reset(chk_NoRemunerado_EstadoPermisos);
-                    Reset(pnl_FirmaJefe_EstadoPermisos)
+                    Reset(drp_EstadoPermiso_EP);
+                    Reset(chk_NoRemunerado_EP);
+                    Reset(chk_Remunerado_EP);
+                    Reset(pnl_FirmaJefe_EP);
+                    Reset(txt_MotivoRechazo_EP);
                 PressedBorderColor: =RGBA(52, 152, 47, 1)
                 PressedColor: =RGBA(21, 68, 18, 1)
                 PressedFill: =RGBA(255, 255, 255, 1)
@@ -1877,79 +1889,798 @@
                 Y: =95
                 ZIndex: =80
 
-    Container3_9 As groupContainer.manualLayoutContainer:
+            Label32 As label:
+                Align: =Align.Center
+                BorderColor: =App.Theme.Colors.Darker40
+                Color: =RGBA(0, 0, 0, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                DisplayMode: =DisplayMode.View
+                Font: =App.Theme.Font
+                Height: =95
+                PaddingBottom: =10
+                PaddingLeft: =10
+                PaddingRight: =10
+                PaddingTop: =10
+                Text: |-
+                    ="ADVERTENCIA
+                    Asegurese de haber firmado el premiso
+                    ¿Desea continuar?"
+                Width: =350
+                ZIndex: =81
+
+    cnt_Aviso_EP As groupContainer.manualLayoutContainer:
+        BorderColor: =RGBA(255, 191, 0, 1)
+        BorderThickness: =4
         DropShadow: =DropShadow.Light
-        Fill: |
-            =RGBA(153, 201, 238, 1)
-        Height: =262
-        RadiusBottomLeft: =4
-        RadiusBottomRight: =4
-        RadiusTopLeft: =4
-        RadiusTopRight: =4
-        Visible: =conMotivoVisble
-        X: =453
-        Y: =304
-        ZIndex: =7
+        Fill: =RGBA(255, 255, 255, 1)
+        Height: =180
+        RadiusBottomLeft: =15
+        RadiusBottomRight: =15
+        RadiusTopLeft: =15
+        RadiusTopRight: =15
+        Visible: =Aviso
+        X: =433
+        Y: =293
+        ZIndex: =6
 
-        Label10_1 As label:
+        txt_Aviso_EP As text:
             Align: =Align.Center
-            BorderColor: =App.Theme.Colors.Darker40
-            Color: =RGBA(0, 0, 0, 1)
-            DisabledColor: =RGBA(166, 166, 166, 1)
-            Font: =App.Theme.Font
-            Size: =15
-            Text: ="Motivo del rechazo"
-            Width: =500
-            ZIndex: =80
-
-        txt_MotivoRehazo_EstadoPermisos_1 As text:
             BorderColor: =App.Theme.Colors.Darker40
             BorderThickness: =2
             Color: =RGBA(0, 0, 0, 1)
-            Default: =
+            Default: =textoAviso
             DisabledBorderColor: =RGBA(166, 166, 166, 1)
             DisabledColor: =RGBA(166, 166, 166, 1)
             DisabledFill: =RGBA(244, 244, 244, 1)
+            DisplayMode: =DisplayMode.View
             FocusedBorderThickness: =4
             Font: =App.Theme.Font
-            Height: =133
-            HintText: ="Maximo 100 caracteres"
+            Height: =84
             HoverBorderColor: =App.Theme.Colors.Darker40
             HoverColor: =RGBA(0, 0, 0, 1)
             HoverFill: =App.Theme.Colors.Lighter70
             Mode: =TextMode.MultiLine
-            Size: =13
+            Size: =20
             Width: =462
             X: =20
-            Y: =40
+            Y: =10
             ZIndex: =81
 
         Button2_6 As button:
-            BorderColor: =App.Theme.Colors.Primary
+            BorderColor: =RGBA(255, 191, 0, 1)
             BorderStyle: =BorderStyle.None
             DisabledBorderColor: =RGBA(244, 244, 244, 1)
             DisabledColor: =RGBA(166, 166, 166, 1)
             DisabledFill: =RGBA(244, 244, 244, 1)
-            Fill: =RGBA(40, 134, 222, 1)
+            Fill: =RGBA(255, 191, 0, 1)
             Font: =App.Theme.Font
             FontWeight: =FontWeight.Semibold
-            Height: =60
-            HoverBorderColor: =App.Theme.Colors.Darker10
+            Height: =50
+            HoverBorderColor: =RGBA(255, 191, 0, 1)
             HoverColor: =RGBA(255, 255, 255, 1)
-            HoverFill: =App.Theme.Colors.Darker10
+            HoverFill: =RGBA(176, 132, 0, 1)
             OnSelect: |-
-                =If(
-                    IsBlank(txt_MotivoRehazo_EstadoPermisos_1.Text),    
-                    Notify("Debe indicar el motivo de rechazo de la solicitud",NotificationType.Error),
-                    UpdateContext({conMotivoVisble: false}); UpdateContext({ConVisible: true})
-                )
-            PressedBorderColor: =App.Theme.Colors.Darker40
-            PressedColor: =Self.Color
-            PressedFill: =App.Theme.Colors.Darker40
-            Size: =15
+                =UpdateContext({Aviso: false, textoAviso: Blank()})
+            PressedBorderColor: =RGBA(255, 191, 0, 1)
+            PressedColor: =RGBA(176, 132, 0, 1)
+            PressedFill: =RGBA(255, 255, 255, 1)
+            Size: =20
             Text: ="Continuar"
             Width: =232
             X: =135
-            Y: =188
+            Y: =110
             ZIndex: =82
+
+    cnt_Revisar_EP_1 As groupContainer.manualLayoutContainer:
+        BorderColor: =RGBA(40, 134, 222, 1)
+        BorderThickness: =3
+        DropShadow: =DropShadow.Bold
+        Fill: =RGBA(255, 255, 255, 1)
+        Height: =507
+        RadiusBottomLeft: =15
+        RadiusBottomRight: =15
+        RadiusTopLeft: =15
+        RadiusTopRight: =15
+        Visible: =showContainer
+        Width: =616
+        X: =472
+        Y: =260
+        ZIndex: =7
+
+        Container52_1 As groupContainer.manualLayoutContainer:
+            BorderColor: =RGBA(180, 214, 250, 1)
+            BorderThickness: =3
+            DropShadow: =DropShadow.Semibold
+            Height: =449
+            RadiusBottomLeft: =10
+            RadiusBottomRight: =10
+            RadiusTopLeft: =10
+            RadiusTopRight: =10
+            Width: =226
+            X: =370
+            Y: =45
+            ZIndex: =1
+
+            Label2_186 As label:
+                Align: =Align.Center
+                BorderColor: =App.Theme.Colors.Darker40
+                BorderStyle: =BorderStyle.None
+                Color: =RGBA(0, 0, 0, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                Font: =App.Theme.Font
+                Height: =25
+                Size: =11
+                Text: ="Solicitud"
+                Width: =200
+                X: =13
+                Y: =35
+                ZIndex: =1
+
+            txt_Solicitud_EP_1 As text:
+                Align: =Align.Center
+                BorderColor: =App.Theme.Colors.Darker40
+                BorderThickness: =2
+                Color: =RGBA(0, 0, 0, 1)
+                Default: =glr_EstadoPermisos_EP.Selected.Solicitud
+                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                DisabledColor: =RGBA(0, 0, 0, 1)
+                DisabledFill: =RGBA(180, 214, 250, 0.2)
+                DisplayMode: =DisplayMode.Disabled
+                FocusedBorderThickness: =4
+                Font: =App.Theme.Font
+                Height: =30
+                HoverBorderColor: =App.Theme.Colors.Darker40
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =App.Theme.Colors.Lighter70
+                PaddingBottom: =0
+                PaddingLeft: =5
+                PaddingTop: =0
+                Size: =13
+                Width: =200
+                X: =13
+                Y: =60
+                ZIndex: =2
+
+            Label2_200 As label:
+                Align: =Align.Center
+                BorderColor: =App.Theme.Colors.Darker40
+                BorderStyle: =BorderStyle.None
+                Color: =RGBA(0, 0, 0, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                Font: =App.Theme.Font
+                Height: =25
+                Size: =11
+                Text: ="Disa Solicitados"
+                Width: =200
+                X: =13
+                Y: =95
+                ZIndex: =3
+
+            txt_Dias_EP_1 As text:
+                Align: =Align.Center
+                BorderColor: =App.Theme.Colors.Darker40
+                BorderThickness: =2
+                Color: =RGBA(0, 0, 0, 1)
+                Default: =glr_EstadoPermisos_EP.Selected.DiasSolicitados & " dias"
+                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                DisabledColor: =RGBA(0, 0, 0, 1)
+                DisabledFill: =RGBA(180, 214, 250, 0.2)
+                DisplayMode: =DisplayMode.Disabled
+                FocusedBorderThickness: =4
+                Font: =App.Theme.Font
+                Height: =30
+                HoverBorderColor: =App.Theme.Colors.Darker40
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =App.Theme.Colors.Lighter70
+                PaddingBottom: =0
+                PaddingLeft: =5
+                PaddingTop: =0
+                Size: =13
+                Width: =200
+                X: =13
+                Y: =120
+                ZIndex: =4
+
+            Label2_205 As label:
+                Align: =Align.Center
+                BorderColor: =App.Theme.Colors.Darker40
+                BorderStyle: =BorderStyle.None
+                Color: =RGBA(0, 0, 0, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                Font: =App.Theme.Font
+                Height: =25
+                Size: =11
+                Text: ="Fecha Inicio"
+                Width: =200
+                X: =13
+                Y: =156
+                ZIndex: =5
+
+            txt_FechaInicio_EP_1 As text:
+                Align: =Align.Center
+                BorderColor: =App.Theme.Colors.Darker40
+                BorderThickness: =2
+                Color: =RGBA(0, 0, 0, 1)
+                Default: =Text(glr_EstadoPermisos_EP.Selected.Fecha_Inicio,"[$-es-ES]dd/mm/yyyy")
+                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                DisabledColor: =RGBA(0, 0, 0, 1)
+                DisabledFill: =RGBA(180, 214, 250, 0.2)
+                DisplayMode: =DisplayMode.Disabled
+                FocusedBorderThickness: =4
+                Font: =App.Theme.Font
+                Height: =30
+                HoverBorderColor: =App.Theme.Colors.Darker40
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =App.Theme.Colors.Lighter70
+                PaddingBottom: =0
+                PaddingLeft: =5
+                PaddingTop: =0
+                Size: =13
+                Width: =200
+                X: =13
+                Y: =181
+                ZIndex: =6
+
+            Label2_206 As label:
+                Align: =Align.Center
+                BorderColor: =App.Theme.Colors.Darker40
+                BorderStyle: =BorderStyle.None
+                Color: =RGBA(0, 0, 0, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                Font: =App.Theme.Font
+                Height: =25
+                Size: =11
+                Text: ="Fecha Fin"
+                Width: =200
+                X: =13
+                Y: =217
+                ZIndex: =7
+
+            txt_FechaFin_EP_1 As text:
+                Align: =Align.Center
+                BorderColor: =App.Theme.Colors.Darker40
+                BorderThickness: =2
+                Color: =RGBA(0, 0, 0, 1)
+                Default: =Text(glr_EstadoPermisos_EP.Selected.Fecha_Fin, "[$-es-ES]dd/mm/yyyy")
+                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                DisabledColor: =RGBA(0, 0, 0, 1)
+                DisabledFill: =RGBA(180, 214, 250, 0.2)
+                DisplayMode: =DisplayMode.Disabled
+                FocusedBorderThickness: =4
+                Font: =App.Theme.Font
+                Height: =30
+                HoverBorderColor: =App.Theme.Colors.Darker40
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =App.Theme.Colors.Lighter70
+                PaddingBottom: =0
+                PaddingLeft: =5
+                PaddingTop: =0
+                Size: =13
+                Width: =200
+                X: =13
+                Y: =242
+                ZIndex: =8
+
+            Label2_207 As label:
+                Align: =Align.Center
+                BorderColor: =App.Theme.Colors.Darker40
+                BorderStyle: =BorderStyle.None
+                Color: =RGBA(0, 0, 0, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                Font: =App.Theme.Font
+                Height: =25
+                Size: =11
+                Text: ="Motivo Solicitud"
+                Width: =200
+                X: =13
+                Y: =277
+                ZIndex: =9
+
+            txt_MotivoSoli_EP_1 As text:
+                Align: =Align.Center
+                BorderColor: =App.Theme.Colors.Darker40
+                BorderThickness: =2
+                Color: =RGBA(0, 0, 0, 1)
+                Default: =glr_EstadoPermisos_EP.Selected.Motivo
+                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                DisabledColor: =RGBA(0, 0, 0, 1)
+                DisabledFill: =RGBA(180, 214, 250, 0.2)
+                DisplayMode: =DisplayMode.Disabled
+                FocusedBorderThickness: =4
+                Font: =App.Theme.Font
+                Height: =137
+                HoverBorderColor: =App.Theme.Colors.Darker40
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =App.Theme.Colors.Lighter70
+                Mode: =TextMode.MultiLine
+                PaddingBottom: =0
+                PaddingLeft: =5
+                PaddingTop: =0
+                Size: =13
+                Width: =200
+                X: =13
+                Y: =302
+                ZIndex: =10
+
+            TextInput13_7 As text:
+                Align: =Align.Center
+                BorderColor: =App.Theme.Colors.Darker40
+                BorderThickness: =2
+                Color: =RGBA(0, 0, 0, 1)
+                Default: ="Informacion de la Solicitud"
+                DisabledBorderColor: =RGBA(180, 214, 250, 1)
+                DisabledColor: =RGBA(0, 0, 0, 1)
+                DisabledFill: =RGBA(180, 214, 250, 1)
+                DisplayMode: =DisplayMode.Disabled
+                FocusedBorderThickness: =4
+                Font: =App.Theme.Font
+                FontWeight: =FontWeight.Semibold
+                Height: =30
+                HoverBorderColor: =App.Theme.Colors.Darker40
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =App.Theme.Colors.Lighter70
+                PaddingBottom: =0
+                PaddingLeft: =5
+                PaddingTop: =0
+                Size: =13
+                Width: =226
+                ZIndex: =11
+
+        Label2_182 As label:
+            Align: =Align.Center
+            BorderColor: =RGBA(40, 134, 222, 1)
+            BorderThickness: =2
+            Color: =RGBA(255, 255, 255, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            Fill: =RGBA(40, 134, 222, 1)
+            Font: =App.Theme.Font
+            FontWeight: =FontWeight.Semibold
+            Height: =35
+            PaddingBottom: =0
+            PaddingTop: =0
+            Size: =15
+            Text: ="Responder a la Solicitud"
+            Width: =616
+            ZIndex: =2
+
+        pnl_FirmaJefe_EP_1 As inkControl:
+            BorderColor: =RGBA(180, 214, 250, 1)
+            BorderThickness: =3
+            Height: =200
+            Width: =320
+            X: =20
+            Y: =237
+            ZIndex: =3
+
+        chk_Remunerado_EP_1 As checkbox:
+            BorderColor: =App.Theme.Colors.Darker40
+            CheckboxBorderColor: =App.Theme.Colors.Primary
+            CheckmarkFill: =App.Theme.Colors.Primary
+            Color: =RGBA(0, 0, 0, 1)
+            Default: =
+            DisplayMode: =If(IsBlank(drp_EstadoPermiso_EP_1.Selected), DisplayMode.Disabled, DisplayMode.Edit)
+            Font: =App.Theme.Font
+            HoverColor: =App.Theme.Colors.Darker30
+            OnCheck: =Reset(chk_NoRemunerado_EP_1)
+            OnSelect: =
+            OnUncheck: =Set(Casilla1Activada,false)
+            Size: =20
+            Text: ="REMUNERADO"
+            Visible: =drp_EstadoPermiso_EP_1.Selected.Nombre <> "Rechazado"
+            Width: =320
+            X: =20
+            Y: =137
+            ZIndex: =4
+
+        chk_NoRemunerado_EP_1 As checkbox:
+            BorderColor: =App.Theme.Colors.Darker40
+            CheckboxBorderColor: =App.Theme.Colors.Primary
+            CheckmarkFill: =App.Theme.Colors.Primary
+            Color: =RGBA(0, 0, 0, 1)
+            Default: =drp_EstadoPermiso_EP_1.Selected.Nombre = "Rechazado"
+            DisplayMode: =If(IsBlank(drp_EstadoPermiso_EP_1.Selected), DisplayMode.Disabled, DisplayMode.Edit)
+            Font: =App.Theme.Font
+            HoverColor: =App.Theme.Colors.Darker30
+            OnCheck: =Reset(chk_Remunerado_EP_1)
+            OnSelect: =
+            OnUncheck: =Set(Casilla2Activada,false)
+            Size: =20
+            Text: ="NO REMUNERADO"
+            Visible: =drp_EstadoPermiso_EP_1.Selected.Nombre <> "Rechazado"
+            Width: =320
+            X: =20
+            Y: =87
+            ZIndex: =5
+
+        "drp_EstadoPermiso_EP_1 As 'Cuadro combinado'.pcfdataset":
+            BasePaletteColor: =RGBA(5, 102, 178, 1)
+            BorderColor: =RGBA(40, 134, 222, 1)
+            BorderRadius: =6
+            BorderStyle: =BorderStyle.Solid
+            BorderThickness: =2
+            DefaultSelectedItems: |-
+                ={Tipo: "Aprovado"}
+            DisplayMode: =DisplayMode.Edit
+            Fill: =RGBA(180, 214, 250, 0.21)
+            FontSize: =18
+            Height: =32
+            InputTextPlaceholder: ="Estado de la Solicitud"
+            Items: =ProcesosRHS
+            OnChange: |-
+                =Reset(txt_MotivoRechazo_EP_1);
+                Reset(chk_NoRemunerado_EP_1);
+                Reset(chk_Remunerado_EP_1);
+            PaddingBottom: =0
+            PaddingLeft: =5
+            PaddingRight: =5
+            PaddingTop: =0
+            Width: =320
+            X: =20
+            Y: =45
+            ZIndex: =6
+
+            Nombre3_1 As PowerApps_CoreControls_ComboboxCanvasTemplate_dataField.textualColumn:
+                FieldDisplayName: ="Nombre"
+                FieldName: ="crfb9_descripcion"
+                FieldType: ="s"
+                FieldVariantName: ="textualColumn"
+                Order: =1
+                ZIndex: =78
+
+        TextInput13_8 As text:
+            Align: =Align.Center
+            BorderColor: =App.Theme.Colors.Darker40
+            BorderThickness: =2
+            Color: =RGBA(0, 0, 0, 1)
+            Default: ="Firma del Encargado"
+            DisabledBorderColor: =RGBA(180, 214, 250, 1)
+            DisabledColor: =RGBA(0, 0, 0, 1)
+            DisabledFill: =RGBA(180, 214, 250, 1)
+            DisplayMode: =DisplayMode.Disabled
+            FocusedBorderThickness: =4
+            Font: =App.Theme.Font
+            FontWeight: =FontWeight.Semibold
+            Height: =30
+            HoverBorderColor: =App.Theme.Colors.Darker40
+            HoverColor: =RGBA(0, 0, 0, 1)
+            HoverFill: =App.Theme.Colors.Lighter70
+            PaddingBottom: =0
+            PaddingLeft: =5
+            PaddingTop: =0
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =8  
+            RadiusTopRight: =8
+            Size: =13
+            X: =20
+            Y: =207
+            ZIndex: =7
+
+        Label2_208 As label:
+            Align: =Align.Center
+            BorderColor: =App.Theme.Colors.Darker40
+            BorderStyle: =BorderStyle.None
+            Color: =RGBA(0, 0, 0, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            Font: =App.Theme.Font
+            Height: =25
+            Size: =11
+            Text: ="Motivo Rechazo"
+            Visible: =drp_EstadoPermiso_EP_1.Selected.Nombre = "Rechazado"
+            Width: =320
+            X: =20
+            Y: =77
+            ZIndex: =8
+
+        txt_MotivoRechazo_EP_1 As text:
+            Align: =Align.Center
+            BorderColor: =RGBA(40, 134, 222, 1)
+            BorderThickness: =3
+            Color: =RGBA(0, 0, 0, 1)
+            Default: =
+            DisabledBorderColor: =RGBA(40, 134, 222, 1)
+            DisabledColor: =RGBA(0, 0, 0, 1)
+            DisabledFill: =RGBA(180, 214, 250, 0.2)
+            Fill: =RGBA(180, 214, 250, 0.19)
+            FocusedBorderThickness: =4
+            Font: =App.Theme.Font
+            Height: =90
+            HintText: ="Indique el motivo del Rechazo"
+            HoverBorderColor: =RGBA(40, 134, 222, 1)
+            HoverColor: =RGBA(0, 0, 0, 1)
+            HoverFill: =RGBA(180, 214, 250, 0.4)
+            MaxLength: =100
+            Mode: =TextMode.MultiLine
+            PaddingLeft: =5
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+            Size: =13
+            Visible: =drp_EstadoPermiso_EP_1.Selected.Nombre = "Rechazado"
+            X: =20
+            Y: =102
+            ZIndex: =9
+
+        Label2_187 As label:
+            Align: =Align.Right
+            BorderColor: =App.Theme.Colors.Darker40
+            BorderStyle: =BorderStyle.None
+            Color: =RGBA(0, 0, 0, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            Font: =App.Theme.Font
+            Height: =20
+            Size: =10
+            Text: =Len(txt_MotivoRechazo_EP_1.Text) & "/100"
+            Visible: =drp_EstadoPermiso_EP_1.Selected.Nombre = "Rechazado"
+            Width: =70
+            X: =270
+            Y: =172
+            ZIndex: =10
+
+        Button15_5 As button:
+            BorderColor: =RGBA(52, 152, 47, 1)
+            Color: =App.Theme.Colors.PrimaryForeground
+            DisabledBorderColor: =RGBA(244, 244, 244, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            Fill: =RGBA(52, 152, 47, 1)
+            Font: =App.Theme.Font
+            FontWeight: =FontWeight.Semibold
+            HoverBorderColor: =RGBA(52, 152, 47, 1)
+            HoverColor: =App.Theme.Colors.PrimaryForeground
+            HoverFill: =RGBA(21, 68, 18, 1)
+            OnSelect: |
+                =If(
+                    IsBlank(drp_EstadoPermiso_EP_1.Selected),
+                    UpdateContext(
+                        {
+                            Aviso: true,
+                            textoAviso: "Debe seleccionar el estado"
+                        }
+                    ),
+                    drp_EstadoPermiso_EP.Selected.Nombre = "Aprobado" && !chk_Remunerado_EP.Value && !chk_NoRemunerado_EP.Value,
+                    UpdateContext(
+                        {
+                            Aviso: true,
+                            textoAviso: "Debe seleccionar el tipo de remuneracion"
+                        }
+                    ),
+                    drp_EstadoPermiso_EP.Selected.Nombre = "Rechazado" && IsBlank(txt_MotivoRechazo_EP.Text),
+                    UpdateContext(
+                        {
+                            Aviso: true,
+                            textoAviso: "Debe indicar el motivo del rechazo"
+                        }
+                    ),
+                    UpdateContext({ConVisible: true});
+                    
+                );
+            PressedBorderColor: =RGBA(52, 152, 47, 1)
+            PressedColor: =RGBA(21, 68, 18, 1)
+            PressedFill: =RGBA(255, 255, 255, 1)
+            Size: =15
+            Text: ="Guardar"
+            Width: =150
+            X: =190
+            Y: =454
+            ZIndex: =11
+
+        Button15_4 As button:
+            BorderColor: =RGBA(122, 138, 143, 1)
+            Color: =App.Theme.Colors.PrimaryForeground
+            DisabledBorderColor: =RGBA(244, 244, 244, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            Fill: =RGBA(122, 138, 143, 1)
+            Font: =App.Theme.Font
+            FontWeight: =FontWeight.Semibold
+            HoverBorderColor: =RGBA(122, 138, 143, 1)
+            HoverColor: =App.Theme.Colors.PrimaryForeground
+            HoverFill: =RGBA(79, 90, 94, 1)
+            OnSelect: |
+                =UpdateContext({showContainer: false});
+                Reset(drp_EstadoPermiso_EP_1);
+                Reset(chk_NoRemunerado_EP_1);
+                Reset(chk_Remunerado_EP_1);
+                Reset(pnl_FirmaJefe_EP_1);
+                Reset(txt_MotivoRechazo_EP_1);
+            PressedBorderColor: =RGBA(122, 138, 143, 1)
+            PressedColor: =RGBA(79, 90, 94, 1)
+            PressedFill: =RGBA(255, 255, 255, 1)
+            Size: =15
+            Text: ="Cancelar"
+            Width: =150
+            X: =20
+            Y: =454
+            ZIndex: =12
+
+        rct_Fondo_EM2_2 As rectangle:
+            BorderColor: =App.Theme.Colors.Darker40
+            Fill: =RGBA(214, 221, 224, 0.29)
+            Height: =507
+            OnSelect: |-
+                =UpdateContext({ConVisible: false, Aviso: false, textoAviso: Blank()});
+            Visible: =ConVisible || Aviso
+            Width: =616
+            ZIndex: =13
+
+        Container3_9 As groupContainer.manualLayoutContainer:
+            BorderColor: =RGBA(255, 191, 0, 1)
+            BorderThickness: =3
+            DropShadow: =DropShadow.Bold
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =149
+            RadiusBottomLeft: =14
+            RadiusBottomRight: =14
+            RadiusTopLeft: =14
+            RadiusTopRight: =14
+            Visible: =ConVisible
+            Width: =350
+            X: =133
+            Y: =147
+            ZIndex: =14
+
+            Button15_7 As button:
+                BorderColor: =RGBA(52, 152, 47, 1)
+                Color: =App.Theme.Colors.PrimaryForeground
+                DisabledBorderColor: =RGBA(244, 244, 244, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                DisabledFill: =RGBA(244, 244, 244, 1)
+                Fill: =RGBA(52, 152, 47, 1)
+                Font: =App.Theme.Font
+                FontWeight: =FontWeight.Semibold
+                HoverBorderColor: =RGBA(52, 152, 47, 1)
+                HoverColor: =App.Theme.Colors.PrimaryForeground
+                HoverFill: =RGBA(21, 68, 18, 1)
+                OnSelect: |
+                    =Set(
+                        varFirmaJefe,
+                        JSON(
+                            pnl_FirmaJefe_EP_1.Image,
+                            JSONFormat.IncludeBinaryData
+                        )
+                    );
+                    Set(
+                        LogotipoTechShop,
+                        JSON(
+                            Logotipo_2.Image,
+                            JSONFormat.IncludeBinaryData
+                        )
+                    );
+                    UpdateContext({ConVisible: false});
+                    If(
+                        drp_EstadoPermiso_EP_1.Selected.Nombre = "Aprobado",
+                        EnviarCorreo.Run(
+                            LookUp(
+                                Empleados,
+                                Codigo = glr_EstadoPermisos_EP.Selected.Codigo,
+                                Correo
+                            ),
+                            "Revisión de Solicitudes",
+                            "Estimado/a,<br><br>" & "Le informamos que su solicitud de " & glr_EstadoPermisos_EP.Selected.Solicitud & " ha sido APROBADA.<br><br>" & ".<br><br>" & "La solicitud aprobada comprende un total de " & glr_EstadoPermisos_EP.Selected.DiasSolicitados & " días, con fecha de inicio " & txt_FechaInicio_EP_1.Text & " y fecha de fin " & txt_FechaFin_EP_1.Text & ".<br><br>" & "Le solicitamos que se presente en el departamento de Capital Humano para firmar su boleta correspondiente. En caso de no acudir a firmar, su solicitud no será tramitada.<br><br>" & "Gracias.<br>"
+                        );
+                        
+                    );
+                    If(
+                        drp_EstadoPermiso_EP_1.Selected.Nombre = "Rechazado",
+                        EnviarCorreo.Run(
+                            LookUp(
+                                Empleados,
+                                Codigo = glr_EstadoPermisos_EP.Selected.Codigo,
+                                Correo
+                            ),
+                            "Revisión de Solicitudes",
+                            "Estimado/a,<br><br>" & "Le informamos que su solicitud de " & glr_EstadoPermisos_EP.Selected.Solicitud & " ha sido RECHAZADA.<br><br>" & ".<br><br>" & "La solicitud Rechazada comprende un total de " & glr_EstadoPermisos_EP.Selected.DiasSolicitados & " días, con fecha de inicio " & txt_FechaInicio_EP_1.Text & " y fecha de fin " & txt_FechaFin_EP_1.Text & ".<br><br>" & "El motivo el cual fue rechazado fue el siguiente: " & txt_MotivoRechazo_EP_1.Text & ".<br><br>" & "Gracias.<br>"
+                        );
+                        
+                    );
+                    If(
+                        drp_EstadoPermiso_EP_1.Selected.Nombre = "Aprobado",
+                        CorreoConPDF.Run(
+                            htmlPDF_1.HtmlText,
+                            LookUp(
+                                Empleados,
+                                Codigo = VarName,
+                                Correo
+                            ),
+                            "Revisión de Solicitudes",
+                            "Estimado/a,<br><br>" & "Se ha aprobado la solicitud del colaborador " & glr_EstadoPermisos_EP.Selected.Nombre & ", con el ID " & glr_EstadoPermisos_EP.Selected.Codigo & ".<br><br>" & "La solicitud aprobada comprende un total de " & glr_EstadoPermisos_EP.Selected.DiasSolicitados & " días, con fecha de inicio " & txt_FechaInicio_EP_1.Text & " y fecha de fin " & txt_FechaFin_EP_1.Text & ".<br><br>" & "Para obtener más detalles sobre la solicitud aceptada, por favor, consulte el PDF adjunto o revise la solicitud desde el módulo correspondiente.<br><br>" & "Gracias,<br>"
+                        );
+                        
+                    );
+                    If(
+                        drp_EstadoPermiso_EP_1.Selected.Nombre = "Aprobado",
+                        CorreoConPDF.Run(
+                            htmlPDF_1.HtmlText,
+                            "rrhh@tsicr.com",
+                            "Revisión de Solicitudes",
+                            "Estimado/a,<br><br>" & "Se ha aprobado la solicitud del colaborador " & glr_EstadoPermisos_EP.Selected.Nombre & ", con el ID " & glr_EstadoPermisos_EP.Selected.Codigo & ".<br><br>" & "<br><br>Aprobado por: " & LookUp(
+                                Empleados,
+                                Codigo = VarName,
+                                Nombre
+                            ) & " <br><br>" & "La solicitud aprobada comprende un total de " & glr_EstadoPermisos_EP.Selected.DiasSolicitados & " días, con fecha de inicio " & txt_FechaInicio_EP_1.Text & " y fecha de fin " & txt_FechaFin_EP_1.Text & ".<br><br>" & "Para obtener más detalles sobre la solicitud aceptada, por favor, consulte el PDF adjunto o revise la solicitud desde el módulo correspondiente.<br><br>" & "Gracias,<br>"
+                        );
+                        
+                    );
+                    Patch(
+                        TramitesSolicitudes,
+                        glr_EstadoPermisos_EP.Selected,
+                        {
+                            EstadoDeProceso: drp_EstadoPermiso_EP_1.Selected.Nombre,
+                            Remunerado: If(
+                                chk_Remunerado_EP.Value,
+                                "SI",
+                                "NO"
+                            ),
+                            JefeDirecto: LookUp(
+                                Empleados,
+                                Codigo = VarName,
+                                Nombre
+                            ),
+                            FirmaJefes: pnl_FirmaJefe_EP.Image,
+                            MotivoRechazo: txt_MotivoRechazo_EP.Text
+                        }
+                    );
+                    Notify(
+                        "Datos guardados correctamente",
+                        NotificationType.Success
+                    );
+                    Reset(drp_EstadoPermiso_EP);
+                    Reset(chk_NoRemunerado_EP);
+                    Reset(chk_Remunerado_EP);
+                    Reset(pnl_FirmaJefe_EP);
+                    Reset(txt_MotivoRechazo_EP);
+                PressedBorderColor: =RGBA(52, 152, 47, 1)
+                PressedColor: =RGBA(21, 68, 18, 1)
+                PressedFill: =RGBA(255, 255, 255, 1)
+                Size: =15
+                Text: ="Guardar"
+                Width: =150
+                X: =185
+                Y: =95
+                ZIndex: =79
+
+            Button15_6 As button:
+                BorderColor: =RGBA(122, 138, 143, 1)
+                Color: =App.Theme.Colors.PrimaryForeground
+                DisabledBorderColor: =RGBA(244, 244, 244, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                DisabledFill: =RGBA(244, 244, 244, 1)
+                Fill: =RGBA(122, 138, 143, 1)
+                Font: =App.Theme.Font
+                FontWeight: =FontWeight.Semibold
+                HoverBorderColor: =RGBA(122, 138, 143, 1)
+                HoverColor: =App.Theme.Colors.PrimaryForeground
+                HoverFill: =RGBA(79, 90, 94, 1)
+                OnSelect: |-
+                    =UpdateContext({ConVisible: false});
+                PressedBorderColor: =RGBA(122, 138, 143, 1)
+                PressedColor: =RGBA(79, 90, 94, 1)
+                PressedFill: =RGBA(255, 255, 255, 1)
+                Size: =15
+                Text: ="Cancelar"
+                Width: =150
+                X: =15
+                Y: =95
+                ZIndex: =80
+
+            Label32_1 As label:
+                Align: =Align.Center
+                BorderColor: =App.Theme.Colors.Darker40
+                Color: =RGBA(0, 0, 0, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                DisplayMode: =DisplayMode.View
+                Font: =App.Theme.Font
+                Height: =95
+                PaddingBottom: =10
+                PaddingLeft: =10
+                PaddingRight: =10
+                PaddingTop: =10
+                Text: |-
+                    ="ADVERTENCIA
+                    Asegurese de haber firmado el premiso
+                    ¿Desea continuar?"
+                Width: =350
+                ZIndex: =81
 
