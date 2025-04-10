@@ -426,6 +426,7 @@
                             ChevronFill: =RGBA(0, 0, 0, 1)
                             ChevronHoverBackground: =RGBA(180, 214, 250, 1)
                             ChevronHoverFill: =RGBA(0, 0, 0, 1)
+                            Default: =If(VarName in ["2324", "786"], "Aprobado", "En proceso")
                             DisabledBorderColor: =RGBA(166, 166, 166, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             DisabledFill: =RGBA(244, 244, 244, 1)
@@ -454,7 +455,7 @@
                             ChevronFill: =RGBA(0, 0, 0, 1)
                             ChevronHoverBackground: =RGBA(180, 214, 250, 1)
                             ChevronHoverFill: =RGBA(0, 0, 0, 1)
-                            Default: ="Vacaciones"
+                            Default: =If(VarName in ["2324", "786"], "Incapacidad", "Vacaciones")
                             DisabledBorderColor: =RGBA(166, 166, 166, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             DisabledFill: =RGBA(244, 244, 244, 1)
@@ -2611,6 +2612,23 @@
             HoverFill: =App.Theme.Colors.Darker10
             OnSelect: |-
                 =Set(varFirmaJefeIncapacidad, JSON(pnl_View_FirmaJefe_EP.Image, JSONFormat.IncludeBinaryData));
+                //Correo Empleado
+                CorreoConPDF.Run(
+                pdf_Incapacidad_EP.HtmlText,
+                    LookUp(Empleados, Codigo = glr_EstadoPermisos_EP.Selected.Codigo, correoEmpleado),
+                     "Revisión de Solicitudes",
+                        "Estimado/a,<br><br>" &
+                        "Se ha aprobado la solicitud del colaborador " & glr_EstadoPermisos_EP.Selected.Nombre & 
+                        ", con el ID " & glr_EstadoPermisos_EP.Selected.Codigo & 
+                        ".<br><br>" &
+                        "La solicitud aprobada comprende un total de " & glr_EstadoPermisos_EP.Selected.DiasSolicitados & 
+                        " días, con fecha de inicio " & glr_EstadoPermisos_EP.Selected.Fecha_Inicio & 
+                        " y fecha de fin " & glr_EstadoPermisos_EP.Selected.Fecha_Fin & 
+                        ".<br><br>" &
+                        "Para obtener más detalles sobre la solicitud aceptada, por favor, consulte el PDF adjunto o revise la solicitud desde el módulo correspondiente.<br><br>" &
+                        "Gracias,<br>"
+                );
+                //correo a RH
                 CorreoConPDF.Run(
                 pdf_Incapacidad_EP.HtmlText,
                     "yaraya@tsicr.com; respinoza@tsicr.com",
