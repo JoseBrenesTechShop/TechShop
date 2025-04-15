@@ -1679,7 +1679,11 @@ Screens:
                               {
                                   PNCorregido: Substitute(
                                       Substitute(
-                                          Upper(Self.Text),
+                                          Substitute(
+                                              Upper(Self.Text),
+                                              "¡",
+                                              "&"
+                                          ),
                                           "&",
                                           "/"
                                       ),
@@ -1689,7 +1693,11 @@ Screens:
                                   PNSplit: Split(
                                       Substitute(
                                           Substitute(
-                                              Upper(Self.Text),
+                                              Substitute(
+                                                  Upper(Self.Text),
+                                                  "¡",
+                                                  "&"
+                                              ),
                                               "&",
                                               "/"
                                           ),
@@ -1711,10 +1719,18 @@ Screens:
                                       PO: Last(PNSplit).Value,
                                       item: LookUp(
                                           ContenedorPNS_2,
-                                          Nomenclatura = gl_ListaContenedores_LE.Selected.Nomenclatura && 'P/N' = First(PNSplit).Value
+                                          Nomenclatura = gl_ListaContenedores_LE.Selected.Nomenclatura && Substitute('P/N', " ", "") = Substitute(First(PNSplit).Value, " ", "")
                                       )
                                   },
                                   If(
+                                      CountRows(PNSplit) < 3,
+                                      UpdateContext(
+                                          {
+                                              mensajeNotificacion: "El codigo escaneado esta incompleto. Se requiera el numero de tarima y la PO",
+                                              MostrarAviso: true,
+                                              Disable: true
+                                          }
+                                      ),
                                       IsBlank(ident),
                                       UpdateContext(
                                           {
