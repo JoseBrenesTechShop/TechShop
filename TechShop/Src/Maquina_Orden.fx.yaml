@@ -627,7 +627,7 @@
                                 Text: |-
                                     ="Operacion: " & ThisItem.Operacion
                                 VerticalAlign: =VerticalAlign.Top
-                                Width: =200
+                                Width: =250
                                 X: =12
                                 Y: =6
                                 ZIndex: =1
@@ -665,7 +665,7 @@
                                     ="Cantidad: " & ThisItem.Cantidad
                                 VerticalAlign: =VerticalAlign.Top
                                 Width: =230
-                                X: =212
+                                X: =262
                                 Y: =6
                                 ZIndex: =4
 
@@ -684,7 +684,7 @@
                                     ="Meta: " & ThisItem.Meta
                                 VerticalAlign: =VerticalAlign.Top
                                 Width: =200
-                                X: =442
+                                X: =492
                                 Y: =6
                                 ZIndex: =5
 
@@ -703,7 +703,7 @@
                                     ="Tarima: " & ThisItem.Tarima
                                 VerticalAlign: =VerticalAlign.Top
                                 Width: =200
-                                X: =642
+                                X: =692
                                 Y: =6
                                 ZIndex: =6
 
@@ -871,7 +871,7 @@
                             HoverBorderColor: =App.Theme.Colors.Darker10
                             HoverColor: =RGBA(255, 255, 255, 1)
                             HoverFill: =RGBA(52, 152, 47, 1)
-                            OnSelect: |
+                            OnSelect: |-
                                 =If(
                                     CountIf(
                                         CheckList,
@@ -880,46 +880,76 @@
                                         Verificaciones_1,
                                         true
                                     ),
-                                    UpdateContext({TextoAdvertencia: "Debe completar la lista", Aviso: true}),
-                                    With({data: LookUp(
+                                    UpdateContext(
+                                        {
+                                            TextoAdvertencia: "Debe completar la lista",
+                                            Aviso: true
+                                        }
+                                    ),
+                                    With(
+                                        {
+                                            data: LookUp(
                                                 Maquina_Ordens_1,
                                                 Maquina = txt_Maquina_MO.Text
-                                            )},
-                                    If(
-                                        IsBlank(data),
-                                        Collect(
-                                            Maquina_Ordens_1,
-                                            {
-                                                Maquina: txt_Maquina_MO.Text,
-                                                Orden: txt_Orden_MO.Text,
-                                                Operacion: txt_Operacion_MO.Text,
-                                                User: txt_User_MO.Text,
-                                                'Limpieza en linea': "Completa",
-                                                Meta: Value(Text(txt_Meta_MO.Text, "0.00")),
-                                                'P/N': LookUp(Orden_Ejecucion, Orden = txt_Orden_MO.Text && Operacion = txt_Operacion_MO.Text, 'P/N')
-                                            }
-                                        ),
-                                        Collect(,{Fecha: data.'Fecha de modificación',
-                                        Maquina: data.Maquina, 
-                                        Orden: data.Orden, 
-                                        Operacion: data.Operacion,
-                                        'P/N': data.'P/N',
-                                        User: data.User,
-                                        Meta: data.Meta}
-                                        );
-                                        Patch(
-                                            Maquina_Ordens_1,
-                                            data,
-                                            {
-                                                Orden: txt_Orden_MO.Text,
-                                                Operacion: txt_Operacion_MO.Text,
-                                                User: txt_User_MO.Text,
-                                                'Limpieza en linea': "Completa",
-                                                Meta: Value(Text(txt_Meta_MO.Text, "0.00")),
-                                                'P/N': LookUp(Orden_Ejecucion, Orden = txt_Orden_MO.Text && Operacion = txt_Operacion_MO.Text, 'P/N')
-                                            }
+                                            )
+                                        },
+                                        If(
+                                            IsBlank(data),
+                                            Collect(
+                                                Maquina_Ordens_1,
+                                                {
+                                                    Maquina: txt_Maquina_MO.Text,
+                                                    Orden: txt_Orden_MO.Text,
+                                                    Operacion: txt_Operacion_MO.Text,
+                                                    User: txt_User_MO.Text,
+                                                    'Limpieza en linea': "Completa",
+                                                    Meta: Value(
+                                                        Text(
+                                                            txt_Meta_MO.Text,
+                                                            "0.00"
+                                                        )
+                                                    ),
+                                                    'P/N': LookUp(
+                                                        Orden_Ejecucion,
+                                                        Orden = txt_Orden_MO.Text && Operacion = txt_Operacion_MO.Text,
+                                                        'P/N'
+                                                    )
+                                                }
+                                            ),
+                                            Collect(
+                                                Registro_Maquina_Ordens,
+                                                {
+                                                    Fecha: data.'Fecha de modificación',
+                                                    Maquina: data.Maquina,
+                                                    Orden: data.Orden,
+                                                    Operacion: data.Operacion,
+                                                    'P/N': data.'P/N',
+                                                    User: data.User,
+                                                    Meta: data.Meta
+                                                }
+                                            );
+                                            Patch(
+                                                Maquina_Ordens_1,
+                                                data,
+                                                {
+                                                    Orden: txt_Orden_MO.Text,
+                                                    Operacion: txt_Operacion_MO.Text,
+                                                    User: txt_User_MO.Text,
+                                                    'Limpieza en linea': "Completa",
+                                                    Meta: Value(
+                                                        Text(
+                                                            txt_Meta_MO.Text,
+                                                            "0.00"
+                                                        )
+                                                    ),
+                                                    'P/N': LookUp(
+                                                        Orden_Ejecucion,
+                                                        Orden = txt_Orden_MO.Text && Operacion = txt_Operacion_MO.Text,
+                                                        'P/N'
+                                                    )
+                                                }
+                                            )
                                         )
-                                    )
                                     );
                                     UpdateContext({Guardar: false});
                                     Reset(glr_Maquinas_MO);
