@@ -881,13 +881,12 @@
                                         true
                                     ),
                                     UpdateContext({TextoAdvertencia: "Debe completar la lista", Aviso: true}),
-                                    If(
-                                        IsBlank(
-                                            LookUp(
+                                    With({data: LookUp(
                                                 Maquina_Ordens_1,
                                                 Maquina = txt_Maquina_MO.Text
-                                            )
-                                        ),
+                                            )},
+                                    If(
+                                        IsBlank(data),
                                         Collect(
                                             Maquina_Ordens_1,
                                             {
@@ -900,12 +899,17 @@
                                                 'P/N': LookUp(Orden_Ejecucion, Orden = txt_Orden_MO.Text && Operacion = txt_Operacion_MO.Text, 'P/N')
                                             }
                                         ),
+                                        Collect(,{Fecha: data.'Fecha de modificación',
+                                        Maquina: data.Maquina, 
+                                        Orden: data.Orden, 
+                                        Operacion: data.Operacion,
+                                        'P/N': data.'P/N',
+                                        User: data.User,
+                                        Meta: data.Meta}
+                                        );
                                         Patch(
                                             Maquina_Ordens_1,
-                                            LookUp(
-                                                Maquina_Ordens_1,
-                                                Maquina = txt_Maquina_MO.Text
-                                            ),
+                                            data,
                                             {
                                                 Orden: txt_Orden_MO.Text,
                                                 Operacion: txt_Operacion_MO.Text,
@@ -915,6 +919,7 @@
                                                 'P/N': LookUp(Orden_Ejecucion, Orden = txt_Orden_MO.Text && Operacion = txt_Operacion_MO.Text, 'P/N')
                                             }
                                         )
+                                    )
                                     );
                                     UpdateContext({Guardar: false});
                                     Reset(glr_Maquinas_MO);
