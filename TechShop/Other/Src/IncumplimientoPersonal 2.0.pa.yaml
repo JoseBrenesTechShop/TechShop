@@ -166,6 +166,18 @@ Screens:
                         Height: =Parent.Height
                         Width: =Parent.Width
                       Children:
+                        - Label31_3:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              Color: =RGBA(255, 255, 255, 1)
+                              Fill: =RGBA(40, 134, 222, 1)
+                              FontWeight: =FontWeight.Bold
+                              Size: =15
+                              Text: |
+                                =
+                              Width: =1347
+                              Y: =190
                         - Container55_1:
                             Control: GroupContainer@1.3.0
                             Variant: ManualLayout
@@ -306,6 +318,16 @@ Screens:
                                     Width: =18
                                     X: =1322
                                     Y: =10
+                              - Label31_2:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Align: =Align.Center
+                                    Color: =RGBA(255, 255, 255, 1)
+                                    FontWeight: =FontWeight.Bold
+                                    Size: =15
+                                    Text: |
+                                      =If(editar, "Editar un incumplimiento", "Agregar un incumplimiento")
+                                    Width: =1347
                         - btn_Guardar_ip_1:
                             Control: Classic/Button@2.2.0
                             Properties:
@@ -692,9 +714,9 @@ Screens:
                             Properties:
                               BorderStyle: =BorderStyle.None
                               BorderThickness: =2
-                              Height: =447
+                              Height: =428
                               Width: =1351
-                              Y: =215
+                              Y: =230
                             Children:
                               - gl_LogisticaDespacho_LD_2:
                                   Control: Gallery@2.15.0
@@ -703,8 +725,18 @@ Screens:
                                     BorderColor: =RGBA(0, 18, 107, 1)
                                     DisplayMode: =If(editar, DisplayMode.Disabled,DisplayMode.Edit)
                                     Fill: =RGBA(180, 214, 250, 0.39)
-                                    Height: =414
-                                    Items: "=Filter(\n    Incumplimiento_Personal,\n    Fecha_Text = Text(\n        dp_Filtro_Fecha_IP.SelectedDate,\n        \"mm/dd/yyyy\"\n    )\n) "
+                                    Height: =403
+                                    Items: |-
+                                      =Filter(
+                                          Incumplimiento_Personal,
+                                          // Filtro por fecha (si hay selección)
+                                          (IsBlank(dp_Filtro_Fecha_IP.SelectedDate) || 
+                                          Fecha_Text = Text(dp_Filtro_Fecha_IP.SelectedDate, "mm/dd/yyyy")) &&
+
+                                          // Filtro por operario (si hay texto)
+                                          (IsBlank(txt_operarioFiltro.Text) || 
+                                          txt_operarioFiltro.Text in Empleado)
+                                      )
                                     TemplateSize: =30
                                     Width: =1351
                                     Y: =25
@@ -1107,6 +1139,7 @@ Screens:
                               Align: =Align.Center
                               BorderStyle: =BorderStyle.None
                               BorderThickness: =0
+                              Color: =RGBA(255, 255, 255, 1)
                               Default: ="Filtro de Fecha"
                               DisplayMode: =DisplayMode.View
                               Fill: =RGBA(0, 0, 0, 0)
@@ -1114,15 +1147,15 @@ Screens:
                               Height: =38
                               PaddingLeft: =5
                               Width: =129
-                              X: =1038
-                              Y: =177
+                              X: =491
+                              Y: =192
                         - icn_Home_Sp_17:
                             Control: Classic/Icon@2.5.0
                             Properties:
                               BorderColor: =App.Theme.Colors.Primary
                               BorderStyle: =BorderStyle.None
                               BorderThickness: =2
-                              Color: =RGBA(0, 0, 0, 1)
+                              Color: =RGBA(255, 255, 255, 1)
                               DisplayMode: =If(editar, DisplayMode.View, DisplayMode.Edit)
                               FocusedBorderThickness: =20
                               Height: =20
@@ -1134,8 +1167,8 @@ Screens:
                               PaddingBottom: =2
                               PaddingTop: =2
                               Width: =18
-                              X: =1324
-                              Y: =185
+                              X: =777
+                              Y: =200
                         - dp_Filtro_Fecha_IP:
                             Control: DatePicker@0.0.42
                             Properties:
@@ -1148,10 +1181,9 @@ Screens:
                               Format: ='DatePickerCanvas.Format'.Short
                               Height: =35
                               IsEditable: =true
-                              SelectedDate: =Today()
                               Width: =150
-                              X: =1170
-                              Y: =177
+                              X: =623
+                              Y: =192
                         - txt_Observaciones_IP_1:
                             Control: Classic/TextInput@2.3.2
                             Properties:
@@ -1290,6 +1322,67 @@ Screens:
                               Width: =106
                               X: =901
                               Y: =175
+                        - txt_operarioFiltro:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(40, 134, 222, 1)
+                              BorderThickness: =If(Self.DisplayMode = DisplayMode.Disabled, 1, 3)
+                              Default: =
+                              DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                              DisabledColor: =RGBA(40, 134, 222, 1)
+                              DisabledFill: =RGBA(255, 255, 255, 1)
+                              DisplayMode: =If(editar, DisplayMode.View, DisplayMode.Edit)
+                              Height: =30
+                              HintText: ="Busqueda de operario"
+                              HoverBorderColor: =RGBA(40, 134, 222, 1)
+                              PaddingBottom: =2
+                              PaddingLeft: =2
+                              PaddingRight: =2
+                              PaddingTop: =2
+                              RadiusBottomLeft: =10
+                              RadiusBottomRight: =10
+                              RadiusTopLeft: =10
+                              RadiusTopRight: =10
+                              Size: =12
+                              Width: =303
+                              X: =167
+                              Y: =196
+                        - lbl_SP_33:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              Align: =Align.Center
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =0
+                              Color: =RGBA(255, 255, 255, 1)
+                              Default: ="Filtro de operario"
+                              DisplayMode: =DisplayMode.View
+                              Fill: =RGBA(0, 0, 0, 0)
+                              FontWeight: =FontWeight.Semibold
+                              Height: =31
+                              PaddingLeft: =5
+                              Width: =167
+                              Y: =192
+                        - icn_Home_Sp_18:
+                            Control: Classic/Icon@2.5.0
+                            Properties:
+                              BorderColor: =App.Theme.Colors.Primary
+                              BorderStyle: =BorderStyle.None
+                              BorderThickness: =2
+                              Color: =RGBA(255, 255, 255, 1)
+                              DisplayMode: =If(editar, DisplayMode.View, DisplayMode.Edit)
+                              FocusedBorderThickness: =20
+                              Height: =20
+                              HoverBorderColor: =RGBA(0, 0, 0, 0)
+                              HoverColor: =RGBA(15, 84, 140, 1)
+                              HoverFill: =RGBA(0, 0, 0, 0)
+                              Icon: =Icon.Reload
+                              OnSelect: =Reset(txt_operarioFiltro)
+                              PaddingBottom: =2
+                              PaddingTop: =2
+                              Width: =18
+                              X: =473
+                              Y: =200
       - cnt_Comentario_EM_5:
           Control: GroupContainer@1.3.0
           Variant: ManualLayout
