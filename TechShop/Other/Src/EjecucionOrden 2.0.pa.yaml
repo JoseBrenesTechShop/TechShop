@@ -121,7 +121,6 @@ Screens:
                           =
                           Reset(txt_codigo_EO);
                           Reset(txt_PN_EO);
-                          Reset(txt_Operacion_EO);
                           Back();
                         PaddingBottom: =5
                         PaddingLeft: =5
@@ -235,7 +234,6 @@ Screens:
                                       Refresh(CorPJobOper);
                                       Reset(txt_codigo_EO);
                                       Reset(txt_PN_EO);
-                                      Reset(txt_Operacion_EO);
                                     Text: ="Refrescar"
                                     Width: =120
                                     X: =739
@@ -249,7 +247,7 @@ Screens:
                                     Height: =30
                                     HoverBorderColor: =RGBA(180, 214, 250, 1)
                                     HoverColor: =RGBA(255, 255, 255, 1)
-                                    OnSelect: "=\r\nIf(\r\n  CountRows(\r\n    Filter(gl_ejecucionOrden_EO.AllItems, ch_lista_EO.Value)\r\n  ) = 0,\r\n  \r\n  UpdateContext({\r\n    MostrarAviso: true,\r\n    mensajeNotificacion: \"No existe ninguna orden seleccionada\"\r\n  }),\r\n\r\n  ClearCollect(\r\n    colSelEO,\r\n    Filter(gl_ejecucionOrden_EO.AllItems, ch_lista_EO.Value)\r\n  );\r\n  UpdateContext({ agregar: true}),\r\n  UpdateContext({\r\n    MostrarAviso: false\r\n  })\r\n)"
+                                    OnSelect: "=\nIf(\n  CountRows(\n    Filter(gl_ejecucionOrden_EO.AllItems, ch_lista_EO.Value)\n  ) = 0,\n  \n  UpdateContext({\n    MostrarAviso: true,\n    mensajeNotificacion: \"No existe ninguna orden seleccionada\"\n  }),\n\n  ClearCollect(\n    colSelEO,\n    Filter(gl_ejecucionOrden_EO.AllItems, ch_lista_EO.Value)\n  );\n  UpdateContext({ agregar: true}),\n  UpdateContext({\n    MostrarAviso: false\n  })\n)"
                                     Text: ="Agregar ordenes"
                                     Width: =168
                                     X: =876
@@ -343,7 +341,17 @@ Screens:
                                           DisplayMode: =If(editar || agregar, DisplayMode.Disabled,DisplayMode.Edit)
                                           Fill: =RGBA(255, 255, 255, 1)
                                           Height: =569
-                                          Items: "=Filter(\n    CorPJobOper,\n    (IsBlank(txt_codigo_EO.Text) || StartsWith(\n        job,\n        txt_codigo_EO.Text\n    )) && (IsBlank(txt_PN_EO.Text) || StartsWith(\n        item,\n        txt_PN_EO.Text\n    ))\n&& (IsBlank(txt_Operacion_EO.Text) || StartsWith(\n        oper_numFrom,\n        txt_Operacion_EO.Text\n    )),\n    !(job in Orden_Ejecucion.Orden) && !(oper_numFrom in Orden_Ejecucion.Operacion)\n\n   \n\n)"
+                                          Items: |-
+                                            =Filter(
+                                                CorPJobOper,
+                                                (IsBlank(txt_codigo_EO.Text) || StartsWith(
+                                                    job,
+                                                    txt_codigo_EO.Text
+                                                )) && (IsBlank(txt_PN_EO.Text) || StartsWith(
+                                                    item,
+                                                    txt_PN_EO.Text
+                                                ))
+                                            )
                                           TemplateSize: =30
                                           Width: =1346
                                           Y: =25
@@ -742,37 +750,6 @@ Screens:
                                           Weight: ='TextCanvas.Weight'.Semibold
                                           Width: =60
                                           X: =1286
-                              - txt_Operacion_EO:
-                                  Control: Classic/TextInput@2.3.2
-                                  Properties:
-                                    Align: =Align.Center
-                                    BorderColor: =RGBA(180, 214, 250, 1)
-                                    BorderThickness: =3
-                                    Clear: =true
-                                    Default: =
-                                    DisabledBorderColor: =RGBA(180, 214, 250, 1)
-                                    DisabledFill: =RGBA(255, 255, 255, 1)
-                                    DisplayMode: =
-                                    Height: =30
-                                    HintText: ="➜ Operacion"
-                                    HoverBorderColor: =RGBA(180, 214, 250, 1)
-                                    HoverFill: =RGBA(227, 240, 252, 1)
-                                    OnChange: =
-                                    OnSelect: =Reset(txt_Operacion_EO)
-                                    PaddingBottom: =0
-                                    PaddingLeft: =0
-                                    PaddingRight: =0
-                                    PaddingTop: =0
-                                    PressedColor: =RGBA(0, 0, 0, 1)
-                                    PressedFill: =RGBA(255, 255, 255, 1)
-                                    RadiusBottomLeft: =10
-                                    RadiusBottomRight: =10
-                                    RadiusTopLeft: =10
-                                    RadiusTopRight: =10
-                                    Size: =15
-                                    Width: =142
-                                    X: =548
-                                    Y: =20
                               - txt_PN_EO:
                                   Control: Classic/TextInput@2.3.2
                                   Properties:
@@ -820,33 +797,17 @@ Screens:
                                     Width: =26
                                     X: =273
                                     Y: =20
-                              - lbl_ValorDato_EM_63:
-                                  Control: Text@0.0.50
-                                  Properties:
-                                    Align: ='TextCanvas.Align'.Center
-                                    FontColor: =RGBA(255, 255, 255, 1)
-                                    Height: =30
-                                    PaddingBottom: =0
-                                    PaddingLeft: =0
-                                    PaddingRight: =0
-                                    PaddingTop: =0
-                                    Size: =20
-                                    Text: ="•"
-                                    Weight: ='TextCanvas.Weight'.Bold
-                                    Width: =26
-                                    X: =522
-                                    Y: =20
       - Capa1_7:
           Control: GroupContainer@1.3.0
           Variant: ManualLayout
           Properties:
             BorderColor: =RGBA(0, 0, 0, 0)
             Fill: =RGBA(0, 0, 0, 0.12)
-            Height: =660
+            Height: =651
             Visible: =editar || agregar
             Width: =1343
-            X: =23
-            Y: =108
+            X: =11
+            Y: =105
       - Container5_7:
           Control: GroupContainer@1.3.0
           Variant: ManualLayout
@@ -862,8 +823,8 @@ Screens:
             RadiusTopRight: =15
             Visible: =agregar
             Width: =589
-            X: =428
-            Y: =228
+            X: =415
+            Y: =205
           Children:
             - Button3_13:
                 Control: Classic/Button@2.2.0
@@ -875,32 +836,48 @@ Screens:
                   Height: =38
                   HoverBorderColor: =RGBA(180, 214, 250, 1)
                   HoverColor: =RGBA(255, 255, 255, 1)
-                  OnSelect: |-
-                    =ForAll(
-                        colSelEO,
-                        Patch(
-                            Orden_Ejecucion,
-                            Defaults(Orden_Ejecucion),
-                            {
-                                Orden: ThisRecord.job,
-                                'P/N': ThisRecord.item,
-                                Operacion: Value(ThisRecord.oper_numFrom),
-                                Descripcion: ThisRecord.description,
-                                Meta: Value(ThisRecord.Meta),
-                                TiempoSetup: Value(ThisRecord.setup_hrs),
-                                Cantidad: Value(ThisRecord.qty_released),
-                                Tarima: Value(ThisRecord.Tarima),
-                                Tiempo_Maquina: Value(ThisRecord.TMaquinado)
-                            }
-                        )
-                    );
-                    Clear(colSelEO);
-                    UpdateContext({agregar: false});
-                    UpdateContext(
-                        {
+                  OnSelect: |
+                    =If(
+                        CountRows(
+                            Filter(
+                                colSelEO,
+                                CountRows(
+                                    Filter(
+                                        Orden_Ejecucion,
+                                        Orden = ThisRecord.Orden &&
+                                        Operacion = ThisRecord.Operacion
+                                    )
+                                ) > 0
+                            )
+                        ) > 0,
+                        UpdateContext({
                             MostrarAviso: true,
-                            mensajeNotificacion: "Órdenes guardadas correctamente"
-                        }
+                            mensajeNotificacion: "Ya existe una orden con número y operación duplicados"
+                        }),
+                        ForAll(
+                            colSelEO,
+                            Patch(
+                                Orden_Ejecucion,
+                                Defaults(Orden_Ejecucion),
+                                {
+                                    Orden: ThisRecord.job,
+                                    'P/N': ThisRecord.item,
+                                    Operacion: Value(ThisRecord.oper_numFrom),
+                                    Descripcion: ThisRecord.description,
+                                    Meta: Value(ThisRecord.Meta),
+                                    TiempoSetup: Value(ThisRecord.setup_hrs),
+                                    Cantidad: Value(ThisRecord.qty_released),
+                                    Tarima: Value(ThisRecord.Tarima),
+                                    Tiempo_Maquina: Value(ThisRecord.TMaquinado)
+                                }
+                            )
+                        );
+                        Clear(colSelEO);
+                        UpdateContext({ agregar: false });
+                        UpdateContext({
+                            MostrarAviso: true,
+                            mensajeNotificacion: "Órdenes procesadas correctamente"
+                        })
                     )
                   Text: ="Guardar"
                   Width: =176
@@ -960,6 +937,7 @@ Screens:
                         Fill: =RGBA(255, 255, 255, 1)
                         Height: =355
                         Items: =colSelEO
+                        TemplateFill: =
                         TemplateSize: =30
                         Width: =588
                         Y: =25
@@ -999,6 +977,7 @@ Screens:
                               Align: =Align.Center
                               BorderColor: =RGBA(40, 134, 222, 1)
                               BorderThickness: =0.5
+                              Color: =
                               Default: =ThisItem.job
                               DisabledBorderColor: =RGBA(40, 134, 222, 1)
                               DisabledColor: =Color.Black
@@ -1118,15 +1097,15 @@ Screens:
             BorderThickness: =5
             DropShadow: =DropShadow.ExtraBold
             Fill: =RGBA(255, 255, 255, 1)
-            Height: =287
+            Height: =306
             RadiusBottomLeft: =20
             RadiusBottomRight: =20
             RadiusTopLeft: =20
             RadiusTopRight: =20
             Visible: =MostrarAviso
             Width: =740
-            X: =363
-            Y: =299
+            X: =339
+            Y: =264
           Children:
             - txt_MensajeNoti_EM_23:
                 Control: Label@2.5.1
@@ -1176,5 +1155,5 @@ Screens:
             IconStyle: ='Icon.IconStyle'.Filled
             Visible: =agregar
             Width: =64
-            X: =691
-            Y: =172
+            X: =677
+            Y: =135
