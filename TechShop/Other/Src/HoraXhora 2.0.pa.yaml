@@ -1653,7 +1653,29 @@ Screens:
                               Align: =Align.Center
                               BorderColor: =RGBA(0, 18, 107, 1)
                               BorderStyle: =BorderStyle.None
-                              Default: =First(Split(LookUp(HorarioSemanals, Empleado = "pruebas").Zona_K, ",")).Value
+                              Default: |
+                                =First(
+                                    Filter(
+                                        HorarioSemanals,
+                                        Fecha_Inicio <= FechaHorario && Fecha_Fin >= FechaHorario && With(
+                                            {
+                                                zonaPorDia: Switch(
+                                                    Dia,
+                                                    1, ThisRecord.Zona_D,
+                                                    2, ThisRecord.Zona_L,
+                                                    3, ThisRecord.Zona_K,
+                                                    4, ThisRecord.Zona_M,
+                                                    5, ThisRecord.Zona_J,
+                                                    6, ThisRecord.Zona_V,
+                                                    7, ThisRecord.Zona_S
+                                                )
+                                            },
+                                            (zonaPorDia = "GH" && zonaMaquina = "GH") ||
+                                            (zonaPorDia = "TSI,TANDEM" && zonaMaquina in Split("TSI,TANDEM", ",")) ||
+                                            (zonaPorDia = "GH,TSI,TANDEM" && zonaMaquina in Split("GH,TSI,TANDEM", ","))
+                                        )
+                                    )
+                                ).Empleado
                               DisplayMode: =DisplayMode.View
                               Font: =Font.'Open Sans'
                               Height: =28
