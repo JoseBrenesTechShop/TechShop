@@ -57,7 +57,9 @@
                     HPagadas: 0
                 }
             ]
-        )
+        );
+        
+        ClearCollect(Zonas, ["GH", "TSI,TANDEM", "GH,TSI,TANDEM"])
 
     ScreenContainer1_2 As groupContainer.verticalAutoLayoutContainer:
         DropShadow: =DropShadow.Light
@@ -716,21 +718,6 @@
                                 Order: =5
                                 ZIndex: =141
 
-                        lblHorario_1 As label:
-                            Align: =Align.Center
-                            BorderColor: =RGBA(40, 134, 222, 1)
-                            BorderThickness: =1
-                            Color: =RGBA(0, 0, 0, 1)
-                            DisabledColor: =RGBA(166, 166, 166, 1)
-                            Fill: =RGBA(255, 255, 255, 1)
-                            Font: =App.Theme.Font
-                            FontWeight: =If(drpTurno.SelectedText.Value <> LookUp(Tipo_Turnos, Id_Turno = "6", Turno_Op), FontWeight.Bold, FontWeight.Normal)
-                            Size: =15
-                            Text: =Concat(drp_Zona_HP.SelectedItems, ThisRecord.Value, ",")
-                            Width: =200
-                            X: =896
-                            ZIndex: =9
-
                     ctn_Horario_HP As groupContainer.manualLayoutContainer:
                         BorderColor: =RGBA(40, 134, 222, 1)
                         BorderThickness: =3
@@ -998,22 +985,67 @@
                                     )
                                 ZIndex: =5
 
-                            "drp_Zona_HP As 'Cuadro combinado'.pcfdataset":
-                                BorderColor: =RGBA(40, 134, 222, 1)
-                                BorderRadius: =0
-                                BorderStyle: =BorderStyle.Solid
-                                BorderThickness: =0.5
-                                DisplayMode: =DisplayMode.Edit
-                                Fill: =RGBA(255, 255, 255, 1)
-                                Height: =40
-                                InputTextPlaceholder: ="Seleccionar Zona"
-                                IsSearchable: =false
-                                Items: =["GH", "TSI,TANDEM", "GH,TSI,TANDEM"]
-                                PaddingBottom: =2
-                                PaddingLeft: =5
-                                PaddingRight: =5
-                                PaddingTop: =2
-                                SelectMultiple: =false
+                            drp_Zona_HP As dropdown:
+                                AllowEmptySelection: =true
+                                BorderColor: =RGBA(0, 134, 208, 1)
+                                BorderThickness: =1
+                                ChevronBackground: =RGBA(153, 201, 238, 1)
+                                ChevronDisabledBackground: =RGBA(166, 166, 166, 1)
+                                ChevronDisabledFill: =RGBA(204, 228, 246, 1)
+                                ChevronHoverBackground: =RGBA(153, 201, 238, 1)
+                                ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                                Default: |-
+                                    =If(
+                                        Mostrar,
+                                        Switch(
+                                            ThisItem.name,
+                                            "Lunes",
+                                            glr_InfoHorarios_HP.Selected.Zona_L,
+                                            "Martes",
+                                            glr_InfoHorarios_HP.Selected.Zona_K,
+                                            "Miercoles",
+                                            glr_InfoHorarios_HP.Selected.Zona_M,
+                                            "Jueves",
+                                            glr_InfoHorarios_HP.Selected.Zona_J,
+                                            "Viernes",
+                                            glr_InfoHorarios_HP.Selected.Zona_V,
+                                            "Sabado",
+                                            glr_InfoHorarios_HP.Selected.Zona_S,
+                                            "Domingo",
+                                            glr_InfoHorarios_HP.Selected.Zona_D
+                                        )
+                                    )
+                                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                                DisabledColor: =RGBA(0, 0, 0, 1)
+                                DisabledFill: =RGBA(204, 228, 246, 1)
+                                DisplayMode: |-
+                                    =If(
+                                        LookUp(Empleados, VarName = Codigo).Rol in ["ADM", "ADMIN", "SUP"],
+                                        DisplayMode.Edit,
+                                        DisplayMode.View
+                                    )
+                                Font: =App.Theme.Font
+                                HoverBorderColor: =RGBA(102, 182, 227, 1)
+                                HoverColor: =RGBA(0, 0, 0, 1)
+                                HoverFill: =RGBA(204, 228, 246, 1)
+                                Items: =Zonas
+                                OnChange: |-
+                                    =/*Patch(
+                                        Horario;
+                                        LookUp(Horario; name = ThisItem.name);
+                                        {
+                                            turno: Self.Selected.Turno_Op;
+                                            Horario: Self.Selected.Turno_Horas;
+                                            HTrabajadas: Self.Selected.Horas_Trabajadas;
+                                            HPagadas: Self.Selected.Horas_Pagadas
+                                        }
+                                    )*/
+                                PressedBorderColor: =RGBA(102, 174, 229, 1)
+                                PressedColor: =RGBA(255, 255, 255, 1)
+                                PressedFill: =RGBA(102, 174, 229, 1)
+                                Reset: =reset
+                                SelectionFill: =App.Theme.Colors.Primary
+                                Size: =12
                                 Visible: |-
                                     =With(
                                         {Empleado: drp_Empleado_HP.Selected},
@@ -1025,7 +1057,6 @@
                                     )
                                 Width: =150
                                 X: =570
-                                Y: =0
                                 ZIndex: =6
 
                         DataCardKey203_5 As label:
