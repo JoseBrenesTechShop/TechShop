@@ -1002,20 +1002,17 @@
             HoverBorderColor: =RGBA(180, 214, 250, 1)
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =App.Theme.Colors.Darker10
-            OnSelect: |
-                =If(
-                    CountRows(
-                        Filter(
-                            colSelEO,
-                            CountRows(
-                                Filter(
-                                    Orden_Ejecucion,
-                                    Orden = job &&
-                                    Operacion = Text(oper_numFrom)
-                                )
-                            ) > 0
-                        )
-                    ) > 0,
+            OnSelect: |-
+                =With(
+                    { currentRecord: First(colSelEO) },
+                    If(
+                        CountRows(
+                            Filter(
+                                Orden_Ejecucion,
+                                Orden = currentRecord.job && 
+                                Operacion = Text(currentRecord.oper_numFrom)
+                            )
+                        ) > 0,
                     UpdateContext({
                         MostrarAviso: true,
                         mensajeNotificacion: "Existe ordenes registradas en la lista. Elimine las órdenes resaltadas en rojo para proceder con el registro"
