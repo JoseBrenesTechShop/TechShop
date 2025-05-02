@@ -766,6 +766,14 @@
                                 CheckboxBorderColor: =RGBA(40, 134, 222, 1)
                                 CheckboxSize: =35
                                 Color: =RGBA(0, 0, 0, 1)
+                                Default: |-
+                                    =CountRows(
+                                      Filter(
+                                        colSelEO,
+                                        job          = ThisItem.job &&
+                                        oper_numFrom = ThisItem.oper_numFrom
+                                      )
+                                    ) > 0
                                 Height: =30
                                 HoverColor: =RGBA(0, 18, 107, 1)
                                 OnSelect: =Select(Parent)
@@ -1002,8 +1010,8 @@
                             CountRows(
                                 Filter(
                                     Orden_Ejecucion,
-                                    Orden = ThisRecord.Orden &&
-                                    Operacion = ThisRecord.Operacion
+                                    Orden = job &&
+                                    Operacion = Text(oper_numFrom)
                                 )
                             ) > 0
                         )
@@ -1103,7 +1111,7 @@
             "gl_ejecucionOrden_EO_1 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
                 BorderColor: =RGBA(0, 18, 107, 1)
                 DelayItemLoading: =true
-                DisplayMode: =If(editar || agregar, DisplayMode.Disabled,DisplayMode.Edit)
+                DisplayMode: =
                 Fill: =RGBA(255, 255, 255, 1)
                 Height: =355
                 Items: =colSelEO
@@ -1123,21 +1131,32 @@
                     Color: =RGBA(0, 0, 0, 1)
                     Default: =ThisItem.oper_numFrom
                     DisabledBorderColor: =RGBA(40, 134, 222, 1)
-                    DisabledColor: =Color.Black
-                    DisabledFill: =
-                    DisplayMode: =DisplayMode.Disabled
-                    Fill: |-
+                    DisabledColor: |-
                         =If(
                             CountRows(
                                 Filter(
                                     Orden_Ejecucion,
-                                    Orden = Text(ThisItem.job) &&  // Conversión a texto si es necesario
-                                    Operacion = Text(ThisItem.oper_numFrom)  // Conversión a texto
+                                    Orden = Text(ThisItem.job) &&  
+                                    Operacion = Text(ThisItem.oper_numFrom)  
                                 )
                             ) > 0,
-                            RGBA(255, 0, 0, 1),  // Rojo (sintaxis con ;)
-                            Color.White  // Color normal
+                            RGBA(255, 255, 255, 1),  
+                            Color.Black
                         )
+                    DisabledFill: |-
+                        =If(
+                            CountRows(
+                                Filter(
+                                    Orden_Ejecucion,
+                                    Orden = Text(ThisItem.job) &&  
+                                    Operacion = Text(ThisItem.oper_numFrom)  
+                                )
+                            ) > 0,
+                            RGBA(255, 0, 0, 1),  
+                            Color.White 
+                        )
+                    DisplayMode: =DisplayMode.Disabled
+                    Fill: =
                     FocusedBorderThickness: =4
                     Font: =App.Theme.Font
                     FontWeight: =FontWeight.Semibold
@@ -1152,43 +1171,43 @@
                     RadiusTopLeft: =0
                     RadiusTopRight: =0
                     Size: =13
-                    Width: =204
+                    Width: =158
                     X: =384
-                    ZIndex: =19
+                    ZIndex: =1
 
                 txt_Requisicion_LO_8 As text:
                     Align: =Align.Center
                     BorderColor: =RGBA(40, 134, 222, 1)
                     BorderThickness: =0.5
-                    Color: |-
-                        =If(
-                            CountRows(
-                                Filter(
-                                    Orden_Ejecucion,
-                                    Orden = Text(ThisItem.job) &&  // Conversión a texto si es necesario
-                                    Operacion = Text(ThisItem.oper_numFrom)  // Conversión a texto
-                                )
-                            ) > 0,
-                            RGBA(255, 0, 0, 1),  // Rojo (sintaxis con ;)
-                            Color.White  // Color normal
-                        )
+                    Color: =RGBA(0, 0, 0, 1)
                     Default: =ThisItem.job
                     DisabledBorderColor: =RGBA(40, 134, 222, 1)
-                    DisabledColor: =Color.Black
-                    DisabledFill: =
-                    DisplayMode: =DisplayMode.Disabled
-                    Fill: |-
+                    DisabledColor: |-
                         =If(
                             CountRows(
                                 Filter(
                                     Orden_Ejecucion,
-                                    Orden = Text(ThisItem.job) &&  // Conversión a texto si es necesario
-                                    Operacion = Text(ThisItem.oper_numFrom)  // Conversión a texto
+                                    Orden = Text(ThisItem.job) &&  
+                                    Operacion = Text(ThisItem.oper_numFrom)  
                                 )
                             ) > 0,
-                            RGBA(255, 0, 0, 1),  // Rojo (sintaxis con ;)
-                            Color.White  // Color normal
+                            RGBA(255, 255, 255, 1),  
+                            Color.Black
                         )
+                    DisabledFill: |-
+                        =If(
+                            CountRows(
+                                Filter(
+                                    Orden_Ejecucion,
+                                    Orden = Text(ThisItem.job) &&  
+                                    Operacion = Text(ThisItem.oper_numFrom)  
+                                )
+                            ) > 0,
+                            RGBA(255, 0, 0, 1),  
+                            Color.White 
+                        )
+                    DisplayMode: =DisplayMode.Disabled
+                    Fill: =
                     FocusedBorderThickness: =4
                     Font: =App.Theme.Font
                     FontWeight: =FontWeight.Semibold
@@ -1204,7 +1223,7 @@
                     RadiusTopRight: =0
                     Size: =13
                     Width: =192
-                    ZIndex: =32
+                    ZIndex: =2
 
                 txt_TipoEnvio_LO_14 As text:
                     Align: =Align.Center
@@ -1213,21 +1232,32 @@
                     Color: =RGBA(0, 0, 0, 1)
                     Default: =ThisItem.item
                     DisabledBorderColor: =RGBA(40, 134, 222, 1)
-                    DisabledColor: =Color.Black
-                    DisabledFill: =
-                    DisplayMode: =DisplayMode.Disabled
-                    Fill: |-
+                    DisabledColor: |-
                         =If(
                             CountRows(
                                 Filter(
                                     Orden_Ejecucion,
-                                    Orden = Text(ThisItem.job) &&  // Conversión a texto si es necesario
-                                    Operacion = Text(ThisItem.oper_numFrom)  // Conversión a texto
+                                    Orden = Text(ThisItem.job) &&  
+                                    Operacion = Text(ThisItem.oper_numFrom)  
                                 )
                             ) > 0,
-                            RGBA(255, 0, 0, 1),  // Rojo (sintaxis con ;)
-                            Color.White  // Color normal
+                            RGBA(255, 255, 255, 1),  
+                            Color.Black
                         )
+                    DisabledFill: |-
+                        =If(
+                            CountRows(
+                                Filter(
+                                    Orden_Ejecucion,
+                                    Orden = Text(ThisItem.job) &&  
+                                    Operacion = Text(ThisItem.oper_numFrom)  
+                                )
+                            ) > 0,
+                            RGBA(255, 0, 0, 1),  
+                            Color.White 
+                        )
+                    DisplayMode: =DisplayMode.Disabled
+                    Fill: =
                     FocusedBorderThickness: =4
                     Font: =App.Theme.Font
                     FontWeight: =FontWeight.Semibold
@@ -1244,7 +1274,47 @@
                     Size: =13
                     Width: =192
                     X: =192
-                    ZIndex: =33
+                    ZIndex: =3
+
+                Icon18 As icon.Trash:
+                    BorderColor: =RGBA(40, 134, 222, 1)
+                    BorderThickness: =0.5
+                    Color: |-
+                        =If(
+                            CountRows(
+                                Filter(
+                                    Orden_Ejecucion,
+                                    Orden = Text(ThisItem.job) &&  
+                                    Operacion = Text(ThisItem.oper_numFrom)  
+                                )
+                            ) > 0,
+                            RGBA(255, 255, 255, 1),  
+                            Color.Black
+                        )
+                    DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                    DisabledColor: =RGBA(244, 244, 244, 1)
+                    Fill: |-
+                        =If(
+                            CountRows(
+                                Filter(
+                                    Orden_Ejecucion,
+                                    Orden = Text(ThisItem.job) &&  
+                                    Operacion = Text(ThisItem.oper_numFrom)  
+                                )
+                            ) > 0,
+                            RGBA(255, 0, 0, 1),  
+                            Color.White 
+                        )
+                    Height: =30
+                    Icon: =Icon.Trash
+                    OnSelect: |-
+                        =Remove(
+                          colSelEO,
+                          ThisItem
+                        )
+                    Width: =46
+                    X: =542
+                    ZIndex: =4
 
             lbl_PNDato_EM_202 As Texto:
                 Align: ='TextCanvas.Align'.Center
@@ -1261,10 +1331,30 @@
                 Size: =16
                 Text: ="OPERACION"
                 Weight: ='TextCanvas.Weight'.Semibold
-                Width: =206
+                Width: =158
                 X: =384
                 Y: =0
                 ZIndex: =63
+
+            lbl_PNDato_EM_212 As Texto:
+                Align: ='TextCanvas.Align'.Center
+                BorderColor: =RGBA(40, 134, 222, 1)
+                BorderStyle: =BorderStyle.Solid
+                BorderThickness: =0.5
+                DisplayMode: =DisplayMode.Edit
+                Fill: =RGBA(180, 214, 250, 1)
+                Height: =25
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                Size: =16
+                Text: =
+                Weight: ='TextCanvas.Weight'.Semibold
+                Width: =47
+                X: =542
+                Y: =0
+                ZIndex: =64
 
         lbl_BarraVista_EM_15 As text:
             Align: =Align.Center
