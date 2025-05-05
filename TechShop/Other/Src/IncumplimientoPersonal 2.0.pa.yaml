@@ -133,6 +133,8 @@ Screens:
                           Reset(drp_Fecha_IP);
                           Reset(dp_Filtro_Fecha_IP);
                           Refresh(Incumplimiento_Personal);
+                          Reset(txt_Codigo_IP);
+                          UpdateContext({ctxCodigo: Blank()});
                           Back()
                         PaddingBottom: =5
                         PaddingLeft: =5
@@ -399,7 +401,9 @@ Screens:
                                     Reset(drp_Incumplimiento_IP);
                                     Reset(drp_Fecha_IP);
                                     Reset(dp_Filtro_Fecha_IP);
-                                    Refresh(Incumplimiento_Personal)
+                                    Refresh(Incumplimiento_Personal);
+                                    Reset(txt_Codigo_IP);
+                                    UpdateContext({ ctxCodigo: Blank() })
                                 )
                               PressedBorderColor: =Self.Fill
                               PressedColor: =Self.Fill
@@ -461,7 +465,11 @@ Screens:
                               Align: =Align.Center
                               BorderColor: =RGBA(40, 134, 222, 1)
                               BorderThickness: =If(Self.DisplayMode = DisplayMode.Disabled, 1, 3)
-                              Default: =drp_Operario_IP.Selected.Codigo
+                              Default: |-
+                                =Coalesce(
+                                  incumplimientoEditar.Id_Operario,
+                                  ctxCodigo
+                                )
                               DisabledBorderColor: =RGBA(40, 134, 222, 1)
                               DisabledColor: =RGBA(40, 134, 222, 1)
                               DisabledFill: =RGBA(255, 255, 255, 1)
@@ -519,7 +527,14 @@ Screens:
                               BorderRadius: =10
                               BorderStyle: =BorderStyle.Solid
                               BorderThickness: =3
-                              DefaultSelectedItems: =LookUp(Empleados, Codigo = incumplimientoEditar.Id_Operario)
+                              DefaultSelectedItems: |-
+                                =Table(
+                                  If(
+                                    !IsBlank(txt_Codigo_IP.Text),
+                                    LookUp(Empleados, Codigo = txt_Codigo_IP.Text),
+                                    LookUp(Empleados, Codigo = incumplimientoEditar.Id_Operario)
+                                  )
+                                )
                               DisplayMode: =If(editar, DisplayMode.View, DisplayMode.Edit)
                               Fill: =RGBA(255, 255, 255, 1)
                               FontColor: =RGBA(0, 0, 0, 1)
@@ -527,7 +542,9 @@ Screens:
                               Height: =30
                               InputTextPlaceholder: ="Seleccione un Operario"
                               Items: =Empleados
-                              OnChange: =
+                              OnChange: |-
+                                =UpdateContext({ ctxCodigo: drp_Operario_IP.Selected.Codigo });
+                                Reset(txt_Codigo_IP)
                               PaddingBottom: =2
                               PaddingLeft: =2
                               PaddingRight: =2
@@ -1285,7 +1302,9 @@ Screens:
                                     Reset(drp_Incumplimiento_IP);
                                     Reset(drp_Fecha_IP);
                                     Reset(dp_Filtro_Fecha_IP);
-                                     Refresh(Incumplimiento_Personal)
+                                     Refresh(Incumplimiento_Personal);
+                                    Reset(txt_Codigo_IP);
+                                    UpdateContext({ ctxCodigo: Blank() })
                                 )
                               PressedBorderColor: =Self.Fill
                               PressedColor: =Self.Fill
@@ -1312,10 +1331,12 @@ Screens:
                               OnSelect: |-
                                 =UpdateContext({editar: false, incumplimientoEditar: Blank()});
                                     Reset(drp_Turno_IP);
-                                    Reset(drp_Operario_IP);
                                     Reset(drp_Incumplimiento_IP);
                                     Reset(drp_Fecha_IP);
-                                    Reset(dp_Filtro_Fecha_IP)
+                                    Reset(dp_Filtro_Fecha_IP);
+                                    Reset(drp_Operario_IP);
+                                    Reset(txt_Codigo_IP);
+                                    UpdateContext({ ctxCodigo: Blank() })
                               PressedBorderColor: =Self.Fill
                               PressedColor: =Self.Fill
                               PressedFill: =Self.Color
