@@ -279,11 +279,12 @@
                         HoverBorderColor: =RGBA(180, 214, 250, 1)
                         HoverColor: =RGBA(255, 255, 255, 1)
                         HoverFill: =App.Theme.Colors.Darker10
-                        OnSelect: |
+                        OnSelect: |-
                             =Refresh(Orden_Ejecucion);
                             Refresh(CorPJobOper);
                             Reset(txt_codigo_EO);
                             Reset(txt_PN_EO);
+                            Clear(colSelEO)
                         PressedBorderColor: =App.Theme.Colors.Darker40
                         PressedColor: =Self.Color
                         PressedFill: =App.Theme.Colors.Darker40
@@ -1004,43 +1005,65 @@
             HoverFill: =App.Theme.Colors.Darker10
             OnSelect: |-
                 =With(
-                    { currentRecord: First(colSelEO) },
-                    If(
-                        CountRows(
-                            Filter(
-                                Orden_Ejecucion,
-                                Orden = currentRecord.job && 
-                                Operacion = Text(currentRecord.oper_numFrom)
+                    {
+                        duplicados: Filter(
+                            colSelEO As sel,
+                            !IsBlank(
+                                LookUp(
+                                    Orden_Ejecucion,
+                                    Orden = sel.job && 
+                                    Descripcion = sel.description && 
+                                    'P/N' = sel.item
+                                )
                             )
-                        ) > 0,
-                    UpdateContext({
-                        MostrarAviso: true,
-                        mensajeNotificacion: "Existe ordenes registradas en la lista. Elimine las órdenes resaltadas en rojo para proceder con el registro"
-                    }),
-                    ForAll(
-                        colSelEO,
-                        Patch(
-                            Orden_Ejecucion,
-                            Defaults(Orden_Ejecucion),
+                        )
+                    },
+                    If(
+                        IsEmpty(colSelEO),
+                        UpdateContext(
                             {
-                                Orden: ThisRecord.job,
-                                'P/N': ThisRecord.item,
-                                Operacion: Value(ThisRecord.oper_numFrom),
-                                Descripcion: ThisRecord.description,
-                                Meta: Value(ThisRecord.Meta),
-                                TiempoSetup: Value(ThisRecord.setup_hrs),
-                                Cantidad: Value(ThisRecord.qty_released),
-                                Tarima: Value(ThisRecord.Tarima),
-                                Tiempo_Maquina: Value(ThisRecord.TMaquinado)
+                                MostrarAviso: true,
+                                mensajeNotificacion: "No existen órdenes por guardar."
+                            }
+                        ),
+                        CountRows(duplicados) > 0,
+                        UpdateContext(
+                            {
+                                MostrarAviso: true,
+                                mensajeNotificacion: "Las órdenes resaltadas en rojo ya estan registradas, eliminar para continuar"
+                            }
+                        ),
+                        ForAll(
+                            colSelEO,
+                            Patch(
+                                Orden_Ejecucion,
+                                Defaults(Orden_Ejecucion),
+                                {
+                                    Orden: ThisRecord.job,
+                                    'P/N': ThisRecord.item,
+                                    Operacion: Value(ThisRecord.oper_numFrom),
+                                    Descripcion: ThisRecord.description,
+                                    Meta: Value(ThisRecord.Meta),
+                                    TiempoSetup: Value(ThisRecord.setup_hrs),
+                                    Cantidad: Value(ThisRecord.qty_released),
+                                    Tarima: Value(ThisRecord.Tarima),
+                                    Tiempo_Maquina: Value(ThisRecord.TMaquinado)
+                                }
+                            )
+                        );
+                        Clear(colSelEO);
+                        Refresh(Orden_Ejecucion);
+                        Refresh(CorPJobOper);
+                        Reset(txt_codigo_EO);
+                        Reset(txt_PN_EO);
+                        UpdateContext({agregar: false});
+                        UpdateContext(
+                            {
+                                MostrarAviso: true,
+                                mensajeNotificacion: "Órdenes procesadas correctamente"
                             }
                         )
-                    );
-                    Clear(colSelEO);
-                    UpdateContext({ agregar: false });
-                    UpdateContext({
-                        MostrarAviso: true,
-                        mensajeNotificacion: "Órdenes procesadas correctamente"
-                    })
+                    )
                 )
             PressedBorderColor: =App.Theme.Colors.Darker40
             PressedColor: =Self.Color
@@ -1418,7 +1441,7 @@
         RadiusTopRight: =20
         Visible: =MostrarAviso
         Width: =679
-        X: =369
+        X: =364
         Y: =291
         ZIndex: =4
 
@@ -1431,8 +1454,8 @@
             Height: =166
             Size: =25
             Text: =mensajeNotificacion
-            Width: =639
-            X: =22
+            Width: =645
+            X: =20
             Y: =15
             ZIndex: =88
 
