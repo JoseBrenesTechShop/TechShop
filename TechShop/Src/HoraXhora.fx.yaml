@@ -494,7 +494,24 @@ HoraXhora As screen:
                     HoverColor: =RGBA(0, 0, 0, 1)
                     HoverFill: =RGBA(204, 231, 246, 1)
                     OnChange: |-
-                        =If(LookUp(Maquinas, Maquina = Upper(txt_Maquina_HxH.Text)).Status = "Paro", Notify("La maquina seleccionada esta en Paro",NotificationType.Error));
+                        =If(
+                            LookUp(
+                                Maquinas,
+                                Maquina = Upper(txt_Maquina_HxH.Text)
+                            ).Status = "Paro",
+                            Notify(
+                                "La maquina seleccionada esta en Paro",
+                                NotificationType.Error
+                            )
+                        );
+                        UpdateContext(
+                            {
+                                zonaMaquina: LookUp(
+                                    Maquinas,
+                                    Maquina = Self.Text
+                                ).Ubicacion
+                            }
+                        );
                         SetFocus(txt_Tarima_HxH)
                     OnSelect: =Reset(txt_Maquina_HxH)
                     PaddingLeft: =5
@@ -1956,7 +1973,8 @@ HoraXhora As screen:
                         BorderThickness: =2
                         Color: =RGBA(0, 0, 0, 1)
                         Default: |-
-                            =If(
+                            =//Sumar una hora en cada horaInicio y en cada Horafin
+                            If(
                                 HoraValor >= 0 && HoraValor <= 6 && Dia = 2,
                                 With(
                                     {
@@ -1966,11 +1984,13 @@ HoraXhora As screen:
                                                 FechaHorario,
                                                 -1,
                                                 TimeUnit.Days
-                                            )) && Zona = LookUp(
-                                                Maquinas,
-                                                Maquina = txt_Maquina_HxH.Text,
-                                                Ubicacion_Bono
-                                            )
+                                            )) && ((Zona_D = "GH" && zonaMaquina = "GH") || (Zona_D = "TSI,TANDEM" && zonaMaquina in Split(
+                                                "TSI,TANDEM",
+                                                ","
+                                            )) || (Zona_D = "GH,TSI,TANDEM" && zonaMaquina in Split(
+                                                "GH,TSI,TANDEM",
+                                                ","
+                                            )))
                                         )
                                     },
                                     LookUp(
@@ -1992,10 +2012,32 @@ HoraXhora As screen:
                                         {
                                             supervisores: Filter(
                                                 HorarioSemanals,
-                                                Fecha_Inicio <= FechaHorario && Fecha_Fin >= FechaHorario && Zona = LookUp(
-                                                    Maquinas,
-                                                    Maquina = txt_Maquina_HxH.Text,
-                                                    Ubicacion_Bono
+                                                Fecha_Inicio <= FechaHorario &&
+                                                Fecha_Fin >= FechaHorario &&
+                                                (
+                                                    (Dia = 1 && ((Zona_S = "GH" && zonaMaquina = "GH") || 
+                                                    (Zona_S = "TSI,TANDEM" && zonaMaquina in Split("TSI,TANDEM", ",")) || 
+                                                    (Zona_S = "GH,TSI,TANDEM" && zonaMaquina in Split("GH,TSI,TANDEM",",")))) 
+                                                    || 
+                                                    (Dia = 3 && ((Zona_L = "GH" && zonaMaquina = "GH") || 
+                                                    (Zona_L = "TSI,TANDEM" && zonaMaquina in Split("TSI,TANDEM", ",")) ||
+                                                    (Zona_L = "GH,TSI,TANDEM" && zonaMaquina in Split("GH,TSI,TANDEM", ",")))) 
+                                                    || 
+                                                    (Dia = 4 && ((Zona_K = "GH" && zonaMaquina = "GH") || 
+                                                    (Zona_K = "TSI,TANDEM" && zonaMaquina in Split("TSI,TANDEM", ",")) || 
+                                                    (Zona_K = "GH,TSI,TANDEM" && zonaMaquina in Split("GH,TSI,TANDEM", ",")))) 
+                                                    || 
+                                                    (Dia = 5 && ((Zona_M = "GH" && zonaMaquina = "GH") || 
+                                                    (Zona_M = "TSI,TANDEM" && zonaMaquina in Split("TSI,TANDEM", ",")) || 
+                                                    (Zona_M = "GH,TSI,TANDEM" && zonaMaquina in Split("GH,TSI,TANDEM", ",")))) 
+                                                    || 
+                                                    (Dia = 6 && ((Zona_J = "GH" && zonaMaquina = "GH") || 
+                                                    (Zona_J = "TSI,TANDEM" && zonaMaquina in Split("TSI,TANDEM", ",")) || 
+                                                    (Zona_J = "GH,TSI,TANDEM" && zonaMaquina in Split("GH,TSI,TANDEM", ",")))) 
+                                                    || 
+                                                    (Dia = 7 && ((Zona_V = "GH" && zonaMaquina = "GH") || 
+                                                    (Zona_V = "TSI,TANDEM" && zonaMaquina in Split("TSI,TANDEM", ",")) || 
+                                                    (Zona_V = "GH,TSI,TANDEM" && zonaMaquina in Split("GH,TSI,TANDEM", ","))))
                                                 )
                                             )
                                         },
@@ -2087,10 +2129,36 @@ HoraXhora As screen:
                                             {
                                                 supervisores: Filter(
                                                     HorarioSemanals,
-                                                    Fecha_Inicio <= FechaHorario && Fecha_Fin >= FechaHorario && Zona = LookUp(
-                                                        Maquinas,
-                                                        Maquina = txt_Maquina_HxH.Text,
-                                                        Ubicacion_Bono
+                                                    Fecha_Inicio <= FechaHorario && 
+                                                    Fecha_Fin >= FechaHorario && 
+                                                    (
+                                                        (Dia = 1 && ((Zona_D = "GH" && zonaMaquina = "GH") || 
+                                                        (Zona_D = "TSI,TANDEM" && zonaMaquina in Split("TSI,TANDEM", ",")) || 
+                                                        (Zona_D = "GH,TSI,TANDEM" && zonaMaquina in Split("GH,TSI,TANDEM",",")))) 
+                                                        || 
+                                                        (Dia = 2 && ((Zona_L = "GH" && zonaMaquina = "GH") || 
+                                                        (Zona_L = "TSI,TANDEM" && zonaMaquina in Split("TSI,TANDEM", ",")) ||
+                                                        (Zona_L = "GH,TSI,TANDEM" && zonaMaquina in Split("GH,TSI,TANDEM", ",")))) 
+                                                        || 
+                                                        (Dia = 3 && ((Zona_K = "GH" && zonaMaquina = "GH") || 
+                                                        (Zona_K = "TSI,TANDEM" && zonaMaquina in Split("TSI,TANDEM", ",")) || 
+                                                        (Zona_K = "GH,TSI,TANDEM" && zonaMaquina in Split("GH,TSI,TANDEM", ",")))) 
+                                                        || 
+                                                        (Dia = 4 && ((Zona_M = "GH" && zonaMaquina = "GH") || 
+                                                        (Zona_M = "TSI,TANDEM" && zonaMaquina in Split("TSI,TANDEM", ",")) || 
+                                                        (Zona_M = "GH,TSI,TANDEM" && zonaMaquina in Split("GH,TSI,TANDEM", ",")))) 
+                                                        || 
+                                                        (Dia = 5 && ((Zona_J = "GH" && zonaMaquina = "GH") || 
+                                                        (Zona_J = "TSI,TANDEM" && zonaMaquina in Split("TSI,TANDEM", ",")) || 
+                                                        (Zona_J = "GH,TSI,TANDEM" && zonaMaquina in Split("GH,TSI,TANDEM", ",")))) 
+                                                        || 
+                                                        (Dia = 6 && ((Zona_V = "GH" && zonaMaquina = "GH") || 
+                                                        (Zona_V = "TSI,TANDEM" && zonaMaquina in Split("TSI,TANDEM", ",")) || 
+                                                        (Zona_V = "GH,TSI,TANDEM" && zonaMaquina in Split("GH,TSI,TANDEM", ","))))
+                                                        ||
+                                                        (Dia = 7 && ((Zona_S = "GH" && zonaMaquina = "GH") || 
+                                                        (Zona_S = "TSI,TANDEM" && zonaMaquina in Split("TSI,TANDEM", ",")) || 
+                                                        (Zona_S = "GH,TSI,TANDEM" && zonaMaquina in Split("GH,TSI,TANDEM", ","))))
                                                     )
                                                 )
                                             },
@@ -2221,10 +2289,36 @@ HoraXhora As screen:
                                             {
                                                 supervisores: Filter(
                                                     HorarioSemanals,
-                                                    Fecha_Inicio <= FechaHorario && Fecha_Fin >= FechaHorario && Zona = LookUp(
-                                                        Maquinas,
-                                                        Maquina = txt_Maquina_HxH.Text,
-                                                        Ubicacion_Bono
+                                                    Fecha_Inicio <= FechaHorario && 
+                                                    Fecha_Fin >= FechaHorario && 
+                                                    (
+                                                        (Dia = 1 && ((Zona_D = "GH" && zonaMaquina = "GH") || 
+                                                        (Zona_D = "TSI,TANDEM" && zonaMaquina in Split("TSI,TANDEM", ",")) || 
+                                                        (Zona_D = "GH,TSI,TANDEM" && zonaMaquina in Split("GH,TSI,TANDEM",",")))) 
+                                                        || 
+                                                        (Dia = 2 && ((Zona_L = "GH" && zonaMaquina = "GH") || 
+                                                        (Zona_L = "TSI,TANDEM" && zonaMaquina in Split("TSI,TANDEM", ",")) ||
+                                                        (Zona_L = "GH,TSI,TANDEM" && zonaMaquina in Split("GH,TSI,TANDEM", ",")))) 
+                                                        || 
+                                                        (Dia = 3 && ((Zona_K = "GH" && zonaMaquina = "GH") || 
+                                                        (Zona_K = "TSI,TANDEM" && zonaMaquina in Split("TSI,TANDEM", ",")) || 
+                                                        (Zona_K = "GH,TSI,TANDEM" && zonaMaquina in Split("GH,TSI,TANDEM", ",")))) 
+                                                        || 
+                                                        (Dia = 4 && ((Zona_M = "GH" && zonaMaquina = "GH") || 
+                                                        (Zona_M = "TSI,TANDEM" && zonaMaquina in Split("TSI,TANDEM", ",")) || 
+                                                        (Zona_M = "GH,TSI,TANDEM" && zonaMaquina in Split("GH,TSI,TANDEM", ",")))) 
+                                                        || 
+                                                        (Dia = 5 && ((Zona_J = "GH" && zonaMaquina = "GH") || 
+                                                        (Zona_J = "TSI,TANDEM" && zonaMaquina in Split("TSI,TANDEM", ",")) || 
+                                                        (Zona_J = "GH,TSI,TANDEM" && zonaMaquina in Split("GH,TSI,TANDEM", ",")))) 
+                                                        || 
+                                                        (Dia = 6 && ((Zona_V = "GH" && zonaMaquina = "GH") || 
+                                                        (Zona_V = "TSI,TANDEM" && zonaMaquina in Split("TSI,TANDEM", ",")) || 
+                                                        (Zona_V = "GH,TSI,TANDEM" && zonaMaquina in Split("GH,TSI,TANDEM", ","))))
+                                                        ||
+                                                        (Dia = 7 && ((Zona_S = "GH" && zonaMaquina = "GH") || 
+                                                        (Zona_S = "TSI,TANDEM" && zonaMaquina in Split("TSI,TANDEM", ",")) || 
+                                                        (Zona_S = "GH,TSI,TANDEM" && zonaMaquina in Split("GH,TSI,TANDEM", ","))))
                                                     )
                                                 )
                                             },
