@@ -10,7 +10,8 @@ EnvioDeBonos As screen:
                 BonoSemanals,
                 IsBlank(drp_Semana_BS.SelectedText.Value) || SemanaNumber = drp_Semana_BS.Selected.Value,
                 Año = drp_Año_BS.SelectedText.Value,
-                Ubicacion = drp_Ubicacion_BS.SelectedText.Value
+                Ubicacion = drp_Ubicacion_BS.SelectedText.Value,
+                BonoTotal <> 0
             )
         )
 
@@ -148,6 +149,7 @@ EnvioDeBonos As screen:
                 OnSelect: |-
                     =ClearCollect(SelectedEmployees, Blank());
                     ClearCollect(EmployeeCodes, Blank());
+                    ClearCollect(BonoEmpleados, Blank());
                     Set(EmployeeCodesString, Blank());
                     Back()
                 PaddingBottom: =5
@@ -398,8 +400,8 @@ EnvioDeBonos As screen:
                         PaddingRight: =0
                         PaddingTop: =0
                         Size: =18
-                        Text: ="Codigo"
-                        Width: =90
+                        Text: ="Empleado"
+                        Width: =120
                         X: =621
                         ZIndex: =9
 
@@ -407,6 +409,7 @@ EnvioDeBonos As screen:
                         Align: =Align.Center
                         BorderColor: =RGBA(180, 214, 250, 1)
                         BorderThickness: =3
+                        Clear: =true
                         Color: =RGBA(0, 0, 0, 1)
                         Default: =
                         DisabledBorderColor: =RGBA(180, 214, 250, 1)
@@ -414,7 +417,7 @@ EnvioDeBonos As screen:
                         DisabledFill: =RGBA(255, 255, 255, 1)
                         FocusedBorderThickness: =4
                         Font: =App.Theme.Font
-                        HintText: ="Codigo"
+                        HintText: ="Codigo o Nombre"
                         HoverBorderColor: =App.Theme.Colors.Darker40
                         HoverColor: =RGBA(0, 0, 0, 1)
                         HoverFill: =App.Theme.Colors.Lighter70
@@ -424,8 +427,8 @@ EnvioDeBonos As screen:
                         RadiusTopLeft: =8
                         RadiusTopRight: =8
                         Size: =18
-                        Width: =150
-                        X: =711
+                        Width: =300
+                        X: =749
                         Y: =5
                         ZIndex: =10
 
@@ -469,7 +472,7 @@ EnvioDeBonos As screen:
                             =Sort(
                                 Filter(
                                     SelectedEmployees,
-                                    IsBlank(txt_Codigo_EBS.Text) || Codigo = txt_Codigo_EBS.Text
+                                    IsBlank(txt_Codigo_EBS.Text) || (txt_Codigo_EBS.Text in Codigo || txt_Codigo_EBS.Text in Empleado)
                                 ),
                                 Value(Codigo)
                             )
@@ -510,12 +513,24 @@ EnvioDeBonos As screen:
                                 HoverFill: =RGBA(132, 40, 38, 1)
                                 OnSelect: |-
                                     =If(
-                                        !IsBlank(LookUp(SelectedEmployees, Codigo = ThisItem.Codigo)),
+                                        !IsBlank(
+                                            LookUp(
+                                                SelectedEmployees,
+                                                Codigo = ThisItem.Codigo
+                                            )
+                                        ),
+                                        Collect(
+                                            BonoEmpleados,
+                                            ThisItem
+                                        );
                                         RemoveIf(
                                             SelectedEmployees,
                                             Codigo = ThisItem.Codigo
                                         ),
-                                        Notify("El empleado no existe en la lista", NotificationType.Error)
+                                        Notify(
+                                            "El empleado no existe en la lista",
+                                            NotificationType.Error
+                                        )
                                     )
                                 PressedBorderColor: =RGBA(215, 58, 60, 1)
                                 PressedColor: =RGBA(215, 58, 60, 1)
@@ -582,7 +597,7 @@ EnvioDeBonos As screen:
                                 BorderColor: =App.Theme.Colors.Darker40
                                 BorderThickness: =2
                                 Color: =RGBA(0, 0, 0, 1)
-                                Default: ="Empleado"
+                                Default: ="Codigo"
                                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 DisabledFill: =RGBA(244, 244, 244, 1)
@@ -761,7 +776,7 @@ EnvioDeBonos As screen:
                             =Sort(
                                 Filter(
                                     BonoEmpleados,
-                                    IsBlank(txt_Codigo_EBS.Text) || Codigo = txt_Codigo_EBS.Text
+                                    IsBlank(txt_Codigo_EBS.Text) || (txt_Codigo_EBS.Text in Codigo || txt_Codigo_EBS.Text in Empleado)
                                 ),
                                 Value(Codigo)
                             )
@@ -814,13 +829,7 @@ EnvioDeBonos As screen:
                                         IsBlank(LookUp(SelectedEmployees, Codigo = ThisItem.Codigo)),
                                         Collect(
                                             SelectedEmployees,
-                                            {
-                                                Codigo: ThisItem.Codigo,
-                                                Empleado: ThisItem.Empleado,
-                                                ID: ThisItem.ID,
-                                                SubTotal: ThisItem.SubTotal,
-                                                BonoTotal: ThisItem.BonoTotal
-                                            }
+                                            ThisItem
                                         ),
                                         Notify("El empleado ya ha sido agregado", NotificationType.Error)
                                     );
@@ -899,7 +908,7 @@ EnvioDeBonos As screen:
                                 BorderColor: =App.Theme.Colors.Darker40
                                 BorderThickness: =2
                                 Color: =RGBA(0, 0, 0, 1)
-                                Default: ="Empleado"
+                                Default: ="Codigo"
                                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 DisabledFill: =RGBA(244, 244, 244, 1)
@@ -1055,48 +1064,46 @@ EnvioDeBonos As screen:
                                 Y: =10
                                 ZIndex: =11
 
+    Rectangle42 As rectangle:
+        BorderColor: =App.Theme.Colors.Darker40
+        Fill: =RGBA(122, 138, 143, 0.15)
+        Height: =668
+        OnSelect: |
+            =UpdateContext({ConVisible: false});
+        Visible: =ConVisible
+        Width: =1350
+        X: =8
+        Y: =92
+        ZIndex: =2
+
     Container3_6 As groupContainer.manualLayoutContainer:
         BorderColor: =RGBA(39, 113, 194, 1)
-        BorderThickness: =2
-        DropShadow: =DropShadow.Light
+        BorderThickness: =4
+        DropShadow: =DropShadow.Bold
         Fill: =RGBA(255, 255, 255, 1)
-        RadiusBottomLeft: =4
-        RadiusBottomRight: =4
-        RadiusTopLeft: =4
-        RadiusTopRight: =4
+        RadiusBottomLeft: =15
+        RadiusBottomRight: =15
+        RadiusTopLeft: =15
+        RadiusTopRight: =15
         Visible: =ConVisible
-        X: =473
-        Y: =324
-        ZIndex: =2
+        X: =433
+        Y: =284
+        ZIndex: =3
 
         Label4_4 As label:
             Align: =Align.Center
             BorderColor: =App.Theme.Colors.Darker40
-            Color: =RGBA(255, 191, 0, 1)
+            Color: =RGBA(0, 0, 0, 1)
             DisabledColor: =RGBA(166, 166, 166, 1)
             DisplayMode: =DisplayMode.View
             Font: =App.Theme.Font
             Height: =130
-            Size: =15
+            Size: =20
             Text: |-
-                ="      ADVERTENCIA 
-                ¿Esta seguro de enviar los comprobantes de bonos a los usuarios selecionados?
+                ="¿Esta seguro de enviar los comprobantes de bonos a los usuarios selecionados?
                 ¿Desea continuar?"
             Width: =500
             ZIndex: =1
-
-        Icon6_4 As icon.Warning:
-            BorderColor: =App.Theme.Colors.Darker40
-            Color: =RGBA(255, 191, 0, 1)
-            DisabledBorderColor: =RGBA(166, 166, 166, 1)
-            DisabledColor: =RGBA(244, 244, 244, 1)
-            DisplayMode: =DisplayMode.View
-            Height: =32
-            Icon: =Icon.Warning
-            Width: =54
-            X: =149
-            Y: =11
-            ZIndex: =2
 
         Container8_4 As groupContainer.manualLayoutContainer:
             DropShadow: =DropShadow.Light
@@ -1112,14 +1119,14 @@ EnvioDeBonos As screen:
 
             Icon8_4 As icon.CheckBadge:
                 BorderColor: =App.Theme.Colors.Darker40
-                Color: =App.Theme.Colors.Darker30
+                Color: =RGBA(52, 152, 47, 1)
                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                 DisabledColor: =RGBA(244, 244, 244, 1)
-                HoverFill: =RGBA(180, 214, 250, 1)
+                HoverFill: =RGBA(45, 128, 40, 1)
                 Icon: =Icon.CheckBadge
                 OnSelect: |
                     =If(
-                        !IsBlank(dropSemanaBonos.SelectedText.Value),
+                        !IsBlank(txt_Semana_EBS.Text),
                         Set(
                             LogotipoTech,
                             JSON(
@@ -1142,36 +1149,36 @@ EnvioDeBonos As screen:
                             )
                         );
                       If(
-                            StartsWith(drp_Ubicacion_Envio.SelectedText.Value, "GH"),
+                            StartsWith(txt_Ubicacion_EBS.Text, "GH"),
                     
                             EnviarComprobanteSeleccionadosPDF.Run(
-                                "Comprobante Bono Semanal - Semana " & dropSemanaBonos.SelectedText.Value,
-                                "Estimado(a),<br><br>Adjunto encontrará el comprobante de bono semanal correspondiente a la semana " & dropSemanaBonos.SelectedText.Value & ". Este documento es generado automáticamente por nuestro sistema. Por favor, revise la información con detenimiento.<br><br><br><br>Quedamos a su disposición para cualquier consulta.<br><br>Atentamente,<br>Equipo de desarrollo y análisis",
+                                "Comprobante Bono Semanal - Semana " & txt_Semana_EBS.Text,
+                                "Estimado(a),<br><br>Adjunto encontrará el comprobante de bono semanal correspondiente a la semana " & txt_Semana_EBS.Text & ". Este documento es generado automáticamente por nuestro sistema. Por favor, revise la información con detenimiento.<br><br><br><br>Quedamos a su disposición para cualquier consulta.<br><br>Atentamente,<br>Equipo de desarrollo y análisis",
                                 EmployeeCodesString,
                                 LogotipoTech,
                                 ImagenBono1,
-                                dropSemanaBonos.SelectedText.Value,
-                                drp_Ubicacion_Envio.SelectedText.Value
+                                txt_Semana_EBS.Text,
+                                txt_Ubicacion_EBS.Text
                             ),
                             
                             EnviarComprobanteSeleccionadosPDF.Run(
-                                "Comprobante Bono Semanal - Semana " & dropSemanaBonos.SelectedText.Value,
-                                "Estimado(a),<br><br>Adjunto encontrará el comprobante de bono semanal correspondiente a la semana " & dropSemanaBonos.SelectedText.Value & ". Este documento es generado automáticamente por nuestro sistema. Por favor, revise la información con detenimiento.<br><br><br><br>Quedamos a su disposición para cualquier consulta.<br><br>Atentamente,<br>Equipo de desarrollo y análisis",
+                                "Comprobante Bono Semanal - Semana " & txt_Semana_EBS.Text,
+                                "Estimado(a),<br><br>Adjunto encontrará el comprobante de bono semanal correspondiente a la semana " & txt_Semana_EBS.Text & ". Este documento es generado automáticamente por nuestro sistema. Por favor, revise la información con detenimiento.<br><br><br><br>Quedamos a su disposición para cualquier consulta.<br><br>Atentamente,<br>Equipo de desarrollo y análisis",
                                 EmployeeCodesString,
                                 LogotipoTech,
                                 ImagenBono2,  
-                                dropSemanaBonos.SelectedText.Value,
-                                drp_Ubicacion_Envio.SelectedText.Value
+                                txt_Semana_EBS.Text,
+                                txt_Ubicacion_EBS.Text
                             )
                         );
                         EnviarComprobanteFinancieroSeleccionadosPDF.Run(
-                            "Comprobante Financiero Semanal - Semana " & dropSemanaBonos.SelectedText.Value,
-                            "Estimado(a),<br><br>Adjunto encontrará el comprobante financiero semanal correspondiente a la semana " & dropSemanaBonos.SelectedText.Value & ". Este documento es generado automáticamente por nuestro sistema. Por favor, revise la información con detenimiento.<br><br><br><br>Quedamos a su disposición para cualquier consulta.<br><br>Atentamente,<br>Equipo de desarollo y analisis",
+                            "Comprobante Financiero Semanal - Semana " & txt_Semana_EBS.Text,
+                            "Estimado(a),<br><br>Adjunto encontrará el comprobante financiero semanal correspondiente a la semana " & txt_Semana_EBS.Text & ". Este documento es generado automáticamente por nuestro sistema. Por favor, revise la información con detenimiento.<br><br><br><br>Quedamos a su disposición para cualquier consulta.<br><br>Atentamente,<br>Equipo de desarollo y analisis",
                             EmployeeCodesString,
                             "jbrenes@tsicr.com",
                             LogotipoTech,
-                            dropSemanaBonos.SelectedText.Value,
-                            drp_Ubicacion_Envio.SelectedText.Value
+                            txt_Semana_EBS.Text,
+                            txt_Ubicacion_EBS.Text
                         );
                         ForAll(
                             SelectedEmployees,
@@ -1213,7 +1220,7 @@ EnvioDeBonos As screen:
 
             Icon15_5 As icon.CancelBadge:
                 BorderColor: =App.Theme.Colors.Darker40
-                Color: =App.Theme.Colors.Darker30
+                Color: =RGBA(215, 58, 60, 1)
                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                 DisabledColor: =RGBA(244, 244, 244, 1)
                 FocusedBorderThickness: =30
@@ -1231,7 +1238,7 @@ EnvioDeBonos As screen:
         Image: =Logo
         Visible: =false
         X: =180
-        ZIndex: =3
+        ZIndex: =4
 
     imagenPagosBono2 As image:
         BorderColor: =App.Theme.Colors.Darker40
@@ -1241,7 +1248,7 @@ EnvioDeBonos As screen:
         Image: =imagenBono222
         Visible: =false
         X: =80
-        ZIndex: =4
+        ZIndex: =5
 
     imagenPagosBonos As image:
         BorderColor: =App.Theme.Colors.Darker40
@@ -1250,5 +1257,5 @@ EnvioDeBonos As screen:
         Height: =20
         Image: =imagenBonos111
         Visible: =false
-        ZIndex: =5
+        ZIndex: =6
 
