@@ -3,18 +3,28 @@ EnvioDeBonos As screen:
     Fill: =Color.White
     ImagePosition: =ImagePosition.Fill
     LoadingSpinnerColor: =App.Theme.Colors.Primary
+    OnVisible: |-
+        =ClearCollect(
+            BonoEmpleados,
+            Filter(
+                BonoSemanals,
+                IsBlank(drp_Semana_BS.SelectedText.Value) || SemanaNumber = drp_Semana_BS.Selected.Value,
+                Año = drp_Año_BS.SelectedText.Value,
+                Ubicacion = drp_Ubicacion_BS.SelectedText.Value
+            )
+        )
 
     ScreenContainer5_1 As groupContainer.verticalAutoLayoutContainer:
         DropShadow: =DropShadow.Light
         Height: =Parent.Height
         LayoutAlignItems: =LayoutAlignItems.Stretch
         LayoutDirection: =LayoutDirection.Vertical
-        LayoutGap: =16
+        LayoutGap: =8
         LayoutMode: =LayoutMode.Auto
-        PaddingBottom: =16
-        PaddingLeft: =16
-        PaddingRight: =16
-        PaddingTop: =16
+        PaddingBottom: =8
+        PaddingLeft: =8
+        PaddingRight: =8
+        PaddingTop: =8
         RadiusBottomLeft: =4
         RadiusBottomRight: =4
         RadiusTopLeft: =4
@@ -148,24 +158,21 @@ EnvioDeBonos As screen:
                 ZIndex: =6
 
         ScreenContainer5_2 As groupContainer.verticalAutoLayoutContainer:
-            BorderStyle: =BorderStyle.None
+            BorderColor: =RGBA(40, 134, 222, 1)
+            BorderThickness: =4
             DropShadow: =DropShadow.Light
             Fill: =RGBA(140, 217, 255, 0.29)
             Height: =Parent.Height
             LayoutAlignItems: =LayoutAlignItems.Stretch
             LayoutDirection: =LayoutDirection.Vertical
-            LayoutGap: =16
+            LayoutGap: =8
             LayoutMinHeight: =100
             LayoutMinWidth: =250
             LayoutMode: =LayoutMode.Auto
-            PaddingBottom: =5
-            PaddingLeft: =5
-            PaddingRight: =5
-            PaddingTop: =5
-            RadiusBottomLeft: =4
-            RadiusBottomRight: =4
-            RadiusTopLeft: =4
-            RadiusTopRight: =4
+            RadiusBottomLeft: =12
+            RadiusBottomRight: =12
+            RadiusTopLeft: =12
+            RadiusTopRight: =12
             Width: =Parent.Width
             ZIndex: =4
 
@@ -173,330 +180,254 @@ EnvioDeBonos As screen:
                 DropShadow: =DropShadow.Light
                 Fill: =RGBA(40, 134, 222, 1)
                 FillPortions: =0
-                Height: =75
+                Height: =50
                 LayoutMinHeight: =100
                 LayoutMinWidth: =250
                 LayoutMode: =LayoutMode.Auto
-                PaddingLeft: =10
-                RadiusBottomLeft: =8
-                RadiusBottomRight: =8
-                RadiusTopLeft: =8
-                RadiusTopRight: =8
                 Width: =1334
                 X: =12
                 Y: =7
                 ZIndex: =1
 
-                lblCodigoBonos As label:
-                    Align: =Align.Center
-                    AlignInContainer: =AlignInContainer.Center
-                    BorderColor: =RGBA(0, 18, 107, 1)
-                    Color: =RGBA(255, 255, 255, 1)
-                    DisabledColor: =RGBA(166, 166, 166, 1)
-                    FontWeight: =FontWeight.Bold
-                    Height: =60
-                    PaddingBottom: =0
-                    PaddingLeft: =0
-                    PaddingRight: =0
-                    PaddingTop: =0
-                    Size: =20
-                    Text: ="Codigo"
-                    Width: =105
-                    ZIndex: =1
+                Container64 As groupContainer.manualLayoutContainer:
+                    DropShadow: =DropShadow.Light
+                    LayoutMinHeight: =50
+                    LayoutMinWidth: =Parent.Width
+                    RadiusBottomLeft: =4
+                    RadiusBottomRight: =4
+                    RadiusTopLeft: =4
+                    RadiusTopRight: =4
+                    ZIndex: =16
 
-                txtCodigoBono As text:
-                    Align: =Align.Center
-                    AlignInContainer: =AlignInContainer.Center
-                    BorderColor: =RGBA(0, 18, 107, 1)
-                    BorderStyle: =BorderStyle.None
-                    BorderThickness: =2
-                    Color: =RGBA(0, 0, 0, 1)
-                    Default: =
-                    DisabledBorderColor: =RGBA(166, 166, 166, 1)
-                    DisabledColor: =RGBA(166, 166, 166, 1)
-                    DisabledFill: =RGBA(244, 244, 244, 1)
-                    FocusedBorderThickness: =4
-                    Format: =TextFormat.Number
-                    Height: =50
-                    HintText: ="Codigo"
-                    HoverBorderColor: =RGBA(0, 18, 107, 1)
-                    HoverColor: =RGBA(0, 0, 0, 1)
-                    HoverFill: =RGBA(186, 202, 226, 1)
-                    OnSelect: =Reset(txtCodigoBono)
-                    PaddingLeft: =5
-                    RadiusBottomLeft: =20
-                    RadiusBottomRight: =20
-                    RadiusTopLeft: =20
-                    RadiusTopRight: =20
-                    Size: =15
-                    Width: =95
-                    X: =109
-                    Y: =14
-                    ZIndex: =2
+                    btn_Automatico_BS_1 As button:
+                        BorderColor: =RGBA(15, 108, 189, 1)
+                        DisabledBorderColor: =RGBA(244, 244, 244, 1)
+                        DisabledColor: =RGBA(166, 166, 166, 1)
+                        DisabledFill: =RGBA(244, 244, 244, 1)
+                        Fill: =RGBA(15, 84, 140, 1)
+                        Font: =App.Theme.Font
+                        FontWeight: =FontWeight.Semibold
+                        HoverBorderColor: =RGBA(15, 84, 140, 1)
+                        HoverColor: =RGBA(255, 255, 255, 1)
+                        HoverFill: =RGBA(12, 59, 94, 1)
+                        OnSelect: |-
+                            =If(
+                                CountRows(SelectedEmployees) > 0,
+                                UpdateContext({ConVisible: true}),
+                                Notify("No hay empleados agregados", NotificationType.Error)
+                            );
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        PressedBorderColor: =RGBA(15, 84, 140, 1)
+                        PressedColor: =RGBA(15, 84, 140, 1)
+                        PressedFill: =
+                        RadiusBottomLeft: =8
+                        RadiusBottomRight: =8
+                        RadiusTopLeft: =8
+                        RadiusTopRight: =8
+                        Size: =15
+                        Text: ="Enviar Comprobantes"
+                        Width: =220
+                        X: =1064
+                        Y: =5
+                        ZIndex: =1
 
-                barra1 As icon.VerticalLine:
-                    AlignInContainer: =AlignInContainer.Center
-                    BorderColor: =App.Theme.Colors.Darker40
-                    Color: =RGBA(255, 255, 255, 1)
-                    DisabledBorderColor: =RGBA(166, 166, 166, 1)
-                    DisabledColor: =RGBA(244, 244, 244, 1)
-                    DisplayMode: =DisplayMode.View
-                    Height: =60
-                    Icon: =Icon.VerticalLine
-                    Width: =25
-                    X: =820
-                    Y: =22
-                    ZIndex: =3
+                    icn_Home_BS_3 As icon.Erase:
+                        BorderColor: =RGBA(12, 59, 94, 1)
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =2
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                        DisabledColor: =RGBA(244, 244, 244, 1)
+                        DisplayMode: =
+                        FocusedBorderThickness: =20
+                        Height: =40
+                        HoverBorderColor: =RGBA(0, 0, 0, 0)
+                        HoverColor: =RGBA(0, 0, 0, 1)
+                        HoverFill: =RGBA(0, 0, 0, 0)
+                        Icon: =Icon.Erase
+                        OnSelect: |-
+                            =ClearCollect(SelectedEmployees, Blank());
+                            ClearCollect(EmployeeCodes, Blank());
+                            Set(EmployeeCodesString, Blank())
+                        PaddingBottom: =2
+                        PaddingLeft: =2
+                        PaddingRight: =2
+                        PaddingTop: =2
+                        Width: =55
+                        X: =1289
+                        Y: =5
+                        ZIndex: =2
 
-                lblSemanaBonos As label:
-                    Align: =Align.Center
-                    AlignInContainer: =AlignInContainer.Center
-                    BorderColor: =RGBA(0, 18, 107, 1)
-                    Color: =RGBA(255, 255, 255, 1)
-                    DisabledColor: =RGBA(166, 166, 166, 1)
-                    FontWeight: =FontWeight.Bold
-                    Height: =60
-                    PaddingBottom: =0
-                    PaddingLeft: =0
-                    PaddingRight: =0
-                    PaddingTop: =0
-                    Size: =20
-                    Text: ="Semana"
-                    Width: =120
-                    ZIndex: =4
+                    lblCodigoBonos As label:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisabledColor: =RGBA(166, 166, 166, 1)
+                        FontWeight: =FontWeight.Bold
+                        Height: =50
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =18
+                        Text: ="Año"
+                        Width: =60
+                        X: =10
+                        ZIndex: =3
 
-                dropSemanaBonos As dropdown:
-                    AlignInContainer: =AlignInContainer.Center
-                    BorderColor: =RGBA(40, 134, 222, 1)
-                    ChevronBackground: =RGBA(15, 108, 189, 1)
-                    ChevronDisabledBackground: =RGBA(166, 166, 166, 1)
-                    ChevronDisabledFill: =RGBA(244, 244, 244, 1)
-                    ChevronHoverBackground: =RGBA(15, 84, 140, 1)
-                    ChevronHoverFill: =RGBA(255, 255, 255, 1)
-                    Default: =Max(Sort(Distinct(Filter(BonoSemanals, Año = dropSemanaAnos.SelectedText.Value), SemanaNumber),ThisRecord.Value,SortOrder.Descending), Value)
-                    DisabledBorderColor: =RGBA(166, 166, 166, 1)
-                    DisabledColor: =RGBA(166, 166, 166, 1)
-                    DisabledFill: =RGBA(244, 244, 244, 1)
-                    Height: =50
-                    HoverColor: =RGBA(0, 0, 0, 1)
-                    HoverFill: =RGBA(71, 158, 245, 1)
-                    Items: =Sort(Distinct(Filter(BonoSemanals, Año = dropSemanaAnos.SelectedText.Value), SemanaNumber),ThisRecord.Value,SortOrder.Descending)
-                    PressedColor: =RGBA(255, 255, 255, 1)
-                    PressedFill: =RGBA(0, 18, 107, 1)
-                    SelectionFill: =RGBA(15, 108, 189, 1)
-                    Size: =15
-                    Width: =90
-                    X: =1216
-                    Y: =14
-                    ZIndex: =5
+                    txt_Anno_EBS As text:
+                        Align: =Align.Center
+                        BorderColor: =App.Theme.Colors.Darker40
+                        BorderThickness: =3
+                        Color: =RGBA(0, 0, 0, 1)
+                        Default: =drp_Año_BS.SelectedText.Value
+                        DisabledBorderColor: =RGBA(180, 214, 250, 1)
+                        DisabledColor: =RGBA(0, 0, 0, 1)
+                        DisabledFill: =RGBA(255, 255, 255, 1)
+                        DisplayMode: =DisplayMode.Disabled
+                        FocusedBorderThickness: =4
+                        Font: =App.Theme.Font
+                        HoverBorderColor: =App.Theme.Colors.Darker40
+                        HoverColor: =RGBA(0, 0, 0, 1)
+                        HoverFill: =App.Theme.Colors.Lighter70
+                        PaddingLeft: =5
+                        RadiusBottomLeft: =8
+                        RadiusBottomRight: =8
+                        RadiusTopLeft: =8
+                        RadiusTopRight: =8
+                        Size: =18
+                        Width: =80
+                        X: =70
+                        Y: =5
+                        ZIndex: =4
 
-                barra2 As icon.VerticalLine:
-                    AlignInContainer: =AlignInContainer.Center
-                    BorderColor: =App.Theme.Colors.Darker40
-                    Color: =RGBA(255, 255, 255, 1)
-                    DisabledBorderColor: =RGBA(166, 166, 166, 1)
-                    DisabledColor: =RGBA(244, 244, 244, 1)
-                    DisplayMode: =DisplayMode.View
-                    Height: =60
-                    Icon: =Icon.VerticalLine
-                    Width: =25
-                    X: =820
-                    Y: =22
-                    ZIndex: =6
+                    lblCodigoBonos_2 As label:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisabledColor: =RGBA(166, 166, 166, 1)
+                        FontWeight: =FontWeight.Bold
+                        Height: =50
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =18
+                        Text: ="Semana"
+                        Width: =108
+                        X: =165
+                        ZIndex: =5
 
-                lblAnoBono As label:
-                    Align: =Align.Center
-                    AlignInContainer: =AlignInContainer.Center
-                    BorderColor: =RGBA(0, 18, 107, 1)
-                    Color: =RGBA(255, 255, 255, 1)
-                    DisabledColor: =RGBA(166, 166, 166, 1)
-                    FontWeight: =FontWeight.Bold
-                    Height: =60
-                    PaddingBottom: =0
-                    PaddingLeft: =0
-                    PaddingRight: =0
-                    PaddingTop: =0
-                    Size: =20
-                    Text: ="Año"
-                    Width: =70
-                    ZIndex: =7
+                    txt_Semana_EBS As text:
+                        Align: =Align.Center
+                        BorderColor: =App.Theme.Colors.Darker40
+                        BorderThickness: =3
+                        Color: =RGBA(0, 0, 0, 1)
+                        Default: =drp_Semana_BS.SelectedText.Value
+                        DisabledBorderColor: =RGBA(180, 214, 250, 1)
+                        DisabledColor: =RGBA(0, 0, 0, 1)
+                        DisabledFill: =RGBA(255, 255, 255, 1)
+                        DisplayMode: =DisplayMode.Disabled
+                        FocusedBorderThickness: =4
+                        Font: =App.Theme.Font
+                        HoverBorderColor: =App.Theme.Colors.Darker40
+                        HoverColor: =RGBA(0, 0, 0, 1)
+                        HoverFill: =App.Theme.Colors.Lighter70
+                        PaddingLeft: =5
+                        RadiusBottomLeft: =8
+                        RadiusBottomRight: =8
+                        RadiusTopLeft: =8
+                        RadiusTopRight: =8
+                        Size: =18
+                        Width: =80
+                        X: =273
+                        Y: =5
+                        ZIndex: =6
 
-                dropSemanaAnos As dropdown:
-                    AlignInContainer: =AlignInContainer.Center
-                    BorderColor: =RGBA(40, 134, 222, 1)
-                    ChevronBackground: =RGBA(15, 108, 189, 1)
-                    ChevronDisabledBackground: =RGBA(166, 166, 166, 1)
-                    ChevronDisabledFill: =RGBA(244, 244, 244, 1)
-                    ChevronHoverBackground: =RGBA(15, 84, 140, 1)
-                    ChevronHoverFill: =RGBA(255, 255, 255, 1)
-                    DisabledBorderColor: =RGBA(166, 166, 166, 1)
-                    DisabledColor: =RGBA(166, 166, 166, 1)
-                    DisabledFill: =RGBA(244, 244, 244, 1)
-                    Height: =50
-                    HoverColor: =RGBA(0, 0, 0, 1)
-                    HoverFill: =RGBA(71, 158, 245, 1)
-                    Items: |-
-                        =[
-                            Text(Year(Today())),
-                            Text(Year(Today())-1),
-                            Text(Year(Today())-2),
-                            Text(Year(Today())-3),
-                            Text(Year(Today())-4),
-                            Text(Year(Today())-5)
-                        ]
-                    PressedColor: =RGBA(255, 255, 255, 1)
-                    PressedFill: =RGBA(0, 18, 107, 1)
-                    SelectionFill: =RGBA(15, 108, 189, 1)
-                    Size: =15
-                    Width: =110
-                    X: =1216
-                    Y: =14
-                    ZIndex: =8
+                    lblCodigoBonos_3 As label:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisabledColor: =RGBA(166, 166, 166, 1)
+                        FontWeight: =FontWeight.Bold
+                        Height: =50
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =18
+                        Text: ="Ubicacion"
+                        Width: =128
+                        X: =368
+                        ZIndex: =7
 
-                barra3 As icon.VerticalLine:
-                    AlignInContainer: =AlignInContainer.Center
-                    BorderColor: =App.Theme.Colors.Darker40
-                    Color: =RGBA(255, 255, 255, 1)
-                    DisabledBorderColor: =RGBA(166, 166, 166, 1)
-                    DisabledColor: =RGBA(244, 244, 244, 1)
-                    DisplayMode: =DisplayMode.View
-                    Height: =60
-                    Icon: =Icon.VerticalLine
-                    Width: =25
-                    X: =820
-                    Y: =22
-                    ZIndex: =9
+                    txt_Ubicacion_EBS As text:
+                        Align: =Align.Center
+                        BorderColor: =App.Theme.Colors.Darker40
+                        BorderThickness: =3
+                        Color: =RGBA(0, 0, 0, 1)
+                        Default: =drp_Ubicacion_BS.SelectedText.Value
+                        DisabledBorderColor: =RGBA(180, 214, 250, 1)
+                        DisabledColor: =RGBA(0, 0, 0, 1)
+                        DisabledFill: =RGBA(255, 255, 255, 1)
+                        DisplayMode: =DisplayMode.Disabled
+                        FocusedBorderThickness: =4
+                        Font: =App.Theme.Font
+                        HoverBorderColor: =App.Theme.Colors.Darker40
+                        HoverColor: =RGBA(0, 0, 0, 1)
+                        HoverFill: =App.Theme.Colors.Lighter70
+                        PaddingLeft: =5
+                        RadiusBottomLeft: =8
+                        RadiusBottomRight: =8
+                        RadiusTopLeft: =8
+                        RadiusTopRight: =8
+                        Size: =18
+                        Width: =110
+                        X: =496
+                        Y: =5
+                        ZIndex: =8
 
-                Label9_24 As label:
-                    Align: =Align.Center
-                    BorderColor: =RGBA(0, 18, 107, 1)
-                    Color: =RGBA(255, 255, 255, 1)
-                    DisabledColor: =RGBA(166, 166, 166, 1)
-                    FontWeight: =FontWeight.Bold
-                    Height: =75
-                    PaddingBottom: =0
-                    PaddingLeft: =0
-                    PaddingRight: =0
-                    PaddingTop: =0
-                    Size: =18
-                    Text: ="Ubicacion"
-                    Width: =125
-                    ZIndex: =10
+                    lblCodigoBonos_4 As label:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisabledColor: =RGBA(166, 166, 166, 1)
+                        FontWeight: =FontWeight.Bold
+                        Height: =50
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =18
+                        Text: ="Codigo"
+                        Width: =90
+                        X: =621
+                        ZIndex: =9
 
-                drp_Ubicacion_Envio As dropdown:
-                    AlignInContainer: =AlignInContainer.Center
-                    BorderColor: =RGBA(40, 134, 222, 1)
-                    ChevronBackground: =RGBA(15, 108, 189, 1)
-                    ChevronDisabledBackground: =RGBA(166, 166, 166, 1)
-                    ChevronDisabledFill: =RGBA(244, 244, 244, 1)
-                    ChevronHoverBackground: =RGBA(15, 84, 140, 1)
-                    ChevronHoverFill: =RGBA(255, 255, 255, 1)
-                    Default: ="GH"
-                    DisabledBorderColor: =RGBA(166, 166, 166, 1)
-                    DisabledColor: =RGBA(166, 166, 166, 1)
-                    DisabledFill: =RGBA(244, 244, 244, 1)
-                    Height: =50
-                    HoverColor: =RGBA(0, 0, 0, 1)
-                    HoverFill: =RGBA(71, 158, 245, 1)
-                    Items: =Distinct(BonoSemanals, Ubicacion)
-                    OnChange: =Refresh(BonoSemanals)
-                    PressedColor: =RGBA(255, 255, 255, 1)
-                    PressedFill: =RGBA(0, 18, 107, 1)
-                    SelectionFill: =RGBA(15, 108, 189, 1)
-                    Size: =15
-                    Width: =130
-                    X: =1216
-                    Y: =14
-                    ZIndex: =11
-
-                barra3_1 As icon.VerticalLine:
-                    AlignInContainer: =AlignInContainer.Center
-                    BorderColor: =App.Theme.Colors.Darker40
-                    Color: =RGBA(255, 255, 255, 1)
-                    DisabledBorderColor: =RGBA(166, 166, 166, 1)
-                    DisabledColor: =RGBA(244, 244, 244, 1)
-                    DisplayMode: =DisplayMode.View
-                    Height: =60
-                    Icon: =Icon.VerticalLine
-                    Width: =25
-                    X: =820
-                    Y: =22
-                    ZIndex: =12
-
-                btn_Automatico_BS_1 As button:
-                    AlignInContainer: =AlignInContainer.Center
-                    BorderColor: =RGBA(12, 59, 94, 1)
-                    Color: =RGBA(0, 0, 0, 1)
-                    DisabledBorderColor: =RGBA(244, 244, 244, 1)
-                    DisabledColor: =RGBA(166, 166, 166, 1)
-                    DisabledFill: =RGBA(244, 244, 244, 1)
-                    Fill: =RGBA(180, 214, 250, 1)
-                    Font: =App.Theme.Font
-                    FontWeight: =FontWeight.Semibold
-                    Height: =60
-                    HoverBorderColor: =App.Theme.Colors.Darker10
-                    HoverColor: =RGBA(255, 255, 255, 1)
-                    HoverFill: =App.Theme.Colors.Darker10
-                    OnSelect: |-
-                        =If(
-                            CountRows(SelectedEmployees) > 0,
-                            UpdateContext({ConVisible: true}),
-                            Notify("No hay empleados agregados", NotificationType.Error)
-                        );
-                    PaddingBottom: =0
-                    PaddingLeft: =0
-                    PaddingRight: =0
-                    PaddingTop: =0
-                    PressedBorderColor: =App.Theme.Colors.Darker40
-                    PressedColor: =Self.Color
-                    PressedFill: =App.Theme.Colors.Darker40
-                    RadiusBottomLeft: =20
-                    RadiusBottomRight: =20
-                    RadiusTopLeft: =20
-                    RadiusTopRight: =20
-                    Size: =15
-                    Text: ="Enviar Comprobantes"
-                    Width: =175
-                    ZIndex: =13
-
-                barra3_2 As icon.VerticalLine:
-                    AlignInContainer: =AlignInContainer.Center
-                    BorderColor: =App.Theme.Colors.Darker40
-                    Color: =RGBA(255, 255, 255, 1)
-                    DisabledBorderColor: =RGBA(166, 166, 166, 1)
-                    DisabledColor: =RGBA(244, 244, 244, 1)
-                    DisplayMode: =DisplayMode.View
-                    Height: =60
-                    Icon: =Icon.VerticalLine
-                    Width: =25
-                    X: =820
-                    Y: =22
-                    ZIndex: =14
-
-                icn_Home_BS_3 As icon.Erase:
-                    AlignInContainer: =AlignInContainer.Center
-                    BorderColor: =RGBA(12, 59, 94, 1)
-                    BorderThickness: =2
-                    DisabledBorderColor: =RGBA(166, 166, 166, 1)
-                    DisabledColor: =RGBA(244, 244, 244, 1)
-                    DisplayMode: =
-                    Fill: =RGBA(180, 214, 250, 1)
-                    FocusedBorderThickness: =20
-                    Height: =60
-                    HoverBorderColor: =RGBA(0, 134, 208, 1)
-                    HoverColor: =RGBA(255, 255, 255, 1)
-                    HoverFill: =RGBA(15, 84, 140, 1)
-                    Icon: =Icon.Erase
-                    OnSelect: |-
-                        =ClearCollect(SelectedEmployees, Blank());
-                        ClearCollect(EmployeeCodes, Blank());
-                        Set(EmployeeCodesString, Blank())
-                    PaddingBottom: =5
-                    PaddingLeft: =5
-                    PaddingRight: =5
-                    PaddingTop: =5
-                    Width: =65
-                    ZIndex: =15
+                    txt_Codigo_EBS As text:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(180, 214, 250, 1)
+                        BorderThickness: =3
+                        Color: =RGBA(0, 0, 0, 1)
+                        Default: =
+                        DisabledBorderColor: =RGBA(180, 214, 250, 1)
+                        DisabledColor: =RGBA(0, 0, 0, 1)
+                        DisabledFill: =RGBA(255, 255, 255, 1)
+                        FocusedBorderThickness: =4
+                        Font: =App.Theme.Font
+                        HintText: ="Codigo"
+                        HoverBorderColor: =App.Theme.Colors.Darker40
+                        HoverColor: =RGBA(0, 0, 0, 1)
+                        HoverFill: =App.Theme.Colors.Lighter70
+                        PaddingLeft: =5
+                        RadiusBottomLeft: =8
+                        RadiusBottomRight: =8
+                        RadiusTopLeft: =8
+                        RadiusTopRight: =8
+                        Size: =18
+                        Width: =150
+                        X: =711
+                        Y: =5
+                        ZIndex: =10
 
             BottomContainer4_2 As groupContainer.horizontalAutoLayoutContainer:
                 LayoutAlignItems: =LayoutAlignItems.Stretch
@@ -505,9 +436,9 @@ EnvioDeBonos As screen:
                 LayoutMinWidth: =250
                 LayoutMode: =LayoutMode.Auto
                 LayoutWrap: =true
-                PaddingBottom: =2
-                PaddingLeft: =2
-                PaddingRight: =2
+                PaddingBottom: =7
+                PaddingLeft: =10
+                PaddingRight: =10
                 PaddingTop: =2
                 RadiusBottomLeft: =4
                 RadiusBottomRight: =4
@@ -516,441 +447,613 @@ EnvioDeBonos As screen:
                 ZIndex: =2
 
                 SidebarContainer4_1 As groupContainer.verticalAutoLayoutContainer:
+                    BorderColor: =RGBA(40, 134, 222, 1)
+                    BorderThickness: =3
                     DropShadow: =DropShadow.Light
-                    Fill: =RGBA(255, 255, 255, 1)
-                    FillPortions: =3
+                    Fill: =RGBA(180, 214, 250, 0.6)
+                    FillPortions: =4
                     LayoutDirection: =LayoutDirection.Vertical
                     LayoutMinHeight: =100
-                    LayoutMinWidth: =250
+                    LayoutMinWidth: =657
                     LayoutMode: =LayoutMode.Auto
-                    RadiusBottomLeft: =8
-                    RadiusBottomRight: =8
-                    RadiusTopLeft: =8
-                    RadiusTopRight: =8
+                    RadiusBottomLeft: =10
+                    RadiusBottomRight: =10
+                    RadiusTopLeft: =10
+                    RadiusTopRight: =10
                     ZIndex: =4
 
-                    ListaEmpleadosSeleccionados As Tabla.pcfdataset:
-                        ContextualLookupColumnFilters: ="yes"
-                        DateOnlyFormat: ='PowerAppsOneGrid.DateOnlyFormat'.ShortDate
-                        DateTimeFormat: ='PowerAppsOneGrid.DateTimeFormat'.ShortDateTime
-                        DisplayMode: =DisplayMode.Edit
-                        FillPortions: =1
-                        Height: =If(Self.Y + 500 > Parent.Height, Parent.Height - Self.Y, 500)
-                        Items: =Sort(SelectedEmployees, Codigo , SortOrder.Ascending)
-                        LayoutMinHeight: =
-                        LayoutMinWidth: =
-                        LookupFilterBeginsWith: ="no"
-                        NoDataText: ="Ningun empleado ha sido agregado."
-                        onCellValueChange: =false
-                        onFilter: =false
-                        onNavigate: =false
-                        onRowSelect: =false
-                        onSave: =false
-                        OnSelect: =false
-                        Width: =If(Self.X + 800 > Parent.Width, Parent.Width - Self.X, 800)
-                        X: =0
-                        Y: =0
+                    "GaleriaBonoSemanals_2 As gallery.'BrowseLayout_Vertical_OneTextVariant_ver5.0'":
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        DelayItemLoading: =true
+                        Items: |-
+                            =Sort(
+                                Filter(
+                                    SelectedEmployees,
+                                    IsBlank(txt_Codigo_EBS.Text) || Codigo = txt_Codigo_EBS.Text
+                                ),
+                                Value(Codigo)
+                            )
+                        Layout: =Layout.Vertical
+                        LayoutMinHeight: =287
+                        LayoutMinWidth: =Parent.Width
+                        LoadingSpinner: =LoadingSpinner.Data
+                        TemplatePadding: =12
+                        TemplateSize: =105
+                        Width: =920
                         ZIndex: =1
 
-                        Codigo6 As PowerAppsOneGridTemplate_dataField.textualColumn:
-                            FieldDisplayName: ="Codigo"
-                            FieldName: ="Codigo"
-                            FieldType: ="s"
-                            FieldVariantName: ="textualColumn"
-                            Order: =1
-                            Width: =0
-                            ZIndex: =20
+                        Container65_1 As groupContainer.manualLayoutContainer:
+                            BorderColor: =RGBA(40, 134, 222, 1)
+                            BorderThickness: =2
+                            DropShadow: =DropShadow.Light
+                            Fill: =RGBA(255, 255, 255, 1)
+                            Height: =105
+                            RadiusBottomLeft: =6
+                            RadiusBottomRight: =6
+                            RadiusTopLeft: =6
+                            RadiusTopRight: =6
+                            Width: =634
+                            ZIndex: =1
 
-                        Empleado7 As PowerAppsOneGridTemplate_dataField.textualColumn:
-                            FieldDisplayName: ="Empleado"
-                            FieldName: ="Empleado"
-                            FieldType: ="s"
-                            FieldVariantName: ="textualColumn"
-                            Order: =2
-                            Width: =0
-                            ZIndex: =21
+                            Button6_5 As button:
+                                BorderColor: =RGBA(215, 58, 60, 1)
+                                DisabledBorderColor: =RGBA(244, 244, 244, 1)
+                                DisabledColor: =RGBA(166, 166, 166, 1)
+                                DisabledFill: =RGBA(244, 244, 244, 1)
+                                DisplayMode: =If(!IsBlank(LookUp(SelectedEmployees, Codigo = ThisItem.Codigo)), DisplayMode.Edit, DisplayMode.Disabled)
+                                Fill: =RGBA(215, 58, 60, 1)
+                                Font: =App.Theme.Font
+                                FontWeight: =FontWeight.Semibold
+                                Height: =50
+                                HoverBorderColor: =RGBA(215, 58, 60, 1)
+                                HoverColor: =App.Theme.Colors.PrimaryForeground
+                                HoverFill: =RGBA(132, 40, 38, 1)
+                                OnSelect: |-
+                                    =If(
+                                        !IsBlank(LookUp(SelectedEmployees, Codigo = ThisItem.Codigo)),
+                                        RemoveIf(
+                                            SelectedEmployees,
+                                            Codigo = ThisItem.Codigo
+                                        ),
+                                        Notify("El empleado no existe en la lista", NotificationType.Error)
+                                    )
+                                PressedBorderColor: =RGBA(215, 58, 60, 1)
+                                PressedColor: =RGBA(215, 58, 60, 1)
+                                PressedFill: =RGBA(255, 255, 255, 1)
+                                RadiusBottomLeft: =8
+                                RadiusBottomRight: =8
+                                RadiusTopLeft: =8
+                                RadiusTopRight: =8
+                                Size: =15
+                                Text: ="Eliminar"
+                                Width: =115
+                                X: =500
+                                Y: =31
+                                ZIndex: =2
 
-                        Value1 As PowerAppsOneGridTemplate_dataField.textualColumn:
-                            FieldDisplayName: ="Value"
-                            FieldName: ="Value"
-                            FieldType: ="N"
-                            FieldVariantName: ="textualColumn"
-                            Order: =3
-                            Width: =0
-                            ZIndex: =22
+                            TextInput14_13 As text:
+                                Align: =Align.Center
+                                BorderColor: =App.Theme.Colors.Darker40
+                                BorderThickness: =2
+                                Color: =RGBA(0, 0, 0, 1)
+                                Default: ="Empleado"
+                                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                                DisabledColor: =RGBA(166, 166, 166, 1)
+                                DisabledFill: =RGBA(244, 244, 244, 1)
+                                DisplayMode: =DisplayMode.View
+                                FocusedBorderThickness: =4
+                                Font: =App.Theme.Font
+                                Height: =22
+                                HoverBorderColor: =App.Theme.Colors.Darker40
+                                HoverColor: =RGBA(0, 0, 0, 1)
+                                HoverFill: =App.Theme.Colors.Lighter70
+                                PaddingBottom: =2
+                                PaddingLeft: =5
+                                PaddingTop: =2
+                                Size: =12
+                                Width: =330
+                                X: =15
+                                Y: =5
+                                ZIndex: =3
+
+                            TextInput14_14 As text:
+                                Align: =Align.Center
+                                BorderColor: =App.Theme.Colors.Darker40
+                                BorderThickness: =2
+                                Color: =RGBA(0, 0, 0, 1)
+                                Default: =ThisItem.Empleado
+                                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                                DisabledColor: =RGBA(0, 0, 0, 1)
+                                DisabledFill: =RGBA(180, 214, 250, 0.3)
+                                DisplayMode: =DisplayMode.Disabled
+                                FocusedBorderThickness: =4
+                                Font: =App.Theme.Font
+                                Height: =30
+                                HoverBorderColor: =App.Theme.Colors.Darker40
+                                HoverColor: =RGBA(0, 0, 0, 1)
+                                HoverFill: =App.Theme.Colors.Lighter70
+                                Width: =330
+                                X: =15
+                                Y: =27
+                                ZIndex: =4
+
+                            TextInput14_15 As text:
+                                Align: =Align.Center
+                                BorderColor: =App.Theme.Colors.Darker40
+                                BorderThickness: =2
+                                Color: =RGBA(0, 0, 0, 1)
+                                Default: ="Empleado"
+                                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                                DisabledColor: =RGBA(166, 166, 166, 1)
+                                DisabledFill: =RGBA(244, 244, 244, 1)
+                                DisplayMode: =DisplayMode.View
+                                FocusedBorderThickness: =4
+                                Font: =App.Theme.Font
+                                Height: =22
+                                HoverBorderColor: =App.Theme.Colors.Darker40
+                                HoverColor: =RGBA(0, 0, 0, 1)
+                                HoverFill: =App.Theme.Colors.Lighter70
+                                PaddingBottom: =2
+                                PaddingLeft: =5
+                                PaddingTop: =2
+                                Size: =12
+                                Width: =120
+                                X: =360
+                                Y: =5
+                                ZIndex: =5
+
+                            TextInput14_16 As text:
+                                Align: =Align.Center
+                                BorderColor: =App.Theme.Colors.Darker40
+                                BorderThickness: =2
+                                Color: =RGBA(0, 0, 0, 1)
+                                Default: =ThisItem.Codigo
+                                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                                DisabledColor: =RGBA(0, 0, 0, 1)
+                                DisabledFill: =RGBA(180, 214, 250, 0.3)
+                                DisplayMode: =DisplayMode.Disabled
+                                FocusedBorderThickness: =4
+                                Font: =App.Theme.Font
+                                Height: =30
+                                HoverBorderColor: =App.Theme.Colors.Darker40
+                                HoverColor: =RGBA(0, 0, 0, 1)
+                                HoverFill: =App.Theme.Colors.Lighter70
+                                Width: =120
+                                X: =360
+                                Y: =27
+                                ZIndex: =6
+
+                            TextInput14_17 As text:
+                                BorderColor: =App.Theme.Colors.Darker40
+                                BorderThickness: =2
+                                Color: =RGBA(0, 0, 0, 1)
+                                Default: ="SubTotal"
+                                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                                DisabledColor: =RGBA(166, 166, 166, 1)
+                                DisabledFill: =RGBA(244, 244, 244, 1)
+                                DisplayMode: =DisplayMode.View
+                                FocusedBorderThickness: =4
+                                Font: =App.Theme.Font
+                                Height: =30
+                                HoverBorderColor: =App.Theme.Colors.Darker40
+                                HoverColor: =RGBA(0, 0, 0, 1)
+                                HoverFill: =App.Theme.Colors.Lighter70
+                                PaddingBottom: =2
+                                PaddingLeft: =5
+                                PaddingTop: =2
+                                Size: =12
+                                Width: =75
+                                X: =15
+                                Y: =67
+                                ZIndex: =7
+
+                            TextInput14_18 As text:
+                                Align: =Align.Center
+                                BorderColor: =App.Theme.Colors.Darker40
+                                BorderThickness: =2
+                                Color: =RGBA(0, 0, 0, 1)
+                                Default: =ThisItem.SubTotal
+                                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                                DisabledColor: =RGBA(0, 0, 0, 1)
+                                DisabledFill: =RGBA(180, 214, 250, 0.3)
+                                DisplayMode: =DisplayMode.Disabled
+                                FocusedBorderThickness: =4
+                                Font: =App.Theme.Font
+                                Height: =30
+                                HoverBorderColor: =App.Theme.Colors.Darker40
+                                HoverColor: =RGBA(0, 0, 0, 1)
+                                HoverFill: =App.Theme.Colors.Lighter70
+                                Width: =165
+                                X: =90
+                                Y: =67
+                                ZIndex: =8
+
+                            TextInput14_19 As text:
+                                BorderColor: =App.Theme.Colors.Darker40
+                                BorderThickness: =2
+                                Color: =RGBA(0, 0, 0, 1)
+                                Default: ="Total"
+                                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                                DisabledColor: =RGBA(166, 166, 166, 1)
+                                DisabledFill: =RGBA(244, 244, 244, 1)
+                                DisplayMode: =DisplayMode.View
+                                FocusedBorderThickness: =4
+                                Font: =App.Theme.Font
+                                Height: =30
+                                HoverBorderColor: =App.Theme.Colors.Darker40
+                                HoverColor: =RGBA(0, 0, 0, 1)
+                                HoverFill: =App.Theme.Colors.Lighter70
+                                PaddingBottom: =2
+                                PaddingLeft: =5
+                                PaddingTop: =2
+                                Size: =12
+                                Width: =45
+                                X: =270
+                                Y: =67
+                                ZIndex: =9
+
+                            TextInput14_20 As text:
+                                Align: =Align.Center
+                                BorderColor: =App.Theme.Colors.Darker40
+                                BorderThickness: =2
+                                Color: =RGBA(0, 0, 0, 1)
+                                Default: =ThisItem.BonoTotal
+                                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                                DisabledColor: =RGBA(0, 0, 0, 1)
+                                DisabledFill: =RGBA(180, 214, 250, 0.3)
+                                DisplayMode: =DisplayMode.Disabled
+                                FocusedBorderThickness: =4
+                                Font: =App.Theme.Font
+                                Height: =30
+                                HoverBorderColor: =App.Theme.Colors.Darker40
+                                HoverColor: =RGBA(0, 0, 0, 1)
+                                HoverFill: =App.Theme.Colors.Lighter70
+                                Width: =165
+                                X: =315
+                                Y: =67
+                                ZIndex: =10
+
+                            TextInput14_21 As text:
+                                Align: =Align.Center
+                                BorderColor: =App.Theme.Colors.Darker40
+                                BorderThickness: =2
+                                Color: =RGBA(0, 0, 0, 1)
+                                Default: =
+                                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                                DisabledColor: =RGBA(166, 166, 166, 1)
+                                DisabledFill: =RGBA(244, 244, 244, 1)
+                                DisplayMode: =DisplayMode.View
+                                FocusedBorderThickness: =4
+                                Font: =App.Theme.Font
+                                Height: =92
+                                HoverBorderColor: =App.Theme.Colors.Darker40
+                                HoverColor: =RGBA(0, 0, 0, 1)
+                                HoverFill: =App.Theme.Colors.Lighter70
+                                PaddingBottom: =2
+                                PaddingLeft: =5
+                                PaddingTop: =2
+                                Size: =12
+                                Width: =5
+                                X: =485
+                                Y: =10
+                                ZIndex: =11
 
                 MainContainer5_4 As groupContainer.verticalAutoLayoutContainer:
+                    BorderColor: =RGBA(40, 134, 222, 1)
+                    BorderThickness: =3
                     DropShadow: =DropShadow.Light
-                    Fill: =RGBA(255, 255, 255, 1)
-                    FillPortions: =7
+                    Fill: =RGBA(180, 214, 250, 0.6)
+                    FillPortions: =4
                     LayoutDirection: =LayoutDirection.Vertical
                     LayoutMinHeight: =100
-                    LayoutMinWidth: =250
+                    LayoutMinWidth: =657
                     LayoutMode: =LayoutMode.Auto
-                    RadiusBottomLeft: =8
-                    RadiusBottomRight: =8
-                    RadiusTopLeft: =8
-                    RadiusTopRight: =8
+                    RadiusBottomLeft: =10
+                    RadiusBottomRight: =10
+                    RadiusTopLeft: =10
+                    RadiusTopRight: =10
                     ZIndex: =5
 
                     "GaleriaBonoSemanals As gallery.'BrowseLayout_Vertical_OneTextVariant_ver5.0'":
                         BorderColor: =RGBA(0, 18, 107, 1)
                         DelayItemLoading: =true
                         Items: |-
-                            =Filter(
-                                BonoSemanals,
-                                IsBlank(txtCodigoBono.Text) || Codigo = txtCodigoBono.Text,
-                                IsBlank(dropSemanaBonos.Selected.Value) || SemanaNumber = dropSemanaBonos.Selected.Value,
-                                IsBlank(dropSemanaAnos.Selected.Value) || Año = dropSemanaAnos.Selected.Value,
-                                Ubicacion = drp_Ubicacion_Envio.SelectedText.Value
+                            =Sort(
+                                Filter(
+                                    BonoEmpleados,
+                                    IsBlank(txt_Codigo_EBS.Text) || Codigo = txt_Codigo_EBS.Text
+                                ),
+                                Value(Codigo)
                             )
                         Layout: =Layout.Vertical
                         LayoutMinHeight: =287
-                        LayoutMinWidth: =320
+                        LayoutMinWidth: =Parent.Width
                         LoadingSpinner: =LoadingSpinner.Data
-                        TemplatePadding: =0
-                        TemplateSize: =220
+                        TemplatePadding: =12
+                        TemplateSize: =105
                         Width: =920
                         ZIndex: =1
-
-                        Title1_1 As label:
-                            Align: =Align.Center
-                            BorderThickness: =2
-                            Color: =RGBA(50, 49, 48, 1)
-                            DisabledColor: =RGBA(166, 166, 166, 1)
-                            FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
-                            Height: =26
-                            OnSelect: =Select(Parent)
-                            PaddingBottom: =0
-                            PaddingLeft: =0
-                            PaddingRight: =0
-                            PaddingTop: =0
-                            Size: =17
-                            Text: =ThisItem.Codigo
-                            VerticalAlign: =VerticalAlign.Top
-                            Width: =330
-                            X: =156
-                            Y: =44
-                            ZIndex: =1
-
-                        Separator2_4 As rectangle:
-                            BorderColor: =RGBA(0, 18, 107, 1)
-                            Fill: =RGBA(40, 134, 222, 1)
-                            Height: =8
-                            OnSelect: =Select(Parent)
-                            Width: =880
-                            X: =14
-                            Y: =212
-                            ZIndex: =3
 
                         Rectangle2_4 As rectangle:
                             BorderColor: =RGBA(0, 18, 107, 1)
                             Fill: =RGBA(0, 18, 107, 1)
-                            Height: =Parent.TemplateHeight - Separator2_4.Height
+                            Height: =Parent.TemplateHeight
                             OnSelect: =Select(Parent)
                             Visible: =ThisItem.IsSelected
                             Width: =1
                             ZIndex: =4
 
-                        Title1_2 As label:
-                            Align: =Align.Center
+                        Container65 As groupContainer.manualLayoutContainer:
+                            BorderColor: =RGBA(40, 134, 222, 1)
                             BorderThickness: =2
-                            Color: =RGBA(50, 49, 48, 1)
-                            DisabledColor: =RGBA(166, 166, 166, 1)
-                            FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
-                            Height: =26
-                            OnSelect: =Select(Parent)
-                            PaddingBottom: =0
-                            PaddingLeft: =0
-                            PaddingRight: =0
-                            PaddingTop: =0
-                            Size: =17
-                            Text: =ThisItem.Empleado
-                            VerticalAlign: =VerticalAlign.Top
-                            Width: =330
-                            X: =155
-                            Y: =11
+                            DropShadow: =DropShadow.Light
+                            Fill: =RGBA(255, 255, 255, 1)
+                            Height: =105
+                            RadiusBottomLeft: =6
+                            RadiusBottomRight: =6
+                            RadiusTopLeft: =6
+                            RadiusTopRight: =6
+                            Width: =634
                             ZIndex: =5
 
-                        Title1_3 As label:
-                            Align: =Align.Center
-                            BorderThickness: =2
-                            Color: =RGBA(50, 49, 48, 1)
-                            DisabledColor: =RGBA(166, 166, 166, 1)
-                            FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
-                            Height: =26
-                            OnSelect: =Select(Parent)
-                            PaddingBottom: =0
-                            PaddingLeft: =0
-                            PaddingRight: =0
-                            PaddingTop: =0
-                            Text: =ThisItem.SemanaNumber
-                            VerticalAlign: =VerticalAlign.Top
-                            Width: =330
-                            X: =156
-                            Y: =77
-                            ZIndex: =6
-
-                        Title1_4 As label:
-                            Align: =Align.Center
-                            BorderThickness: =2
-                            Color: =RGBA(50, 49, 48, 1)
-                            DisabledColor: =RGBA(166, 166, 166, 1)
-                            FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
-                            Height: =26
-                            OnSelect: =Select(Parent)
-                            PaddingBottom: =0
-                            PaddingLeft: =0
-                            PaddingRight: =0
-                            PaddingTop: =0
-                            Size: =17
-                            Text: |-
-                                ="Empleado:"
-                            VerticalAlign: =VerticalAlign.Top
-                            Width: =127
-                            X: =14
-                            Y: =11
-                            ZIndex: =7
-
-                        Title1_5 As label:
-                            Align: =Align.Center
-                            BorderThickness: =2
-                            Color: =RGBA(50, 49, 48, 1)
-                            DisabledColor: =RGBA(166, 166, 166, 1)
-                            FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
-                            Height: =26
-                            OnSelect: =Select(Parent)
-                            PaddingBottom: =0
-                            PaddingLeft: =0
-                            PaddingRight: =0
-                            PaddingTop: =0
-                            Size: =17
-                            Text: |-
-                                ="Codigo:"
-                            VerticalAlign: =VerticalAlign.Top
-                            Width: =127
-                            X: =14
-                            Y: =44
-                            ZIndex: =8
-
-                        Title1_6 As label:
-                            Align: =Align.Center
-                            BorderThickness: =2
-                            Color: =RGBA(50, 49, 48, 1)
-                            DisabledColor: =RGBA(166, 166, 166, 1)
-                            FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
-                            Height: =26
-                            OnSelect: =Select(Parent)
-                            PaddingBottom: =0
-                            PaddingLeft: =0
-                            PaddingRight: =0
-                            PaddingTop: =0
-                            Size: =17
-                            Text: |-
-                                ="Semana:"
-                            VerticalAlign: =VerticalAlign.Top
-                            Width: =127
-                            X: =14
-                            Y: =79
-                            ZIndex: =9
-
-                        Title1_7 As label:
-                            Align: =Align.Center
-                            BorderThickness: =2
-                            Color: =RGBA(50, 49, 48, 1)
-                            DisabledColor: =RGBA(166, 166, 166, 1)
-                            FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
-                            Height: =26
-                            OnSelect: =Select(Parent)
-                            PaddingBottom: =0
-                            PaddingLeft: =0
-                            PaddingRight: =0
-                            PaddingTop: =0
-                            Size: =17
-                            Text: |-
-                                ="SubTotal:"
-                            VerticalAlign: =VerticalAlign.Top
-                            Width: =127
-                            X: =14
-                            Y: =114
-                            ZIndex: =10
-
-                        Title1_8 As label:
-                            Align: =Align.Center
-                            BorderThickness: =2
-                            Color: =RGBA(50, 49, 48, 1)
-                            DisabledColor: =RGBA(166, 166, 166, 1)
-                            FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
-                            Height: =26
-                            OnSelect: =Select(Parent)
-                            PaddingBottom: =0
-                            PaddingLeft: =0
-                            PaddingRight: =0
-                            PaddingTop: =0
-                            Text: =ThisItem.SubTotal
-                            VerticalAlign: =VerticalAlign.Top
-                            Width: =330
-                            X: =156
-                            Y: =112
-                            ZIndex: =11
-
-                        Title1_9 As label:
-                            Align: =Align.Center
-                            BorderThickness: =2
-                            Color: =RGBA(50, 49, 48, 1)
-                            DisabledColor: =RGBA(166, 166, 166, 1)
-                            FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
-                            Height: =26
-                            OnSelect: =Select(Parent)
-                            PaddingBottom: =0
-                            PaddingLeft: =0
-                            PaddingRight: =0
-                            PaddingTop: =0
-                            Size: =17
-                            Text: |-
-                                ="Total:"
-                            VerticalAlign: =VerticalAlign.Top
-                            Width: =127
-                            X: =14
-                            Y: =145
-                            ZIndex: =12
-
-                        Title1_10 As label:
-                            Align: =Align.Center
-                            BorderThickness: =2
-                            Color: =RGBA(50, 49, 48, 1)
-                            DisabledColor: =RGBA(166, 166, 166, 1)
-                            FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
-                            Height: =26
-                            OnSelect: =Select(Parent)
-                            PaddingBottom: =0
-                            PaddingLeft: =0
-                            PaddingRight: =0
-                            PaddingTop: =0
-                            Text: =ThisItem.BonoTotal
-                            VerticalAlign: =VerticalAlign.Top
-                            Width: =330
-                            X: =156
-                            Y: =147
-                            ZIndex: =13
-
-                        Title1_11 As label:
-                            Align: =Align.Center
-                            BorderThickness: =2
-                            Color: =RGBA(50, 49, 48, 1)
-                            DisabledColor: =RGBA(166, 166, 166, 1)
-                            FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
-                            Height: =26
-                            OnSelect: =Select(Parent)
-                            PaddingBottom: =0
-                            PaddingLeft: =0
-                            PaddingRight: =0
-                            PaddingTop: =0
-                            Size: =17
-                            Text: |-
-                                ="Ubicacion:"
-                            VerticalAlign: =VerticalAlign.Top
-                            Width: =127
-                            X: =14
-                            Y: =178
-                            ZIndex: =16
-
-                        Title1_12 As label:
-                            Align: =Align.Center
-                            BorderThickness: =2
-                            Color: =RGBA(50, 49, 48, 1)
-                            DisabledColor: =RGBA(166, 166, 166, 1)
-                            FontWeight: =If(ThisItem.IsSelected, FontWeight.Semibold, FontWeight.Normal)
-                            Height: =26
-                            OnSelect: =Select(Parent)
-                            PaddingBottom: =0
-                            PaddingLeft: =0
-                            PaddingRight: =0
-                            PaddingTop: =0
-                            Text: =ThisItem.Ubicacion
-                            VerticalAlign: =VerticalAlign.Top
-                            Width: =330
-                            X: =156
-                            Y: =180
-                            ZIndex: =17
-
-                        Button6 As button:
-                            BorderColor: =
-                            Color: =RGBA(0, 0, 0, 1)
-                            DisabledBorderColor: =RGBA(244, 244, 244, 1)
-                            DisabledColor: =RGBA(166, 166, 166, 1)
-                            DisabledFill: =RGBA(244, 244, 244, 1)
-                            DisplayMode: =If(IsBlank(LookUp(SelectedEmployees, Codigo = ThisItem.Codigo)), DisplayMode.Edit, DisplayMode.Disabled)
-                            Fill: =RGBA(166, 215, 153, 1)
-                            Font: =App.Theme.Font
-                            FontWeight: =FontWeight.Semibold
-                            Height: =59
-                            HoverBorderColor: =App.Theme.Colors.Darker10
-                            HoverColor: =App.Theme.Colors.PrimaryForeground
-                            HoverFill: =App.Theme.Colors.Darker10
-                            OnSelect: |-
-                                =If(
-                                    IsBlank(LookUp(SelectedEmployees, Codigo = ThisItem.Codigo)),
-                                    Collect(
+                            Button6 As button:
+                                BorderColor: =RGBA(52, 152, 47, 1)
+                                DisabledBorderColor: =RGBA(244, 244, 244, 1)
+                                DisabledColor: =RGBA(166, 166, 166, 1)
+                                DisabledFill: =RGBA(244, 244, 244, 1)
+                                DisplayMode: =If(IsBlank(LookUp(SelectedEmployees, Codigo = ThisItem.Codigo)), DisplayMode.Edit, DisplayMode.Disabled)
+                                Fill: =RGBA(52, 152, 47, 1)
+                                Font: =App.Theme.Font
+                                FontWeight: =FontWeight.Semibold
+                                Height: =50
+                                HoverBorderColor: =RGBA(52, 152, 47, 1)
+                                HoverColor: =App.Theme.Colors.PrimaryForeground
+                                HoverFill: =RGBA(21, 68, 18, 1)
+                                OnSelect: |-
+                                    =If(
+                                        IsBlank(LookUp(SelectedEmployees, Codigo = ThisItem.Codigo)),
+                                        Collect(
+                                            SelectedEmployees,
+                                            {
+                                                Codigo: ThisItem.Codigo,
+                                                Empleado: ThisItem.Empleado,
+                                                ID: ThisItem.ID,
+                                                SubTotal: ThisItem.SubTotal,
+                                                BonoTotal: ThisItem.BonoTotal
+                                            }
+                                        ),
+                                        Notify("El empleado ya ha sido agregado", NotificationType.Error)
+                                    );
+                                    Clear(EmployeeCodes);
+                                    ForAll(
                                         SelectedEmployees,
-                                        {
-                                            Codigo: ThisItem.Codigo,
-                                            Empleado: ThisItem.Empleado,
-                                            ID: ThisItem.ID
-                                        }
-                                    ),
-                                    Notify("El empleado ya ha sido agregado", NotificationType.Error)
-                                );
-                                Clear(EmployeeCodes);
-                                ForAll(
-                                    SelectedEmployees,
-                                    Collect(EmployeeCodes, { Codigo: Codigo })
-                                );
-                                Set(EmployeeCodesString, 
-                                    Left(Concat(EmployeeCodes, Codigo & "," ), Len(Concat(EmployeeCodes, Codigo & "," )) - 1)
-                                )
-                            PressedBorderColor: =App.Theme.Colors.Darker40
-                            PressedColor: =Self.Color
-                            PressedFill: =App.Theme.Colors.Darker40
-                            Size: =18
-                            Text: ="Agregar Empleado"
-                            Width: =250
-                            X: =558
-                            Y: =44
-                            ZIndex: =18
+                                        Collect(EmployeeCodes, { Codigo: Codigo })
+                                    );
+                                    Set(EmployeeCodesString, 
+                                        Left(Concat(EmployeeCodes, Codigo & "," ), Len(Concat(EmployeeCodes, Codigo & "," )) - 1)
+                                    );
+                                    
+                                    RemoveIf(BonoEmpleados, Codigo = ThisItem.Codigo)
+                                PressedBorderColor: =RGBA(52, 152, 47, 1)
+                                PressedColor: =RGBA(52, 152, 47, 1)
+                                PressedFill: =RGBA(255, 255, 255, 1)
+                                RadiusBottomLeft: =8
+                                RadiusBottomRight: =8
+                                RadiusTopLeft: =8
+                                RadiusTopRight: =8
+                                Size: =15
+                                Text: ="Agregar"
+                                Width: =114
+                                X: =500
+                                Y: =31
+                                ZIndex: =1
 
-                        Button6_1 As button:
-                            BorderColor: =
-                            Color: =RGBA(0, 0, 0, 1)
-                            DisabledBorderColor: =RGBA(244, 244, 244, 1)
-                            DisabledColor: =RGBA(166, 166, 166, 1)
-                            DisabledFill: =RGBA(244, 244, 244, 1)
-                            DisplayMode: =If(!IsBlank(LookUp(SelectedEmployees, Codigo = ThisItem.Codigo)), DisplayMode.Edit, DisplayMode.Disabled)
-                            Fill: =RGBA(255, 184, 174, 1)
-                            Font: =App.Theme.Font
-                            FontWeight: =FontWeight.Semibold
-                            Height: =59
-                            HoverBorderColor: =App.Theme.Colors.Darker10
-                            HoverColor: =App.Theme.Colors.PrimaryForeground
-                            HoverFill: =App.Theme.Colors.Darker10
-                            OnSelect: |-
-                                =If(
-                                    !IsBlank(LookUp(SelectedEmployees, Codigo = ThisItem.Codigo)),
-                                    RemoveIf(
-                                        SelectedEmployees,
-                                        Codigo = ThisItem.Codigo
-                                    ),
-                                    Notify("El empleado no existe en la lista", NotificationType.Error)
-                                )
-                            PressedBorderColor: =App.Theme.Colors.Darker40
-                            PressedColor: =Self.Color
-                            PressedFill: =App.Theme.Colors.Darker40
-                            Size: =18
-                            Text: ="Eliminar Empleado"
-                            Width: =250
-                            X: =558
-                            Y: =121
-                            ZIndex: =19
+                            TextInput14 As text:
+                                Align: =Align.Center
+                                BorderColor: =App.Theme.Colors.Darker40
+                                BorderThickness: =2
+                                Color: =RGBA(0, 0, 0, 1)
+                                Default: ="Empleado"
+                                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                                DisabledColor: =RGBA(166, 166, 166, 1)
+                                DisabledFill: =RGBA(244, 244, 244, 1)
+                                DisplayMode: =DisplayMode.View
+                                FocusedBorderThickness: =4
+                                Font: =App.Theme.Font
+                                Height: =22
+                                HoverBorderColor: =App.Theme.Colors.Darker40
+                                HoverColor: =RGBA(0, 0, 0, 1)
+                                HoverFill: =App.Theme.Colors.Lighter70
+                                PaddingBottom: =2
+                                PaddingLeft: =5
+                                PaddingTop: =2
+                                Size: =12
+                                Width: =330
+                                X: =15
+                                Y: =5
+                                ZIndex: =3
+
+                            TextInput14_1 As text:
+                                Align: =Align.Center
+                                BorderColor: =App.Theme.Colors.Darker40
+                                BorderThickness: =2
+                                Color: =RGBA(0, 0, 0, 1)
+                                Default: =ThisItem.Empleado
+                                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                                DisabledColor: =RGBA(0, 0, 0, 1)
+                                DisabledFill: =RGBA(180, 214, 250, 0.3)
+                                DisplayMode: =DisplayMode.Disabled
+                                FocusedBorderThickness: =4
+                                Font: =App.Theme.Font
+                                Height: =30
+                                HoverBorderColor: =App.Theme.Colors.Darker40
+                                HoverColor: =RGBA(0, 0, 0, 1)
+                                HoverFill: =App.Theme.Colors.Lighter70
+                                Width: =330
+                                X: =15
+                                Y: =27
+                                ZIndex: =4
+
+                            TextInput14_2 As text:
+                                Align: =Align.Center
+                                BorderColor: =App.Theme.Colors.Darker40
+                                BorderThickness: =2
+                                Color: =RGBA(0, 0, 0, 1)
+                                Default: ="Empleado"
+                                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                                DisabledColor: =RGBA(166, 166, 166, 1)
+                                DisabledFill: =RGBA(244, 244, 244, 1)
+                                DisplayMode: =DisplayMode.View
+                                FocusedBorderThickness: =4
+                                Font: =App.Theme.Font
+                                Height: =22
+                                HoverBorderColor: =App.Theme.Colors.Darker40
+                                HoverColor: =RGBA(0, 0, 0, 1)
+                                HoverFill: =App.Theme.Colors.Lighter70
+                                PaddingBottom: =2
+                                PaddingLeft: =5
+                                PaddingTop: =2
+                                Size: =12
+                                Width: =120
+                                X: =360
+                                Y: =5
+                                ZIndex: =5
+
+                            TextInput14_3 As text:
+                                Align: =Align.Center
+                                BorderColor: =App.Theme.Colors.Darker40
+                                BorderThickness: =2
+                                Color: =RGBA(0, 0, 0, 1)
+                                Default: =ThisItem.Codigo
+                                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                                DisabledColor: =RGBA(0, 0, 0, 1)
+                                DisabledFill: =RGBA(180, 214, 250, 0.3)
+                                DisplayMode: =DisplayMode.Disabled
+                                FocusedBorderThickness: =4
+                                Font: =App.Theme.Font
+                                Height: =30
+                                HoverBorderColor: =App.Theme.Colors.Darker40
+                                HoverColor: =RGBA(0, 0, 0, 1)
+                                HoverFill: =App.Theme.Colors.Lighter70
+                                Width: =120
+                                X: =360
+                                Y: =27
+                                ZIndex: =6
+
+                            TextInput14_4 As text:
+                                BorderColor: =App.Theme.Colors.Darker40
+                                BorderThickness: =2
+                                Color: =RGBA(0, 0, 0, 1)
+                                Default: ="SubTotal"
+                                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                                DisabledColor: =RGBA(166, 166, 166, 1)
+                                DisabledFill: =RGBA(244, 244, 244, 1)
+                                DisplayMode: =DisplayMode.View
+                                FocusedBorderThickness: =4
+                                Font: =App.Theme.Font
+                                Height: =30
+                                HoverBorderColor: =App.Theme.Colors.Darker40
+                                HoverColor: =RGBA(0, 0, 0, 1)
+                                HoverFill: =App.Theme.Colors.Lighter70
+                                PaddingBottom: =2
+                                PaddingLeft: =5
+                                PaddingTop: =2
+                                Size: =12
+                                Width: =75
+                                X: =15
+                                Y: =67
+                                ZIndex: =7
+
+                            TextInput14_5 As text:
+                                Align: =Align.Center
+                                BorderColor: =App.Theme.Colors.Darker40
+                                BorderThickness: =2
+                                Color: =RGBA(0, 0, 0, 1)
+                                Default: =ThisItem.SubTotal
+                                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                                DisabledColor: =RGBA(0, 0, 0, 1)
+                                DisabledFill: =RGBA(180, 214, 250, 0.3)
+                                DisplayMode: =DisplayMode.Disabled
+                                FocusedBorderThickness: =4
+                                Font: =App.Theme.Font
+                                Height: =30
+                                HoverBorderColor: =App.Theme.Colors.Darker40
+                                HoverColor: =RGBA(0, 0, 0, 1)
+                                HoverFill: =App.Theme.Colors.Lighter70
+                                Width: =165
+                                X: =90
+                                Y: =67
+                                ZIndex: =8
+
+                            TextInput14_6 As text:
+                                BorderColor: =App.Theme.Colors.Darker40
+                                BorderThickness: =2
+                                Color: =RGBA(0, 0, 0, 1)
+                                Default: ="Total"
+                                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                                DisabledColor: =RGBA(166, 166, 166, 1)
+                                DisabledFill: =RGBA(244, 244, 244, 1)
+                                DisplayMode: =DisplayMode.View
+                                FocusedBorderThickness: =4
+                                Font: =App.Theme.Font
+                                Height: =30
+                                HoverBorderColor: =App.Theme.Colors.Darker40
+                                HoverColor: =RGBA(0, 0, 0, 1)
+                                HoverFill: =App.Theme.Colors.Lighter70
+                                PaddingBottom: =2
+                                PaddingLeft: =5
+                                PaddingTop: =2
+                                Size: =12
+                                Width: =45
+                                X: =270
+                                Y: =67
+                                ZIndex: =9
+
+                            TextInput14_7 As text:
+                                Align: =Align.Center
+                                BorderColor: =App.Theme.Colors.Darker40
+                                BorderThickness: =2
+                                Color: =RGBA(0, 0, 0, 1)
+                                Default: =ThisItem.BonoTotal
+                                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                                DisabledColor: =RGBA(0, 0, 0, 1)
+                                DisabledFill: =RGBA(180, 214, 250, 0.3)
+                                DisplayMode: =DisplayMode.Disabled
+                                FocusedBorderThickness: =4
+                                Font: =App.Theme.Font
+                                Height: =30
+                                HoverBorderColor: =App.Theme.Colors.Darker40
+                                HoverColor: =RGBA(0, 0, 0, 1)
+                                HoverFill: =App.Theme.Colors.Lighter70
+                                Width: =165
+                                X: =315
+                                Y: =67
+                                ZIndex: =10
+
+                            TextInput14_8 As text:
+                                Align: =Align.Center
+                                BorderColor: =App.Theme.Colors.Darker40
+                                BorderThickness: =2
+                                Color: =RGBA(0, 0, 0, 1)
+                                Default: =
+                                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                                DisabledColor: =RGBA(166, 166, 166, 1)
+                                DisabledFill: =RGBA(244, 244, 244, 1)
+                                DisplayMode: =DisplayMode.View
+                                FocusedBorderThickness: =4
+                                Font: =App.Theme.Font
+                                Height: =92
+                                HoverBorderColor: =App.Theme.Colors.Darker40
+                                HoverColor: =RGBA(0, 0, 0, 1)
+                                HoverFill: =App.Theme.Colors.Lighter70
+                                PaddingBottom: =2
+                                PaddingLeft: =5
+                                PaddingTop: =2
+                                Size: =12
+                                Width: =5
+                                X: =485
+                                Y: =10
+                                ZIndex: =11
 
     Container3_6 As groupContainer.manualLayoutContainer:
         BorderColor: =RGBA(39, 113, 194, 1)
@@ -1124,29 +1227,28 @@ EnvioDeBonos As screen:
         BorderColor: =App.Theme.Colors.Darker40
         DisabledBorderColor: =RGBA(166, 166, 166, 1)
         DisabledFill: =RGBA(244, 244, 244, 1)
+        Height: =30
         Image: =Logo
         Visible: =false
-        X: =80
-        Y: =80
+        X: =180
         ZIndex: =3
 
     imagenPagosBono2 As image:
         BorderColor: =App.Theme.Colors.Darker40
         DisabledBorderColor: =RGBA(166, 166, 166, 1)
         DisabledFill: =RGBA(244, 244, 244, 1)
+        Height: =30
         Image: =imagenBono222
         Visible: =false
-        X: =100
-        Y: =100
+        X: =80
         ZIndex: =4
 
     imagenPagosBonos As image:
         BorderColor: =App.Theme.Colors.Darker40
         DisabledBorderColor: =RGBA(166, 166, 166, 1)
         DisabledFill: =RGBA(244, 244, 244, 1)
+        Height: =20
         Image: =imagenBonos111
         Visible: =false
-        X: =120
-        Y: =120
         ZIndex: =5
 
