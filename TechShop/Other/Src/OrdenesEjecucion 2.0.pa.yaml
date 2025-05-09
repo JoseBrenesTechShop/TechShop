@@ -193,10 +193,6 @@ Screens:
                                     HoverColor: =RGBA(255, 255, 255, 1)
                                     OnSelect: |-
                                       =Refresh(Orden_Ejecucion);
-                                      Reset(txt_codigo_EO_1);
-                                      Reset(txt_PN_EO_1);
-                                      Reset(txt_Operacion_EO_1);
-                                      Reset(drp_estado_EO);
                                       ResetForm(frm_Editar_EditarOrden_1)
                                     Text: ="Refrescar"
                                     Width: =120
@@ -363,7 +359,7 @@ Screens:
                                           DisplayMode: =If(editar || agregar, DisplayMode.Disabled,DisplayMode.Edit)
                                           Fill: =RGBA(255, 255, 255, 1)
                                           Height: =563
-                                          Items: "=Sort(Filter(\n  Orden_Ejecucion,\n \n  Estado_Orden = drp_estado_EO.SelectedText.Value,\n\n  ( IsBlank(txt_codigo_EO_1.Text) ||\n    StartsWith( Orden, txt_codigo_EO_1.Text )\n  ),\n\n  ( IsBlank(txt_PN_EO_1.Text) ||\n    StartsWith( 'P/N', txt_PN_EO_1.Text )\n  ),\n\n  ( IsBlank(txt_Operacion_EO_1.Text) ||\n    StartsWith( Operacion, txt_Operacion_EO_1.Text )\n  )\n), 'Fecha de creación', SortOrder.Descending\n)\n"
+                                          Items: "=Sort(\n  Filter(\n    Orden_Ejecucion,\n    Estado_Orden = drp_estado_EO.SelectedText.Value,\n    \n    ( IsBlank(txt_codigo_EO_1.Text) ||\n      txt_codigo_EO_1.Text in Orden\n    ),\n    \n    ( IsBlank(txt_PN_EO_1.Text) ||\n      txt_PN_EO_1.Text in 'P/N'\n    ),\n    \n    ( IsBlank(txt_Operacion_EO_1.Text) ||\n      txt_Operacion_EO_1.Text in Operacion\n    )\n  ),\n  'Fecha de creación',\n  SortOrder.Descending\n)\n"
                                           TemplateSize: =30
                                           Width: =1346
                                           Y: =25
@@ -1266,7 +1262,7 @@ Screens:
                   DataSource: =Orden_Ejecucion
                   Fill: =RGBA(255, 255, 255, 1)
                   Height: =266
-                  Item: =tbl_EjecucionOrden_EditarOrden.Selected
+                  Item: =gl_EjecucionOrdenes.Selected
                   OnSuccess: |-
                     =    UpdateContext(
                             {
@@ -1907,6 +1903,14 @@ Screens:
                               Width: =320
                               X: =30
                               Y: =40
+            - TextCanvas1:
+                Control: Text@0.0.51
+                Properties:
+                  Height: =38
+                  Text: =
+                  Width: =224
+                  X: =68
+                  Y: =312
       - cnt_Comentario_EM_11:
           Control: GroupContainer@1.3.0
           Variant: ManualLayout

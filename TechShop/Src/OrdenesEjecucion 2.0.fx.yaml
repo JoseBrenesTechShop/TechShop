@@ -226,10 +226,6 @@
                         HoverFill: =App.Theme.Colors.Darker10
                         OnSelect: |-
                             =Refresh(Orden_Ejecucion);
-                            Reset(txt_codigo_EO_1);
-                            Reset(txt_PN_EO_1);
-                            Reset(txt_Operacion_EO_1);
-                            Reset(drp_estado_EO);
                             ResetForm(frm_Editar_EditarOrden_1)
                         PressedBorderColor: =App.Theme.Colors.Darker40
                         PressedColor: =Self.Color
@@ -421,23 +417,25 @@
                             Fill: =RGBA(255, 255, 255, 1)
                             Height: =563
                             Items: |
-                                =Sort(Filter(
-                                  Orden_Ejecucion,
-                                 
-                                  Estado_Orden = drp_estado_EO.SelectedText.Value,
-                                
-                                  ( IsBlank(txt_codigo_EO_1.Text) ||
-                                    StartsWith( Orden, txt_codigo_EO_1.Text )
+                                =Sort(
+                                  Filter(
+                                    Orden_Ejecucion,
+                                    Estado_Orden = drp_estado_EO.SelectedText.Value,
+                                    
+                                    ( IsBlank(txt_codigo_EO_1.Text) ||
+                                      txt_codigo_EO_1.Text in Orden
+                                    ),
+                                    
+                                    ( IsBlank(txt_PN_EO_1.Text) ||
+                                      txt_PN_EO_1.Text in 'P/N'
+                                    ),
+                                    
+                                    ( IsBlank(txt_Operacion_EO_1.Text) ||
+                                      txt_Operacion_EO_1.Text in Operacion
+                                    )
                                   ),
-                                
-                                  ( IsBlank(txt_PN_EO_1.Text) ||
-                                    StartsWith( 'P/N', txt_PN_EO_1.Text )
-                                  ),
-                                
-                                  ( IsBlank(txt_Operacion_EO_1.Text) ||
-                                    StartsWith( Operacion, txt_Operacion_EO_1.Text )
-                                  )
-                                ), 'Fecha de creación', SortOrder.Descending
+                                  'Fecha de creación',
+                                  SortOrder.Descending
                                 )
                             Layout: =Layout.Vertical
                             LoadingSpinner: =LoadingSpinner.Data
@@ -1428,7 +1426,7 @@
             DataSource: =Orden_Ejecucion
             Fill: =RGBA(255, 255, 255, 1)
             Height: =266
-            Item: =tbl_EjecucionOrden_EditarOrden.Selected
+            Item: =gl_EjecucionOrdenes.Selected
             OnSuccess: |-
                 =    UpdateContext(
                         {
@@ -2167,6 +2165,15 @@
                     X: =30
                     Y: =40
                     ZIndex: =5
+
+        TextCanvas1 As Texto:
+            DisplayMode: =DisplayMode.Edit
+            Height: =38
+            Text: =
+            Width: =224
+            X: =68
+            Y: =312
+            ZIndex: =88
 
     cnt_Comentario_EM_11 As groupContainer.manualLayoutContainer:
         BorderColor: =RGBA(40, 134, 222, 1)
