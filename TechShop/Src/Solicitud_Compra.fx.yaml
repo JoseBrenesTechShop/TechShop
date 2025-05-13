@@ -4,8 +4,24 @@ Solicitud_Compra As screen:
     ImagePosition: =ImagePosition.Fill
     LoadingSpinnerColor: =App.Theme.Colors.Primary
     OnVisible: |-
-        =ClearCollect(colPreqLocal,      preq);
-        ClearCollect(colPreqItemLocal,   preqitem)
+        =ClearCollect(colPreqLocal,      preq); //no toquen esta madre trae los datos local para evitar la advertencia
+        ClearCollect(colPreqItemLocal,   preqitem);//no toquen esta madre trae los datos local para evitar la advertencia
+        
+        
+        //estoy debugueando cabrones me cago en power apps
+        ClearCollect(
+          colDebug,
+          AddColumns(
+            colPreqItemLocal,
+            reqDate,  LookUp(colPreqLocal, req_num = req_num, req_date),
+            passYear, Year(
+                           LookUp(colPreqLocal, req_num = req_num, req_date)
+                       ) = Value(drp_Ano_SC.SelectedText.Value),
+            passDate, DateValue(
+                           LookUp(colPreqLocal, req_num = req_num, req_date)
+                         ) >= DateValue("15/02/2025")
+          )
+        );
 
     ScreenContainer_EM_8 As groupContainer.verticalAutoLayoutContainer:
         DropShadow: =DropShadow.Light
@@ -214,16 +230,15 @@ Solicitud_Compra As screen:
                             BorderColor: =RGBA(0, 18, 107, 1)
                             DelayItemLoading: =true
                             Height: =587
-                            Items: |
+                            Items: |-
                                 =Distinct(
                                   Filter(
                                     colPreqItemLocal,
                                     With(
                                       { num: ThisRecord.req_num },
-                                      // ¡idéntico a tu lógica original!
                                       Year(
                                         LookUp(
-                                          colPreqLocal,      // <--- antes era preq
+                                          colPreqLocal,    
                                           req_num = num,
                                           req_date
                                         )
@@ -231,7 +246,7 @@ Solicitud_Compra As screen:
                                       &&
                                       DateValue(
                                         LookUp(
-                                          colPreqLocal,      // <--- antes era preq
+                                          colPreqLocal,      
                                           req_num = num,
                                           req_date
                                         )
@@ -241,6 +256,33 @@ Solicitud_Compra As screen:
                                   ),
                                   req_num
                                 )
+                                
+                                
+                                //codigo original anterior
+                                /*
+                                Distinct(
+                                    Filter(
+                                        preqitem;
+                                        With(
+                                            {num: ThisRecord.req_num};
+                                            Year(
+                                                LookUp(
+                                                    preq;
+                                                    req_num = num;
+                                                    req_date
+                                                )
+                                            ) = Value(drp_Ano_SC.SelectedText.Value) && DateValue(
+                                                LookUp(
+                                                    preq;
+                                                    req_num = num;
+                                                    req_date
+                                                )
+                                            ) >= DateValue("15/02/2025")
+                                        );
+                                        !(req_num in Solicitud_Compras.soli_num)
+                                    );
+                                    req_num
+                                )*/
                             Layout: =Layout.Vertical
                             LoadingSpinner: =LoadingSpinner.Data
                             ShowScrollbar: =false
