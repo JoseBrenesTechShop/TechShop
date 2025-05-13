@@ -3,25 +3,7 @@ Solicitud_Compra As screen:
     Fill: =Color.White
     ImagePosition: =ImagePosition.Fill
     LoadingSpinnerColor: =App.Theme.Colors.Primary
-    OnVisible: |-
-        =ClearCollect(colPreqLocal,      preq); //no toquen esta madre trae los datos local para evitar la advertencia
-        ClearCollect(colPreqItemLocal,   preqitem);//no toquen esta madre trae los datos local para evitar la advertencia
-        
-        
-        //estoy debugueando cabrones me cago en power apps
-        ClearCollect(
-          colDebug,
-          AddColumns(
-            colPreqItemLocal,
-            reqDate,  LookUp(colPreqLocal, req_num = req_num, req_date),
-            passYear, Year(
-                           LookUp(colPreqLocal, req_num = req_num, req_date)
-                       ) = Value(drp_Ano_SC.SelectedText.Value),
-            passDate, DateValue(
-                           LookUp(colPreqLocal, req_num = req_num, req_date)
-                         ) >= DateValue("15/02/2025")
-          )
-        );
+    OnVisible: =
 
     ScreenContainer_EM_8 As groupContainer.verticalAutoLayoutContainer:
         DropShadow: =DropShadow.Light
@@ -231,14 +213,18 @@ Solicitud_Compra As screen:
                             DelayItemLoading: =true
                             Height: =587
                             Items: |-
-                                =Distinct(
-                                  Filter(
-                                    colPreqItemLocal,
-                                    !( req_num in Solicitud_Compras.soli_num ) &&
-                                    stat = "R"
+                                =Sort(
+                                  Distinct(
+                                    Filter(
+                                      preqitem,
+                                      stat = "R" 
+                                    ),
+                                    req_num
                                   ),
-                                  req_num
+                                  Value,
+                                  SortOrder.Ascending
                                 )
+                                
                                 
                                 //codigo original anterior
                                 /*
