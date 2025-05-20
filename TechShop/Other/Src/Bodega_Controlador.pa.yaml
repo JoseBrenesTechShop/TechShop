@@ -680,7 +680,7 @@ Screens:
                         RadiusTopRight: =0
                         Size: =12
                         Width: =150
-                  - txt_CantMaquinas_BC_3:
+                  - AddDescripcion_BC:
                       Control: Classic/TextInput@2.3.2
                       Properties:
                         Align: =Align.Center
@@ -729,7 +729,7 @@ Screens:
                         Size: =12
                         Width: =400
                         X: =150
-                  - txt_CantMaquinas_BC_4:
+                  - AddMaximo_BC:
                       Control: Classic/TextInput@2.3.2
                       Properties:
                         Align: =Align.Center
@@ -784,7 +784,7 @@ Screens:
                         Size: =12
                         Width: =150
                         X: =700
-                  - txt_CantMaquinas_BC_5:
+                  - AddQty_BC:
                       Control: Classic/TextInput@2.3.2
                       Properties:
                         Align: =Align.Center
@@ -1170,16 +1170,34 @@ Screens:
                       Control: Classic/Button@2.2.0
                       Properties:
                         Height: =30
-                        OnSelect: |+
-                          =If(IsBlank(drp_AddOrden_BC.Selected.Value) || IsBlank(drp_AddOP_BC.Selected.Operacion),
-                          Notify("Debe indicar la Orden y la Operacion", NotificationType.Error),
-                          IsBlank(txt_CantMaquinas_BC.Text),
-                          Notify("La orden debe tener maquinas asignadas", NotificationType.Error),
-                          CountRows(glr_AddMateriales_BC.AllItems) <= 0,
-                          Notify("La lista de materiales no puede estar vacia", NotificationType.Error),
-                          Collect(b)
+                        OnSelect: |-
+                          =If(
+                              IsBlank(drp_AddOrden_BC.Selected.Value) || IsBlank(drp_AddOP_BC.Selected.Operacion),
+                              Notify(
+                                  "Debe indicar la Orden y la Operacion",
+                                  NotificationType.Error
+                              ),
+                              IsBlank(txt_CantMaquinas_BC.Text),
+                              Notify(
+                                  "La orden debe tener maquinas asignadas",
+                                  NotificationType.Error
+                              ),
+                              CountRows(glr_AddMateriales_BC.AllItems) <= 0,
+                              Notify(
+                                  "La lista de materiales no puede estar vacia",
+                                  NotificationType.Error
+                              ),
+                              ForAll(
+                                  glr_AddMateriales_BC.AllItems,
+                                  Collect(
+                                      Bodega_Controladors,
+                                      {
+                                          Orden: drp_AddOrden_BC.Selected.Value,
+                                          Operacion: drp_AddOP_BC.Selected.Operacion
+                                      }
+                                  )
+                              )
                           )
-
                         PaddingBottom: =2
                         PaddingLeft: =2
                         PaddingRight: =2
