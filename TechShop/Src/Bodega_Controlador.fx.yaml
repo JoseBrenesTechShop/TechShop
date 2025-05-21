@@ -212,7 +212,10 @@ Bodega_Controlador As screen:
                             HoverColor: =RGBA(0, 0, 0, 1)
                             HoverFill: =
                             Icon: =Icon.Reload
-                            OnSelect: =
+                            OnSelect: |-
+                                =UpdateContext({SetMaterial: Blank()});
+                                Refresh(Controlador_Bodegas);
+                                Reset(glr_Materiales_BC)
                             PaddingBottom: =8
                             PaddingLeft: =2
                             PaddingRight: =2
@@ -311,7 +314,7 @@ Bodega_Controlador As screen:
                             Y: =10
                             ZIndex: =12
 
-                    "glr_AddMateriales_BC_1 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+                    "glr_Materiales_BC As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
                         '#CopilotOverlayLabel': ="Filtrada"
                         BorderColor: =RGBA(180, 214, 250, 1)
                         BorderStyle: =BorderStyle.None
@@ -992,7 +995,7 @@ Bodega_Controlador As screen:
             =Reset(drp_AddOP_BC);
             Reset(drp_AddOrden_BC);
             Reset(glr_AddMateriales_BC);
-            UpdateContext({VerMaquinas: false, agregarOrden: !agregarOrden, editarMaterial: false})
+            UpdateContext({VerMaquinas: false, agregarOrden: !agregarOrden, editarMaterial: false, SetMaterial: Blank()})
         Visible: =agregarOrden || editarMaterial
         Width: =BottomContainer3_7.Width
         X: =8
@@ -1027,7 +1030,8 @@ Bodega_Controlador As screen:
                     Filter(
                         jobmatl,
                         job = drp_AddOrden_BC.Selected.Value,
-                        oper_num = Value(drp_AddOP_BC.Selected.Operacion),
+                        oper_num = If(Value(drp_AddOP_BC.Selected.Operacion) = 25, 30, Value(drp_AddOP_BC.Selected.Operacion)),
+                        probable = 1,
                         StartsWith(
                             item,
                             "12"
@@ -1056,7 +1060,7 @@ Bodega_Controlador As screen:
                         Sum(
                             Filter(
                                 jobmatl,
-                                item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = Value(drp_AddOP_BC.Selected.Operacion)
+                                item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = If(Value(drp_AddOP_BC.Selected.Operacion) = 25, 30, Value(drp_AddOP_BC.Selected.Operacion))
                             ),
                             matl_qty
                         ) = 0,
@@ -1100,7 +1104,7 @@ Bodega_Controlador As screen:
                 Default: |-
                     =LookUp(
                         jobmatl,
-                        item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = Value(drp_AddOP_BC.Selected.Operacion)
+                        item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = If(Value(drp_AddOP_BC.Selected.Operacion) = 25, 30, Value(drp_AddOP_BC.Selected.Operacion))
                     ).description
                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                 DisabledColor: =RGBA(0, 0, 0, 1)
@@ -1109,7 +1113,7 @@ Bodega_Controlador As screen:
                         Sum(
                             Filter(
                                 jobmatl,
-                                item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = Value(drp_AddOP_BC.Selected.Operacion)
+                                item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = If(Value(drp_AddOP_BC.Selected.Operacion) = 25, 30, Value(drp_AddOP_BC.Selected.Operacion))
                             ),
                             matl_qty
                         ) = 0,
@@ -1156,7 +1160,7 @@ Bodega_Controlador As screen:
                         ((drp_AddOP_BC.Selected.Meta * 36) * txt_CantMaquinas_BC.Text) * Sum(
                             Filter(
                                 jobmatl,
-                                item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = Value(drp_AddOP_BC.Selected.Operacion)
+                                item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = If(Value(drp_AddOP_BC.Selected.Operacion) = 25, 30, Value(drp_AddOP_BC.Selected.Operacion))
                             ),
                             matl_qty
                         ),
@@ -1169,7 +1173,7 @@ Bodega_Controlador As screen:
                         Sum(
                             Filter(
                                 jobmatl,
-                                item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = Value(drp_AddOP_BC.Selected.Operacion)
+                                item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = If(Value(drp_AddOP_BC.Selected.Operacion) = 25, 30, Value(drp_AddOP_BC.Selected.Operacion))
                             ),
                             matl_qty
                         ) = 0,
@@ -1215,7 +1219,7 @@ Bodega_Controlador As screen:
                     =Sum(
                         Filter(
                             jobmatl,
-                            item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = Value(drp_AddOP_BC.Selected.Operacion)
+                            item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = If(Value(drp_AddOP_BC.Selected.Operacion) = 25, 30, Value(drp_AddOP_BC.Selected.Operacion))
                         ),
                         matl_qty
                     )
@@ -1226,7 +1230,7 @@ Bodega_Controlador As screen:
                         Sum(
                             Filter(
                                 jobmatl,
-                                item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = Value(drp_AddOP_BC.Selected.Operacion)
+                                item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = If(Value(drp_AddOP_BC.Selected.Operacion) = 25, 30, Value(drp_AddOP_BC.Selected.Operacion))
                             ),
                             matl_qty
                         ) = 0,
@@ -1734,6 +1738,12 @@ Bodega_Controlador As screen:
                                 }
                             }
                         ),
+                        UpdateContext(
+                            {
+                                VerMaquinas: false,
+                                agregarOrden: !agregarOrden
+                            }
+                        );
                         UpdateContext({Guardando: true});
                         ForAll(
                             glr_AddMateriales_BC.AllItems,
@@ -1758,16 +1768,10 @@ Bodega_Controlador As screen:
                                 }
                             }
                         );
-                        UpdateContext({Guardando: false});
+                        UpdateContext({Guardando: false}),
                         Reset(drp_AddOP_BC);
                         Reset(drp_AddOrden_BC);
-                        Reset(glr_AddMateriales_BC);
-                        UpdateContext(
-                            {
-                                VerMaquinas: false,
-                                agregarOrden: !agregarOrden
-                            }
-                        )
+                        Reset(glr_AddMateriales_BC)
                     )
                 PaddingBottom: =2
                 PaddingLeft: =2
@@ -2016,6 +2020,22 @@ Bodega_Controlador As screen:
                             1
                         )
                     )
+                Fill: |-
+                    =If(
+                        ThisItem.Maximo = 0,
+                        RGBA(
+                            255,
+                            184,
+                            174,
+                            1
+                        ),
+                        RGBA(
+                            255,
+                            255,
+                            255,
+                            1
+                        )
+                    )
                 FocusedBorderThickness: =4
                 Font: =App.Theme.Font
                 Format: =TextFormat.Number
@@ -2044,6 +2064,22 @@ Bodega_Controlador As screen:
                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                 DisabledColor: =RGBA(0, 0, 0, 1)
                 DisabledFill: |-
+                    =If(
+                        ThisItem.Maximo = 0,
+                        RGBA(
+                            255,
+                            184,
+                            174,
+                            1
+                        ),
+                        RGBA(
+                            255,
+                            255,
+                            255,
+                            1
+                        )
+                    )
+                Fill: |-
                     =If(
                         ThisItem.Maximo = 0,
                         RGBA(
@@ -2315,7 +2351,7 @@ Bodega_Controlador As screen:
                 PaddingRight: =5
                 PaddingTop: =5
                 Width: =32
-                X: =652
+                X: =650
                 Y: =10
                 ZIndex: =1
 
@@ -2393,7 +2429,7 @@ Bodega_Controlador As screen:
                 HoverFill: =
                 Icon: =Icon.CancelBadge
                 OnSelect: |-
-                    =UpdateContext({editarMaterial: false})
+                    =UpdateContext({editarMaterial: false, SetMaterial: Blank()})
                 PaddingBottom: =8
                 PaddingLeft: =8
                 PaddingRight: =8
@@ -2417,48 +2453,33 @@ Bodega_Controlador As screen:
                 HoverFill: =App.Theme.Colors.Darker10
                 OnSelect: |-
                     =If(
-                        IsBlank(drp_AddOrden_BC_1.Selected.Value) || IsBlank(drp_AddOP_BC_1.Selected.Operacion),
+                        CountRows(
+                            Filter(
+                                glr_EditMateriales_BC.AllItems,
+                                (Value(ThisRecord.EditMaximo_BC.Text) < 0 || IsBlank(ThisRecord.EditMaximo_BC.Text)) || (Value(ThisRecord.EditUsado_BC.Text) < 0 || IsBlank(ThisRecord.EditUsado_BC.Text))
+                            )
+                        ) > 0,
                         UpdateContext(
                             {
                                 Aviso: {
                                     Ver: true,
                                     Tipo: 0,
-                                    Texto: "Debe seleccionar una Orden y una Operacion"
-                                }
-                            }
-                        ),
-                        IsBlank(txt_CantMaquinas_BC_4.Text) || txt_CantMaquinas_BC_4.Text = "0",
-                        UpdateContext(
-                            {
-                                Aviso: {
-                                    Ver: true,
-                                    Tipo: 0,
-                                    Texto: "La Orden debe tener almenos una maquina asignada"
-                                }
-                            }
-                        ),
-                        CountRows(glr_EditMateriales_BC.AllItems) <= 0,
-                        UpdateContext(
-                            {
-                                Aviso: {
-                                    Ver: true,
-                                    Tipo: 0,
-                                    Texto: "La lista de materiales no puede estar vacia"
+                                    Texto: "El Máximo y el Usado deben tener valores válidos"
                                 }
                             }
                         ),
                         UpdateContext({Guardando: true});
                         ForAll(
                             glr_EditMateriales_BC.AllItems,
-                            Collect(
+                            Patch(
                                 Controlador_Bodegas,
+                                LookUp(
+                                    Controlador_Bodegas,
+                                    Material = SetMaterial && Orden = ThisRecord.Orden && Operacion = ThisRecord.Operacion
+                                ),
                                 {
-                                    Orden: drp_AddOrden_BC_1.Selected.Value,
-                                    Operacion: drp_AddOP_BC_1.Selected.Operacion,
-                                    Material: ThisRecord.Value,
-                                    Descripcion: ThisRecord.EditOP_BC.Text,
-                                    Matl_Qty: Value(ThisRecord.EditMaximo_BC.Text),
-                                    Maximo: Value(ThisRecord.EditUsado_BC.Text)
+                                    Maximo: Value(ThisRecord.EditMaximo_BC.Text),
+                                    Usado: Value(ThisRecord.EditUsado_BC.Text)
                                 }
                             )
                         );
@@ -2467,20 +2488,14 @@ Bodega_Controlador As screen:
                                 Aviso: {
                                     Ver: true,
                                     Tipo: 2,
-                                    Texto: "La Orden se agrego con exito"
-                                }
+                                    Texto: "Materiales editados exitosamente"
+                                },
+                                Guardando: false,
+                                editarMaterial: false,
+                                SetMaterial: Blank()
                             }
                         );
-                        UpdateContext({Guardando: false});
-                        Reset(drp_AddOP_BC_1);
-                        Reset(drp_AddOrden_BC_1);
-                        Reset(glr_EditMateriales_BC);
-                        UpdateContext(
-                            {
-                                VerMaquinas: false,
-                                agregarOrden: !agregarOrden
-                            }
-                        )
+                        
                     )
                 PaddingBottom: =2
                 PaddingLeft: =2
@@ -2556,7 +2571,7 @@ Bodega_Controlador As screen:
                 RadiusTopRight: =8
                 Size: =12
                 Width: =280
-                X: =370
+                X: =365
                 Y: =10
                 ZIndex: =12
 

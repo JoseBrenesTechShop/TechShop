@@ -189,7 +189,10 @@ Screens:
                                           HoverColor: =RGBA(0, 0, 0, 1)
                                           HoverFill: =
                                           Icon: =Icon.Reload
-                                          OnSelect: =
+                                          OnSelect: |-
+                                            =UpdateContext({SetMaterial: Blank()});
+                                            Refresh(Controlador_Bodegas);
+                                            Reset(glr_Materiales_BC)
                                           PaddingBottom: =8
                                           PaddingLeft: =2
                                           PaddingRight: =2
@@ -265,7 +268,7 @@ Screens:
                                           Text: ="Editar Material"
                                           X: =365
                                           Y: =10
-                              - glr_AddMateriales_BC_1:
+                              - glr_Materiales_BC:
                                   Control: Gallery@2.15.0
                                   Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
                                   Properties:
@@ -881,7 +884,7 @@ Screens:
               =Reset(drp_AddOP_BC);
               Reset(drp_AddOrden_BC);
               Reset(glr_AddMateriales_BC);
-              UpdateContext({VerMaquinas: false, agregarOrden: !agregarOrden, editarMaterial: false})
+              UpdateContext({VerMaquinas: false, agregarOrden: !agregarOrden, editarMaterial: false, SetMaterial: Blank()})
             Visible: =agregarOrden || editarMaterial
             Width: =BottomContainer3_7.Width
             X: =8
@@ -916,7 +919,8 @@ Screens:
                         Filter(
                             jobmatl,
                             job = drp_AddOrden_BC.Selected.Value,
-                            oper_num = Value(drp_AddOP_BC.Selected.Operacion),
+                            oper_num = If(Value(drp_AddOP_BC.Selected.Operacion) = 25, 30, Value(drp_AddOP_BC.Selected.Operacion)),
+                            probable = 1,
                             StartsWith(
                                 item,
                                 "12"
@@ -943,7 +947,7 @@ Screens:
                               Sum(
                                   Filter(
                                       jobmatl,
-                                      item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = Value(drp_AddOP_BC.Selected.Operacion)
+                                      item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = If(Value(drp_AddOP_BC.Selected.Operacion) = 25, 30, Value(drp_AddOP_BC.Selected.Operacion))
                                   ),
                                   matl_qty
                               ) = 0,
@@ -982,7 +986,7 @@ Screens:
                         Default: |-
                           =LookUp(
                               jobmatl,
-                              item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = Value(drp_AddOP_BC.Selected.Operacion)
+                              item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = If(Value(drp_AddOP_BC.Selected.Operacion) = 25, 30, Value(drp_AddOP_BC.Selected.Operacion))
                           ).description
                         DisabledBorderColor: =RGBA(40, 134, 222, 1)
                         DisabledColor: =RGBA(0, 0, 0, 1)
@@ -991,7 +995,7 @@ Screens:
                               Sum(
                                   Filter(
                                       jobmatl,
-                                      item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = Value(drp_AddOP_BC.Selected.Operacion)
+                                      item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = If(Value(drp_AddOP_BC.Selected.Operacion) = 25, 30, Value(drp_AddOP_BC.Selected.Operacion))
                                   ),
                                   matl_qty
                               ) = 0,
@@ -1033,7 +1037,7 @@ Screens:
                               ((drp_AddOP_BC.Selected.Meta * 36) * txt_CantMaquinas_BC.Text) * Sum(
                                   Filter(
                                       jobmatl,
-                                      item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = Value(drp_AddOP_BC.Selected.Operacion)
+                                      item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = If(Value(drp_AddOP_BC.Selected.Operacion) = 25, 30, Value(drp_AddOP_BC.Selected.Operacion))
                                   ),
                                   matl_qty
                               ),
@@ -1046,7 +1050,7 @@ Screens:
                               Sum(
                                   Filter(
                                       jobmatl,
-                                      item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = Value(drp_AddOP_BC.Selected.Operacion)
+                                      item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = If(Value(drp_AddOP_BC.Selected.Operacion) = 25, 30, Value(drp_AddOP_BC.Selected.Operacion))
                                   ),
                                   matl_qty
                               ) = 0,
@@ -1087,7 +1091,7 @@ Screens:
                           =Sum(
                               Filter(
                                   jobmatl,
-                                  item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = Value(drp_AddOP_BC.Selected.Operacion)
+                                  item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = If(Value(drp_AddOP_BC.Selected.Operacion) = 25, 30, Value(drp_AddOP_BC.Selected.Operacion))
                               ),
                               matl_qty
                           )
@@ -1098,7 +1102,7 @@ Screens:
                               Sum(
                                   Filter(
                                       jobmatl,
-                                      item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = Value(drp_AddOP_BC.Selected.Operacion)
+                                      item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = If(Value(drp_AddOP_BC.Selected.Operacion) = 25, 30, Value(drp_AddOP_BC.Selected.Operacion))
                                   ),
                                   matl_qty
                               ) = 0,
@@ -1494,6 +1498,12 @@ Screens:
                                       }
                                   }
                               ),
+                              UpdateContext(
+                                  {
+                                      VerMaquinas: false,
+                                      agregarOrden: !agregarOrden
+                                  }
+                              );
                               UpdateContext({Guardando: true});
                               ForAll(
                                   glr_AddMateriales_BC.AllItems,
@@ -1518,16 +1528,10 @@ Screens:
                                       }
                                   }
                               );
-                              UpdateContext({Guardando: false});
+                              UpdateContext({Guardando: false}),
                               Reset(drp_AddOP_BC);
                               Reset(drp_AddOrden_BC);
-                              Reset(glr_AddMateriales_BC);
-                              UpdateContext(
-                                  {
-                                      VerMaquinas: false,
-                                      agregarOrden: !agregarOrden
-                                  }
-                              )
+                              Reset(glr_AddMateriales_BC)
                           )
                         PaddingBottom: =2
                         PaddingLeft: =2
@@ -1753,6 +1757,22 @@ Screens:
                                   1
                               )
                           )
+                        Fill: |-
+                          =If(
+                              ThisItem.Maximo = 0,
+                              RGBA(
+                                  255,
+                                  184,
+                                  174,
+                                  1
+                              ),
+                              RGBA(
+                                  255,
+                                  255,
+                                  255,
+                                  1
+                              )
+                          )
                         Format: =TextFormat.Number
                         Height: =30
                         HintText: ="#"
@@ -1776,6 +1796,22 @@ Screens:
                         DisabledBorderColor: =RGBA(40, 134, 222, 1)
                         DisabledColor: =RGBA(0, 0, 0, 1)
                         DisabledFill: |-
+                          =If(
+                              ThisItem.Maximo = 0,
+                              RGBA(
+                                  255,
+                                  184,
+                                  174,
+                                  1
+                              ),
+                              RGBA(
+                                  255,
+                                  255,
+                                  255,
+                                  1
+                              )
+                          )
+                        Fill: |-
                           =If(
                               ThisItem.Maximo = 0,
                               RGBA(
@@ -2015,7 +2051,7 @@ Screens:
                         PaddingRight: =5
                         PaddingTop: =5
                         Width: =32
-                        X: =652
+                        X: =650
                         Y: =10
                   - TextCanvas1_48:
                       Control: Text@0.0.51
@@ -2073,7 +2109,7 @@ Screens:
                         HoverFill: =
                         Icon: =Icon.CancelBadge
                         OnSelect: |-
-                          =UpdateContext({editarMaterial: false})
+                          =UpdateContext({editarMaterial: false, SetMaterial: Blank()})
                         PaddingBottom: =8
                         PaddingLeft: =8
                         PaddingRight: =8
@@ -2084,73 +2120,7 @@ Screens:
                       Control: Classic/Button@2.2.0
                       Properties:
                         Height: =30
-                        OnSelect: |-
-                          =If(
-                              IsBlank(drp_AddOrden_BC_1.Selected.Value) || IsBlank(drp_AddOP_BC_1.Selected.Operacion),
-                              UpdateContext(
-                                  {
-                                      Aviso: {
-                                          Ver: true,
-                                          Tipo: 0,
-                                          Texto: "Debe seleccionar una Orden y una Operacion"
-                                      }
-                                  }
-                              ),
-                              IsBlank(txt_CantMaquinas_BC_4.Text) || txt_CantMaquinas_BC_4.Text = "0",
-                              UpdateContext(
-                                  {
-                                      Aviso: {
-                                          Ver: true,
-                                          Tipo: 0,
-                                          Texto: "La Orden debe tener almenos una maquina asignada"
-                                      }
-                                  }
-                              ),
-                              CountRows(glr_EditMateriales_BC.AllItems) <= 0,
-                              UpdateContext(
-                                  {
-                                      Aviso: {
-                                          Ver: true,
-                                          Tipo: 0,
-                                          Texto: "La lista de materiales no puede estar vacia"
-                                      }
-                                  }
-                              ),
-                              UpdateContext({Guardando: true});
-                              ForAll(
-                                  glr_EditMateriales_BC.AllItems,
-                                  Collect(
-                                      Controlador_Bodegas,
-                                      {
-                                          Orden: drp_AddOrden_BC_1.Selected.Value,
-                                          Operacion: drp_AddOP_BC_1.Selected.Operacion,
-                                          Material: ThisRecord.Value,
-                                          Descripcion: ThisRecord.EditOP_BC.Text,
-                                          Matl_Qty: Value(ThisRecord.EditMaximo_BC.Text),
-                                          Maximo: Value(ThisRecord.EditUsado_BC.Text)
-                                      }
-                                  )
-                              );
-                              UpdateContext(
-                                  {
-                                      Aviso: {
-                                          Ver: true,
-                                          Tipo: 2,
-                                          Texto: "La Orden se agrego con exito"
-                                      }
-                                  }
-                              );
-                              UpdateContext({Guardando: false});
-                              Reset(drp_AddOP_BC_1);
-                              Reset(drp_AddOrden_BC_1);
-                              Reset(glr_EditMateriales_BC);
-                              UpdateContext(
-                                  {
-                                      VerMaquinas: false,
-                                      agregarOrden: !agregarOrden
-                                  }
-                              )
-                          )
+                        OnSelect: "=If(\n    CountRows(\n        Filter(\n            glr_EditMateriales_BC.AllItems,\n            (Value(ThisRecord.EditMaximo_BC.Text) < 0 || IsBlank(ThisRecord.EditMaximo_BC.Text)) || (Value(ThisRecord.EditUsado_BC.Text) < 0 || IsBlank(ThisRecord.EditUsado_BC.Text))\n        )\n    ) > 0,\n    UpdateContext(\n        {\n            Aviso: {\n                Ver: true,\n                Tipo: 0,\n                Texto: \"El Máximo y el Usado deben tener valores válidos\"\n            }\n        }\n    ),\n    UpdateContext({Guardando: true});\n    ForAll(\n        glr_EditMateriales_BC.AllItems,\n        Patch(\n            Controlador_Bodegas,\n            LookUp(\n                Controlador_Bodegas,\n                Material = SetMaterial && Orden = ThisRecord.Orden && Operacion = ThisRecord.Operacion\n            ),\n            {\n                Maximo: Value(ThisRecord.EditMaximo_BC.Text),\n                Usado: Value(ThisRecord.EditUsado_BC.Text)\n            }\n        )\n    );\n    UpdateContext(\n        {\n            Aviso: {\n                Ver: true,\n                Tipo: 2,\n                Texto: \"Materiales editados exitosamente\"\n            },\n            Guardando: false,\n            editarMaterial: false,\n            SetMaterial: Blank()\n        }\n    );\n    \n)"
                         PaddingBottom: =2
                         PaddingLeft: =2
                         PaddingRight: =2
@@ -2204,7 +2174,7 @@ Screens:
                         RadiusTopRight: =8
                         Size: =12
                         Width: =280
-                        X: =370
+                        X: =365
                         Y: =10
             - txt_CantMaquinas_BC_27:
                 Control: Classic/TextInput@2.3.2
