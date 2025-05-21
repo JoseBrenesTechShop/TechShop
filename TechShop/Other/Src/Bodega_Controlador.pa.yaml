@@ -199,12 +199,71 @@ Screens:
                                     - Button17:
                                         Control: Classic/Button@2.2.0
                                         Properties:
+                                          BorderColor: =RGBA(52, 152, 47, 1)
+                                          DisplayMode: |-
+                                            =If(
+                                                !IsBlank(Material),
+                                                DisplayMode.Disabled,
+                                                DisplayMode.Edit
+                                            )
+                                          Fill: =RGBA(52, 152, 47, 1)
                                           Height: =30
+                                          HoverBorderColor: =RGBA(52, 152, 47, 1)
+                                          HoverFill: =RGBA(21, 68, 18, 1)
                                           OnSelect: |-
                                             =UpdateContext({agregarOrden: true})
+                                          PressedBorderColor: =RGBA(52, 152, 47, 1)
+                                          PressedColor: =RGBA(52, 152, 47, 1)
+                                          PressedFill: =RGBA(166, 215, 153, 1)
                                           Size: =14
                                           Text: ="Agregar Orden"
-                                          X: =1130
+                                          X: =15
+                                          Y: =10
+                                    - Button17_2:
+                                        Control: Classic/Button@2.2.0
+                                        Properties:
+                                          BorderColor: =RGBA(215, 58, 60, 1)
+                                          DisplayMode: |-
+                                            =If(
+                                                !IsBlank(Material),
+                                                DisplayMode.Disabled,
+                                                DisplayMode.Edit
+                                            )
+                                          Fill: =RGBA(215, 58, 60, 1)
+                                          Height: =30
+                                          HoverBorderColor: =RGBA(215, 58, 60, 1)
+                                          HoverFill: =RGBA(132, 40, 38, 1)
+                                          OnSelect: |-
+                                            =UpdateContext({agregarOrden: true})
+                                          PressedBorderColor: =RGBA(215, 58, 60, 1)
+                                          PressedColor: =RGBA(215, 58, 60, 1)
+                                          PressedFill: =RGBA(255, 184, 174, 1)
+                                          Size: =14
+                                          Text: ="Eliminar Orden"
+                                          X: =190
+                                          Y: =10
+                                    - Button17_3:
+                                        Control: Classic/Button@2.2.0
+                                        Properties:
+                                          BorderColor: =RGBA(255, 191, 0, 1)
+                                          DisplayMode: |-
+                                            =If(
+                                                IsBlank(Material),
+                                                DisplayMode.Disabled,
+                                                DisplayMode.Edit
+                                            )
+                                          Fill: =RGBA(255, 191, 0, 1)
+                                          Height: =30
+                                          HoverBorderColor: =RGBA(255, 191, 0, 1)
+                                          HoverFill: =RGBA(148, 111, 0, 1)
+                                          OnSelect: |-
+                                            =UpdateContext({agregarOrden: true})
+                                          PressedBorderColor: =RGBA(255, 191, 0, 1)
+                                          PressedColor: =RGBA(255, 191, 0, 1)
+                                          PressedFill: =RGBA(255, 238, 189, 1)
+                                          Size: =14
+                                          Text: ="Editar Material"
+                                          X: =365
                                           Y: =10
                               - glr_AddMateriales_BC_1:
                                   Control: Gallery@2.15.0
@@ -213,20 +272,8 @@ Screens:
                                     BorderColor: =RGBA(180, 214, 250, 1)
                                     BorderStyle: =BorderStyle.None
                                     BorderThickness: =3
-                                    Height: =323
-                                    Items: |-
-                                      =Distinct(
-                                          Filter(
-                                              jobmatl,
-                                              job = drp_AddOrden_BC.Selected.Value,
-                                              oper_num = Value(drp_AddOP_BC.Selected.Operacion),
-                                              StartsWith(
-                                                  item,
-                                                  "12"
-                                              )
-                                          ),
-                                          item
-                                      )
+                                    Height: =588
+                                    Items: =Distinct(Controlador_Bodegas, Material)
                                     TemplateSize: =30
                                     Width: =1347
                                     Y: =75
@@ -243,12 +290,19 @@ Screens:
                                           DisabledColor: =RGBA(0, 0, 0, 1)
                                           DisabledFill: |-
                                             =If(
+                                                ThisItem.IsSelected && Material = ThisItem.Value,
+                                                RGBA(
+                                                    180,
+                                                    214,
+                                                    250,
+                                                    1
+                                                ),
                                                 Sum(
                                                     Filter(
-                                                        jobmatl,
-                                                        item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = Value(drp_AddOP_BC.Selected.Operacion)
+                                                        Controlador_Bodegas,
+                                                        Material = ThisItem.Value
                                                     ),
-                                                    matl_qty
+                                                    Maximo
                                                 ) = 0,
                                                 RGBA(
                                                     255,
@@ -274,7 +328,8 @@ Screens:
                                           RadiusTopLeft: =0
                                           RadiusTopRight: =0
                                           Size: =12
-                                          Width: =150
+                                          Width: =180
+                                          X: =45
                                     - txt_CantMaquinas_BC_11:
                                         Control: Classic/TextInput@2.3.2
                                         Properties:
@@ -284,19 +339,26 @@ Screens:
                                           Clear: =true
                                           Default: |-
                                             =LookUp(
-                                                jobmatl,
-                                                item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = Value(drp_AddOP_BC.Selected.Operacion)
-                                            ).description
+                                                Controlador_Bodegas,
+                                                Material = ThisItem.Value
+                                            ).Descripcion
                                           DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                           DisabledColor: =RGBA(0, 0, 0, 1)
                                           DisabledFill: |-
                                             =If(
+                                                ThisItem.IsSelected && Material = ThisItem.Value,
+                                                RGBA(
+                                                    180,
+                                                    214,
+                                                    250,
+                                                    1
+                                                ),
                                                 Sum(
                                                     Filter(
-                                                        jobmatl,
-                                                        item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = Value(drp_AddOP_BC.Selected.Operacion)
+                                                        Controlador_Bodegas,
+                                                        Material = ThisItem.Value
                                                     ),
-                                                    matl_qty
+                                                    Maximo
                                                 ) = 0,
                                                 RGBA(
                                                     255,
@@ -322,64 +384,9 @@ Screens:
                                           RadiusTopLeft: =0
                                           RadiusTopRight: =0
                                           Size: =12
-                                          Width: =400
-                                          X: =150
+                                          Width: =482
+                                          X: =225
                                     - txt_CantMaquinas_BC_12:
-                                        Control: Classic/TextInput@2.3.2
-                                        Properties:
-                                          Align: =Align.Center
-                                          BorderColor: =RGBA(40, 134, 222, 1)
-                                          BorderThickness: =1
-                                          Clear: =true
-                                          Default: |-
-                                            =RoundUp(
-                                                ((drp_AddOP_BC.Selected.Meta * 36) * txt_CantMaquinas_BC.Text) * Sum(
-                                                    Filter(
-                                                        jobmatl,
-                                                        item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = Value(drp_AddOP_BC.Selected.Operacion)
-                                                    ),
-                                                    matl_qty
-                                                ),
-                                                0
-                                            )
-                                          DisabledBorderColor: =RGBA(40, 134, 222, 1)
-                                          DisabledColor: =RGBA(0, 0, 0, 1)
-                                          DisabledFill: |-
-                                            =If(
-                                                Sum(
-                                                    Filter(
-                                                        jobmatl,
-                                                        item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = Value(drp_AddOP_BC.Selected.Operacion)
-                                                    ),
-                                                    matl_qty
-                                                ) = 0,
-                                                RGBA(
-                                                    255,
-                                                    184,
-                                                    174,
-                                                    1
-                                                ),
-                                                RGBA(
-                                                    255,
-                                                    255,
-                                                    255,
-                                                    1
-                                                )
-                                            )
-                                          DisplayMode: =DisplayMode.Disabled
-                                          Height: =30
-                                          HintText: ="#"
-                                          HoverBorderColor: =RGBA(39, 113, 194, 1)
-                                          PaddingLeft: =5
-                                          PressedBorderColor: =RGBA(39, 113, 194, 1)
-                                          RadiusBottomLeft: =0
-                                          RadiusBottomRight: =0
-                                          RadiusTopLeft: =0
-                                          RadiusTopRight: =0
-                                          Size: =12
-                                          Width: =150
-                                          X: =700
-                                    - txt_CantMaquinas_BC_13:
                                         Control: Classic/TextInput@2.3.2
                                         Properties:
                                           Align: =Align.Center
@@ -389,21 +396,28 @@ Screens:
                                           Default: |-
                                             =Sum(
                                                 Filter(
-                                                    jobmatl,
-                                                    item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = Value(drp_AddOP_BC.Selected.Operacion)
+                                                    Controlador_Bodegas,
+                                                    Material = ThisItem.Value
                                                 ),
-                                                matl_qty
+                                                Maximo
                                             )
                                           DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                           DisabledColor: =RGBA(0, 0, 0, 1)
                                           DisabledFill: |-
                                             =If(
+                                                ThisItem.IsSelected && Material = ThisItem.Value,
+                                                RGBA(
+                                                    180,
+                                                    214,
+                                                    250,
+                                                    1
+                                                ),
                                                 Sum(
                                                     Filter(
-                                                        jobmatl,
-                                                        item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = Value(drp_AddOP_BC.Selected.Operacion)
+                                                        Controlador_Bodegas,
+                                                        Material = ThisItem.Value
                                                     ),
-                                                    matl_qty
+                                                    Maximo
                                                 ) = 0,
                                                 RGBA(
                                                     255,
@@ -429,8 +443,261 @@ Screens:
                                           RadiusTopLeft: =0
                                           RadiusTopRight: =0
                                           Size: =12
-                                          Width: =150
-                                          X: =550
+                                          Width: =160
+                                          X: =867
+                                    - txt_CantMaquinas_BC_13:
+                                        Control: Classic/TextInput@2.3.2
+                                        Properties:
+                                          Align: =Align.Center
+                                          BorderColor: =RGBA(40, 134, 222, 1)
+                                          BorderThickness: =1
+                                          Clear: =true
+                                          Default: |-
+                                            =LookUp(
+                                                Controlador_Bodegas,
+                                                Material = ThisItem.Value
+                                            ).Matl_Qty
+                                          DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                                          DisabledColor: =RGBA(0, 0, 0, 1)
+                                          DisabledFill: |-
+                                            =If(
+                                                ThisItem.IsSelected && Material = ThisItem.Value,
+                                                RGBA(
+                                                    180,
+                                                    214,
+                                                    250,
+                                                    1
+                                                ),
+                                                Sum(
+                                                    Filter(
+                                                        Controlador_Bodegas,
+                                                        Material = ThisItem.Value
+                                                    ),
+                                                    Maximo
+                                                ) = 0,
+                                                RGBA(
+                                                    255,
+                                                    184,
+                                                    174,
+                                                    1
+                                                ),
+                                                RGBA(
+                                                    255,
+                                                    255,
+                                                    255,
+                                                    1
+                                                )
+                                            )
+                                          DisplayMode: =DisplayMode.Disabled
+                                          Height: =30
+                                          HintText: ="#"
+                                          HoverBorderColor: =RGBA(39, 113, 194, 1)
+                                          PaddingLeft: =5
+                                          PressedBorderColor: =RGBA(39, 113, 194, 1)
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                          Size: =12
+                                          Width: =160
+                                          X: =707
+                                    - txt_CantMaquinas_BC_20:
+                                        Control: Classic/TextInput@2.3.2
+                                        Properties:
+                                          Align: =Align.Center
+                                          BorderColor: =RGBA(40, 134, 222, 1)
+                                          BorderThickness: =1
+                                          Clear: =true
+                                          Default: |-
+                                            =If(
+                                                IsBlank(
+                                                    Sum(
+                                                        Filter(
+                                                            Controlador_Bodegas,
+                                                            Material = ThisItem.Value
+                                                        ),
+                                                        Usado
+                                                    )
+                                                ),
+                                                0,
+                                                Sum(
+                                                    Filter(
+                                                        Controlador_Bodegas,
+                                                        Material = ThisItem.Value
+                                                    ),
+                                                    Usado
+                                                )
+                                            )
+                                          DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                                          DisabledColor: =RGBA(0, 0, 0, 1)
+                                          DisabledFill: |-
+                                            =If(
+                                                ThisItem.IsSelected && Material = ThisItem.Value,
+                                                RGBA(
+                                                    180,
+                                                    214,
+                                                    250,
+                                                    1
+                                                ),
+                                                Sum(
+                                                    Filter(
+                                                        Controlador_Bodegas,
+                                                        Material = ThisItem.Value
+                                                    ),
+                                                    Maximo
+                                                ) = 0,
+                                                RGBA(
+                                                    255,
+                                                    184,
+                                                    174,
+                                                    1
+                                                ),
+                                                RGBA(
+                                                    255,
+                                                    255,
+                                                    255,
+                                                    1
+                                                )
+                                            )
+                                          DisplayMode: =DisplayMode.Disabled
+                                          Height: =30
+                                          HintText: ="#"
+                                          HoverBorderColor: =RGBA(39, 113, 194, 1)
+                                          PaddingLeft: =5
+                                          PressedBorderColor: =RGBA(39, 113, 194, 1)
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                          Size: =12
+                                          Width: =160
+                                          X: =1027
+                                    - txt_CantMaquinas_BC_21:
+                                        Control: Classic/TextInput@2.3.2
+                                        Properties:
+                                          Align: =Align.Center
+                                          BorderColor: =RGBA(40, 134, 222, 1)
+                                          BorderThickness: =1
+                                          Clear: =true
+                                          Default: |-
+                                            =Sum(
+                                                Filter(
+                                                    Controlador_Bodegas,
+                                                    Material = ThisItem.Value
+                                                ),
+                                                Maximo
+                                            ) - Sum(
+                                                Filter(
+                                                    Controlador_Bodegas,
+                                                    Material = ThisItem.Value
+                                                ),
+                                                Usado
+                                            )
+                                          DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                                          DisabledColor: =RGBA(0, 0, 0, 1)
+                                          DisabledFill: |-
+                                            =If(
+                                                ThisItem.IsSelected && Material = ThisItem.Value,
+                                                RGBA(
+                                                    180,
+                                                    214,
+                                                    250,
+                                                    1
+                                                ),
+                                                Sum(
+                                                    Filter(
+                                                        Controlador_Bodegas,
+                                                        Material = ThisItem.Value
+                                                    ),
+                                                    Maximo
+                                                ) = 0,
+                                                RGBA(
+                                                    255,
+                                                    184,
+                                                    174,
+                                                    1
+                                                ),
+                                                RGBA(
+                                                    255,
+                                                    255,
+                                                    255,
+                                                    1
+                                                )
+                                            )
+                                          DisplayMode: =DisplayMode.Disabled
+                                          Height: =30
+                                          HintText: ="#"
+                                          HoverBorderColor: =RGBA(39, 113, 194, 1)
+                                          PaddingLeft: =5
+                                          PressedBorderColor: =RGBA(39, 113, 194, 1)
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                          Size: =12
+                                          Width: =160
+                                          X: =1187
+                                    - icn_Refresh_BD_5:
+                                        Control: Classic/Icon@2.5.0
+                                        Properties:
+                                          BorderColor: =RGBA(40, 134, 222, 1)
+                                          BorderThickness: =1
+                                          Color: =RGBA(0, 0, 0, 1)
+                                          Fill: |-
+                                            =If(
+                                                ThisItem.IsSelected && Material = ThisItem.Value,
+                                                RGBA(
+                                                    180,
+                                                    214,
+                                                    250,
+                                                    1
+                                                ),
+                                                Sum(
+                                                    Filter(
+                                                        Controlador_Bodegas,
+                                                        Material = ThisItem.Value
+                                                    ),
+                                                    Maximo
+                                                ) = 0,
+                                                RGBA(
+                                                    255,
+                                                    184,
+                                                    174,
+                                                    1
+                                                ),
+                                                RGBA(
+                                                    255,
+                                                    255,
+                                                    255,
+                                                    1
+                                                )
+                                            )
+                                          FocusedBorderThickness: =20
+                                          Height: =30
+                                          HoverBorderColor: =RGBA(40, 134, 222, 1)
+                                          HoverColor: =RGBA(0, 0, 0, 1)
+                                          HoverFill: =RGBA(180, 214, 250, 1)
+                                          Icon: =Icon.ChevronRight
+                                          OnSelect: |-
+                                            =If(
+                                                Material = ThisItem.Value,
+                                                UpdateContext({Material: Blank()}),
+                                                UpdateContext({Material: ThisItem.Value})
+                                            )
+                                          PaddingBottom: =4
+                                          PaddingLeft: =2
+                                          PaddingRight: =2
+                                          PaddingTop: =4
+                                          Width: =45
+                                    - Rectangle45:
+                                        Control: Rectangle@2.3.0
+                                        Properties:
+                                          Fill: =RGBA(0, 0, 0, 0)
+                                          Height: =60
+                                          OnSelect: =Select(Parent)
+                                          Width: =1310
+                                          X: =45
+                                          Y: =-10
                               - txt_CantMaquinas_BC_14:
                                   Control: Classic/TextInput@2.3.2
                                   Properties:
@@ -444,7 +711,7 @@ Screens:
                                     DisabledFill: =RGBA(180, 214, 250, 1)
                                     DisplayMode: =DisplayMode.Disabled
                                     Height: =25
-                                    HintText: ="#"
+                                    HintText: =
                                     HoverBorderColor: =RGBA(39, 113, 194, 1)
                                     PaddingLeft: =5
                                     PressedBorderColor: =RGBA(39, 113, 194, 1)
@@ -453,7 +720,8 @@ Screens:
                                     RadiusTopLeft: =0
                                     RadiusTopRight: =0
                                     Size: =12
-                                    Width: =150
+                                    Width: =180
+                                    X: =45
                                     Y: =50
                               - txt_CantMaquinas_BC_15:
                                   Control: Classic/TextInput@2.3.2
@@ -477,8 +745,8 @@ Screens:
                                     RadiusTopLeft: =0
                                     RadiusTopRight: =0
                                     Size: =12
-                                    Width: =400
-                                    X: =150
+                                    Width: =482
+                                    X: =225
                                     Y: =50
                               - txt_CantMaquinas_BC_16:
                                   Control: Classic/TextInput@2.3.2
@@ -502,8 +770,8 @@ Screens:
                                     RadiusTopLeft: =0
                                     RadiusTopRight: =0
                                     Size: =12
-                                    Width: =150
-                                    X: =550
+                                    Width: =160
+                                    X: =707
                                     Y: =50
                               - txt_CantMaquinas_BC_17:
                                   Control: Classic/TextInput@2.3.2
@@ -527,8 +795,8 @@ Screens:
                                     RadiusTopLeft: =0
                                     RadiusTopRight: =0
                                     Size: =12
-                                    Width: =150
-                                    X: =700
+                                    Width: =160
+                                    X: =867
                                     Y: =50
                               - txt_CantMaquinas_BC_18:
                                   Control: Classic/TextInput@2.3.2
@@ -552,8 +820,8 @@ Screens:
                                     RadiusTopLeft: =0
                                     RadiusTopRight: =0
                                     Size: =12
-                                    Width: =150
-                                    X: =850
+                                    Width: =160
+                                    X: =1027
                                     Y: =50
                               - txt_CantMaquinas_BC_19:
                                   Control: Classic/TextInput@2.3.2
@@ -577,13 +845,37 @@ Screens:
                                     RadiusTopLeft: =0
                                     RadiusTopRight: =0
                                     Size: =12
-                                    Width: =150
-                                    X: =1000
+                                    Width: =160
+                                    X: =1187
+                                    Y: =50
+                              - txt_CantMaquinas_BC_22:
+                                  Control: Classic/TextInput@2.3.2
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(40, 134, 222, 1)
+                                    BorderThickness: =1
+                                    Clear: =true
+                                    Default: =
+                                    DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                                    DisabledColor: =RGBA(0, 0, 0, 1)
+                                    DisabledFill: =RGBA(180, 214, 250, 1)
+                                    DisplayMode: =DisplayMode.Disabled
+                                    Height: =25
+                                    HintText: =
+                                    HoverBorderColor: =RGBA(39, 113, 194, 1)
+                                    PaddingLeft: =5
+                                    PressedBorderColor: =RGBA(39, 113, 194, 1)
+                                    RadiusBottomLeft: =0
+                                    RadiusBottomRight: =0
+                                    RadiusTopLeft: =0
+                                    RadiusTopRight: =0
+                                    Size: =12
+                                    Width: =45
                                     Y: =50
       - Rectangle44:
           Control: Rectangle@2.3.0
           Properties:
-            Fill: =RGBA(0, 0, 0, 0.2)
+            Fill: =RGBA(0, 0, 0, 0.5)
             Height: =BottomContainer3_7.Height
             OnSelect: |-
               =Reset(drp_AddOP_BC);
@@ -1173,31 +1465,68 @@ Screens:
                         OnSelect: |-
                           =If(
                               IsBlank(drp_AddOrden_BC.Selected.Value) || IsBlank(drp_AddOP_BC.Selected.Operacion),
-                              Notify(
-                                  "Debe indicar la Orden y la Operacion",
-                                  NotificationType.Error
+                              UpdateContext(
+                                  {
+                                      Aviso: {
+                                          Ver: true,
+                                          Tipo: 0,
+                                          Texto: "Debe seleccionar una Orden y una Operacion"
+                                      }
+                                  }
                               ),
-                              IsBlank(txt_CantMaquinas_BC.Text),
-                              Notify(
-                                  "La orden debe tener maquinas asignadas",
-                                  NotificationType.Error
+                              IsBlank(txt_CantMaquinas_BC.Text) || txt_CantMaquinas_BC.Text = "0",
+                              UpdateContext(
+                                  {
+                                      Aviso: {
+                                          Ver: true,
+                                          Tipo: 0,
+                                          Texto: "La Orden debe tener almenos una maquina asignada"
+                                      }
+                                  }
                               ),
                               CountRows(glr_AddMateriales_BC.AllItems) <= 0,
-                              Notify(
-                                  "La lista de materiales no puede estar vacia",
-                                  NotificationType.Error
+                              UpdateContext(
+                                  {
+                                      Aviso: {
+                                          Ver: true,
+                                          Tipo: 0,
+                                          Texto: "La lista de materiales no puede estar vacia"
+                                      }
+                                  }
                               ),
+                              UpdateContext({Guardando: true});
                               ForAll(
                                   glr_AddMateriales_BC.AllItems,
                                   Collect(
-                                      Bodega_Controlador,
+                                      Controlador_Bodegas,
                                       {
                                           Orden: drp_AddOrden_BC.Selected.Value,
                                           Operacion: drp_AddOP_BC.Selected.Operacion,
                                           Material: ThisRecord.Value,
                                           Descripcion: ThisRecord.AddDescripcion_BC.Text,
+                                          Matl_Qty: Value(ThisRecord.AddQty_BC.Text),
+                                          Maximo: Value(ThisRecord.AddMaximo_BC.Text)
                                       }
                                   )
+                              );
+                              UpdateContext(
+                                  {
+                                      Aviso: {
+                                          Ver: true,
+                                          Tipo: 2,
+                                          Texto: "La Orden se agrego con exito"
+                                      }
+                                  }
+                              );
+                              UpdateContext({Guardando: false});
+                              Reset(drp_AddOP_BC);
+                              Reset(drp_AddOrden_BC);
+                              Reset(glr_AddMateriales_BC);
+                              UpdateContext(
+                                  {
+                                      VerMaquinas: false,
+                                      agregarOrden: !agregarOrden
+                                  }
                               )
                           )
                         PaddingBottom: =2
@@ -1287,3 +1616,109 @@ Screens:
                   Width: =32
                   X: =218
                   Y: =2
+      - cnt_Avisos_BC:
+          Control: GroupContainer@1.3.0
+          Variant: ManualLayout
+          Properties:
+            Fill: =RGBA(0, 0, 0, 0.2)
+            Height: =669
+            RadiusBottomLeft: =12
+            RadiusBottomRight: =12
+            RadiusTopLeft: =12
+            RadiusTopRight: =12
+            Visible: =Guardando || Aviso.Ver
+            Width: =1350
+            X: =8
+            Y: =92
+          Children:
+            - Icon3_85:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  BorderColor: =RGBA(12, 59, 94, 1)
+                  BorderStyle: =BorderStyle.None
+                  BorderThickness: =2
+                  Color: =If(Aviso.Tipo = 0, RGBA(255, 0, 0, 1), Aviso.Tipo = 1, RGBA(255, 191, 0, 1), RGBA(54, 176, 75, 1))
+                  DisplayMode: =DisplayMode.View
+                  FocusedBorderThickness: =20
+                  Height: =150
+                  HoverBorderColor: =App.Theme.Colors.Darker10
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =App.Theme.Colors.Darker10
+                  Icon: =If(Aviso.Tipo = 0, Icon.Error, Aviso.Tipo = 1, Icon.Warning, Icon.CheckBadge)
+                  OnSelect: |
+                    =Navigate(MenuAdministrativo);
+                  PaddingBottom: =5
+                  PaddingLeft: =5
+                  PaddingRight: =5
+                  PaddingTop: =5
+                  Visible: =Aviso.Ver && !Guardando
+                  Width: =150
+                  X: =1350 / 2 - 75
+                  Y: =90
+            - Container70:
+                Control: GroupContainer@1.3.0
+                Variant: ManualLayout
+                Properties:
+                  BorderColor: =If(Aviso.Tipo = 0, RGBA(255, 0, 0, 1), Aviso.Tipo = 1, RGBA(255, 191, 0, 1), RGBA(54, 176, 75, 1))
+                  BorderThickness: =4
+                  Fill: =RGBA(255, 255, 255, 1)
+                  Height: =112
+                  RadiusBottomLeft: =10
+                  RadiusBottomRight: =10
+                  RadiusTopLeft: =10
+                  RadiusTopRight: =10
+                  Visible: =Aviso.Ver && !Guardando
+                  X: =425
+                  Y: =250
+                Children:
+                  - TextInput15:
+                      Control: Classic/TextInput@2.3.2
+                      Properties:
+                        Align: =Align.Center
+                        Default: =Aviso.Texto
+                        DisplayMode: =DisplayMode.View
+                        Height: =100
+                        Mode: =TextMode.MultiLine
+                        PaddingBottom: =12
+                        PaddingRight: =12
+                        PaddingTop: =12
+                        Size: =16
+                        Width: =500
+                  - Rectangle43:
+                      Control: Rectangle@2.3.0
+                      Properties:
+                        Fill: =RGBA(235, 235, 235, 1)
+                        Height: =12
+                        Width: =500
+                        Y: =100
+                  - Rectangle43_1:
+                      Control: Rectangle@2.3.0
+                      Properties:
+                        Fill: =If(Aviso.Tipo = 0, RGBA(255, 0, 0, 1), Aviso.Tipo = 1, RGBA(255, 191, 0, 1), RGBA(54, 176, 75, 1))
+                        Height: =12
+                        Width: =(tmp_Aviso_BC.Value / 3200) * 500
+                        Y: =100
+            - tmp_Aviso_BC:
+                Control: Timer@2.1.0
+                Properties:
+                  Duration: =3500
+                  OnTimerEnd: |-
+                    =UpdateContext({Aviso: {Ver: false, Tipo: 3, Texto: ""}, Guardando: false}); Reset(Self)
+                  Start: =Aviso.Ver
+                  Visible: =false
+            - Spinner1:
+                Control: Spinner@1.4.6
+                Properties:
+                  Appearance: ='Spinner.Appearance'.Primary
+                  BasePaletteColor: =RGBA(5, 102, 178, 1)
+                  FontColor: =RGBA(40, 134, 222, 1)
+                  FontSize: =30
+                  FontWeight: =FontWeight.Bold
+                  Height: =669
+                  Label: ="Guardando"
+                  LabelPosition: ='Spinner.LabelPosition'.Below
+                  SpinnerColor: =RGBA(15, 108, 189, 1)
+                  SpinnerSize: ='Spinner.SpinnerSize'.Huge
+                  TrackColor: =RGBA(180, 214, 250, 1)
+                  Visible: =Guardando && !Aviso.Ver
+                  Width: =1350
