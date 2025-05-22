@@ -106,7 +106,7 @@ Bodega_Controlador As screen:
                 FontWeight: =FontWeight.Bold
                 Height: =60
                 Size: =25
-                Text: ="BODEGA CONTROLADOR " & CountRows(glr_Materiales_BC.AllItems)
+                Text: ="BODEGA CONTROLADOR"
                 Width: =740
                 ZIndex: =5
 
@@ -327,9 +327,39 @@ Bodega_Controlador As screen:
                             PressedFill: =RGBA(255, 238, 189, 1)
                             Size: =14
                             Text: ="Editar Material"
-                            X: =365
+                            X: =542
                             Y: =10
                             ZIndex: =12
+
+                        Button17_8 As button:
+                            BorderColor: =RGBA(15, 84, 140, 1)
+                            Color: =App.Theme.Colors.PrimaryForeground
+                            DisabledBorderColor: =RGBA(244, 244, 244, 1)
+                            DisabledColor: =RGBA(166, 166, 166, 1)
+                            DisabledFill: =RGBA(244, 244, 244, 1)
+                            DisplayMode: |-
+                                =If(
+                                    !IsBlank(SetMaterial),
+                                    DisplayMode.Disabled,
+                                    DisplayMode.Edit
+                                )
+                            Fill: =RGBA(15, 84, 140, 1)
+                            Font: =App.Theme.Font
+                            FontWeight: =FontWeight.Semibold
+                            Height: =30
+                            HoverBorderColor: =RGBA(12, 59, 94, 1)
+                            HoverColor: =App.Theme.Colors.PrimaryForeground
+                            HoverFill: =RGBA(12, 59, 94, 1)
+                            OnSelect: |-
+                                =UpdateContext({agregarMaterial: true})
+                            PressedBorderColor: =RGBA(15, 84, 140, 1)
+                            PressedColor: =RGBA(15, 84, 140, 1)
+                            PressedFill: =RGBA(180, 214, 250, 1)
+                            Size: =14
+                            Text: ="Agregar Material"
+                            X: =366
+                            Y: =10
+                            ZIndex: =13
 
                     "glr_Materiales_BC As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
                         '#CopilotOverlayLabel': ="Filtrada"
@@ -924,15 +954,28 @@ Bodega_Controlador As screen:
             Reset(drp_DeleteOP_BC);
             Reset(drp_DeleteOrden_BC);
             Reset(glr_EliminarMateriales_BC);
-            UpdateContext({VerMaquinas: false, agregarOrden: false, eliminarOrden: false, ConfirmarEliminarOrden: false, editarMaterial: false, SetMaterial: Blank()})
-        Visible: =agregarOrden || editarMaterial || eliminarOrden
+            Reset(drp_AddMaterialOP_BC);
+            Reset(drp_AddMaterialOrden_BC);
+            Reset(drp_AddMaterial_BC);
+            UpdateContext(
+                {
+                    VerMaquinas: false,
+                    agregarOrden: false,
+                    eliminarOrden: false,
+                    ConfirmarEliminarOrden: false,
+                    editarMaterial: false,
+                    SetMaterial: Blank(),
+                    agregarMaterial: false
+                }
+            )
+        Visible: =agregarOrden || editarMaterial || eliminarOrden || agregarMaterial
         Width: =BottomContainer3_7.Width
         X: =8
         Y: =92
         ZIndex: =2
 
     cnt_AgregarOrden_BC As groupContainer.manualLayoutContainer:
-        BorderColor: =RGBA(40, 134, 222, 1)
+        BorderColor: =RGBA(52, 152, 47, 1)
         BorderThickness: =4
         DropShadow: =DropShadow.Light
         Fill: =RGBA(255, 255, 255, 1)
@@ -953,7 +996,7 @@ Bodega_Controlador As screen:
             BorderStyle: =BorderStyle.None
             BorderThickness: =3
             DelayItemLoading: =true
-            Height: =323
+            Height: =310
             Items: |-
                 =Distinct(
                     Filter(
@@ -982,7 +1025,7 @@ Bodega_Controlador As screen:
                 Clear: =true
                 Color: =RGBA(0, 0, 0, 1)
                 Default: =ThisItem.Value
-                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                DisabledBorderColor: =RGBA(52, 152, 47, 1)
                 DisabledColor: =RGBA(0, 0, 0, 1)
                 DisabledFill: |-
                     =If(
@@ -1035,7 +1078,7 @@ Bodega_Controlador As screen:
                         jobmatl,
                         item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = If(Value(drp_AddOP_BC.Selected.Operacion) = 25, 30, Value(drp_AddOP_BC.Selected.Operacion))
                     ).description
-                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                DisabledBorderColor: =RGBA(52, 152, 47, 1)
                 DisabledColor: =RGBA(0, 0, 0, 1)
                 DisabledFill: |-
                     =If(
@@ -1081,7 +1124,7 @@ Bodega_Controlador As screen:
 
             AddMaximo_BC As text:
                 Align: =Align.Center
-                BorderColor: =RGBA(40, 134, 222, 1)
+                BorderColor: =RGBA(52, 152, 47, 1)
                 Clear: =true
                 Color: =RGBA(0, 0, 0, 1)
                 Default: |-
@@ -1095,7 +1138,7 @@ Bodega_Controlador As screen:
                         ),
                         0
                     )
-                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                DisabledBorderColor: =RGBA(52, 152, 47, 1)
                 DisabledColor: =RGBA(0, 0, 0, 1)
                 DisabledFill: |-
                     =If(
@@ -1125,11 +1168,11 @@ Bodega_Controlador As screen:
                 Height: =30
                 HintText: |-
                     ="#"
-                HoverBorderColor: =RGBA(39, 113, 194, 1)
+                HoverBorderColor: =RGBA(52, 152, 47, 1)
                 HoverColor: =RGBA(0, 0, 0, 1)
-                HoverFill: =App.Theme.Colors.Lighter70
+                HoverFill: =RGBA(166, 215, 153, 1)
                 PaddingLeft: =5
-                PressedBorderColor: =RGBA(39, 113, 194, 1)
+                PressedBorderColor: =RGBA(52, 152, 47, 1)
                 RadiusBottomLeft: =0
                 RadiusBottomRight: =0
                 RadiusTopLeft: =0
@@ -1152,7 +1195,7 @@ Bodega_Controlador As screen:
                         ),
                         matl_qty
                     )
-                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                DisabledBorderColor: =RGBA(52, 152, 47, 1)
                 DisabledColor: =RGBA(0, 0, 0, 1)
                 DisabledFill: |-
                     =If(
@@ -1202,9 +1245,9 @@ Bodega_Controlador As screen:
             Clear: =true
             Color: =RGBA(0, 0, 0, 1)
             Default: ="Material"
-            DisabledBorderColor: =RGBA(40, 134, 222, 1)
+            DisabledBorderColor: =RGBA(52, 152, 47, 1)
             DisabledColor: =RGBA(0, 0, 0, 1)
-            DisabledFill: =RGBA(180, 214, 250, 1)
+            DisabledFill: =RGBA(166, 215, 153, 1)
             DisplayMode: =DisplayMode.Disabled
             FocusedBorderThickness: =4
             Font: =App.Theme.Font
@@ -1231,9 +1274,9 @@ Bodega_Controlador As screen:
             Clear: =true
             Color: =RGBA(0, 0, 0, 1)
             Default: ="Descripcion"
-            DisabledBorderColor: =RGBA(40, 134, 222, 1)
+            DisabledBorderColor: =RGBA(52, 152, 47, 1)
             DisabledColor: =RGBA(0, 0, 0, 1)
-            DisabledFill: =RGBA(180, 214, 250, 1)
+            DisabledFill: =RGBA(166, 215, 153, 1)
             DisplayMode: =DisplayMode.Disabled
             FocusedBorderThickness: =4
             Font: =App.Theme.Font
@@ -1261,9 +1304,9 @@ Bodega_Controlador As screen:
             Clear: =true
             Color: =RGBA(0, 0, 0, 1)
             Default: ="matl_qty"
-            DisabledBorderColor: =RGBA(40, 134, 222, 1)
+            DisabledBorderColor: =RGBA(52, 152, 47, 1)
             DisabledColor: =RGBA(0, 0, 0, 1)
-            DisabledFill: =RGBA(180, 214, 250, 1)
+            DisabledFill: =RGBA(166, 215, 153, 1)
             DisplayMode: =DisplayMode.Disabled
             FocusedBorderThickness: =4
             Font: =App.Theme.Font
@@ -1291,9 +1334,9 @@ Bodega_Controlador As screen:
             Clear: =true
             Color: =RGBA(0, 0, 0, 1)
             Default: ="Maximo"
-            DisabledBorderColor: =RGBA(40, 134, 222, 1)
+            DisabledBorderColor: =RGBA(52, 152, 47, 1)
             DisabledColor: =RGBA(0, 0, 0, 1)
-            DisabledFill: =RGBA(180, 214, 250, 1)
+            DisabledFill: =RGBA(166, 215, 153, 1)
             DisplayMode: =DisplayMode.Disabled
             FocusedBorderThickness: =4
             Font: =App.Theme.Font
@@ -1318,7 +1361,7 @@ Bodega_Controlador As screen:
         Container6_3 As groupContainer.manualLayoutContainer:
             BorderStyle: =BorderStyle.None
             DropShadow: =DropShadow.Light
-            Fill: =RGBA(40, 134, 222, 1)
+            Fill: =RGBA(52, 152, 47, 1)
             Height: =52
             Width: =850
             ZIndex: =6
@@ -1382,7 +1425,7 @@ Bodega_Controlador As screen:
                 AccessibleLabel: =""
                 Appearance: ='ComboboxCanvas.Appearance'.Outline
                 BasePaletteColor: =RGBA(5, 102, 178, 1)
-                BorderColor: =RGBA(180, 214, 250, 1)
+                BorderColor: =RGBA(166, 215, 153, 1)
                 BorderRadius: =10
                 BorderStyle: =BorderStyle.Solid
                 BorderThickness: =3
@@ -1430,7 +1473,7 @@ Bodega_Controlador As screen:
                 AccessibleLabel: =""
                 Appearance: ='ComboboxCanvas.Appearance'.Outline
                 BasePaletteColor: =RGBA(5, 102, 178, 1)
-                BorderColor: =RGBA(180, 214, 250, 1)
+                BorderColor: =RGBA(166, 215, 153, 1)
                 BorderRadius: =10
                 BorderStyle: =BorderStyle.Solid
                 BorderThickness: =3
@@ -1542,12 +1585,12 @@ Bodega_Controlador As screen:
 
             txt_CantMaquinas_BC As text:
                 Align: =Align.Center
-                BorderColor: =RGBA(180, 214, 250, 1)
+                BorderColor: =RGBA(166, 215, 153, 1)
                 BorderThickness: =3
                 Clear: =true
                 Color: =RGBA(0, 0, 0, 1)
                 Default: =CountRows(glr_Maquinas_BC.AllItems)
-                DisabledBorderColor: =RGBA(180, 214, 250, 1)
+                DisabledBorderColor: =RGBA(166, 215, 153, 1)
                 DisabledColor: =RGBA(0, 0, 0, 1)
                 DisabledFill: =RGBA(255, 255, 255, 1)
                 DisplayMode: =DisplayMode.Disabled
@@ -1623,18 +1666,18 @@ Bodega_Controlador As screen:
                 ZIndex: =9
 
             Button17_1 As button:
-                BorderColor: =App.Theme.Colors.Primary
+                BorderColor: =RGBA(45, 128, 40, 1)
                 Color: =App.Theme.Colors.PrimaryForeground
                 DisabledBorderColor: =RGBA(244, 244, 244, 1)
                 DisabledColor: =RGBA(166, 166, 166, 1)
                 DisabledFill: =RGBA(244, 244, 244, 1)
-                Fill: =App.Theme.Colors.Primary
+                Fill: =RGBA(45, 128, 40, 1)
                 Font: =App.Theme.Font
                 FontWeight: =FontWeight.Semibold
                 Height: =30
-                HoverBorderColor: =App.Theme.Colors.Darker10
+                HoverBorderColor: =RGBA(45, 128, 40, 1)
                 HoverColor: =App.Theme.Colors.PrimaryForeground
-                HoverFill: =App.Theme.Colors.Darker10
+                HoverFill: =RGBA(21, 68, 18, 1)
                 OnSelect: |-
                     =If(
                         IsBlank(drp_AddOrden_BC.Selected.Value) || IsBlank(drp_AddOP_BC.Selected.Operacion),
@@ -1731,9 +1774,9 @@ Bodega_Controlador As screen:
                 PaddingLeft: =2
                 PaddingRight: =2
                 PaddingTop: =2
-                PressedBorderColor: =App.Theme.Colors.Darker40
-                PressedColor: =Self.Color
-                PressedFill: =App.Theme.Colors.Darker40
+                PressedBorderColor: =RGBA(45, 128, 40, 1)
+                PressedColor: =RGBA(45, 128, 40, 1)
+                PressedFill: =RGBA(166, 215, 153, 1)
                 Size: =14
                 Text: ="Guardar"
                 Visible: =!IsBlank(drp_AddOrden_BC.Selected.Value) && !IsBlank(drp_AddOP_BC.Selected.Operacion)
@@ -1743,7 +1786,29 @@ Bodega_Controlador As screen:
                 ZIndex: =10
 
     cnt_ListaMaquinas_BC As groupContainer.manualLayoutContainer:
-        BorderColor: =If(eliminarOrden, RGBA(215, 58, 60, 1), RGBA(40, 134, 222, 1))
+        BorderColor: |-
+            =If(
+                eliminarOrden,
+                RGBA(
+                    215,
+                    58,
+                    60,
+                    1
+                ),
+                agregarMaterial,
+                RGBA(
+                    40,
+                    134,
+                    222,
+                    1
+                ),
+                RGBA(
+                    52,
+                    152,
+                    47,
+                    1
+                )
+            )
         BorderThickness: =4
         DropShadow: =DropShadow.Light
         Height: =400
@@ -1781,9 +1846,53 @@ Bodega_Controlador As screen:
                 Clear: =true
                 Color: =RGBA(0, 0, 0, 1)
                 Default: =ThisItem.Maquina
-                DisabledBorderColor: =If(eliminarOrden, RGBA(215, 58, 60, 1), RGBA(40, 134, 222, 1))
+                DisabledBorderColor: |-
+                    =If(
+                        eliminarOrden,
+                        RGBA(
+                            215,
+                            58,
+                            60,
+                            1
+                        ),
+                        agregarMaterial,
+                        RGBA(
+                            40,
+                            134,
+                            222,
+                            1
+                        ),
+                        RGBA(
+                            52,
+                            152,
+                            47,
+                            1
+                        )
+                    )
                 DisabledColor: =RGBA(0, 0, 0, 1)
-                DisabledFill: =If(eliminarOrden, RGBA(255, 184, 174, 1), RGBA(180, 214, 250, 0.3))
+                DisabledFill: |-
+                    =If(
+                        eliminarOrden,
+                        RGBA(
+                            255,
+                            184,
+                            174,
+                            1
+                        ),
+                        agregarMaterial,
+                        RGBA(
+                            180,
+                            214,
+                            250,
+                            1
+                        ),
+                        RGBA(
+                            166,
+                            215,
+                            153,
+                            1
+                        )
+                    )
                 DisplayMode: =DisplayMode.Disabled
                 FocusedBorderThickness: =4
                 Font: =App.Theme.Font
@@ -2662,7 +2771,7 @@ Bodega_Controlador As screen:
                     ZIndex: =3
 
     cnt_EditarMaterial_BC As groupContainer.manualLayoutContainer:
-        BorderColor: =RGBA(40, 134, 222, 1)
+        BorderColor: =RGBA(255, 191, 0, 1)
         BorderThickness: =4
         DropShadow: =DropShadow.Light
         Fill: =RGBA(255, 255, 255, 1)
@@ -2683,7 +2792,7 @@ Bodega_Controlador As screen:
             BorderStyle: =BorderStyle.None
             BorderThickness: =3
             DelayItemLoading: =true
-            Height: =284
+            Height: =302
             Items: =Filter(Controlador_Bodegas, Material = SetMaterial)
             Layout: =Layout.Vertical
             LoadingSpinner: =LoadingSpinner.Data
@@ -2695,11 +2804,11 @@ Bodega_Controlador As screen:
 
             EditOrden_BC As text:
                 Align: =Align.Center
-                BorderColor: =RGBA(40, 134, 222, 1)
+                BorderColor: =RGBA(255, 191, 0, 1)
                 Clear: =true
                 Color: =RGBA(0, 0, 0, 1)
                 Default: =ThisItem.Orden
-                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                DisabledBorderColor: =RGBA(255, 191, 0, 1)
                 DisabledColor: =RGBA(0, 0, 0, 1)
                 DisabledFill: |-
                     =If(
@@ -2725,7 +2834,7 @@ Bodega_Controlador As screen:
                     ="#"
                 HoverBorderColor: =RGBA(39, 113, 194, 1)
                 HoverColor: =RGBA(0, 0, 0, 1)
-                HoverFill: =App.Theme.Colors.Lighter70
+                HoverFill: =
                 PaddingLeft: =5
                 PressedBorderColor: =RGBA(39, 113, 194, 1)
                 RadiusBottomLeft: =0
@@ -2738,11 +2847,11 @@ Bodega_Controlador As screen:
 
             EditOP_BC As text:
                 Align: =Align.Center
-                BorderColor: =RGBA(40, 134, 222, 1)
+                BorderColor: =RGBA(255, 191, 0, 1)
                 Clear: =true
                 Color: =RGBA(0, 0, 0, 1)
                 Default: =ThisItem.Operacion
-                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                DisabledBorderColor: =RGBA(255, 191, 0, 1)
                 DisabledColor: =RGBA(0, 0, 0, 1)
                 DisabledFill: |-
                     =If(
@@ -2768,7 +2877,7 @@ Bodega_Controlador As screen:
                     ="#"
                 HoverBorderColor: =RGBA(39, 113, 194, 1)
                 HoverColor: =RGBA(0, 0, 0, 1)
-                HoverFill: =App.Theme.Colors.Lighter70
+                HoverFill: =
                 PaddingLeft: =5
                 PressedBorderColor: =RGBA(39, 113, 194, 1)
                 RadiusBottomLeft: =0
@@ -2782,7 +2891,7 @@ Bodega_Controlador As screen:
 
             EditUsado_BC As text:
                 Align: =Align.Center
-                BorderColor: =RGBA(40, 134, 222, 1)
+                BorderColor: =RGBA(255, 191, 0, 1)
                 Color: =RGBA(0, 0, 0, 1)
                 Default: |-
                     =If(
@@ -2790,7 +2899,7 @@ Bodega_Controlador As screen:
                         0,
                         ThisItem.Usado
                     )
-                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                DisabledBorderColor: =RGBA(255, 191, 0, 1)
                 DisabledColor: =RGBA(0, 0, 0, 1)
                 DisabledFill: |-
                     =If(
@@ -2833,7 +2942,7 @@ Bodega_Controlador As screen:
                     ="#"
                 HoverBorderColor: =RGBA(39, 113, 194, 1)
                 HoverColor: =RGBA(0, 0, 0, 1)
-                HoverFill: =App.Theme.Colors.Lighter70
+                HoverFill: =
                 PaddingLeft: =5
                 PressedBorderColor: =RGBA(39, 113, 194, 1)
                 RadiusBottomLeft: =0
@@ -2847,10 +2956,10 @@ Bodega_Controlador As screen:
 
             EditMaximo_BC As text:
                 Align: =Align.Center
-                BorderColor: =RGBA(40, 134, 222, 1)
+                BorderColor: =RGBA(255, 191, 0, 1)
                 Color: =RGBA(0, 0, 0, 1)
                 Default: =ThisItem.Maximo
-                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                DisabledBorderColor: =RGBA(255, 191, 0, 1)
                 DisabledColor: =RGBA(0, 0, 0, 1)
                 DisabledFill: |-
                     =If(
@@ -2890,11 +2999,11 @@ Bodega_Controlador As screen:
                 Height: =30
                 HintText: |-
                     ="#"
-                HoverBorderColor: =RGBA(39, 113, 194, 1)
+                HoverBorderColor: =RGBA(255, 191, 0, 1)
                 HoverColor: =RGBA(0, 0, 0, 1)
-                HoverFill: =App.Theme.Colors.Lighter70
+                HoverFill: =RGBA(255, 237, 181, 1)
                 PaddingLeft: =5
-                PressedBorderColor: =RGBA(39, 113, 194, 1)
+                PressedBorderColor: =RGBA(255, 191, 0, 1)
                 RadiusBottomLeft: =0
                 RadiusBottomRight: =0
                 RadiusTopLeft: =0
@@ -2906,11 +3015,11 @@ Bodega_Controlador As screen:
 
             EditRestante_BC As text:
                 Align: =Align.Center
-                BorderColor: =RGBA(40, 134, 222, 1)
+                BorderColor: =RGBA(255, 191, 0, 1)
                 Clear: =true
                 Color: =RGBA(0, 0, 0, 1)
                 Default: =EditMaximo_BC.Text - EditUsado_BC.Text
-                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                DisabledBorderColor: =RGBA(255, 191, 0, 1)
                 DisabledColor: =RGBA(0, 0, 0, 1)
                 DisabledFill: |-
                     =If(
@@ -2936,7 +3045,7 @@ Bodega_Controlador As screen:
                     ="#"
                 HoverBorderColor: =RGBA(39, 113, 194, 1)
                 HoverColor: =RGBA(0, 0, 0, 1)
-                HoverFill: =App.Theme.Colors.Lighter70
+                HoverFill: =
                 PaddingLeft: =5
                 PressedBorderColor: =RGBA(39, 113, 194, 1)
                 RadiusBottomLeft: =0
@@ -2950,11 +3059,11 @@ Bodega_Controlador As screen:
 
             EditQty_BC_3 As text:
                 Align: =Align.Center
-                BorderColor: =RGBA(40, 134, 222, 1)
+                BorderColor: =RGBA(255, 191, 0, 1)
                 Clear: =true
                 Color: =RGBA(0, 0, 0, 1)
                 Default: =ThisItem.Matl_Qty
-                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                DisabledBorderColor: =RGBA(255, 191, 0, 1)
                 DisabledColor: =RGBA(0, 0, 0, 1)
                 DisabledFill: |-
                     =If(
@@ -2980,7 +3089,7 @@ Bodega_Controlador As screen:
                     ="#"
                 HoverBorderColor: =RGBA(39, 113, 194, 1)
                 HoverColor: =RGBA(0, 0, 0, 1)
-                HoverFill: =App.Theme.Colors.Lighter70
+                HoverFill: =
                 PaddingLeft: =5
                 PressedBorderColor: =RGBA(39, 113, 194, 1)
                 RadiusBottomLeft: =0
@@ -2998,9 +3107,9 @@ Bodega_Controlador As screen:
             Clear: =true
             Color: =RGBA(0, 0, 0, 1)
             Default: ="Orden"
-            DisabledBorderColor: =RGBA(40, 134, 222, 1)
+            DisabledBorderColor: =RGBA(255, 191, 0, 1)
             DisabledColor: =RGBA(0, 0, 0, 1)
-            DisabledFill: =RGBA(180, 214, 250, 1)
+            DisabledFill: =RGBA(255, 237, 181, 1)
             DisplayMode: =DisplayMode.Disabled
             FocusedBorderThickness: =4
             Font: =App.Theme.Font
@@ -3027,9 +3136,9 @@ Bodega_Controlador As screen:
             Clear: =true
             Color: =RGBA(0, 0, 0, 1)
             Default: ="Operacion"
-            DisabledBorderColor: =RGBA(40, 134, 222, 1)
+            DisabledBorderColor: =RGBA(255, 191, 0, 1)
             DisabledColor: =RGBA(0, 0, 0, 1)
-            DisabledFill: =RGBA(180, 214, 250, 1)
+            DisabledFill: =RGBA(255, 237, 181, 1)
             DisplayMode: =DisplayMode.Disabled
             FocusedBorderThickness: =4
             Font: =App.Theme.Font
@@ -3057,9 +3166,9 @@ Bodega_Controlador As screen:
             Clear: =true
             Color: =RGBA(0, 0, 0, 1)
             Default: ="Maximo"
-            DisabledBorderColor: =RGBA(40, 134, 222, 1)
+            DisabledBorderColor: =RGBA(255, 191, 0, 1)
             DisabledColor: =RGBA(0, 0, 0, 1)
-            DisabledFill: =RGBA(180, 214, 250, 1)
+            DisabledFill: =RGBA(255, 237, 181, 1)
             DisplayMode: =DisplayMode.Disabled
             FocusedBorderThickness: =4
             Font: =App.Theme.Font
@@ -3087,9 +3196,9 @@ Bodega_Controlador As screen:
             Clear: =true
             Color: =RGBA(0, 0, 0, 1)
             Default: ="Usado"
-            DisabledBorderColor: =RGBA(40, 134, 222, 1)
+            DisabledBorderColor: =RGBA(255, 191, 0, 1)
             DisabledColor: =RGBA(0, 0, 0, 1)
-            DisabledFill: =RGBA(180, 214, 250, 1)
+            DisabledFill: =RGBA(255, 237, 181, 1)
             DisplayMode: =DisplayMode.Disabled
             FocusedBorderThickness: =4
             Font: =App.Theme.Font
@@ -3098,7 +3207,7 @@ Bodega_Controlador As screen:
                 ="#"
             HoverBorderColor: =RGBA(39, 113, 194, 1)
             HoverColor: =RGBA(0, 0, 0, 1)
-            HoverFill: =App.Theme.Colors.Lighter70
+            HoverFill: =RGBA(255, 237, 181, 1)
             PaddingLeft: =5
             PressedBorderColor: =RGBA(39, 113, 194, 1)
             RadiusBottomLeft: =0
@@ -3114,7 +3223,7 @@ Bodega_Controlador As screen:
         Container6_4 As groupContainer.manualLayoutContainer:
             BorderStyle: =BorderStyle.None
             DropShadow: =DropShadow.Light
-            Fill: =RGBA(40, 134, 222, 1)
+            Fill: =RGBA(255, 191, 0, 1)
             Height: =52
             Width: =Parent.Width
             ZIndex: =6
@@ -3180,7 +3289,7 @@ Bodega_Controlador As screen:
                 Clear: =true
                 Color: =RGBA(0, 0, 0, 1)
                 Default: =SetMaterial
-                DisabledBorderColor: =RGBA(180, 214, 250, 1)
+                DisabledBorderColor: =RGBA(255, 237, 181, 1)
                 DisabledColor: =RGBA(0, 0, 0, 1)
                 DisabledFill: =RGBA(255, 255, 255, 1)
                 DisplayMode: =DisplayMode.Disabled
@@ -3228,18 +3337,18 @@ Bodega_Controlador As screen:
                 ZIndex: =9
 
             Button17_4 As button:
-                BorderColor: =App.Theme.Colors.Primary
+                BorderColor: =RGBA(255, 191, 0, 1)
                 Color: =App.Theme.Colors.PrimaryForeground
                 DisabledBorderColor: =RGBA(244, 244, 244, 1)
                 DisabledColor: =RGBA(166, 166, 166, 1)
                 DisabledFill: =RGBA(244, 244, 244, 1)
-                Fill: =App.Theme.Colors.Primary
+                Fill: =RGBA(148, 111, 0, 1)
                 Font: =App.Theme.Font
                 FontWeight: =FontWeight.Semibold
                 Height: =30
-                HoverBorderColor: =App.Theme.Colors.Darker10
+                HoverBorderColor: =RGBA(255, 191, 0, 1)
                 HoverColor: =App.Theme.Colors.PrimaryForeground
-                HoverFill: =App.Theme.Colors.Darker10
+                HoverFill: =RGBA(84, 63, 0, 1)
                 OnSelect: |-
                     =If(
                         CountRows(
@@ -3290,9 +3399,9 @@ Bodega_Controlador As screen:
                 PaddingLeft: =2
                 PaddingRight: =2
                 PaddingTop: =2
-                PressedBorderColor: =App.Theme.Colors.Darker40
-                PressedColor: =Self.Color
-                PressedFill: =App.Theme.Colors.Darker40
+                PressedBorderColor: =RGBA(255, 191, 0, 1)
+                PressedColor: =RGBA(255, 191, 0, 1)
+                PressedFill: =RGBA(255, 237, 181, 1)
                 Size: =14
                 Text: ="Guardar"
                 Width: =110
@@ -3340,7 +3449,7 @@ Bodega_Controlador As screen:
                         Controlador_Bodegas,
                         Material = SetMaterial
                     ).Descripcion
-                DisabledBorderColor: =RGBA(180, 214, 250, 1)
+                DisabledBorderColor: =RGBA(255, 237, 181, 1)
                 DisabledColor: =RGBA(0, 0, 0, 1)
                 DisabledFill: =RGBA(255, 255, 255, 1)
                 DisplayMode: =DisplayMode.Disabled
@@ -3370,9 +3479,9 @@ Bodega_Controlador As screen:
             Clear: =true
             Color: =RGBA(0, 0, 0, 1)
             Default: ="matl_qty"
-            DisabledBorderColor: =RGBA(40, 134, 222, 1)
+            DisabledBorderColor: =RGBA(255, 191, 0, 1)
             DisabledColor: =RGBA(0, 0, 0, 1)
-            DisabledFill: =RGBA(180, 214, 250, 1)
+            DisabledFill: =RGBA(255, 237, 181, 1)
             DisplayMode: =DisplayMode.Disabled
             FocusedBorderThickness: =4
             Font: =App.Theme.Font
@@ -3400,6 +3509,141 @@ Bodega_Controlador As screen:
             Clear: =true
             Color: =RGBA(0, 0, 0, 1)
             Default: ="Restante"
+            DisabledBorderColor: =RGBA(255, 191, 0, 1)
+            DisabledColor: =RGBA(0, 0, 0, 1)
+            DisabledFill: =RGBA(255, 237, 181, 1)
+            DisplayMode: =DisplayMode.Disabled
+            FocusedBorderThickness: =4
+            Font: =App.Theme.Font
+            Height: =25
+            HintText: |-
+                ="#"
+            HoverBorderColor: =RGBA(39, 113, 194, 1)
+            HoverColor: =RGBA(0, 0, 0, 1)
+            HoverFill: =App.Theme.Colors.Lighter70
+            PaddingLeft: =5
+            PressedBorderColor: =RGBA(39, 113, 194, 1)
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =12
+            Width: =150
+            X: =700
+            Y: =52
+            ZIndex: =8
+
+    cnt_AgregarMaterial_BC As groupContainer.manualLayoutContainer:
+        BorderColor: =RGBA(40, 134, 222, 1)
+        BorderThickness: =4
+        DropShadow: =DropShadow.Light
+        Fill: =RGBA(255, 255, 255, 1)
+        Height: =108
+        RadiusBottomLeft: =12
+        RadiusBottomRight: =12
+        RadiusTopLeft: =12
+        RadiusTopRight: =12
+        Visible: =agregarMaterial
+        Width: =850
+        X: =If(VerMaquinas, 118, 258)
+        Y: =Rectangle44.Height / 2 - Self.Height / 2
+        ZIndex: =7
+
+        txt_CantMaquinas_BC_33 As text:
+            Align: =Align.Center
+            BorderColor: =RGBA(40, 134, 222, 1)
+            Clear: =true
+            Color: =RGBA(0, 0, 0, 1)
+            Default: ="Material"
+            DisabledBorderColor: =RGBA(40, 134, 222, 1)
+            DisabledColor: =RGBA(0, 0, 0, 1)
+            DisabledFill: =RGBA(180, 214, 250, 1)
+            DisplayMode: =DisplayMode.Disabled
+            FocusedBorderThickness: =4
+            Font: =App.Theme.Font
+            Height: =25
+            HintText: |-
+                ="#"
+            HoverBorderColor: =RGBA(39, 113, 194, 1)
+            HoverColor: =RGBA(0, 0, 0, 1)
+            HoverFill: =App.Theme.Colors.Lighter70
+            PaddingLeft: =5
+            PressedBorderColor: =RGBA(39, 113, 194, 1)
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =12
+            Width: =170
+            Y: =52
+            ZIndex: =2
+
+        txt_CantMaquinas_BC_34 As text:
+            Align: =Align.Center
+            BorderColor: =RGBA(40, 134, 222, 1)
+            Clear: =true
+            Color: =RGBA(0, 0, 0, 1)
+            Default: ="Descripcion"
+            DisabledBorderColor: =RGBA(40, 134, 222, 1)
+            DisabledColor: =RGBA(0, 0, 0, 1)
+            DisabledFill: =RGBA(180, 214, 250, 1)
+            DisplayMode: =DisplayMode.Disabled
+            FocusedBorderThickness: =4
+            Font: =App.Theme.Font
+            Height: =25
+            HintText: |-
+                ="#"
+            HoverBorderColor: =RGBA(39, 113, 194, 1)
+            HoverColor: =RGBA(0, 0, 0, 1)
+            HoverFill: =App.Theme.Colors.Lighter70
+            PaddingLeft: =5
+            PressedBorderColor: =RGBA(39, 113, 194, 1)
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =12
+            Width: =380
+            X: =170
+            Y: =52
+            ZIndex: =3
+
+        txt_CantMaquinas_BC_35 As text:
+            Align: =Align.Center
+            BorderColor: =RGBA(40, 134, 222, 1)
+            Clear: =true
+            Color: =RGBA(0, 0, 0, 1)
+            Default: ="matl_qty"
+            DisabledBorderColor: =RGBA(40, 134, 222, 1)
+            DisabledColor: =RGBA(0, 0, 0, 1)
+            DisabledFill: =RGBA(180, 214, 250, 1)
+            DisplayMode: =DisplayMode.Disabled
+            FocusedBorderThickness: =4
+            Font: =App.Theme.Font
+            Height: =25
+            HintText: |-
+                ="#"
+            HoverBorderColor: =RGBA(39, 113, 194, 1)
+            HoverColor: =RGBA(0, 0, 0, 1)
+            HoverFill: =App.Theme.Colors.Lighter70
+            PaddingLeft: =5
+            PressedBorderColor: =RGBA(39, 113, 194, 1)
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =12
+            Width: =150
+            X: =550
+            Y: =52
+            ZIndex: =4
+
+        txt_CantMaquinas_BC_36 As text:
+            Align: =Align.Center
+            BorderColor: =RGBA(40, 134, 222, 1)
+            Clear: =true
+            Color: =RGBA(0, 0, 0, 1)
+            Default: ="Maximo"
             DisabledBorderColor: =RGBA(40, 134, 222, 1)
             DisabledColor: =RGBA(0, 0, 0, 1)
             DisabledFill: =RGBA(180, 214, 250, 1)
@@ -3422,7 +3666,532 @@ Bodega_Controlador As screen:
             Width: =150
             X: =700
             Y: =52
+            ZIndex: =5
+
+        Container6_8 As groupContainer.manualLayoutContainer:
+            BorderStyle: =BorderStyle.None
+            DropShadow: =DropShadow.Light
+            Fill: =RGBA(40, 134, 222, 1)
+            Height: =52
+            Width: =850
+            ZIndex: =6
+
+            icn_Refresh_BC_7 As icon:
+                BorderColor: =RGBA(12, 59, 94, 1)
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =2
+                Color: =RGBA(255, 255, 255, 1)
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                DisabledColor: =RGBA(244, 244, 244, 1)
+                FocusedBorderThickness: =20
+                Height: =32
+                HoverBorderColor: =
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =
+                Icon: =Icon.Reload
+                OnSelect: |-
+                    =Reset(drp_AddMaterialOP_BC);
+                    Reset(drp_AddMaterialOrden_BC);
+                    Reset(drp_AddMaterial_BC);
+                PaddingBottom: =5
+                PaddingLeft: =5
+                PaddingRight: =5
+                PaddingTop: =5
+                Width: =32
+                X: =652
+                Y: =10
+                ZIndex: =1
+
+            TextCanvas1_51 As Texto:
+                Align: ='TextCanvas.Align'.Start
+                AutoHeight: =false
+                BorderStyle: =BorderStyle.Solid
+                BorderThickness: =0
+                ContentLanguage: =""
+                DisplayMode: =DisplayMode.Edit
+                Font: =Font.Arial
+                FontColor: =RGBA(255, 255, 255, 1)
+                FontItalic: =false
+                FontStrikethrough: =false
+                FontUnderline: =false
+                Height: =32
+                PaddingLeft: =2
+                PaddingRight: =2
+                PaddingTop: =2
+                Size: =20
+                TabIndex: =0
+                Text: ="Orden"
+                Tooltip: =""
+                VerticalAlign: =VerticalAlign.Middle
+                Visible: =true
+                Weight: ="Regular"
+                Width: =65
+                Wrap: =true
+                X: =10
+                Y: =10
+                ZIndex: =2
+
+            "drp_AddMaterialOrden_BC As 'Cuadro combinado'.pcfdataset":
+                AccessibleLabel: =""
+                Appearance: ='ComboboxCanvas.Appearance'.Outline
+                BasePaletteColor: =RGBA(5, 102, 178, 1)
+                BorderColor: =RGBA(180, 214, 250, 1)
+                BorderRadius: =10
+                BorderStyle: =BorderStyle.Solid
+                BorderThickness: =3
+                ContentLanguage: =""
+                DisplayMode: =DisplayMode.Edit
+                Fill: =RGBA(255, 255, 255, 1)
+                Font: =""
+                FontColor: =RGBA(0, 0, 0, 1)
+                FontItalic: =false
+                FontSize: =16
+                FontStrikethrough: =false
+                FontUnderline: =false
+                FontWeight: =""
+                Height: =32
+                InputTextPlaceholder: ="Buscar Orden"
+                IsSearchable: =true
+                Items: =Sort(Distinct(Controlador_Bodegas, Orden), Value)
+                MultiValueDelimiter: =", "
+                OnChange: =false
+                PaddingBottom: =2
+                PaddingLeft: =2
+                PaddingRight: =2
+                PaddingTop: =2
+                Required: =false
+                SelectMultiple: =false
+                TabIndex: =0
+                Tooltip: =""
+                TriggerOutput: ="Keypress"
+                ValidationState: ="None"
+                Visible: =true
+                Width: =180
+                X: =75
+                Y: =10
+                ZIndex: =3
+
+                Value2_3 As PowerApps_CoreControls_ComboboxCanvasTemplate_dataField.textualColumn:
+                    FieldDisplayName: ="Value"
+                    FieldName: ="Value"
+                    FieldType: ="e"
+                    Order: =1
+                    Type: ="s"
+                    ZIndex: =1
+
+            "drp_AddMaterialOP_BC As 'Cuadro combinado'.pcfdataset":
+                AccessibleLabel: =""
+                Appearance: ='ComboboxCanvas.Appearance'.Outline
+                BasePaletteColor: =RGBA(5, 102, 178, 1)
+                BorderColor: =RGBA(180, 214, 250, 1)
+                BorderRadius: =10
+                BorderStyle: =BorderStyle.Solid
+                BorderThickness: =3
+                ContentLanguage: =""
+                DisplayMode: =DisplayMode.Edit
+                Fill: =RGBA(255, 255, 255, 1)
+                Font: =""
+                FontColor: =RGBA(0, 0, 0, 1)
+                FontItalic: =false
+                FontSize: =16
+                FontStrikethrough: =false
+                FontUnderline: =false
+                FontWeight: =""
+                Height: =32
+                InputTextPlaceholder: =If(IsBlank(drp_AddMaterialOrden_BC.Selected.Value), "No hay datos", "Operacion")
+                IsSearchable: =true
+                Items: =Sort(Distinct(Filter(Controlador_Bodegas, Orden = drp_AddMaterialOrden_BC.Selected.Value), Operacion), Value(Value))
+                MultiValueDelimiter: =", "
+                OnChange: =false
+                PaddingBottom: =2
+                PaddingLeft: =2
+                PaddingRight: =2
+                PaddingTop: =2
+                Required: =false
+                SelectMultiple: =false
+                TabIndex: =0
+                Tooltip: =""
+                TriggerOutput: ="Keypress"
+                ValidationState: ="None"
+                Visible: =true
+                Width: =100
+                X: =370
+                Y: =10
+                ZIndex: =4
+
+                Value1_1 As PowerApps_CoreControls_ComboboxCanvasTemplate_dataField.textualColumn:
+                    FieldDisplayName: ="Value"
+                    FieldName: ="Value"
+                    FieldType: ="s"
+                    Order: =1
+                    Type: ="s"
+                    ZIndex: =1
+
+            TextCanvas1_52 As Texto:
+                Align: ='TextCanvas.Align'.Start
+                AutoHeight: =false
+                BorderStyle: =BorderStyle.Solid
+                BorderThickness: =0
+                ContentLanguage: =""
+                DisplayMode: =DisplayMode.Edit
+                Font: =Font.Arial
+                FontColor: =RGBA(255, 255, 255, 1)
+                FontItalic: =false
+                FontStrikethrough: =false
+                FontUnderline: =false
+                Height: =32
+                PaddingLeft: =2
+                PaddingRight: =2
+                PaddingTop: =2
+                Size: =20
+                TabIndex: =0
+                Text: ="Operacion"
+                Tooltip: =""
+                VerticalAlign: =VerticalAlign.Middle
+                Visible: =true
+                Weight: ="Regular"
+                Width: =105
+                Wrap: =true
+                X: =265
+                Y: =10
+                ZIndex: =5
+
+            TextCanvas1_53 As Texto:
+                Align: ='TextCanvas.Align'.Start
+                AutoHeight: =false
+                BorderStyle: =BorderStyle.Solid
+                BorderThickness: =0
+                ContentLanguage: =""
+                DisplayMode: =DisplayMode.Edit
+                Font: =Font.Arial
+                FontColor: =RGBA(255, 255, 255, 1)
+                FontItalic: =false
+                FontStrikethrough: =false
+                FontUnderline: =false
+                Height: =32
+                PaddingLeft: =2
+                PaddingRight: =2
+                PaddingTop: =2
+                Size: =20
+                TabIndex: =0
+                Text: ="Maquinas"
+                Tooltip: =""
+                VerticalAlign: =VerticalAlign.Middle
+                Visible: =true
+                Weight: ="Regular"
+                Width: =100
+                Wrap: =true
+                X: =480
+                Y: =10
+                ZIndex: =6
+
+            txt_DeleteCantMaquinas_BC_1 As text:
+                Align: =Align.Center
+                BorderColor: =RGBA(180, 214, 250, 1)
+                BorderThickness: =3
+                Clear: =true
+                Color: =RGBA(0, 0, 0, 1)
+                Default: =CountRows(glr_Maquinas_BC.AllItems)
+                DisabledBorderColor: =RGBA(180, 214, 250, 1)
+                DisabledColor: =RGBA(0, 0, 0, 1)
+                DisabledFill: =RGBA(255, 255, 255, 1)
+                DisplayMode: =DisplayMode.Disabled
+                FocusedBorderThickness: =4
+                Font: =App.Theme.Font
+                Height: =32
+                HintText: |-
+                    ="#"
+                HoverBorderColor: =RGBA(39, 113, 194, 1)
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =App.Theme.Colors.Lighter70
+                PaddingLeft: =5
+                PressedBorderColor: =RGBA(39, 113, 194, 1)
+                RadiusBottomLeft: =8
+                RadiusBottomRight: =8
+                RadiusTopLeft: =8
+                RadiusTopRight: =8
+                Size: =12
+                Width: =40
+                X: =580
+                Y: =10
+                ZIndex: =7
+
+            icn_Maquinas_BC_2 As icon:
+                BorderColor: =RGBA(12, 59, 94, 1)
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =2
+                Color: =RGBA(255, 255, 255, 1)
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                DisabledColor: =RGBA(244, 244, 244, 1)
+                FocusedBorderThickness: =20
+                Height: =32
+                HoverBorderColor: =
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =
+                Icon: =Icon.Information
+                OnSelect: |-
+                    =UpdateContext({VerMaquinas: !VerMaquinas})
+                PaddingBottom: =5
+                PaddingLeft: =2
+                PaddingRight: =2
+                PaddingTop: =5
+                Tooltip: ="Ver Maquinas"
+                Width: =32
+                X: =620
+                Y: =10
+                ZIndex: =8
+
+            icn_Refresh_BC_8 As icon:
+                BorderColor: =RGBA(12, 59, 94, 1)
+                BorderStyle: =BorderStyle.None
+                BorderThickness: =2
+                Color: =RGBA(255, 255, 255, 1)
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                DisabledColor: =RGBA(244, 244, 244, 1)
+                FocusedBorderThickness: =20
+                Height: =52
+                HoverBorderColor: =
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =
+                Icon: =Icon.CancelBadge
+                OnSelect: |-
+                    =Reset(drp_AddMaterialOP_BC);
+                    Reset(drp_AddMaterialOrden_BC);
+                    Reset(drp_AddMaterial_BC);
+                    UpdateContext({agregarMaterial: false, VerMaquinas: false})
+                PaddingBottom: =8
+                PaddingLeft: =8
+                PaddingRight: =8
+                PaddingTop: =8
+                Width: =52
+                X: =798
+                ZIndex: =9
+
+            Button17_9 As button:
+                BorderColor: =RGBA(184, 0, 0, 1)
+                Color: =App.Theme.Colors.PrimaryForeground
+                DisabledBorderColor: =RGBA(244, 244, 244, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                DisabledFill: =RGBA(244, 244, 244, 1)
+                Fill: =RGBA(132, 40, 38, 1)
+                Font: =App.Theme.Font
+                FontWeight: =FontWeight.Semibold
+                Height: =30
+                HoverBorderColor: =RGBA(184, 0, 0, 1)
+                HoverColor: =App.Theme.Colors.PrimaryForeground
+                HoverFill: =RGBA(79, 29, 26, 1)
+                OnSelect: =
+                PaddingBottom: =2
+                PaddingLeft: =2
+                PaddingRight: =2
+                PaddingTop: =2
+                PressedBorderColor: =RGBA(184, 0, 0, 1)
+                PressedColor: =RGBA(184, 0, 0, 1)
+                PressedFill: =RGBA(255, 184, 174, 1)
+                Size: =14
+                Text: ="Eliminar"
+                Visible: =!IsBlank(drp_AddMaterialOrden_BC.Selected.Value) && !IsBlank(drp_AddMaterialOP_BC.Selected.Value)
+                Width: =110
+                X: =688
+                Y: =11
+                ZIndex: =10
+
+        "drp_AddMaterial_BC As 'Cuadro combinado'.pcfdataset":
+            AccessibleLabel: =""
+            Appearance: ='ComboboxCanvas.Appearance'.Outline
+            BasePaletteColor: =RGBA(5, 102, 178, 1)
+            BorderColor: =RGBA(40, 134, 222, 1)
+            BorderRadius: =0
+            BorderStyle: =BorderStyle.Solid
+            BorderThickness: =1
+            ContentLanguage: =""
+            DisplayMode: =DisplayMode.Edit
+            Fill: =RGBA(255, 255, 255, 1)
+            Font: =""
+            FontColor: =RGBA(0, 0, 0, 1)
+            FontItalic: =false
+            FontSize: =16
+            FontStrikethrough: =false
+            FontUnderline: =false
+            FontWeight: =""
+            Height: =31
+            InputTextPlaceholder: ="Buscar Orden"
+            IsSearchable: =true
+            Items: |-
+                =Sort(
+                    Distinct(
+                        Filter(
+                            jobmatl,
+                            probable = 1,
+                            StartsWith(
+                                item,
+                                "12"
+                            )
+                        ),
+                        item
+                    ),
+                    Value
+                )
+            MultiValueDelimiter: =", "
+            OnChange: =false
+            PaddingBottom: =2
+            PaddingLeft: =5
+            PaddingRight: =2
+            PaddingTop: =2
+            Required: =false
+            SelectMultiple: =false
+            TabIndex: =0
+            Tooltip: =""
+            TriggerOutput: ="Keypress"
+            ValidationState: ="None"
+            Visible: =true
+            Width: =170
+            X: =0
+            Y: =77
             ZIndex: =8
+
+            Value2_4 As PowerApps_CoreControls_ComboboxCanvasTemplate_dataField.textualColumn:
+                FieldDisplayName: ="Value"
+                FieldName: ="Value"
+                FieldType: ="e"
+                Order: =1
+                Type: ="s"
+                ZIndex: =1
+
+        txt_AddMaterialDescripcion_BC As text:
+            Align: =Align.Center
+            BorderColor: =RGBA(40, 134, 222, 1)
+            Clear: =true
+            Color: =RGBA(0, 0, 0, 1)
+            Default: =ThisItem.Descripcion
+            DisabledBorderColor: =RGBA(40, 134, 222, 1)
+            DisabledColor: =RGBA(0, 0, 0, 1)
+            DisabledFill: |-
+                =If(
+                    ThisItem.Matl_Qty = 0,
+                    RGBA(
+                        255,
+                        184,
+                        174,
+                        1
+                    ),
+                    RGBA(
+                        255,
+                        255,
+                        255,
+                        1
+                    )
+                )
+            DisplayMode: =DisplayMode.Disabled
+            FocusedBorderThickness: =4
+            Font: =App.Theme.Font
+            Height: =30
+            HintText: |-
+                ="#"
+            HoverBorderColor: =RGBA(39, 113, 194, 1)
+            HoverColor: =RGBA(0, 0, 0, 1)
+            HoverFill: =
+            PaddingLeft: =5
+            PressedBorderColor: =RGBA(39, 113, 194, 1)
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =12
+            Width: =380
+            X: =170
+            Y: =77
+            ZIndex: =9
+
+        txt_AddMaterialMaximo_BC As text:
+            Align: =Align.Center
+            BorderColor: =RGBA(40, 134, 222, 1)
+            Clear: =true
+            Color: =RGBA(0, 0, 0, 1)
+            Default: =ThisItem.Maximo
+            DisabledBorderColor: =RGBA(40, 134, 222, 1)
+            DisabledColor: =RGBA(0, 0, 0, 1)
+            DisabledFill: |-
+                =If(
+                    ThisItem.Matl_Qty = 0,
+                    RGBA(
+                        255,
+                        184,
+                        174,
+                        1
+                    ),
+                    RGBA(
+                        255,
+                        255,
+                        255,
+                        1
+                    )
+                )
+            FocusedBorderThickness: =4
+            Font: =App.Theme.Font
+            Format: =TextFormat.Number
+            Height: =30
+            HintText: |-
+                ="#"
+            HoverBorderColor: =RGBA(39, 113, 194, 1)
+            HoverColor: =RGBA(0, 0, 0, 1)
+            HoverFill: =RGBA(180, 214, 250, 1)
+            PaddingLeft: =5
+            PressedBorderColor: =RGBA(39, 113, 194, 1)
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =12
+            Width: =150
+            X: =700
+            Y: =77
+            ZIndex: =10
+
+        txt_AddMaterialQty_BC As text:
+            Align: =Align.Center
+            BorderColor: =RGBA(40, 134, 222, 1)
+            Clear: =true
+            Color: =RGBA(0, 0, 0, 1)
+            Default: =ThisItem.Matl_Qty
+            DisabledBorderColor: =RGBA(40, 134, 222, 1)
+            DisabledColor: =RGBA(0, 0, 0, 1)
+            DisabledFill: |-
+                =If(
+                    ThisItem.Matl_Qty = 0,
+                    RGBA(
+                        255,
+                        184,
+                        174,
+                        1
+                    ),
+                    RGBA(
+                        255,
+                        255,
+                        255,
+                        1
+                    )
+                )
+            DisplayMode: =DisplayMode.Disabled
+            FocusedBorderThickness: =4
+            Font: =App.Theme.Font
+            Height: =30
+            HintText: |-
+                ="#"
+            HoverBorderColor: =RGBA(39, 113, 194, 1)
+            HoverColor: =RGBA(0, 0, 0, 1)
+            HoverFill: =
+            PaddingLeft: =5
+            PressedBorderColor: =RGBA(39, 113, 194, 1)
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =12
+            Width: =150
+            X: =550
+            Y: =77
+            ZIndex: =11
 
     cnt_Avisos_BC As groupContainer.manualLayoutContainer:
         DropShadow: =DropShadow.Light
@@ -3436,7 +4205,7 @@ Bodega_Controlador As screen:
         Width: =1350
         X: =8
         Y: =92
-        ZIndex: =7
+        ZIndex: =8
 
         Icon3_85 As icon:
             BorderColor: =RGBA(12, 59, 94, 1)

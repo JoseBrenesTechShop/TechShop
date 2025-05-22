@@ -95,7 +95,7 @@ Screens:
                         FontWeight: =FontWeight.Bold
                         Height: =60
                         Size: =25
-                        Text: ="BODEGA CONTROLADOR " & CountRows(glr_Materiales_BC.AllItems)
+                        Text: ="BODEGA CONTROLADOR"
                         Width: =740
                   - Icon14_164:
                       Control: Classic/Icon@2.5.0
@@ -283,7 +283,30 @@ Screens:
                                           PressedFill: =RGBA(255, 238, 189, 1)
                                           Size: =14
                                           Text: ="Editar Material"
-                                          X: =365
+                                          X: =542
+                                          Y: =10
+                                    - Button17_8:
+                                        Control: Classic/Button@2.2.0
+                                        Properties:
+                                          BorderColor: =RGBA(15, 84, 140, 1)
+                                          DisplayMode: |-
+                                            =If(
+                                                !IsBlank(SetMaterial),
+                                                DisplayMode.Disabled,
+                                                DisplayMode.Edit
+                                            )
+                                          Fill: =RGBA(15, 84, 140, 1)
+                                          Height: =30
+                                          HoverBorderColor: =RGBA(12, 59, 94, 1)
+                                          HoverFill: =RGBA(12, 59, 94, 1)
+                                          OnSelect: |-
+                                            =UpdateContext({agregarMaterial: true})
+                                          PressedBorderColor: =RGBA(15, 84, 140, 1)
+                                          PressedColor: =RGBA(15, 84, 140, 1)
+                                          PressedFill: =RGBA(180, 214, 250, 1)
+                                          Size: =14
+                                          Text: ="Agregar Material"
+                                          X: =366
                                           Y: =10
                               - glr_Materiales_BC:
                                   Control: Gallery@2.15.0
@@ -823,8 +846,21 @@ Screens:
               Reset(drp_DeleteOP_BC);
               Reset(drp_DeleteOrden_BC);
               Reset(glr_EliminarMateriales_BC);
-              UpdateContext({VerMaquinas: false, agregarOrden: false, eliminarOrden: false, ConfirmarEliminarOrden: false, editarMaterial: false, SetMaterial: Blank()})
-            Visible: =agregarOrden || editarMaterial || eliminarOrden
+              Reset(drp_AddMaterialOP_BC);
+              Reset(drp_AddMaterialOrden_BC);
+              Reset(drp_AddMaterial_BC);
+              UpdateContext(
+                  {
+                      VerMaquinas: false,
+                      agregarOrden: false,
+                      eliminarOrden: false,
+                      ConfirmarEliminarOrden: false,
+                      editarMaterial: false,
+                      SetMaterial: Blank(),
+                      agregarMaterial: false
+                  }
+              )
+            Visible: =agregarOrden || editarMaterial || eliminarOrden || agregarMaterial
             Width: =BottomContainer3_7.Width
             X: =8
             Y: =92
@@ -832,7 +868,7 @@ Screens:
           Control: GroupContainer@1.3.0
           Variant: ManualLayout
           Properties:
-            BorderColor: =RGBA(40, 134, 222, 1)
+            BorderColor: =RGBA(52, 152, 47, 1)
             BorderThickness: =4
             Fill: =RGBA(255, 255, 255, 1)
             Height: =400
@@ -852,7 +888,7 @@ Screens:
                   BorderColor: =RGBA(180, 214, 250, 1)
                   BorderStyle: =BorderStyle.None
                   BorderThickness: =3
-                  Height: =323
+                  Height: =310
                   Items: |-
                     =Distinct(
                         Filter(
@@ -879,7 +915,7 @@ Screens:
                         BorderThickness: =1
                         Clear: =true
                         Default: =ThisItem.Value
-                        DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                        DisabledBorderColor: =RGBA(52, 152, 47, 1)
                         DisabledColor: =RGBA(0, 0, 0, 1)
                         DisabledFill: |-
                           =If(
@@ -927,7 +963,7 @@ Screens:
                               jobmatl,
                               item = ThisItem.Value && job = drp_AddOrden_BC.Selected.Value && oper_num = If(Value(drp_AddOP_BC.Selected.Operacion) = 25, 30, Value(drp_AddOP_BC.Selected.Operacion))
                           ).description
-                        DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                        DisabledBorderColor: =RGBA(52, 152, 47, 1)
                         DisabledColor: =RGBA(0, 0, 0, 1)
                         DisabledFill: |-
                           =If(
@@ -968,7 +1004,7 @@ Screens:
                       Control: Classic/TextInput@2.3.2
                       Properties:
                         Align: =Align.Center
-                        BorderColor: =RGBA(40, 134, 222, 1)
+                        BorderColor: =RGBA(52, 152, 47, 1)
                         BorderThickness: =1
                         Clear: =true
                         Default: |-
@@ -982,7 +1018,7 @@ Screens:
                               ),
                               0
                           )
-                        DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                        DisabledBorderColor: =RGBA(52, 152, 47, 1)
                         DisabledColor: =RGBA(0, 0, 0, 1)
                         DisabledFill: |-
                           =If(
@@ -1009,9 +1045,10 @@ Screens:
                         Format: =TextFormat.Number
                         Height: =30
                         HintText: ="#"
-                        HoverBorderColor: =RGBA(39, 113, 194, 1)
+                        HoverBorderColor: =RGBA(52, 152, 47, 1)
+                        HoverFill: =RGBA(166, 215, 153, 1)
                         PaddingLeft: =5
-                        PressedBorderColor: =RGBA(39, 113, 194, 1)
+                        PressedBorderColor: =RGBA(52, 152, 47, 1)
                         RadiusBottomLeft: =0
                         RadiusBottomRight: =0
                         RadiusTopLeft: =0
@@ -1034,7 +1071,7 @@ Screens:
                               ),
                               matl_qty
                           )
-                        DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                        DisabledBorderColor: =RGBA(52, 152, 47, 1)
                         DisabledColor: =RGBA(0, 0, 0, 1)
                         DisabledFill: |-
                           =If(
@@ -1079,9 +1116,9 @@ Screens:
                   BorderThickness: =1
                   Clear: =true
                   Default: ="Material"
-                  DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                  DisabledBorderColor: =RGBA(52, 152, 47, 1)
                   DisabledColor: =RGBA(0, 0, 0, 1)
-                  DisabledFill: =RGBA(180, 214, 250, 1)
+                  DisabledFill: =RGBA(166, 215, 153, 1)
                   DisplayMode: =DisplayMode.Disabled
                   Height: =25
                   HintText: ="#"
@@ -1103,9 +1140,9 @@ Screens:
                   BorderThickness: =1
                   Clear: =true
                   Default: ="Descripcion"
-                  DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                  DisabledBorderColor: =RGBA(52, 152, 47, 1)
                   DisabledColor: =RGBA(0, 0, 0, 1)
-                  DisabledFill: =RGBA(180, 214, 250, 1)
+                  DisabledFill: =RGBA(166, 215, 153, 1)
                   DisplayMode: =DisplayMode.Disabled
                   Height: =25
                   HintText: ="#"
@@ -1128,9 +1165,9 @@ Screens:
                   BorderThickness: =1
                   Clear: =true
                   Default: ="matl_qty"
-                  DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                  DisabledBorderColor: =RGBA(52, 152, 47, 1)
                   DisabledColor: =RGBA(0, 0, 0, 1)
-                  DisabledFill: =RGBA(180, 214, 250, 1)
+                  DisabledFill: =RGBA(166, 215, 153, 1)
                   DisplayMode: =DisplayMode.Disabled
                   Height: =25
                   HintText: ="#"
@@ -1153,9 +1190,9 @@ Screens:
                   BorderThickness: =1
                   Clear: =true
                   Default: ="Maximo"
-                  DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                  DisabledBorderColor: =RGBA(52, 152, 47, 1)
                   DisabledColor: =RGBA(0, 0, 0, 1)
-                  DisabledFill: =RGBA(180, 214, 250, 1)
+                  DisabledFill: =RGBA(166, 215, 153, 1)
                   DisplayMode: =DisplayMode.Disabled
                   Height: =25
                   HintText: ="#"
@@ -1175,7 +1212,7 @@ Screens:
                 Variant: ManualLayout
                 Properties:
                   BorderStyle: =BorderStyle.None
-                  Fill: =RGBA(40, 134, 222, 1)
+                  Fill: =RGBA(52, 152, 47, 1)
                   Height: =52
                   RadiusBottomLeft: =0
                   RadiusBottomRight: =0
@@ -1229,7 +1266,7 @@ Screens:
                       Properties:
                         Appearance: ='ComboboxCanvas.Appearance'.Outline
                         BasePaletteColor: =RGBA(5, 102, 178, 1)
-                        BorderColor: =RGBA(180, 214, 250, 1)
+                        BorderColor: =RGBA(166, 215, 153, 1)
                         BorderRadius: =10
                         BorderStyle: =BorderStyle.Solid
                         BorderThickness: =3
@@ -1260,7 +1297,7 @@ Screens:
                       Properties:
                         Appearance: ='ComboboxCanvas.Appearance'.Outline
                         BasePaletteColor: =RGBA(5, 102, 178, 1)
-                        BorderColor: =RGBA(180, 214, 250, 1)
+                        BorderColor: =RGBA(166, 215, 153, 1)
                         BorderRadius: =10
                         BorderStyle: =BorderStyle.Solid
                         BorderThickness: =3
@@ -1333,11 +1370,11 @@ Screens:
                       Control: Classic/TextInput@2.3.2
                       Properties:
                         Align: =Align.Center
-                        BorderColor: =RGBA(180, 214, 250, 1)
+                        BorderColor: =RGBA(166, 215, 153, 1)
                         BorderThickness: =3
                         Clear: =true
                         Default: =CountRows(glr_Maquinas_BC.AllItems)
-                        DisabledBorderColor: =RGBA(180, 214, 250, 1)
+                        DisabledBorderColor: =RGBA(166, 215, 153, 1)
                         DisabledColor: =RGBA(0, 0, 0, 1)
                         DisabledFill: =RGBA(255, 255, 255, 1)
                         DisplayMode: =DisplayMode.Disabled
@@ -1404,7 +1441,11 @@ Screens:
                   - Button17_1:
                       Control: Classic/Button@2.2.0
                       Properties:
+                        BorderColor: =RGBA(45, 128, 40, 1)
+                        Fill: =RGBA(45, 128, 40, 1)
                         Height: =30
+                        HoverBorderColor: =RGBA(45, 128, 40, 1)
+                        HoverFill: =RGBA(21, 68, 18, 1)
                         OnSelect: |-
                           =If(
                               IsBlank(drp_AddOrden_BC.Selected.Value) || IsBlank(drp_AddOP_BC.Selected.Operacion),
@@ -1501,6 +1542,9 @@ Screens:
                         PaddingLeft: =2
                         PaddingRight: =2
                         PaddingTop: =2
+                        PressedBorderColor: =RGBA(45, 128, 40, 1)
+                        PressedColor: =RGBA(45, 128, 40, 1)
+                        PressedFill: =RGBA(166, 215, 153, 1)
                         Size: =14
                         Text: ="Guardar"
                         Visible: =!IsBlank(drp_AddOrden_BC.Selected.Value) && !IsBlank(drp_AddOP_BC.Selected.Operacion)
@@ -1511,7 +1555,29 @@ Screens:
           Control: GroupContainer@1.3.0
           Variant: ManualLayout
           Properties:
-            BorderColor: =If(eliminarOrden, RGBA(215, 58, 60, 1), RGBA(40, 134, 222, 1))
+            BorderColor: |-
+              =If(
+                  eliminarOrden,
+                  RGBA(
+                      215,
+                      58,
+                      60,
+                      1
+                  ),
+                  agregarMaterial,
+                  RGBA(
+                      40,
+                      134,
+                      222,
+                      1
+                  ),
+                  RGBA(
+                      52,
+                      152,
+                      47,
+                      1
+                  )
+              )
             BorderThickness: =4
             Height: =400
             RadiusBottomLeft: =12
@@ -1546,9 +1612,53 @@ Screens:
                         BorderThickness: =3
                         Clear: =true
                         Default: =ThisItem.Maquina
-                        DisabledBorderColor: =If(eliminarOrden, RGBA(215, 58, 60, 1), RGBA(40, 134, 222, 1))
+                        DisabledBorderColor: |-
+                          =If(
+                              eliminarOrden,
+                              RGBA(
+                                  215,
+                                  58,
+                                  60,
+                                  1
+                              ),
+                              agregarMaterial,
+                              RGBA(
+                                  40,
+                                  134,
+                                  222,
+                                  1
+                              ),
+                              RGBA(
+                                  52,
+                                  152,
+                                  47,
+                                  1
+                              )
+                          )
                         DisabledColor: =RGBA(0, 0, 0, 1)
-                        DisabledFill: =If(eliminarOrden, RGBA(255, 184, 174, 1), RGBA(180, 214, 250, 0.3))
+                        DisabledFill: |-
+                          =If(
+                              eliminarOrden,
+                              RGBA(
+                                  255,
+                                  184,
+                                  174,
+                                  1
+                              ),
+                              agregarMaterial,
+                              RGBA(
+                                  180,
+                                  214,
+                                  250,
+                                  1
+                              ),
+                              RGBA(
+                                  166,
+                                  215,
+                                  153,
+                                  1
+                              )
+                          )
                         DisplayMode: =DisplayMode.Disabled
                         Height: =30
                         HintText: ="#"
@@ -2269,7 +2379,7 @@ Screens:
           Control: GroupContainer@1.3.0
           Variant: ManualLayout
           Properties:
-            BorderColor: =RGBA(40, 134, 222, 1)
+            BorderColor: =RGBA(255, 191, 0, 1)
             BorderThickness: =4
             Fill: =RGBA(255, 255, 255, 1)
             Height: =379
@@ -2289,7 +2399,7 @@ Screens:
                   BorderColor: =RGBA(180, 214, 250, 1)
                   BorderStyle: =BorderStyle.None
                   BorderThickness: =3
-                  Height: =284
+                  Height: =302
                   Items: =Filter(Controlador_Bodegas, Material = SetMaterial)
                   TemplateSize: =30
                   Width: =850
@@ -2299,11 +2409,11 @@ Screens:
                       Control: Classic/TextInput@2.3.2
                       Properties:
                         Align: =Align.Center
-                        BorderColor: =RGBA(40, 134, 222, 1)
+                        BorderColor: =RGBA(255, 191, 0, 1)
                         BorderThickness: =1
                         Clear: =true
                         Default: =ThisItem.Orden
-                        DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                        DisabledBorderColor: =RGBA(255, 191, 0, 1)
                         DisabledColor: =RGBA(0, 0, 0, 1)
                         DisabledFill: |-
                           =If(
@@ -2325,6 +2435,7 @@ Screens:
                         Height: =30
                         HintText: ="#"
                         HoverBorderColor: =RGBA(39, 113, 194, 1)
+                        HoverFill: =
                         PaddingLeft: =5
                         PressedBorderColor: =RGBA(39, 113, 194, 1)
                         RadiusBottomLeft: =0
@@ -2337,11 +2448,11 @@ Screens:
                       Control: Classic/TextInput@2.3.2
                       Properties:
                         Align: =Align.Center
-                        BorderColor: =RGBA(40, 134, 222, 1)
+                        BorderColor: =RGBA(255, 191, 0, 1)
                         BorderThickness: =1
                         Clear: =true
                         Default: =ThisItem.Operacion
-                        DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                        DisabledBorderColor: =RGBA(255, 191, 0, 1)
                         DisabledColor: =RGBA(0, 0, 0, 1)
                         DisabledFill: |-
                           =If(
@@ -2363,6 +2474,7 @@ Screens:
                         Height: =30
                         HintText: ="#"
                         HoverBorderColor: =RGBA(39, 113, 194, 1)
+                        HoverFill: =
                         PaddingLeft: =5
                         PressedBorderColor: =RGBA(39, 113, 194, 1)
                         RadiusBottomLeft: =0
@@ -2376,7 +2488,7 @@ Screens:
                       Control: Classic/TextInput@2.3.2
                       Properties:
                         Align: =Align.Center
-                        BorderColor: =RGBA(40, 134, 222, 1)
+                        BorderColor: =RGBA(255, 191, 0, 1)
                         BorderThickness: =1
                         Default: |-
                           =If(
@@ -2384,7 +2496,7 @@ Screens:
                               0,
                               ThisItem.Usado
                           )
-                        DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                        DisabledBorderColor: =RGBA(255, 191, 0, 1)
                         DisabledColor: =RGBA(0, 0, 0, 1)
                         DisabledFill: |-
                           =If(
@@ -2423,6 +2535,7 @@ Screens:
                         Height: =30
                         HintText: ="#"
                         HoverBorderColor: =RGBA(39, 113, 194, 1)
+                        HoverFill: =
                         PaddingLeft: =5
                         PressedBorderColor: =RGBA(39, 113, 194, 1)
                         RadiusBottomLeft: =0
@@ -2436,10 +2549,10 @@ Screens:
                       Control: Classic/TextInput@2.3.2
                       Properties:
                         Align: =Align.Center
-                        BorderColor: =RGBA(40, 134, 222, 1)
+                        BorderColor: =RGBA(255, 191, 0, 1)
                         BorderThickness: =1
                         Default: =ThisItem.Maximo
-                        DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                        DisabledBorderColor: =RGBA(255, 191, 0, 1)
                         DisabledColor: =RGBA(0, 0, 0, 1)
                         DisabledFill: |-
                           =If(
@@ -2476,9 +2589,10 @@ Screens:
                         Format: =TextFormat.Number
                         Height: =30
                         HintText: ="#"
-                        HoverBorderColor: =RGBA(39, 113, 194, 1)
+                        HoverBorderColor: =RGBA(255, 191, 0, 1)
+                        HoverFill: =RGBA(255, 237, 181, 1)
                         PaddingLeft: =5
-                        PressedBorderColor: =RGBA(39, 113, 194, 1)
+                        PressedBorderColor: =RGBA(255, 191, 0, 1)
                         RadiusBottomLeft: =0
                         RadiusBottomRight: =0
                         RadiusTopLeft: =0
@@ -2490,11 +2604,11 @@ Screens:
                       Control: Classic/TextInput@2.3.2
                       Properties:
                         Align: =Align.Center
-                        BorderColor: =RGBA(40, 134, 222, 1)
+                        BorderColor: =RGBA(255, 191, 0, 1)
                         BorderThickness: =1
                         Clear: =true
                         Default: =EditMaximo_BC.Text - EditUsado_BC.Text
-                        DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                        DisabledBorderColor: =RGBA(255, 191, 0, 1)
                         DisabledColor: =RGBA(0, 0, 0, 1)
                         DisabledFill: |-
                           =If(
@@ -2516,6 +2630,7 @@ Screens:
                         Height: =30
                         HintText: ="#"
                         HoverBorderColor: =RGBA(39, 113, 194, 1)
+                        HoverFill: =
                         PaddingLeft: =5
                         PressedBorderColor: =RGBA(39, 113, 194, 1)
                         RadiusBottomLeft: =0
@@ -2529,11 +2644,11 @@ Screens:
                       Control: Classic/TextInput@2.3.2
                       Properties:
                         Align: =Align.Center
-                        BorderColor: =RGBA(40, 134, 222, 1)
+                        BorderColor: =RGBA(255, 191, 0, 1)
                         BorderThickness: =1
                         Clear: =true
                         Default: =ThisItem.Matl_Qty
-                        DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                        DisabledBorderColor: =RGBA(255, 191, 0, 1)
                         DisabledColor: =RGBA(0, 0, 0, 1)
                         DisabledFill: |-
                           =If(
@@ -2555,6 +2670,7 @@ Screens:
                         Height: =30
                         HintText: ="#"
                         HoverBorderColor: =RGBA(39, 113, 194, 1)
+                        HoverFill: =
                         PaddingLeft: =5
                         PressedBorderColor: =RGBA(39, 113, 194, 1)
                         RadiusBottomLeft: =0
@@ -2572,9 +2688,9 @@ Screens:
                   BorderThickness: =1
                   Clear: =true
                   Default: ="Orden"
-                  DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                  DisabledBorderColor: =RGBA(255, 191, 0, 1)
                   DisabledColor: =RGBA(0, 0, 0, 1)
-                  DisabledFill: =RGBA(180, 214, 250, 1)
+                  DisabledFill: =RGBA(255, 237, 181, 1)
                   DisplayMode: =DisplayMode.Disabled
                   Height: =25
                   HintText: ="#"
@@ -2596,9 +2712,9 @@ Screens:
                   BorderThickness: =1
                   Clear: =true
                   Default: ="Operacion"
-                  DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                  DisabledBorderColor: =RGBA(255, 191, 0, 1)
                   DisabledColor: =RGBA(0, 0, 0, 1)
-                  DisabledFill: =RGBA(180, 214, 250, 1)
+                  DisabledFill: =RGBA(255, 237, 181, 1)
                   DisplayMode: =DisplayMode.Disabled
                   Height: =25
                   HintText: ="#"
@@ -2621,9 +2737,9 @@ Screens:
                   BorderThickness: =1
                   Clear: =true
                   Default: ="Maximo"
-                  DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                  DisabledBorderColor: =RGBA(255, 191, 0, 1)
                   DisabledColor: =RGBA(0, 0, 0, 1)
-                  DisabledFill: =RGBA(180, 214, 250, 1)
+                  DisabledFill: =RGBA(255, 237, 181, 1)
                   DisplayMode: =DisplayMode.Disabled
                   Height: =25
                   HintText: ="#"
@@ -2646,13 +2762,14 @@ Screens:
                   BorderThickness: =1
                   Clear: =true
                   Default: ="Usado"
-                  DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                  DisabledBorderColor: =RGBA(255, 191, 0, 1)
                   DisabledColor: =RGBA(0, 0, 0, 1)
-                  DisabledFill: =RGBA(180, 214, 250, 1)
+                  DisabledFill: =RGBA(255, 237, 181, 1)
                   DisplayMode: =DisplayMode.Disabled
                   Height: =25
                   HintText: ="#"
                   HoverBorderColor: =RGBA(39, 113, 194, 1)
+                  HoverFill: =RGBA(255, 237, 181, 1)
                   PaddingLeft: =5
                   PressedBorderColor: =RGBA(39, 113, 194, 1)
                   RadiusBottomLeft: =0
@@ -2668,7 +2785,7 @@ Screens:
                 Variant: ManualLayout
                 Properties:
                   BorderStyle: =BorderStyle.None
-                  Fill: =RGBA(40, 134, 222, 1)
+                  Fill: =RGBA(255, 191, 0, 1)
                   Height: =52
                   RadiusBottomLeft: =0
                   RadiusBottomRight: =0
@@ -2724,7 +2841,7 @@ Screens:
                         BorderThickness: =3
                         Clear: =true
                         Default: =SetMaterial
-                        DisabledBorderColor: =RGBA(180, 214, 250, 1)
+                        DisabledBorderColor: =RGBA(255, 237, 181, 1)
                         DisabledColor: =RGBA(0, 0, 0, 1)
                         DisabledFill: =RGBA(255, 255, 255, 1)
                         DisplayMode: =DisplayMode.Disabled
@@ -2765,12 +2882,19 @@ Screens:
                   - Button17_4:
                       Control: Classic/Button@2.2.0
                       Properties:
+                        BorderColor: =RGBA(255, 191, 0, 1)
+                        Fill: =RGBA(148, 111, 0, 1)
                         Height: =30
+                        HoverBorderColor: =RGBA(255, 191, 0, 1)
+                        HoverFill: =RGBA(84, 63, 0, 1)
                         OnSelect: "=If(\n    CountRows(\n        Filter(\n            glr_EditMateriales_BC.AllItems,\n            (Value(ThisRecord.EditMaximo_BC.Text) < 0 || IsBlank(ThisRecord.EditMaximo_BC.Text)) || (Value(ThisRecord.EditUsado_BC.Text) < 0 || IsBlank(ThisRecord.EditUsado_BC.Text))\n        )\n    ) > 0,\n    UpdateContext(\n        {\n            Aviso: {\n                Ver: true,\n                Tipo: 0,\n                Texto: \"El Máximo y el Usado deben tener valores válidos\"\n            }\n        }\n    ),\n    UpdateContext({Guardando: true});\n    ForAll(\n        glr_EditMateriales_BC.AllItems,\n        Patch(\n            Controlador_Bodegas,\n            LookUp(\n                Controlador_Bodegas,\n                Material = SetMaterial && Orden = ThisRecord.Orden && Operacion = ThisRecord.Operacion\n            ),\n            {\n                Maximo: Value(ThisRecord.EditMaximo_BC.Text),\n                Usado: Value(ThisRecord.EditUsado_BC.Text)\n            }\n        )\n    );\n    UpdateContext(\n        {\n            Aviso: {\n                Ver: true,\n                Tipo: 2,\n                Texto: \"Materiales editados exitosamente\"\n            },\n            Guardando: false,\n            editarMaterial: false,\n            SetMaterial: Blank()\n        }\n    );\n    \n)"
                         PaddingBottom: =2
                         PaddingLeft: =2
                         PaddingRight: =2
                         PaddingTop: =2
+                        PressedBorderColor: =RGBA(255, 191, 0, 1)
+                        PressedColor: =RGBA(255, 191, 0, 1)
+                        PressedFill: =RGBA(255, 237, 181, 1)
                         Size: =14
                         Text: ="Guardar"
                         Width: =110
@@ -2805,7 +2929,7 @@ Screens:
                               Controlador_Bodegas,
                               Material = SetMaterial
                           ).Descripcion
-                        DisabledBorderColor: =RGBA(180, 214, 250, 1)
+                        DisabledBorderColor: =RGBA(255, 237, 181, 1)
                         DisabledColor: =RGBA(0, 0, 0, 1)
                         DisabledFill: =RGBA(255, 255, 255, 1)
                         DisplayMode: =DisplayMode.Disabled
@@ -2830,9 +2954,9 @@ Screens:
                   BorderThickness: =1
                   Clear: =true
                   Default: ="matl_qty"
-                  DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                  DisabledBorderColor: =RGBA(255, 191, 0, 1)
                   DisabledColor: =RGBA(0, 0, 0, 1)
-                  DisabledFill: =RGBA(180, 214, 250, 1)
+                  DisabledFill: =RGBA(255, 237, 181, 1)
                   DisplayMode: =DisplayMode.Disabled
                   Height: =25
                   HintText: ="#"
@@ -2855,6 +2979,122 @@ Screens:
                   BorderThickness: =1
                   Clear: =true
                   Default: ="Restante"
+                  DisabledBorderColor: =RGBA(255, 191, 0, 1)
+                  DisabledColor: =RGBA(0, 0, 0, 1)
+                  DisabledFill: =RGBA(255, 237, 181, 1)
+                  DisplayMode: =DisplayMode.Disabled
+                  Height: =25
+                  HintText: ="#"
+                  HoverBorderColor: =RGBA(39, 113, 194, 1)
+                  PaddingLeft: =5
+                  PressedBorderColor: =RGBA(39, 113, 194, 1)
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =12
+                  Width: =150
+                  X: =700
+                  Y: =52
+      - cnt_AgregarMaterial_BC:
+          Control: GroupContainer@1.3.0
+          Variant: ManualLayout
+          Properties:
+            BorderColor: =RGBA(40, 134, 222, 1)
+            BorderThickness: =4
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =108
+            RadiusBottomLeft: =12
+            RadiusBottomRight: =12
+            RadiusTopLeft: =12
+            RadiusTopRight: =12
+            Visible: =agregarMaterial
+            Width: =850
+            X: =If(VerMaquinas, 118, 258)
+            Y: =Rectangle44.Height / 2 - Self.Height / 2
+          Children:
+            - txt_CantMaquinas_BC_33:
+                Control: Classic/TextInput@2.3.2
+                Properties:
+                  Align: =Align.Center
+                  BorderColor: =RGBA(40, 134, 222, 1)
+                  BorderThickness: =1
+                  Clear: =true
+                  Default: ="Material"
+                  DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                  DisabledColor: =RGBA(0, 0, 0, 1)
+                  DisabledFill: =RGBA(180, 214, 250, 1)
+                  DisplayMode: =DisplayMode.Disabled
+                  Height: =25
+                  HintText: ="#"
+                  HoverBorderColor: =RGBA(39, 113, 194, 1)
+                  PaddingLeft: =5
+                  PressedBorderColor: =RGBA(39, 113, 194, 1)
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =12
+                  Width: =170
+                  Y: =52
+            - txt_CantMaquinas_BC_34:
+                Control: Classic/TextInput@2.3.2
+                Properties:
+                  Align: =Align.Center
+                  BorderColor: =RGBA(40, 134, 222, 1)
+                  BorderThickness: =1
+                  Clear: =true
+                  Default: ="Descripcion"
+                  DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                  DisabledColor: =RGBA(0, 0, 0, 1)
+                  DisabledFill: =RGBA(180, 214, 250, 1)
+                  DisplayMode: =DisplayMode.Disabled
+                  Height: =25
+                  HintText: ="#"
+                  HoverBorderColor: =RGBA(39, 113, 194, 1)
+                  PaddingLeft: =5
+                  PressedBorderColor: =RGBA(39, 113, 194, 1)
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =12
+                  Width: =380
+                  X: =170
+                  Y: =52
+            - txt_CantMaquinas_BC_35:
+                Control: Classic/TextInput@2.3.2
+                Properties:
+                  Align: =Align.Center
+                  BorderColor: =RGBA(40, 134, 222, 1)
+                  BorderThickness: =1
+                  Clear: =true
+                  Default: ="matl_qty"
+                  DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                  DisabledColor: =RGBA(0, 0, 0, 1)
+                  DisabledFill: =RGBA(180, 214, 250, 1)
+                  DisplayMode: =DisplayMode.Disabled
+                  Height: =25
+                  HintText: ="#"
+                  HoverBorderColor: =RGBA(39, 113, 194, 1)
+                  PaddingLeft: =5
+                  PressedBorderColor: =RGBA(39, 113, 194, 1)
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =12
+                  Width: =150
+                  X: =550
+                  Y: =52
+            - txt_CantMaquinas_BC_36:
+                Control: Classic/TextInput@2.3.2
+                Properties:
+                  Align: =Align.Center
+                  BorderColor: =RGBA(40, 134, 222, 1)
+                  BorderThickness: =1
+                  Clear: =true
+                  Default: ="Maximo"
                   DisabledBorderColor: =RGBA(40, 134, 222, 1)
                   DisabledColor: =RGBA(0, 0, 0, 1)
                   DisabledFill: =RGBA(180, 214, 250, 1)
@@ -2872,6 +3112,418 @@ Screens:
                   Width: =150
                   X: =700
                   Y: =52
+            - Container6_8:
+                Control: GroupContainer@1.3.0
+                Variant: ManualLayout
+                Properties:
+                  BorderStyle: =BorderStyle.None
+                  Fill: =RGBA(40, 134, 222, 1)
+                  Height: =52
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =850
+                Children:
+                  - icn_Refresh_BC_7:
+                      Control: Classic/Icon@2.5.0
+                      Properties:
+                        BorderColor: =RGBA(12, 59, 94, 1)
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =2
+                        Color: =RGBA(255, 255, 255, 1)
+                        FocusedBorderThickness: =20
+                        Height: =32
+                        HoverBorderColor: =
+                        HoverColor: =RGBA(0, 0, 0, 1)
+                        HoverFill: =
+                        Icon: =Icon.Reload
+                        OnSelect: |-
+                          =Reset(drp_AddMaterialOP_BC);
+                          Reset(drp_AddMaterialOrden_BC);
+                          Reset(drp_AddMaterial_BC);
+                        PaddingBottom: =5
+                        PaddingLeft: =5
+                        PaddingRight: =5
+                        PaddingTop: =5
+                        Width: =32
+                        X: =652
+                        Y: =10
+                  - TextCanvas1_51:
+                      Control: Text@0.0.51
+                      Properties:
+                        Align: ='TextCanvas.Align'.Start
+                        BorderStyle: =BorderStyle.Solid
+                        BorderThickness: =0
+                        Font: =Font.Arial
+                        FontColor: =RGBA(255, 255, 255, 1)
+                        PaddingLeft: =2
+                        PaddingRight: =2
+                        PaddingTop: =2
+                        Size: =20
+                        Text: ="Orden"
+                        VerticalAlign: =VerticalAlign.Middle
+                        Width: =65
+                        X: =10
+                        Y: =10
+                  - drp_AddMaterialOrden_BC:
+                      Control: ComboBox@0.0.51
+                      Properties:
+                        Appearance: ='ComboboxCanvas.Appearance'.Outline
+                        BasePaletteColor: =RGBA(5, 102, 178, 1)
+                        BorderColor: =RGBA(180, 214, 250, 1)
+                        BorderRadius: =10
+                        BorderStyle: =BorderStyle.Solid
+                        BorderThickness: =3
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FontColor: =RGBA(0, 0, 0, 1)
+                        FontSize: =16
+                        InputTextPlaceholder: ="Buscar Orden"
+                        Items: =Sort(Distinct(Controlador_Bodegas, Orden), Value)
+                        PaddingBottom: =2
+                        PaddingLeft: =2
+                        PaddingRight: =2
+                        PaddingTop: =2
+                        Width: =180
+                        X: =75
+                        Y: =10
+                      Children:
+                        - Value2_3:
+                            Control: ComboBoxDataField@1.5.0
+                            Variant: textualColumn
+                            IsLocked: true
+                            Properties:
+                              FieldDisplayName: ="Value"
+                              FieldName: ="Value"
+                              FieldType: ="e"
+                              Order: =1
+                  - drp_AddMaterialOP_BC:
+                      Control: ComboBox@0.0.51
+                      Properties:
+                        Appearance: ='ComboboxCanvas.Appearance'.Outline
+                        BasePaletteColor: =RGBA(5, 102, 178, 1)
+                        BorderColor: =RGBA(180, 214, 250, 1)
+                        BorderRadius: =10
+                        BorderStyle: =BorderStyle.Solid
+                        BorderThickness: =3
+                        Fill: =RGBA(255, 255, 255, 1)
+                        FontColor: =RGBA(0, 0, 0, 1)
+                        FontSize: =16
+                        InputTextPlaceholder: =If(IsBlank(drp_AddMaterialOrden_BC.Selected.Value), "No hay datos", "Operacion")
+                        Items: =Sort(Distinct(Filter(Controlador_Bodegas, Orden = drp_AddMaterialOrden_BC.Selected.Value), Operacion), Value(Value))
+                        PaddingBottom: =2
+                        PaddingLeft: =2
+                        PaddingRight: =2
+                        PaddingTop: =2
+                        Width: =100
+                        X: =370
+                        Y: =10
+                      Children:
+                        - Value1_1:
+                            Control: ComboBoxDataField@1.5.0
+                            Variant: textualColumn
+                            IsLocked: true
+                            Properties:
+                              FieldDisplayName: ="Value"
+                              FieldName: ="Value"
+                              FieldType: ="s"
+                              Order: =1
+                  - TextCanvas1_52:
+                      Control: Text@0.0.51
+                      Properties:
+                        Align: ='TextCanvas.Align'.Start
+                        BorderStyle: =BorderStyle.Solid
+                        BorderThickness: =0
+                        Font: =Font.Arial
+                        FontColor: =RGBA(255, 255, 255, 1)
+                        PaddingLeft: =2
+                        PaddingRight: =2
+                        PaddingTop: =2
+                        Size: =20
+                        Text: ="Operacion"
+                        VerticalAlign: =VerticalAlign.Middle
+                        Width: =105
+                        X: =265
+                        Y: =10
+                  - TextCanvas1_53:
+                      Control: Text@0.0.51
+                      Properties:
+                        Align: ='TextCanvas.Align'.Start
+                        BorderStyle: =BorderStyle.Solid
+                        BorderThickness: =0
+                        Font: =Font.Arial
+                        FontColor: =RGBA(255, 255, 255, 1)
+                        PaddingLeft: =2
+                        PaddingRight: =2
+                        PaddingTop: =2
+                        Size: =20
+                        Text: ="Maquinas"
+                        VerticalAlign: =VerticalAlign.Middle
+                        Width: =100
+                        X: =480
+                        Y: =10
+                  - txt_DeleteCantMaquinas_BC_1:
+                      Control: Classic/TextInput@2.3.2
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(180, 214, 250, 1)
+                        BorderThickness: =3
+                        Clear: =true
+                        Default: =CountRows(glr_Maquinas_BC.AllItems)
+                        DisabledBorderColor: =RGBA(180, 214, 250, 1)
+                        DisabledColor: =RGBA(0, 0, 0, 1)
+                        DisabledFill: =RGBA(255, 255, 255, 1)
+                        DisplayMode: =DisplayMode.Disabled
+                        Height: =32
+                        HintText: ="#"
+                        HoverBorderColor: =RGBA(39, 113, 194, 1)
+                        PaddingLeft: =5
+                        PressedBorderColor: =RGBA(39, 113, 194, 1)
+                        RadiusBottomLeft: =8
+                        RadiusBottomRight: =8
+                        RadiusTopLeft: =8
+                        RadiusTopRight: =8
+                        Size: =12
+                        Width: =40
+                        X: =580
+                        Y: =10
+                  - icn_Maquinas_BC_2:
+                      Control: Classic/Icon@2.5.0
+                      Properties:
+                        BorderColor: =RGBA(12, 59, 94, 1)
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =2
+                        Color: =RGBA(255, 255, 255, 1)
+                        FocusedBorderThickness: =20
+                        Height: =32
+                        HoverBorderColor: =
+                        HoverColor: =RGBA(0, 0, 0, 1)
+                        HoverFill: =
+                        Icon: =Icon.Information
+                        OnSelect: |-
+                          =UpdateContext({VerMaquinas: !VerMaquinas})
+                        PaddingBottom: =5
+                        PaddingLeft: =2
+                        PaddingRight: =2
+                        PaddingTop: =5
+                        Tooltip: ="Ver Maquinas"
+                        Width: =32
+                        X: =620
+                        Y: =10
+                  - icn_Refresh_BC_8:
+                      Control: Classic/Icon@2.5.0
+                      Properties:
+                        BorderColor: =RGBA(12, 59, 94, 1)
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =2
+                        Color: =RGBA(255, 255, 255, 1)
+                        FocusedBorderThickness: =20
+                        Height: =52
+                        HoverBorderColor: =
+                        HoverColor: =RGBA(0, 0, 0, 1)
+                        HoverFill: =
+                        Icon: =Icon.CancelBadge
+                        OnSelect: |-
+                          =Reset(drp_AddMaterialOP_BC);
+                          Reset(drp_AddMaterialOrden_BC);
+                          Reset(drp_AddMaterial_BC);
+                          UpdateContext({agregarMaterial: false, VerMaquinas: false})
+                        PaddingBottom: =8
+                        PaddingLeft: =8
+                        PaddingRight: =8
+                        PaddingTop: =8
+                        Width: =52
+                        X: =798
+                  - Button17_9:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        BorderColor: =RGBA(184, 0, 0, 1)
+                        Fill: =RGBA(132, 40, 38, 1)
+                        Height: =30
+                        HoverBorderColor: =RGBA(184, 0, 0, 1)
+                        HoverFill: =RGBA(79, 29, 26, 1)
+                        OnSelect: =
+                        PaddingBottom: =2
+                        PaddingLeft: =2
+                        PaddingRight: =2
+                        PaddingTop: =2
+                        PressedBorderColor: =RGBA(184, 0, 0, 1)
+                        PressedColor: =RGBA(184, 0, 0, 1)
+                        PressedFill: =RGBA(255, 184, 174, 1)
+                        Size: =14
+                        Text: ="Eliminar"
+                        Visible: =!IsBlank(drp_AddMaterialOrden_BC.Selected.Value) && !IsBlank(drp_AddMaterialOP_BC.Selected.Value)
+                        Width: =110
+                        X: =688
+                        Y: =11
+            - drp_AddMaterial_BC:
+                Control: ComboBox@0.0.51
+                Properties:
+                  Appearance: ='ComboboxCanvas.Appearance'.Outline
+                  BasePaletteColor: =RGBA(5, 102, 178, 1)
+                  BorderColor: =RGBA(40, 134, 222, 1)
+                  BorderRadius: =0
+                  BorderStyle: =BorderStyle.Solid
+                  BorderThickness: =1
+                  Fill: =RGBA(255, 255, 255, 1)
+                  FontColor: =RGBA(0, 0, 0, 1)
+                  FontSize: =16
+                  Height: =31
+                  InputTextPlaceholder: ="Buscar Orden"
+                  Items: |-
+                    =Sort(
+                        Distinct(
+                            Filter(
+                                jobmatl,
+                                probable = 1,
+                                StartsWith(
+                                    item,
+                                    "12"
+                                )
+                            ),
+                            item
+                        ),
+                        Value
+                    )
+                  PaddingBottom: =2
+                  PaddingLeft: =5
+                  PaddingRight: =2
+                  PaddingTop: =2
+                  Width: =170
+                  Y: =77
+                Children:
+                  - Value2_4:
+                      Control: ComboBoxDataField@1.5.0
+                      Variant: textualColumn
+                      IsLocked: true
+                      Properties:
+                        FieldDisplayName: ="Value"
+                        FieldName: ="Value"
+                        FieldType: ="e"
+                        Order: =1
+            - txt_AddMaterialDescripcion_BC:
+                Control: Classic/TextInput@2.3.2
+                Properties:
+                  Align: =Align.Center
+                  BorderColor: =RGBA(40, 134, 222, 1)
+                  BorderThickness: =1
+                  Clear: =true
+                  Default: =ThisItem.Descripcion
+                  DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                  DisabledColor: =RGBA(0, 0, 0, 1)
+                  DisabledFill: |-
+                    =If(
+                        ThisItem.Matl_Qty = 0,
+                        RGBA(
+                            255,
+                            184,
+                            174,
+                            1
+                        ),
+                        RGBA(
+                            255,
+                            255,
+                            255,
+                            1
+                        )
+                    )
+                  DisplayMode: =DisplayMode.Disabled
+                  Height: =30
+                  HintText: ="#"
+                  HoverBorderColor: =RGBA(39, 113, 194, 1)
+                  HoverFill: =
+                  PaddingLeft: =5
+                  PressedBorderColor: =RGBA(39, 113, 194, 1)
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =12
+                  Width: =380
+                  X: =170
+                  Y: =77
+            - txt_AddMaterialMaximo_BC:
+                Control: Classic/TextInput@2.3.2
+                Properties:
+                  Align: =Align.Center
+                  BorderColor: =RGBA(40, 134, 222, 1)
+                  BorderThickness: =1
+                  Clear: =true
+                  Default: =ThisItem.Maximo
+                  DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                  DisabledColor: =RGBA(0, 0, 0, 1)
+                  DisabledFill: |-
+                    =If(
+                        ThisItem.Matl_Qty = 0,
+                        RGBA(
+                            255,
+                            184,
+                            174,
+                            1
+                        ),
+                        RGBA(
+                            255,
+                            255,
+                            255,
+                            1
+                        )
+                    )
+                  Format: =TextFormat.Number
+                  Height: =30
+                  HintText: ="#"
+                  HoverBorderColor: =RGBA(39, 113, 194, 1)
+                  HoverFill: =RGBA(180, 214, 250, 1)
+                  PaddingLeft: =5
+                  PressedBorderColor: =RGBA(39, 113, 194, 1)
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =12
+                  Width: =150
+                  X: =700
+                  Y: =77
+            - txt_AddMaterialQty_BC:
+                Control: Classic/TextInput@2.3.2
+                Properties:
+                  Align: =Align.Center
+                  BorderColor: =RGBA(40, 134, 222, 1)
+                  BorderThickness: =1
+                  Clear: =true
+                  Default: =ThisItem.Matl_Qty
+                  DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                  DisabledColor: =RGBA(0, 0, 0, 1)
+                  DisabledFill: |-
+                    =If(
+                        ThisItem.Matl_Qty = 0,
+                        RGBA(
+                            255,
+                            184,
+                            174,
+                            1
+                        ),
+                        RGBA(
+                            255,
+                            255,
+                            255,
+                            1
+                        )
+                    )
+                  DisplayMode: =DisplayMode.Disabled
+                  Height: =30
+                  HintText: ="#"
+                  HoverBorderColor: =RGBA(39, 113, 194, 1)
+                  HoverFill: =
+                  PaddingLeft: =5
+                  PressedBorderColor: =RGBA(39, 113, 194, 1)
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =12
+                  Width: =150
+                  X: =550
+                  Y: =77
       - cnt_Avisos_BC:
           Control: GroupContainer@1.3.0
           Variant: ManualLayout
