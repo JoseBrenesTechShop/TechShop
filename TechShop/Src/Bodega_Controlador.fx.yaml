@@ -1830,7 +1830,11 @@ Bodega_Controlador As screen:
             DelayItemLoading: =true
             Fill: =RGBA(255, 255, 255, 1)
             Height: =400
-            Items: =Filter(Maquina_Ordens_1, (Orden = drp_AddOrden_BC.Selected.Value || Orden = drp_DeleteOrden_BC.Selected.Value) && (Operacion = drp_AddOP_BC.Selected.Operacion || Operacion = drp_DeleteOP_BC.Selected.Value))
+            Items: |-
+                =Filter(
+                    Maquina_Ordens_1,
+                    (Orden = drp_AddOrden_BC.Selected.Value || Orden = drp_DeleteOrden_BC.Selected.Value || Orden = drp_AddMaterialOrden_BC.Selected.Value) && (Operacion = drp_AddOP_BC.Selected.Operacion || Operacion = drp_DeleteOP_BC.Selected.Value || Operacion = drp_AddMaterialOP_BC.Selected.Operacion)
+                )
             Layout: =Layout.Vertical
             LoadingSpinner: =LoadingSpinner.Data
             TemplatePadding: =10
@@ -3752,7 +3756,7 @@ Bodega_Controlador As screen:
                 Height: =32
                 InputTextPlaceholder: ="Buscar Orden"
                 IsSearchable: =true
-                Items: =Sort(Distinct(Controlador_Bodegas, Orden), Value)
+                Items: =Sort(Distinct(Filter(Orden_Ejecucion, Estado_Orden = "Ejecucion"), Orden), Value)
                 MultiValueDelimiter: =", "
                 OnChange: =false
                 PaddingBottom: =2
@@ -3800,7 +3804,7 @@ Bodega_Controlador As screen:
                 Height: =32
                 InputTextPlaceholder: =If(IsBlank(drp_AddMaterialOrden_BC.Selected.Value), "No hay datos", "Operacion")
                 IsSearchable: =true
-                Items: =Sort(Distinct(Filter(Controlador_Bodegas, Orden = drp_AddMaterialOrden_BC.Selected.Value), Operacion), Value(Value))
+                Items: =Sort(Filter(Orden_Ejecucion, Orden = drp_AddMaterialOrden_BC.Selected.Value), Value(Operacion))
                 MultiValueDelimiter: =", "
                 OnChange: =false
                 PaddingBottom: =2
@@ -3819,13 +3823,21 @@ Bodega_Controlador As screen:
                 Y: =10
                 ZIndex: =4
 
-                Value1_1 As PowerApps_CoreControls_ComboboxCanvasTemplate_dataField.textualColumn:
-                    FieldDisplayName: ="Value"
-                    FieldName: ="Value"
+                Operacion4 As PowerApps_CoreControls_ComboboxCanvasTemplate_dataField.textualColumn:
+                    FieldDisplayName: ="Operacion"
+                    FieldName: ="crfb9_operacion"
                     FieldType: ="s"
+                    FieldVariantName: ="textualColumn"
                     Order: =1
-                    Type: ="s"
-                    ZIndex: =1
+                    ZIndex: =14
+
+                Meta2 As PowerApps_CoreControls_ComboboxCanvasTemplate_dataField.textualColumn:
+                    FieldDisplayName: ="Meta"
+                    FieldName: ="crfb9_meta"
+                    FieldType: ="n"
+                    FieldVariantName: ="textualColumn"
+                    Order: =2
+                    ZIndex: =15
 
             TextCanvas1_52 As Texto:
                 Align: ='TextCanvas.Align'.Start
@@ -3885,7 +3897,7 @@ Bodega_Controlador As screen:
                 Y: =10
                 ZIndex: =6
 
-            txt_DeleteCantMaquinas_BC_1 As text:
+            txt_MaterialCantMaquinas_BC As text:
                 Align: =Align.Center
                 BorderColor: =RGBA(180, 214, 250, 1)
                 BorderThickness: =3
@@ -3980,7 +3992,98 @@ Bodega_Controlador As screen:
                 HoverBorderColor: =RGBA(184, 0, 0, 1)
                 HoverColor: =App.Theme.Colors.PrimaryForeground
                 HoverFill: =RGBA(79, 29, 26, 1)
-                OnSelect: =
+                OnSelect: |-
+                    =If(
+                        IsBlank(drp_AddOrden_BC.Selected.Value) || IsBlank(drp_AddOP_BC.Selected.Operacion),
+                        UpdateContext(
+                            {
+                                Aviso: {
+                                    Ver: true,
+                                    Tipo: 0,
+                                    Texto: "Debe seleccionar una Orden y una Operacion"
+                                }
+                            }
+                        ),
+                        IsBlank(txt_CantMaquinas_BC.Text) || txt_CantMaquinas_BC.Text = "0",
+                        UpdateContext(
+                            {
+                                Aviso: {
+                                    Ver: true,
+                                    Tipo: 0,
+                                    Texto: "La Orden debe tener almenos una maquina asignada"
+                                }
+                            }
+                        ),
+                        CountRows(glr_AddMateriales_BC.AllItems) <= 0,
+                        UpdateContext(
+                            {
+                                Aviso: {
+                                    Ver: true,
+                                    Tipo: 0,
+                                    Texto: "La lista de materiales no puede estar vacia"
+                                }
+                            }
+                        ),
+                        CountRows(Filter(Controlador_Bodegas, Orden = drp_AddOrden_BC.Selected.Value && Operacion = drp_AddOP_BC.Selected.Operacion)) > 0,
+                        UpdateContext(
+                            {
+                                Aviso: {
+                                    Ver: true,
+                                    Tipo: 0,
+                                    Texto: "La Orden seleccionada ya fue agregada"
+                                }
+                            }
+                        ),
+                        CountRows(
+                            Filter(
+                                glr_AddMateriales_BC.AllItems,
+                                (Value(ThisRecord.AddMaximo_BC.Text) < 0 || IsBlank(ThisRecord.AddMaximo_BC.Text))
+                            )
+                        ) > 0,
+                        UpdateContext(
+                            {
+                                Aviso: {
+                                    Ver: true,
+                                    Tipo: 0,
+                                    Texto: "El Máximo deben tener valores válidos"
+                                }
+                            }
+                        ),
+                        UpdateContext(
+                            {
+                                VerMaquinas: false,
+                                agregarOrden: !agregarOrden
+                            }
+                        );
+                        UpdateContext({Guardando: true});
+                        ForAll(
+                            glr_AddMateriales_BC.AllItems,
+                            Collect(
+                                Controlador_Bodegas,
+                                {
+                                    Orden: drp_AddOrden_BC.Selected.Value,
+                                    Operacion: drp_AddOP_BC.Selected.Operacion,
+                                    Material: ThisRecord.Value,
+                                    Descripcion: ThisRecord.AddDescripcion_BC.Text,
+                                    Matl_Qty: Value(ThisRecord.AddQty_BC.Text),
+                                    Maximo: Value(ThisRecord.AddMaximo_BC.Text)
+                                }
+                            )
+                        );
+                        UpdateContext(
+                            {
+                                Aviso: {
+                                    Ver: true,
+                                    Tipo: 2,
+                                    Texto: "La Orden se agrego con exito"
+                                }
+                            }
+                        );
+                        UpdateContext({Guardando: false}),
+                        Reset(drp_AddOP_BC);
+                        Reset(drp_AddOrden_BC);
+                        Reset(glr_AddMateriales_BC)
+                    )
                 PaddingBottom: =2
                 PaddingLeft: =2
                 PaddingRight: =2
@@ -3990,7 +4093,7 @@ Bodega_Controlador As screen:
                 PressedFill: =RGBA(255, 184, 174, 1)
                 Size: =14
                 Text: ="Eliminar"
-                Visible: =!IsBlank(drp_AddMaterialOrden_BC.Selected.Value) && !IsBlank(drp_AddMaterialOP_BC.Selected.Value)
+                Visible: =!IsBlank(drp_AddMaterialOrden_BC.Selected.Value) && !IsBlank(drp_AddMaterialOP_BC.Selected.Operacion)
                 Width: =110
                 X: =688
                 Y: =11
@@ -4022,7 +4125,6 @@ Bodega_Controlador As screen:
                     Distinct(
                         Filter(
                             jobmatl,
-                            probable = 1,
                             StartsWith(
                                 item,
                                 "12"
@@ -4063,12 +4165,22 @@ Bodega_Controlador As screen:
             BorderColor: =RGBA(40, 134, 222, 1)
             Clear: =true
             Color: =RGBA(0, 0, 0, 1)
-            Default: =ThisItem.Descripcion
+            Default: |-
+                =LookUp(
+                    jobmatl,
+                    item = drp_AddMaterial_BC.Selected.Value
+                ).description
             DisabledBorderColor: =RGBA(40, 134, 222, 1)
             DisabledColor: =RGBA(0, 0, 0, 1)
             DisabledFill: |-
                 =If(
-                    ThisItem.Matl_Qty = 0,
+                    Sum(
+                        Filter(
+                            jobmatl,
+                            item = drp_AddMaterial_BC.Selected.Value
+                        ),
+                        matl_qty
+                    ) = 0,
                     RGBA(
                         255,
                         184,
@@ -4108,12 +4220,28 @@ Bodega_Controlador As screen:
             BorderColor: =RGBA(40, 134, 222, 1)
             Clear: =true
             Color: =RGBA(0, 0, 0, 1)
-            Default: =ThisItem.Maximo
+            Default: |-
+                =RoundUp(
+                    ((drp_AddMaterialOP_BC.Selected.Meta * 36) * txt_MaterialCantMaquinas_BC.Text) * Sum(
+                        Filter(
+                            jobmatl,
+                            item = drp_AddMaterial_BC.Selected.Value
+                        ),
+                        matl_qty
+                    ),
+                    0
+                )
             DisabledBorderColor: =RGBA(40, 134, 222, 1)
             DisabledColor: =RGBA(0, 0, 0, 1)
             DisabledFill: |-
                 =If(
-                    ThisItem.Matl_Qty = 0,
+                    Sum(
+                    Filter(
+                        jobmatl,
+                        item = drp_AddMaterial_BC.Selected.Value
+                    ),
+                    matl_qty
+                ) = 0,
                     RGBA(
                         255,
                         184,
@@ -4153,12 +4281,25 @@ Bodega_Controlador As screen:
             BorderColor: =RGBA(40, 134, 222, 1)
             Clear: =true
             Color: =RGBA(0, 0, 0, 1)
-            Default: =ThisItem.Matl_Qty
+            Default: |-
+                =Sum(
+                    Filter(
+                        jobmatl,
+                        item = drp_AddMaterial_BC.Selected.Value
+                    ),
+                    matl_qty
+                )
             DisabledBorderColor: =RGBA(40, 134, 222, 1)
             DisabledColor: =RGBA(0, 0, 0, 1)
             DisabledFill: |-
                 =If(
-                    ThisItem.Matl_Qty = 0,
+                    Sum(
+                        Filter(
+                            jobmatl,
+                            item = drp_AddMaterial_BC.Selected.Value
+                        ),
+                        matl_qty
+                    ) = 0,
                     RGBA(
                         255,
                         184,
