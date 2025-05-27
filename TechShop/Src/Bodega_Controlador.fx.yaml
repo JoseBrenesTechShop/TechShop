@@ -1753,6 +1753,7 @@ Bodega_Controlador As screen:
                                 {
                                     Orden: drp_AddOrden_BC.Selected.Value,
                                     Operacion: drp_AddOP_BC.Selected.Operacion,
+                                    'P/N': drp_AddOP_BC.Selected.'P/N',
                                     Material: ThisRecord.Value,
                                     Descripcion: ThisRecord.AddDescripcion_BC.Text,
                                     Matl_Qty: Value(ThisRecord.AddQty_BC.Text),
@@ -3582,7 +3583,7 @@ Bodega_Controlador As screen:
             RadiusTopLeft: =0
             RadiusTopRight: =0
             Size: =12
-            Width: =170
+            Width: =210
             Y: =52
             ZIndex: =2
 
@@ -3611,40 +3612,10 @@ Bodega_Controlador As screen:
             RadiusTopLeft: =0
             RadiusTopRight: =0
             Size: =12
-            Width: =380
-            X: =170
+            Width: =490
+            X: =210
             Y: =52
             ZIndex: =3
-
-        txt_CantMaquinas_BC_35 As text:
-            Align: =Align.Center
-            BorderColor: =RGBA(40, 134, 222, 1)
-            Clear: =true
-            Color: =RGBA(0, 0, 0, 1)
-            Default: ="matl_qty"
-            DisabledBorderColor: =RGBA(40, 134, 222, 1)
-            DisabledColor: =RGBA(0, 0, 0, 1)
-            DisabledFill: =RGBA(180, 214, 250, 1)
-            DisplayMode: =DisplayMode.Disabled
-            FocusedBorderThickness: =4
-            Font: =App.Theme.Font
-            Height: =25
-            HintText: |-
-                ="#"
-            HoverBorderColor: =RGBA(39, 113, 194, 1)
-            HoverColor: =RGBA(0, 0, 0, 1)
-            HoverFill: =App.Theme.Colors.Lighter70
-            PaddingLeft: =5
-            PressedBorderColor: =RGBA(39, 113, 194, 1)
-            RadiusBottomLeft: =0
-            RadiusBottomRight: =0
-            RadiusTopLeft: =0
-            RadiusTopRight: =0
-            Size: =12
-            Width: =150
-            X: =550
-            Y: =52
-            ZIndex: =4
 
         txt_CantMaquinas_BC_36 As text:
             Align: =Align.Center
@@ -4018,13 +3989,13 @@ Bodega_Controlador As screen:
                                 }
                             }
                         ),
-                        CountRows(glr_AddMateriales_BC.AllItems) <= 0,
+                        IsBlank(drp_AddMaterial_BC.Selected.Value),
                         UpdateContext(
                             {
                                 Aviso: {
                                     Ver: true,
                                     Tipo: 0,
-                                    Texto: "La lista de materiales no puede estar vacia"
+                                    Texto: "Debe seleccionar un Material"
                                 }
                             }
                         ),
@@ -4038,12 +4009,7 @@ Bodega_Controlador As screen:
                                 }
                             }
                         ),
-                        CountRows(
-                            Filter(
-                                glr_AddMateriales_BC.AllItems,
-                                (Value(ThisRecord.AddMaximo_BC.Text) < 0 || IsBlank(ThisRecord.AddMaximo_BC.Text))
-                            )
-                        ) > 0,
+                        IsBlank(txt_AddMaterialMaximo_BC.Text) || Value(txt_AddMaterialMaximo_BC.Text) <= 0,
                         UpdateContext(
                             {
                                 Aviso: {
@@ -4060,19 +4026,18 @@ Bodega_Controlador As screen:
                             }
                         );
                         UpdateContext({Guardando: true});
-                        ForAll(
-                            glr_AddMateriales_BC.AllItems,
                             Collect(
                                 Controlador_Bodegas,
                                 {
-                                    Orden: drp_AddOrden_BC.Selected.Value,
-                                    Operacion: drp_AddOP_BC.Selected.Operacion,
-                                    Material: ThisRecord.Value,
-                                    Descripcion: ThisRecord.AddDescripcion_BC.Text,
-                                    Matl_Qty: Value(ThisRecord.AddQty_BC.Text),
-                                    Maximo: Value(ThisRecord.AddMaximo_BC.Text)
+                                    Orden: drp_AddMaterialOrden_BC.Selected.Value,
+                                    Operacion: drp_AddMaterialOP_BC.Selected.Operacion,
+                                    'P/N': drp_AddMaterialOP_BC.Selected.'P/N',
+                                    Material: drp_AddMaterial_BC.Selected.Value,
+                                    Descripcion: txt_AddMaterialDescripcion_BC.Text,
+                                    Matl_Qty: -1,
+                                    Maximo: Value(txt_AddMaterialMaximo_BC.Text)
                                 }
-                            )
+                            
                         );
                         UpdateContext(
                             {
@@ -4121,7 +4086,7 @@ Bodega_Controlador As screen:
             FontStrikethrough: =false
             FontUnderline: =false
             FontWeight: =""
-            Height: =31
+            Height: =30
             InputTextPlaceholder: ="Buscar Orden"
             IsSearchable: =true
             Items: |-
@@ -4151,7 +4116,7 @@ Bodega_Controlador As screen:
             TriggerOutput: ="Keypress"
             ValidationState: ="None"
             Visible: =true
-            Width: =170
+            Width: =210
             X: =0
             Y: =77
             ZIndex: =8
@@ -4214,9 +4179,9 @@ Bodega_Controlador As screen:
             RadiusTopLeft: =0
             RadiusTopRight: =0
             Size: =12
-            Width: =380
-            X: =170
-            Y: =77
+            Width: =490
+            X: =210
+            Y: =78
             ZIndex: =9
 
         txt_AddMaterialMaximo_BC As text:
@@ -4269,64 +4234,6 @@ Bodega_Controlador As screen:
             X: =700
             Y: =77
             ZIndex: =10
-
-        txt_AddMaterialQty_BC As text:
-            Align: =Align.Center
-            BorderColor: =RGBA(40, 134, 222, 1)
-            Clear: =true
-            Color: =RGBA(0, 0, 0, 1)
-            Default: |-
-                =Sum(
-                    Filter(
-                        jobmatl,
-                        item = drp_AddMaterial_BC.Selected.Value
-                    ),
-                    matl_qty
-                )
-            DisabledBorderColor: =RGBA(40, 134, 222, 1)
-            DisabledColor: =RGBA(0, 0, 0, 1)
-            DisabledFill: |-
-                =If(
-                    Sum(
-                        Filter(
-                            jobmatl,
-                            item = drp_AddMaterial_BC.Selected.Value
-                        ),
-                        matl_qty
-                    ) = 0,
-                    RGBA(
-                        255,
-                        184,
-                        174,
-                        1
-                    ),
-                    RGBA(
-                        255,
-                        255,
-                        255,
-                        1
-                    )
-                )
-            DisplayMode: =DisplayMode.Disabled
-            FocusedBorderThickness: =4
-            Font: =App.Theme.Font
-            Height: =30
-            HintText: |-
-                ="#"
-            HoverBorderColor: =RGBA(39, 113, 194, 1)
-            HoverColor: =RGBA(0, 0, 0, 1)
-            HoverFill: =
-            PaddingLeft: =5
-            PressedBorderColor: =RGBA(39, 113, 194, 1)
-            RadiusBottomLeft: =0
-            RadiusBottomRight: =0
-            RadiusTopLeft: =0
-            RadiusTopRight: =0
-            Size: =12
-            Width: =150
-            X: =550
-            Y: =77
-            ZIndex: =11
 
     cnt_Avisos_BC As groupContainer.manualLayoutContainer:
         DropShadow: =DropShadow.Light
