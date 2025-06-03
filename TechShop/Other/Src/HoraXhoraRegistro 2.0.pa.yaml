@@ -1658,6 +1658,36 @@ Screens:
                                                     )
                                                 )
                                             );
+                                            UpdateContext(
+                                                {
+                                                    RecordControladorHerramienta: Filter(
+                                                        Controlador_Herramientas,
+                                                        Orden = tbl_Info_HxHR2.Selected.Orden,
+                                                        Operacion = tbl_Info_HxHR2.Selected.Operacion,
+                                                        Produccion_Hecha > 0
+                                                    )
+                                                }
+                                            );
+                                            ForAll(
+                                                RecordControladorHerramienta,
+                                                With(
+                                                    {
+                                                        Herra: ThisRecord,
+                                                        cantNew: (ThisRecord.Produccion_Hecha - (tbl_Info_HxHR2.Selected.Cantidad + tbl_Info_HxHR2.Selected.Scrap)) + Cantidad
+                                                    },
+                                                    Patch(
+                                                        Controlador_Herramientas,
+                                                        Herra,
+                                                        {
+                                                            Produccion_Hecha: If(
+                                                                cantNew < 0,
+                                                                0,
+                                                                cantNew
+                                                            )
+                                                        }
+                                                    )
+                                                )
+                                            );
                                             Patch(
                                                 'Hora X Hora',
                                                 tbl_Info_HxHR2.Selected,
@@ -2132,6 +2162,36 @@ Screens:
                                     Herra,
                                     {
                                         Cant_Actual: If(
+                                            cantNew < 0,
+                                            0,
+                                            cantNew
+                                        )
+                                    }
+                                )
+                            )
+                        );
+                        UpdateContext(
+                            {
+                                RecordControladorHerramienta: Filter(
+                                    Controlador_Herramientas,
+                                    Orden = tbl_Info_HxHR2.Selected.Orden,
+                                    Operacion = tbl_Info_HxHR2.Selected.Operacion,
+                                    Produccion_Hecha > 0
+                                )
+                            }
+                        );
+                        ForAll(
+                            RecordControladorHerramienta,
+                            With(
+                                {
+                                    Herra: ThisRecord,
+                                    cantNew: (ThisRecord.Produccion_Hecha - (tbl_Info_HxHR2.Selected.Cantidad + tbl_Info_HxHR2.Selected.Scrap)) + Cantidad
+                                },
+                                Patch(
+                                    Controlador_Herramientas,
+                                    Herra,
+                                    {
+                                        Produccion_Hecha: If(
                                             cantNew < 0,
                                             0,
                                             cantNew
