@@ -675,67 +675,101 @@ Herramienta_Controlador As screen:
                                     UpdateContext({Guardando: true});
                                     ForAll(
                                         glr_Materiales_HC.AllItems,
-                                        With(
-                                            {
-                                                Record: LookUp(
-                                                    Controlador_Herramientas,
-                                                    Orden = ThisRecord.Orden && Operacion = ThisRecord.Operacion && Material = ThisRecord.Material
-                                                ),
-                                                R_Orden: ThisRecord.Orden,
-                                                R_Op: ThisRecord.Operacion,
-                                                R_PN: ThisRecord.'P/N',
-                                                R_Ma: ThisRecord.Material,
-                                                R_Des: ThisRecord.Descripcion,
-                                                R_Value: ThisRecord.nmb_Entregar_HC.Value,
-                                                R_Meta: Value(ThisRecord.txt_Meta_HC.Text)
-                                            },
+                                        If(
+                                            ThisRecord.nmb_Entregar_HC.Value > 0,
                                             If(
-                                                R_Value > 0,
-                                                If(
-                                                    IsBlank(Record),
-                                                    Collect(
-                                                        Controlador_Herramientas,
+                                                IsBlank(
+                                                    With(
                                                         {
-                                                            Orden: R_Orden,
-                                                            Operacion: R_Op,
-                                                            'P/N': R_PN,
-                                                            Material: R_Ma,
-                                                            Descripcion: R_Des,
-                                                            Fecha: Today(),
-                                                            Hora: Value(
-                                                                Text(
-                                                                    Now(),
-                                                                    "HH"
-                                                                )
-                                                            ),
-                                                            Entregado: R_Value,
-                                                            Produccion_Hecha: 0,
-                                                            Produccion_Meta: R_Meta,
-                                                            User: txt_User_HC.Text,
-                                                            Operario: drp_Empleado_HC.Selected.Nombre
-                                                        }
-                                                    ),
-                                                    Patch(
-                                                        Controlador_Herramientas,
+                                                            or: ThisRecord.Orden,
+                                                            op: ThisRecord.Operacion,
+                                                            ma: ThisRecord.Material
+                                                        },
                                                         LookUp(
                                                             Controlador_Herramientas,
-                                                            Orden = R_Orden && Operacion = R_Op && Material = R_Ma
-                                                        ),
-                                                        {
-                                                            Fecha: Today(),
-                                                            Hora: Value(
-                                                                Text(
-                                                                    Now(),
-                                                                    "HH"
-                                                                )
-                                                            ),
-                                                            Entregado: R_Value,
-                                                            Produccion_Hecha: 0,
-                                                            Produccion_Meta: R_Meta,
-                                                            User: txt_User_HC.Text,
-                                                            Operario: drp_Empleado_HC.Selected.Nombre
-                                                        }
+                                                            Orden = or && Operacion = op && Material = ma
+                                                        )
                                                     )
+                                                ),
+                                                Collect(
+                                                    Controlador_Herramientas,
+                                                    {
+                                                        Orden: ThisRecord.Orden,
+                                                        Operacion: ThisRecord.Operacion,
+                                                        'P/N': ThisRecord.'P/N',
+                                                        Material: ThisRecord.Material,
+                                                        Descripcion: ThisRecord.Descripcion,
+                                                        Fecha: Today(),
+                                                        Hora: Value(
+                                                            Text(
+                                                                Now(),
+                                                                "HH"
+                                                            )
+                                                        ),
+                                                        Entregado: ThisRecord.nmb_Entregar_HC.Value,
+                                                        Produccion_Hecha: 0,
+                                                        Produccion_Meta: Value(ThisRecord.txt_Meta_HC.Text),
+                                                        User: txt_User_HC.Text,
+                                                        Operario: drp_Empleado_HC.Selected.Nombre
+                                                    }
+                                                );
+                                                Patch(
+                                                    Controlador_Bodegas,
+                                                    With(
+                                                        {
+                                                            or: ThisRecord.Orden,
+                                                            op: ThisRecord.Operacion,
+                                                            ma: ThisRecord.Material
+                                                        },
+                                                        LookUp(
+                                                            Controlador_Bodegas,
+                                                            Orden = or && Operacion = op && Material = ma
+                                                        )
+                                                    ),
+                                                    {Usado: ThisRecord.Usado + ThisRecord.nmb_Entregar_HC.Value}
+                                                ),
+                                                Patch(
+                                                    Controlador_Herramientas,
+                                                    With(
+                                                        {
+                                                            or: ThisRecord.Orden,
+                                                            op: ThisRecord.Operacion,
+                                                            ma: ThisRecord.Material
+                                                        },
+                                                        LookUp(
+                                                            Controlador_Herramientas,
+                                                            Orden = or && Operacion = op && Material = ma
+                                                        )
+                                                    ),
+                                                    {
+                                                        Fecha: Today(),
+                                                        Hora: Value(
+                                                            Text(
+                                                                Now(),
+                                                                "HH"
+                                                            )
+                                                        ),
+                                                        Entregado: ThisRecord.nmb_Entregar_HC.Value,
+                                                        Produccion_Hecha: 0,
+                                                        Produccion_Meta: Value(ThisRecord.txt_Meta_HC.Text),
+                                                        User: txt_User_HC.Text,
+                                                        Operario: drp_Empleado_HC.Selected.Nombre
+                                                    }
+                                                );
+                                                Patch(
+                                                    Controlador_Bodegas,
+                                                    With(
+                                                        {
+                                                            or: ThisRecord.Orden,
+                                                            op: ThisRecord.Operacion,
+                                                            ma: ThisRecord.Material
+                                                        },
+                                                        LookUp(
+                                                            Controlador_Bodegas,
+                                                            Orden = or && Operacion = op && Material = ma
+                                                        )
+                                                    ),
+                                                    {Usado: ThisRecord.Usado + ThisRecord.nmb_Entregar_HC.Value}
                                                 )
                                             )
                                         )
@@ -749,7 +783,7 @@ Herramienta_Controlador As screen:
                             PressedBorderColor: =RGBA(15, 84, 140, 1)
                             PressedColor: =RGBA(15, 84, 140, 1)
                             PressedFill: =RGBA(180, 214, 250, 1)
-                            Size: =14
+                            Size: =16
                             Text: ="Guardar"
                             X: =1117
                             Y: =10
@@ -997,12 +1031,7 @@ Herramienta_Controlador As screen:
                             TabIndex: =0
                             Tooltip: =""
                             ValidationState: ="None"
-                            Value: |-
-                                =If(
-                                    IsBlank(ThisItem.Usado),
-                                    0,
-                                    ThisItem.Usado
-                                )
+                            Value: =0
                             Visible: =true
                             Width: =80
                             X: =1137
@@ -1262,7 +1291,7 @@ Herramienta_Controlador As screen:
                             BorderColor: =RGBA(40, 134, 222, 1)
                             Clear: =true
                             Color: =RGBA(0, 0, 0, 1)
-                            Default: =0
+                            Default: =RoundUp(1/ThisItem.Matl_Qty, 0)
                             DisabledBorderColor: =RGBA(40, 134, 222, 1)
                             DisabledColor: =RGBA(0, 0, 0, 1)
                             DisabledFill: |-
