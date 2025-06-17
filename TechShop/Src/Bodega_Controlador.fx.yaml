@@ -398,6 +398,68 @@ Bodega_Controlador As screen:
                             Y: =10
                             ZIndex: =14
 
+                        Button17_12 As button:
+                            BorderColor: =RGBA(15, 84, 140, 1)
+                            Color: =App.Theme.Colors.PrimaryForeground
+                            DisabledBorderColor: =RGBA(244, 244, 244, 1)
+                            DisabledColor: =RGBA(166, 166, 166, 1)
+                            DisabledFill: =RGBA(244, 244, 244, 1)
+                            DisplayMode: |-
+                                =If(
+                                    !IsBlank(SetMaterial),
+                                    DisplayMode.Disabled,
+                                    DisplayMode.Edit
+                                )
+                            Fill: =RGBA(15, 84, 140, 1)
+                            Font: =App.Theme.Font
+                            FontWeight: =FontWeight.Semibold
+                            Height: =30
+                            HoverBorderColor: =RGBA(12, 59, 94, 1)
+                            HoverColor: =App.Theme.Colors.PrimaryForeground
+                            HoverFill: =RGBA(12, 59, 94, 1)
+                            OnSelect: |-
+                                =ClearCollect(
+                                    VerOrdenesList_BC,
+                                    {
+                                        Orden: "",
+                                        Operacion: ""
+                                    }
+                                );
+                                ForAll(
+                                    Controlador_Bodegas,
+                                    With(
+                                        {
+                                            ThisOrden: ThisRecord.Orden,
+                                            ThisOP: ThisRecord.Operacion
+                                        },
+                                        If(
+                                            IsBlank(
+                                                LookUp(
+                                                    VerOrdenesList_BC,
+                                                    Orden = ThisOrden && Operacion = ThisOP
+                                                )
+                                            ),
+                                            Collect(
+                                                VerOrdenesList_BC,
+                                                {
+                                                    Orden: ThisOrden,
+                                                    Operacion: ThisOP
+                                                }
+                                            )
+                                        )
+                                    )
+                                );
+                                UpdateContext({VerOrdenes: true})
+                            PressedBorderColor: =RGBA(15, 84, 140, 1)
+                            PressedColor: =RGBA(15, 84, 140, 1)
+                            PressedFill: =RGBA(180, 214, 250, 1)
+                            Size: =14
+                            Text: ="Ver Ordenes"
+                            Width: =120
+                            X: =717
+                            Y: =10
+                            ZIndex: =15
+
                     "glr_Materiales_BC As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
                         '#CopilotOverlayLabel': ="Filtrada"
                         BorderColor: =RGBA(180, 214, 250, 1)
@@ -1197,14 +1259,142 @@ Bodega_Controlador As screen:
                     ConfirmarEliminarOrden: false,
                     editarMaterial: false,
                     SetMaterial: Blank(),
-                    agregarMaterial: false
+                    agregarMaterial: false,
+                    VerOrdenes: false
                 }
             )
-        Visible: =agregarOrden || editarMaterial || eliminarOrden || agregarMaterial
+        Visible: =agregarOrden || editarMaterial || eliminarOrden || agregarMaterial || VerOrdenes
         Width: =BottomContainer3_7.Width
         X: =8
         Y: =92
         ZIndex: =2
+
+    Container71 As groupContainer.manualLayoutContainer:
+        BorderColor: =RGBA(40, 134, 222, 1)
+        BorderThickness: =3
+        DropShadow: =DropShadow.Regular
+        Fill: =RGBA(255, 255, 255, 1)
+        Height: =278
+        RadiusBottomLeft: =10
+        RadiusBottomRight: =10
+        RadiusTopLeft: =10
+        RadiusTopRight: =10
+        Visible: =VerOrdenes
+        Width: =320
+        X: =523
+        Y: =245
+        ZIndex: =3
+
+        TextInput17 As text:
+            Align: =Align.Center
+            BorderColor: =App.Theme.Colors.Darker40
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =2
+            Color: =RGBA(0, 0, 0, 1)
+            Default: ="Lista de Ordenes"
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(255, 255, 255, 1)
+            DisabledFill: =RGBA(40, 134, 222, 1)
+            DisplayMode: =DisplayMode.Disabled
+            FocusedBorderThickness: =4
+            Font: =App.Theme.Font
+            FontWeight: =FontWeight.Bold
+            Height: =30
+            HoverBorderColor: =App.Theme.Colors.Darker40
+            HoverColor: =RGBA(0, 0, 0, 1)
+            HoverFill: =App.Theme.Colors.Lighter70
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =15
+            Width: =Parent.Width
+            ZIndex: =1
+
+        Gallery7 As gallery.galleryVertical:
+            BorderColor: =App.Theme.Colors.Darker40
+            DelayItemLoading: =true
+            Height: =248
+            Items: =Filter(VerOrdenesList_BC, Orden <> "")
+            Layout: =Layout.Vertical
+            LoadingSpinner: =LoadingSpinner.Data
+            TemplatePadding: =0
+            TemplateSize: =30
+            Width: =320
+            Y: =30
+            ZIndex: =2
+
+            TextInput17_2 As text:
+                Align: =Align.Center
+                BorderColor: =App.Theme.Colors.Darker40
+                Color: =RGBA(0, 0, 0, 1)
+                Default: =ThisItem.Operacion
+                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                DisabledColor: =RGBA(0, 0, 0, 1)
+                DisabledFill: =RGBA(255, 255, 255, 1)
+                DisplayMode: =DisplayMode.Disabled
+                FocusedBorderThickness: =4
+                Font: =App.Theme.Font
+                Height: =30
+                HintText: =""
+                HoverBorderColor: =App.Theme.Colors.Darker40
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =App.Theme.Colors.Lighter70
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =12
+                Width: =118
+                X: =201
+                ZIndex: =1
+
+            TextInput17_1 As text:
+                Align: =Align.Center
+                BorderColor: =App.Theme.Colors.Darker40
+                Color: =RGBA(0, 0, 0, 1)
+                Default: =ThisItem.Orden
+                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                DisabledColor: =RGBA(0, 0, 0, 1)
+                DisabledFill: =RGBA(255, 255, 255, 1)
+                DisplayMode: =DisplayMode.Disabled
+                FocusedBorderThickness: =4
+                Font: =App.Theme.Font
+                Height: =30
+                HintText: =""
+                HoverBorderColor: =App.Theme.Colors.Darker40
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =App.Theme.Colors.Lighter70
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =12
+                Width: =201
+                ZIndex: =2
+
+        icn_Refresh_BC_9 As icon:
+            BorderColor: =RGBA(12, 59, 94, 1)
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =2
+            Color: =RGBA(255, 255, 255, 1)
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(244, 244, 244, 1)
+            FocusedBorderThickness: =20
+            Height: =30
+            HoverBorderColor: =
+            HoverColor: =RGBA(0, 0, 0, 1)
+            HoverFill: =
+            Icon: =Icon.CancelBadge
+            OnSelect: |-
+                =UpdateContext({VerOrdenes: false})
+            PaddingBottom: =2
+            PaddingLeft: =2
+            PaddingRight: =2
+            PaddingTop: =2
+            Width: =30
+            X: =290
+            ZIndex: =3
 
     cnt_AgregarOrden_BC As groupContainer.manualLayoutContainer:
         BorderColor: =RGBA(52, 152, 47, 1)
@@ -1220,7 +1410,7 @@ Bodega_Controlador As screen:
         Width: =850
         X: =If(VerMaquinas, 118, 258)
         Y: =200
-        ZIndex: =3
+        ZIndex: =4
 
         "glr_AddMateriales_BC As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
             '#CopilotOverlayLabel': ="Filtrada"
@@ -2054,7 +2244,7 @@ Bodega_Controlador As screen:
         Width: =250
         X: =997
         Y: =200
-        ZIndex: =4
+        ZIndex: =5
 
         "glr_Maquinas_BC As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
             '#CopilotOverlayLabel': ="Filtrada"
@@ -2188,7 +2378,7 @@ Bodega_Controlador As screen:
         Width: =850
         X: =If(VerMaquinas, 118, 258)
         Y: =200
-        ZIndex: =5
+        ZIndex: =6
 
         "glr_EliminarMateriales_BC As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
             '#CopilotOverlayLabel': ="Filtrada"
@@ -3023,7 +3213,7 @@ Bodega_Controlador As screen:
         Width: =850
         X: =Parent.Width / 2 - Self.Width / 2
         Y: =200
-        ZIndex: =6
+        ZIndex: =7
 
         "glr_EditMateriales_BC As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
             '#CopilotOverlayLabel': ="Filtrada"
@@ -3785,7 +3975,7 @@ Bodega_Controlador As screen:
         Width: =850
         X: =If(VerMaquinas, 118, 258)
         Y: =Rectangle44.Height / 2 - Self.Height / 2
-        ZIndex: =7
+        ZIndex: =8
 
         txt_CantMaquinas_BC_33 As text:
             Align: =Align.Center
@@ -4476,7 +4666,7 @@ Bodega_Controlador As screen:
         Width: =1350
         X: =8
         Y: =92
-        ZIndex: =8
+        ZIndex: =9
 
         Icon3_85 As icon:
             BorderColor: =RGBA(12, 59, 94, 1)
