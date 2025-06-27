@@ -220,13 +220,7 @@ Detalle_Solicitud_Compra_NoAprobadas As screen:
                             DisabledBorderColor: =RGBA(244, 244, 244, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             DisabledFill: =RGBA(244, 244, 244, 1)
-                            DisplayMode: |-
-                                =If(CountIf(CheckList_DSCNM, true) = CountIf(glr_Detalles_DSC_1.AllItems, true) && CountIf(glr_Detalles_DSC_1.AllItems, true) > 0 && IsBlank(
-                                        LookUp(
-                                            Solicitud_Compras,
-                                            soli_num = txt_Num_Soli_DSC_1.Text
-                                        )
-                                    ), DisplayMode.Edit, DisplayMode.Disabled)
+                            DisplayMode: =If(CountIf(CheckList_DSCNM, true) = CountIf(glr_Detalles_DSC_1.AllItems, true) && CountIf(glr_Detalles_DSC_1.AllItems, true) > 0, DisplayMode.Edit, DisplayMode.Disabled)
                             Fill: =RGBA(15, 108, 189, 1)
                             Font: =App.Theme.Font
                             FontWeight: =FontWeight.Semibold
@@ -235,27 +229,36 @@ Detalle_Solicitud_Compra_NoAprobadas As screen:
                             HoverColor: =App.Theme.Colors.PrimaryForeground
                             HoverFill: =RGBA(15, 84, 140, 1)
                             OnSelect: |-
-                                =If(
-                                    IsBlank(
-                                        LookUp(
-                                            Solicitud_Compras,
-                                            soli_num = txt_Num_Soli_DSC_1.Text
-                                        )
-                                    ),
+                                =With(
+                                    {
+                                        cont: CountRows(
+                                            Filter(
+                                                Solicitud_Compras,
+                                                Text(
+                                                    First(
+                                                        Split(
+                                                            soli_num,
+                                                            "-"
+                                                        )
+                                                    ).Value
+                                                ) = txt_Num_Soli_DSC_1.Text
+                                            )
+                                        ) + 1
+                                    },
                                     Collect(
                                         Solicitud_Compras,
                                         {
-                                            soli_num: Upper(txt_Num_Soli_DSC_1.Text),
-                                            fecha: DateValue(txt_Fecha_DSC.Text),
-                                            solicitante: txt_Solicitante_DSC.Text,
-                                            user: txt_User_DSC.Text,
-                                            total: Value(txt_Total_DSC.Text),
+                                            soli_num: Upper(txt_Num_Soli_DSC_1.Text) & "-" & Text(cont),
+                                            fecha: DateValue(txt_Fecha_DSC_1.Text),
+                                            solicitante: txt_Solicitante_DSC_1.Text,
+                                            user: txt_User_DSC_4.Text,
+                                            total: Value(txt_Total_DSC_1.Text),
                                             estado: "Listo"
                                         }
                                     );
-                                    Back(),
-                                    Reset(txt_Num_Soli_DSC),
-                                    Clear(CheckList_DSCNM)
+                                    Reset(txt_Num_Soli_DSC_1);
+                                    Clear(CheckList_DSCNM);
+                                    Back()
                                 )
                             PressedBorderColor: =RGBA(15, 108, 189, 1)
                             PressedColor: =RGBA(15, 108, 189, 1)
@@ -415,7 +418,7 @@ Detalle_Solicitud_Compra_NoAprobadas As screen:
                                                     ) - 1
                                                 ) = LookUp(
                                                     preq,
-                                                    req_num = txt_Num_Soli_DSC.Text,
+                                                    req_num = txt_Num_Soli_DSC_1.Text,
                                                     requester
                                                 )
                                             )
@@ -480,7 +483,27 @@ Detalle_Solicitud_Compra_NoAprobadas As screen:
                             Clear: =true
                             Color: =RGBA(0, 0, 0, 1)
                             Default: |-
-                                =Text(Sum(Filter(preqitem, req_num = txt_Num_Soli_DSC_1.Text), qty_ordered * unit_mat_cost), "###,###,##0.00")
+                                =Text(
+                                    Sum(
+                                        With(
+                                            {
+                                                Nfila: Filter(
+                                                    Compras_NoMarcadas,
+                                                    NSolicitud = txt_Num_Soli_DSC_1.Text
+                                                ).NFilaSolicitud
+                                            },
+                                            Filter(
+                                                Filter(
+                                                    preqitem,
+                                                    req_num = txt_Num_Soli_DSC_1.Text
+                                                ),
+                                                req_line in Nfila
+                                            )
+                                        ),
+                                        qty_ordered * unit_mat_cost
+                                    ),
+                                    "###,###,##0.00"
+                                )
                             DisabledBorderColor: =RGBA(180, 214, 250, 1)
                             DisabledColor: =RGBA(0, 0, 0, 1)
                             DisabledFill: =RGBA(255, 255, 255, 1)
@@ -776,27 +799,10 @@ Detalle_Solicitud_Compra_NoAprobadas As screen:
                                 CheckboxSize: =30
                                 CheckmarkFill: =RGBA(52, 152, 47, 1)
                                 Color: =RGBA(0, 0, 0, 1)
-                                Default: |-
-                                    =!IsBlank(
-                                        LookUp(
-                                            Solicitud_Compras,
-                                            soli_num = txt_Num_Soli_DSC_1.Text
-                                        )
-                                    )
+                                Default: =ThisItem.req_line in CheckList_DSCNM.req_line
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =RGBA(40, 134, 222, 1)
                                 DisabledFill: =RGBA(255, 255, 255, 1)
-                                DisplayMode: |-
-                                    =If(
-                                        IsBlank(
-                                            LookUp(
-                                                Solicitud_Compras,
-                                                soli_num = txt_Num_Soli_DSC_1.Text
-                                            )
-                                        ),
-                                        DisplayMode.Edit,
-                                        DisplayMode.Disabled
-                                    )
                                 Fill: =RGBA(255, 255, 255, 1)
                                 Font: =App.Theme.Font
                                 Height: =30

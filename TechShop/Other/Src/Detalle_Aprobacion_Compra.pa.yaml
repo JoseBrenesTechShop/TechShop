@@ -18,13 +18,56 @@ Screens:
         Reset(txt_Num_Soli_DAC);
         Reset(txt_Comentario_DAC);
       OnVisible: |-
-        =If(
-            IsEmpty(compras),
-            Clear(compras);
+        =UpdateContext(
+            {
+                Nsoli: Text(
+                    First(
+                        Split(
+                            glr_Solicitud_AC.Selected.soli_num,
+                            "-"
+                        )
+                    ).Value
+                )
+            }
+        );
+        Clear(compras);
+        If(
+            "-" in glr_Solicitud_AC.Selected.soli_num,
+            ForAll(
+                With(
+                    {
+                        Nfila: Filter(
+                            Compras_NoMarcadas,
+                            NSolicitud = txt_Num_Soli_DSC_1.Text
+                        ).NFilaSolicitud
+                    },
+                    Filter(
+                        Filter(
+                            preqitem,
+                            req_num = txt_Num_Soli_DSC_1.Text
+                        ),
+                        req_line in Nfila
+                    )
+                ),
+                Collect(
+                    compras,
+                    {
+                        req_line: ThisRecord.req_line,
+                        item: ThisRecord.item,
+                        descripcion: ThisRecord.description,
+                        medida: ThisRecord.u_m,
+                        cantidad: ThisRecord.qty_ordered,
+                        precio: ThisRecord.unit_mat_cost,
+                        num_vendedor: ThisRecord.vend_num,
+                        aprobado: true,
+                        comentario: ""
+                    }
+                )
+            ),
             ForAll(
                 Filter(
                     preqitem,
-                    req_num = glr_Solicitud_AC.Selected.soli_num
+                    req_num = Nsoli
                 ),
                 Collect(
                     compras,
@@ -236,14 +279,14 @@ Screens:
                                           HoverBorderColor: =RGBA(52, 152, 47, 1)
                                           HoverFill: =RGBA(21, 68, 18, 1)
                                           OnSelect: |-
-                                            =
+                                            =RemoveIf(Compras_NoMarcadas, NSolicitud = Nsoli);
                                             // Limpia y recolecto los no-aprobados en Compras_NoMarcadas
                                             ForAll(
                                                 Filter( compras, aprobado = false ),
                                                 Collect(
                                                     Compras_NoMarcadas,
                                                     {
-                                                        NSolicitud: Upper(txt_Num_Soli_DAC.Text),
+                                                        NSolicitud: Upper(Nsoli),
                                                         NFilaSolicitud: ThisRecord.req_line
                                                     }
                                                 )
@@ -255,7 +298,7 @@ Screens:
                                                     Detalle_Solicitud_Compras,
                                                     {
                                                         linea: ThisRecord.req_line,
-                                                        soli_num: txt_Num_Soli_DAC.Text,
+                                                        soli_num: Nsoli,
                                                         descripcion: ThisRecord.descripcion,
                                                         medida: ThisRecord.medida,
                                                         cantidad: ThisRecord.cantidad,
@@ -338,7 +381,8 @@ Screens:
                                           HintText: ="Solicitud"
                                           HoverBorderColor: =RGBA(180, 214, 250, 1)
                                           HoverFill: =RGBA(227, 240, 252, 1)
-                                          OnChange: =ClearCollect(CheckList_DSC, Blank())
+                                          OnChange: |+
+                                            =ClearCollect(CheckList_DSC, Blank());
                                           PaddingBottom: =0
                                           PaddingLeft: =0
                                           PaddingRight: =0
@@ -377,7 +421,7 @@ Screens:
                                           BorderColor: =RGBA(180, 214, 250, 1)
                                           BorderThickness: =3
                                           Clear: =true
-                                          Default: =Text(LookUp(preq, req_num = txt_Num_Soli_DAC.Text, req_date), "dd/mm/yyyy")
+                                          Default: =Text(LookUp(preq, req_num = Nsoli, req_date), "dd/mm/yyyy")
                                           DisabledBorderColor: =RGBA(180, 214, 250, 1)
                                           DisabledColor: =RGBA(0, 0, 0, 1)
                                           DisabledFill: =RGBA(255, 255, 255, 1)
@@ -430,7 +474,7 @@ Screens:
                                                 {
                                                     email: LookUp(
                                                         preq,
-                                                        req_num = txt_Num_Soli_DAC.Text,
+                                                        req_num =  Nsoli,
                                                         requester
                                                     ),
                                                     name: First(
@@ -444,7 +488,7 @@ Screens:
                                                                 ) - 1
                                                             ) = LookUp(
                                                                 preq,
-                                                                req_num = txt_Num_Soli_DAC.Text,
+                                                                req_num = Nsoli,
                                                                 requester
                                                             )
                                                         )
