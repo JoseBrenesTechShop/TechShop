@@ -236,18 +236,19 @@ Screens:
                                           HoverBorderColor: =RGBA(52, 152, 47, 1)
                                           HoverFill: =RGBA(21, 68, 18, 1)
                                           OnSelect: |-
-                                            =Patch(
-                                                Solicitud_Compras,
-                                                glr_Solicitud_AC.Selected,
-                                                {
-                                                    soli_num: Upper(txt_Num_Soli_DAC.Text),
-                                                    fecha: DateValue(txt_Fecha_DAC.Text),
-                                                    solicitante: txt_Solicitante_DAC.Text,
-                                                    total: Value(txt_Total_DAC.Text),
-                                                    comentario: txt_Comentario_DAC.Text,
-                                                    estado: "Aprobado"
-                                                }
+                                            =
+                                            // Limpia y recolecto los no-aprobados en Compras_NoMarcadas
+                                            ForAll(
+                                                Filter( compras, aprobado = false ),
+                                                Collect(
+                                                    Compras_NoMarcadas,
+                                                    {
+                                                        NSolicitud: Upper(txt_Num_Soli_DAC.Text),
+                                                        NFilaSolicitud: ThisRecord.req_line
+                                                    }
+                                                )
                                             );
+
                                             ForAll(
                                                 compras,
                                                 Collect(
@@ -279,16 +280,17 @@ Screens:
                                                 )
                                             );
 
-                                            // Limpia y recolecto los no-aprobados en Compras_NoMarcadas
-                                            ForAll(
-                                                Filter( compras, aprobado = false ),
-                                                Collect(
-                                                    Compras_NoMarcadas_1,
-                                                    {
-                                                        NSolicitud: Upper(txt_Num_Soli_DAC.Text),
-                                                        NFilaSolicitud: ThisRecord.req_line
-                                                    }
-                                                )
+                                            Patch(
+                                                Solicitud_Compras,
+                                                glr_Solicitud_AC.Selected,
+                                                {
+                                                    soli_num: Upper(txt_Num_Soli_DAC.Text),
+                                                    fecha: DateValue(txt_Fecha_DAC.Text),
+                                                    solicitante: txt_Solicitante_DAC.Text,
+                                                    total: Value(txt_Total_DAC.Text),
+                                                    comentario: txt_Comentario_DAC.Text,
+                                                    estado: "Aprobado"
+                                                }
                                             );
                                             Back()
                                           PaddingBottom: =2
