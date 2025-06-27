@@ -7,14 +7,14 @@ Detalle_Solicitud_Compra_NoAprobadas As screen:
         =Clear(CheckList_DSC);
         Reset(txt_Solicitante_DSC_1);
         Reset(txt_Num_Soli_DSC_1);
-        Reset(glr_Detalles_DSC_1);
+        Reset(glr_Detalles_DSCNM);
         Reset(glr_Solicitudes_SC);
         Refresh(preqitem);
     OnVisible: |-
         =Clear(CheckList_DSCNM);
         Reset(txt_Solicitante_DSC_1);
         Reset(txt_Num_Soli_DSC_1);
-        Reset(glr_Detalles_DSC_1);
+        Reset(glr_Detalles_DSCNM);
 
     ScreenContainer_EM_15 As groupContainer.verticalAutoLayoutContainer:
         DropShadow: =DropShadow.Light
@@ -220,7 +220,7 @@ Detalle_Solicitud_Compra_NoAprobadas As screen:
                             DisabledBorderColor: =RGBA(244, 244, 244, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             DisabledFill: =RGBA(244, 244, 244, 1)
-                            DisplayMode: =If(CountIf(CheckList_DSCNM, true) = CountIf(glr_Detalles_DSC_1.AllItems, true) && CountIf(glr_Detalles_DSC_1.AllItems, true) > 0, DisplayMode.Edit, DisplayMode.Disabled)
+                            DisplayMode: =If(CountIf(CheckList_DSCNM, true) = CountIf(glr_Detalles_DSCNM.AllItems, true) && CountIf(glr_Detalles_DSCNM.AllItems, true) > 0, DisplayMode.Edit, DisplayMode.Disabled)
                             Fill: =RGBA(15, 108, 189, 1)
                             Font: =App.Theme.Font
                             FontWeight: =FontWeight.Semibold
@@ -245,7 +245,20 @@ Detalle_Solicitud_Compra_NoAprobadas As screen:
                                             )
                                         ) + 1
                                     },
-                                
+                                    ForAll(
+                                        glr_Detalles_DSCNM.AllItems,
+                                        With(
+                                            {line: ThisRecord.req_line},
+                                            Patch(
+                                                Compras_NoMarcadas,
+                                                LookUp(
+                                                    Compras_NoMarcadas,
+                                                    NSolicitud = txt_Num_Soli_DSC_1.Text && NFilaSolicitud = line
+                                                ),
+                                                {Enviado: 1}
+                                            )
+                                        )
+                                    );
                                     Collect(
                                         Solicitud_Compras,
                                         {
@@ -544,7 +557,7 @@ Detalle_Solicitud_Compra_NoAprobadas As screen:
                             PaddingTop: =0
                             Size: =20
                             Text: |-
-                                ="Revisado: " & CountIf(CheckList_DSCNM, true) & "/" & glr_Detalles_DSC_1.AllItemsCount
+                                ="Revisado: " & CountIf(CheckList_DSCNM, true) & "/" & glr_Detalles_DSCNM.AllItemsCount
                             VerticalAlign: =VerticalAlign.Middle
                             Weight: ='TextCanvas.Weight'.Bold
                             Width: =174
@@ -765,7 +778,7 @@ Detalle_Solicitud_Compra_NoAprobadas As screen:
                             Y: =0
                             ZIndex: =32
 
-                        "glr_Detalles_DSC_1 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+                        "glr_Detalles_DSCNM As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
                             BorderColor: =RGBA(0, 18, 107, 1)
                             DelayItemLoading: =true
                             Height: =587

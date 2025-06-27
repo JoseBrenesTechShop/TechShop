@@ -32,19 +32,19 @@ Screens:
         );
         Clear(compras);
         If(
-            "-" in glr_Solicitud_AC.Selected.soli_num,
+            "-" in glr_Solicitud_AC.Selected.soli_num && IsEmpty(Filter(Detalle_Solicitud_Compras, soli_num = glr_Solicitud_AC.Selected.soli_num)),
             ForAll(
                 With(
                     {
                         Nfila: Filter(
                             Compras_NoMarcadas,
-                            NSolicitud = txt_Num_Soli_DSC_1.Text
+                            NSolicitud = Nsoli
                         ).NFilaSolicitud
                     },
                     Filter(
                         Filter(
                             preqitem,
-                            req_num = txt_Num_Soli_DSC_1.Text
+                            req_num = Nsoli
                         ),
                         req_line in Nfila
                     )
@@ -287,7 +287,8 @@ Screens:
                                                     Compras_NoMarcadas,
                                                     {
                                                         NSolicitud: Upper(Nsoli),
-                                                        NFilaSolicitud: ThisRecord.req_line
+                                                        NFilaSolicitud: ThisRecord.req_line,
+                                                        Enviado: 0
                                                     }
                                                 )
                                             );
@@ -298,7 +299,7 @@ Screens:
                                                     Detalle_Solicitud_Compras,
                                                     {
                                                         linea: ThisRecord.req_line,
-                                                        soli_num: Nsoli,
+                                                        soli_num: txt_Num_Soli_DAC.Text,
                                                         descripcion: ThisRecord.descripcion,
                                                         medida: ThisRecord.medida,
                                                         cantidad: ThisRecord.cantidad,
@@ -381,8 +382,7 @@ Screens:
                                           HintText: ="Solicitud"
                                           HoverBorderColor: =RGBA(180, 214, 250, 1)
                                           HoverFill: =RGBA(227, 240, 252, 1)
-                                          OnChange: |+
-                                            =ClearCollect(CheckList_DSC, Blank());
+                                          OnChange: =ClearCollect(CheckList_DSC, Blank());
                                           PaddingBottom: =0
                                           PaddingLeft: =0
                                           PaddingRight: =0
