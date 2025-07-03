@@ -4419,13 +4419,13 @@ Bodega_Controlador As screen:
                                 }
                             }
                         ),
-                        CountRows(Filter(Controlador_Bodegas, Orden = drp_AddMaterialOrden_BC.Selected.Value && Operacion = drp_AddMaterialOP_BC.Selected.Operacion)) > 0,
+                        CountRows(Filter(Controlador_Bodegas, Orden = drp_AddMaterialOrden_BC.Selected.Value && Operacion = drp_AddMaterialOP_BC.Selected.Operacion && Material = drp_AddMaterial_BC.Selected.Value)) > 0,
                         UpdateContext(
                             {
                                 Aviso: {
                                     Ver: true,
                                     Tipo: 0,
-                                    Texto: "La Orden seleccionada ya fue agregada"
+                                    Texto: "El inserto ya fue agregado a la orden y operacion seleccionada"
                                 }
                             }
                         ),
@@ -4442,7 +4442,7 @@ Bodega_Controlador As screen:
                         UpdateContext(
                             {
                                 VerMaquinas: false,
-                                agregarOrden: !agregarOrden
+                                agregarMaterial: !agregarMaterial
                             }
                         ); 
                             Collect(
@@ -4453,7 +4453,7 @@ Bodega_Controlador As screen:
                                     'P/N': drp_AddMaterialOP_BC.Selected.'P/N',
                                     Material: drp_AddMaterial_BC.Selected.Value,
                                     Descripcion: txt_AddMaterialDescripcion_BC.Text,
-                                    Matl_Qty: -1,
+                                    Matl_Qty: 0,
                                     Maximo: Value(txt_AddMaterialMaximo_BC.Text),
                                     Usado: 0
                                 }
@@ -4464,14 +4464,17 @@ Bodega_Controlador As screen:
                                 Aviso: {
                                     Ver: true,
                                     Tipo: 2,
-                                    Texto: "La Orden se agrego con exito"
+                                    Texto: "El inserto se agrego con exito"
                                 }
                             }
                         );
                         UpdateContext({Guardando: false}),
                         Reset(drp_AddMaterialOP_BC);
                         Reset(drp_AddMaterialOrden_BC);
-                        Reset(drp_AddMaterial_BC)
+                        Reset(drp_AddMaterial_BC);
+                        Reset(txt_AddMaterialMaximo_BC);
+                        Reset(glr_Materiales_BC);
+                        Reset(glr_AddMateriales_BC)
                     )
                 PaddingBottom: =2
                 PaddingLeft: =2
@@ -4509,11 +4512,11 @@ Bodega_Controlador As screen:
             Height: =30
             InputTextPlaceholder: ="Buscar Material"
             IsSearchable: =true
-            Items: |-
+            Items: |
                 =Sort(
                     Distinct(
                         Filter(
-                            jobmatl,
+                            item,
                             StartsWith(
                                 item,
                                 "12"
