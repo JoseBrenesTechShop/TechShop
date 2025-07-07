@@ -298,7 +298,8 @@ Bodega_Controlador As screen:
                             PressedFill: =RGBA(255, 184, 174, 1)
                             Size: =14
                             Text: ="Eliminar Orden"
-                            X: =190
+                            Visible: =false
+                            X: =918
                             Y: =10
                             ZIndex: =11
 
@@ -328,7 +329,7 @@ Bodega_Controlador As screen:
                             PressedFill: =RGBA(255, 238, 189, 1)
                             Size: =14
                             Text: ="Editar Material"
-                            X: =542
+                            X: =366
                             Y: =10
                             ZIndex: =12
 
@@ -352,17 +353,14 @@ Bodega_Controlador As screen:
                             HoverColor: =App.Theme.Colors.PrimaryForeground
                             HoverFill: =RGBA(12, 59, 94, 1)
                             OnSelect: |-
-                                =If(
-                                    VarName = "1",
-                                    UpdateContext({agregarMaterial: true}),
-                                    Notify("Proximamente")
-                                )
+                                =
+                                    UpdateContext({agregarMaterial: true})
                             PressedBorderColor: =RGBA(15, 84, 140, 1)
                             PressedColor: =RGBA(15, 84, 140, 1)
                             PressedFill: =RGBA(180, 214, 250, 1)
                             Size: =14
                             Text: ="Agregar Material"
-                            X: =366
+                            X: =190
                             Y: =10
                             ZIndex: =13
 
@@ -455,7 +453,7 @@ Bodega_Controlador As screen:
                             Size: =14
                             Text: ="Ver Ordenes"
                             Width: =120
-                            X: =717
+                            X: =541
                             Y: =10
                             ZIndex: =15
 
@@ -2176,7 +2174,7 @@ Bodega_Controlador As screen:
                                     Material: ThisRecord.Value,
                                     Descripcion: ThisRecord.AddDescripcion_BC.Text,
                                     Matl_Qty: Value(ThisRecord.AddQty_BC.Text),
-                                    Maximo: Value(ThisRecord.AddMaximo_BC.Text),
+                                    Maximo: 0,
                                     Usado: 0
                                 }
                             )
@@ -4005,7 +4003,7 @@ Bodega_Controlador As screen:
             Size: =12
             Width: =210
             Y: =52
-            ZIndex: =2
+            ZIndex: =1
 
         txt_CantMaquinas_BC_34 As text:
             Align: =Align.Center
@@ -4035,7 +4033,7 @@ Bodega_Controlador As screen:
             Width: =490
             X: =210
             Y: =52
-            ZIndex: =3
+            ZIndex: =2
 
         txt_CantMaquinas_BC_36 As text:
             Align: =Align.Center
@@ -4065,7 +4063,7 @@ Bodega_Controlador As screen:
             Width: =150
             X: =700
             Y: =52
-            ZIndex: =5
+            ZIndex: =3
 
         Container6_8 As groupContainer.manualLayoutContainer:
             BorderStyle: =BorderStyle.None
@@ -4073,7 +4071,7 @@ Bodega_Controlador As screen:
             Fill: =RGBA(40, 134, 222, 1)
             Height: =52
             Width: =850
-            ZIndex: =6
+            ZIndex: =4
 
             icn_Refresh_BC_7 As icon:
                 BorderColor: =RGBA(12, 59, 94, 1)
@@ -4088,10 +4086,10 @@ Bodega_Controlador As screen:
                 HoverColor: =RGBA(0, 0, 0, 1)
                 HoverFill: =
                 Icon: =Icon.Reload
-                OnSelect: |-
+                OnSelect: |
                     =Reset(drp_AddMaterialOP_BC);
                     Reset(drp_AddMaterialOrden_BC);
-                    Reset(drp_AddMaterial_BC);
+                    UpdateContext({txt_Material: Blank()});
                 PaddingBottom: =5
                 PaddingLeft: =5
                 PaddingRight: =5
@@ -4364,8 +4362,13 @@ Bodega_Controlador As screen:
                 OnSelect: |-
                     =Reset(drp_AddMaterialOP_BC);
                     Reset(drp_AddMaterialOrden_BC);
-                    Reset(drp_AddMaterial_BC);
-                    UpdateContext({agregarMaterial: false, VerMaquinas: false})
+                    UpdateContext(
+                        {
+                            agregarMaterial: false,
+                            VerMaquinas: false,
+                            txt_Material: Blank()
+                        }
+                    )
                 PaddingBottom: =8
                 PaddingLeft: =8
                 PaddingRight: =8
@@ -4409,7 +4412,7 @@ Bodega_Controlador As screen:
                                 }
                             }
                         ),
-                        IsBlank(drp_AddMaterial_BC.Selected.Value),
+                        IsBlank(txt_Material),
                         UpdateContext(
                             {
                                 Aviso: {
@@ -4419,7 +4422,12 @@ Bodega_Controlador As screen:
                                 }
                             }
                         ),
-                        CountRows(Filter(Controlador_Bodegas, Orden = drp_AddMaterialOrden_BC.Selected.Value && Operacion = drp_AddMaterialOP_BC.Selected.Operacion && Material = drp_AddMaterial_BC.Selected.Value)) > 0,
+                        CountRows(
+                            Filter(
+                                Controlador_Bodegas,
+                                Orden = drp_AddMaterialOrden_BC.Selected.Value && Operacion = drp_AddMaterialOP_BC.Selected.Operacion && Material = txt_Material
+                            )
+                        ) > 0,
                         UpdateContext(
                             {
                                 Aviso: {
@@ -4444,20 +4452,19 @@ Bodega_Controlador As screen:
                                 VerMaquinas: false,
                                 agregarMaterial: !agregarMaterial
                             }
-                        ); 
-                            Collect(
-                                Controlador_Bodegas,
-                                {
-                                    Orden: drp_AddMaterialOrden_BC.Selected.Value,
-                                    Operacion: drp_AddMaterialOP_BC.Selected.Operacion,
-                                    'P/N': drp_AddMaterialOP_BC.Selected.'P/N',
-                                    Material: drp_AddMaterial_BC.Selected.Value,
-                                    Descripcion: txt_AddMaterialDescripcion_BC.Text,
-                                    Matl_Qty: 0,
-                                    Maximo: Value(txt_AddMaterialMaximo_BC.Text),
-                                    Usado: 0
-                                }
-                            
+                        );
+                        Collect(
+                            Controlador_Bodegas,
+                            {
+                                Orden: drp_AddMaterialOrden_BC.Selected.Value,
+                                Operacion: drp_AddMaterialOP_BC.Selected.Operacion,
+                                'P/N': drp_AddMaterialOP_BC.Selected.'P/N',
+                                Material: txt_Material,
+                                Descripcion: txt_AddMaterialDescripcion_BC.Text,
+                                Matl_Qty: 0,
+                                Maximo: Value(txt_AddMaterialMaximo_BC.Text),
+                                Usado: 0
+                            }
                         );
                         UpdateContext(
                             {
@@ -4471,7 +4478,7 @@ Bodega_Controlador As screen:
                         UpdateContext({Guardando: false}),
                         Reset(drp_AddMaterialOP_BC);
                         Reset(drp_AddMaterialOrden_BC);
-                        Reset(drp_AddMaterial_BC);
+                        UpdateContext({txt_Material: Blank()});
                         Reset(txt_AddMaterialMaximo_BC);
                         Reset(glr_Materiales_BC);
                         Reset(glr_AddMateriales_BC)
@@ -4491,67 +4498,6 @@ Bodega_Controlador As screen:
                 Y: =11
                 ZIndex: =10
 
-        "drp_AddMaterial_BC As 'Cuadro combinado'.pcfdataset":
-            AccessibleLabel: =""
-            Appearance: ='ComboboxCanvas.Appearance'.Outline
-            BasePaletteColor: =RGBA(5, 102, 178, 1)
-            BorderColor: =RGBA(40, 134, 222, 1)
-            BorderRadius: =0
-            BorderStyle: =BorderStyle.Solid
-            BorderThickness: =1
-            ContentLanguage: =""
-            DisplayMode: =DisplayMode.Edit
-            Fill: =RGBA(255, 255, 255, 1)
-            Font: =""
-            FontColor: =RGBA(0, 0, 0, 1)
-            FontItalic: =false
-            FontSize: =16
-            FontStrikethrough: =false
-            FontUnderline: =false
-            FontWeight: =""
-            Height: =30
-            InputTextPlaceholder: ="Buscar Material"
-            IsSearchable: =true
-            Items: |
-                =Sort(
-                    Distinct(
-                        Filter(
-                            item,
-                            StartsWith(
-                                item,
-                                "12"
-                            )
-                        ),
-                        item
-                    ),
-                    Value
-                )
-            MultiValueDelimiter: =", "
-            OnChange: =false
-            PaddingBottom: =2
-            PaddingLeft: =5
-            PaddingRight: =2
-            PaddingTop: =2
-            Required: =false
-            SelectMultiple: =false
-            TabIndex: =0
-            Tooltip: =""
-            TriggerOutput: ="Keypress"
-            ValidationState: ="None"
-            Visible: =true
-            Width: =210
-            X: =0
-            Y: =77
-            ZIndex: =8
-
-            Value2_4 As PowerApps_CoreControls_ComboboxCanvasTemplate_dataField.textualColumn:
-                FieldDisplayName: ="Value"
-                FieldName: ="Value"
-                FieldType: ="e"
-                Order: =1
-                Type: ="s"
-                ZIndex: =1
-
         txt_AddMaterialDescripcion_BC As text:
             Align: =Align.Center
             BorderColor: =RGBA(40, 134, 222, 1)
@@ -4560,7 +4506,7 @@ Bodega_Controlador As screen:
             Default: |-
                 =LookUp(
                     jobmatl,
-                    item = drp_AddMaterial_BC.Selected.Value
+                    item = txt_Material
                 ).description
             DisabledBorderColor: =RGBA(40, 134, 222, 1)
             DisabledColor: =RGBA(0, 0, 0, 1)
@@ -4569,7 +4515,7 @@ Bodega_Controlador As screen:
                     Sum(
                         Filter(
                             jobmatl,
-                            item = drp_AddMaterial_BC.Selected.Value
+                            item = txt_Material
                         ),
                         matl_qty
                     ) = 0,
@@ -4605,7 +4551,7 @@ Bodega_Controlador As screen:
             Width: =490
             X: =210
             Y: =78
-            ZIndex: =9
+            ZIndex: =5
 
         txt_AddMaterialMaximo_BC As text:
             Align: =Align.Center
@@ -4620,7 +4566,7 @@ Bodega_Controlador As screen:
                     Sum(
                     Filter(
                         jobmatl,
-                        item = drp_AddMaterial_BC.Selected.Value
+                        item = txt_Material
                     ),
                     matl_qty
                 ) = 0,
@@ -4656,7 +4602,71 @@ Bodega_Controlador As screen:
             Width: =150
             X: =700
             Y: =77
-            ZIndex: =10
+            ZIndex: =6
+
+        txt_AddMaterialDescripcion_BC_1 As text:
+            Align: =Align.Center
+            BorderColor: =RGBA(40, 134, 222, 1)
+            Clear: =true
+            Color: =RGBA(0, 0, 0, 1)
+            Default: =txt_Material
+            DisabledBorderColor: =RGBA(40, 134, 222, 1)
+            DisabledColor: =RGBA(0, 0, 0, 1)
+            DisabledFill: |-
+                =If(
+                    Sum(
+                        Filter(
+                            jobmatl,
+                            item = txt_Material
+                        ),
+                        matl_qty
+                    ) = 0,
+                    RGBA(
+                        255,
+                        184,
+                        174,
+                        1
+                    ),
+                    RGBA(
+                        255,
+                        255,
+                        255,
+                        1
+                    )
+                )
+            DisplayMode: =DisplayMode.Disabled
+            FocusedBorderThickness: =4
+            Font: =App.Theme.Font
+            Height: =30
+            HintText: ="Material"
+            HoverBorderColor: =RGBA(39, 113, 194, 1)
+            HoverColor: =RGBA(0, 0, 0, 1)
+            HoverFill: =
+            PaddingLeft: =5
+            PressedBorderColor: =RGBA(39, 113, 194, 1)
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =12
+            Width: =210
+            Y: =78
+            ZIndex: =7
+
+        Icon4_13 As icon:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderThickness: =5
+            Color: =RGBA(0, 0, 0, 0)
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(244, 244, 244, 1)
+            Height: =30
+            HoverBorderColor: =RGBA(40, 134, 222, 1)
+            Icon: =Icon.Printing3D
+            OnSelect: |-
+                =UpdateContext({showContainer: !showContainer})
+            Width: =210
+            Y: =78
+            ZIndex: =8
 
     cnt_Calcular_BC As groupContainer.manualLayoutContainer:
         BorderColor: =RGBA(40, 134, 222, 1)
@@ -4907,4 +4917,197 @@ Bodega_Controlador As screen:
             X: =0
             Y: =0
             ZIndex: =5
+
+    ContainerPN_EM_10 As groupContainer.manualLayoutContainer:
+        BorderColor: =RGBA(15, 108, 189, 1)
+        BorderThickness: =4
+        DropShadow: =DropShadow.Bold
+        Fill: =RGBA(180, 214, 250, 1)
+        Height: =75 + gl_SeleccionPN_EM_10.Height
+        RadiusBottomLeft: =15
+        RadiusBottomRight: =15
+        RadiusTopLeft: =15
+        RadiusTopRight: =15
+        Visible: =showContainer
+        Width: =451
+        X: =610
+        Y: =133
+        ZIndex: =11
+
+        lbl_BarraSeleccion_EM_10 As text:
+            Align: =Align.Center
+            BorderThickness: =2
+            Color: =RGBA(255, 255, 255, 1)
+            Default: ="Seleccione el Material"
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            DisplayMode: =DisplayMode.View
+            Fill: =RGBA(40, 134, 222, 1)
+            FocusedBorderThickness: =4
+            FontWeight: =FontWeight.Bold
+            Height: =73
+            HintText: ="Tarima"
+            HoverBorderColor: =RGBA(204, 231, 246, 1)
+            HoverColor: =RGBA(0, 0, 0, 1)
+            HoverFill: =RGBA(204, 231, 246, 1)
+            OnChange: =
+            OnSelect: =Reset(lbl_BarraSeleccion_EM_10)
+            PaddingBottom: =40
+            PaddingLeft: =5
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Size: =18
+            Width: =451
+            ZIndex: =1
+
+        "gl_SeleccionPN_EM_10 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+            '#CopilotOverlayLabel': ="Filtrada"
+            BorderColor: =RGBA(15, 108, 189, 1)
+            BorderThickness: =2
+            DelayItemLoading: =true
+            Height: =If(CountIf(Self.AllItems, true) >= 7, 427, CountIf(Self.AllItems, true) * Self.TemplateHeight + 5)
+            Items: |-
+                =Sort(
+                    Distinct(
+                        Filter(
+                            item,
+                            StartsWith(
+                                item,
+                                "12"
+                            ),
+                            (IsBlank(txt_Filtro_EM_10.Text) || txt_Filtro_EM_10.Text in item)
+                        ),
+                        item
+                    ),
+                    Value
+                )
+            Layout: =Layout.Vertical
+            LoadingSpinner: =LoadingSpinner.Data
+            TemplatePadding: =0
+            TemplateSize: =60
+            Transition: =Transition.Push
+            Width: =451
+            Y: =73
+            ZIndex: =2
+
+            SeparatorPN_EM_10 As rectangle:
+                BorderColor: =RGBA(0, 18, 107, 1)
+                Fill: =RGBA(40, 134, 222, 0.49)
+                Height: =8
+                OnSelect: =Select(Parent)
+                Width: |
+                    =Parent.TemplateWidth - 20
+                X: =10
+                Y: =52
+                ZIndex: =1
+
+            txt_SeleccionPN_EM_10 As text:
+                Align: =Align.Center
+                BorderColor: =App.Theme.Colors.Darker40
+                BorderThickness: =2
+                Color: =RGBA(0, 0, 0, 1)
+                Default: =ThisItem.Value
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                DisabledFill: =RGBA(244, 244, 244, 1)
+                DisplayMode: =DisplayMode.View
+                FocusedBorderThickness: =4
+                Font: =App.Theme.Font
+                Height: =35
+                HintText: =""
+                HoverBorderColor: =App.Theme.Colors.Darker40
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =App.Theme.Colors.Lighter70
+                OnSelect: |-
+                    =UpdateContext({showContainer: !showContainer})
+                PaddingLeft: =5
+                RadiusBottomLeft: =15
+                RadiusBottomRight: =15
+                RadiusTopLeft: =15
+                RadiusTopRight: =15
+                Size: =15
+                Width: =400
+                X: =25
+                Y: =9
+                ZIndex: =3
+
+            icn_AgregarPN_EM_10 As icon:
+                AccessibleLabel: =Self.Tooltip
+                Color: =RGBA(0, 0, 0, 0)
+                Height: =60
+                Icon: =Icon.Add
+                OnSelect: |-
+                    =UpdateContext(
+                        {
+                            showContainer: false,
+                            txt_Material: ThisItem.Value
+                        }
+                    )
+                PaddingBottom: =16
+                PaddingLeft: =16
+                PaddingRight: =16
+                PaddingTop: =16
+                Tooltip: ="Ver los detalles del elemento"
+                Width: =441
+                X: =10
+                ZIndex: =4
+
+        lbl_Filtro_EM_10 As Texto:
+            Align: ='TextCanvas.Align'.Center
+            AutoHeight: =false
+            BorderStyle: =""
+            ContentLanguage: =""
+            DisplayMode: =DisplayMode.Edit
+            Font: =""
+            FontColor: =RGBA(255, 255, 255, 1)
+            FontItalic: =false
+            FontStrikethrough: =false
+            FontUnderline: =false
+            Height: =40
+            Size: =25
+            TabIndex: =0
+            Text: ="Filtro"
+            Tooltip: =""
+            VerticalAlign: =""
+            Visible: =true
+            Weight: ='TextCanvas.Weight'.Bold
+            Width: =101
+            Wrap: =true
+            X: =0
+            Y: =33
+            ZIndex: =3
+
+        txt_Filtro_EM_10 As text:
+            Align: =Align.Center
+            BorderColor: =RGBA(180, 214, 250, 1)
+            BorderThickness: =3
+            Clear: =true
+            Color: =RGBA(0, 0, 0, 1)
+            Default: =
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            FocusedBorderThickness: =4
+            Font: =App.Theme.Font
+            Height: =30
+            HintText: =""
+            HoverBorderColor: =RGBA(180, 214, 250, 1)
+            HoverColor: =RGBA(0, 0, 0, 1)
+            HoverFill: =RGBA(217, 236, 255, 1)
+            OnSelect: =
+            PaddingLeft: =5
+            PressedFill: =RGBA(255, 255, 255, 1)
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Reset: =!showContainer
+            Size: =15
+            Width: =348
+            X: =90
+            Y: =38
+            ZIndex: =4
 
