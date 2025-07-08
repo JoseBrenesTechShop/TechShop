@@ -208,7 +208,7 @@ SolicitudesHerramientas As screen:
                         RadiusTopLeft: =4
                         RadiusTopRight: =4
                         Width: =1350
-                        ZIndex: =13
+                        ZIndex: =1
 
                         txt_FiltroOperario_SH_1 As text:
                             Align: =Align.Center
@@ -400,90 +400,90 @@ SolicitudesHerramientas As screen:
                                 HoverColor: =RGBA(0, 0, 0, 1)
                                 HoverFill: =RGBA(255, 255, 255, 1)
                                 OnChange: |-
-                                    =UpdateContext(
+                                    =With(
                                         {
-                                            info: {
-                                                Maquina: Upper(Self.Text),
-                                                OpFiltro: If(
-                                                    IsEmpty(
-                                                        If(
-                                                            Drop_SeleccionHerraSum_SH_1.SelectedText.Value = "Herramienta",
-                                                            Filter(
-                                                                jobmatl,
-                                                                job = Text(
-                                                                    LookUp(
-                                                                        Maquina_Ordens_1,
-                                                                        Maquina = txt_Maquina_SH_2.Text,
-                                                                        Orden
+                                            myJob: LookUp(
+                                                item,
+                                                item = LookUp(
+                                                    Orden_Ejecucion,
+                                                    Operacion = Text(info.OpFiltro) && Orden = info.Orden
+                                                ).'P/N'
+                                            ).job
+                                        },
+                                        UpdateContext(
+                                            {
+                                                info: {
+                                                    Maquina: Upper(Self.Text),
+                                                    OpFiltro: If(
+                                                        IsEmpty(
+                                                            If(
+                                                                Drop_SeleccionHerraSum_SH_1.SelectedText.Value = "Herramienta",
+                                                                Filter(
+                                                                    jobmatl,
+                                                                    job = myJob ,
+                                                                    oper_num = Value(
+                                                                        LookUp(
+                                                                            Maquina_Ordens_1,
+                                                                            Maquina = txt_Maquina_SH_2.Text,
+                                                                            Operacion
+                                                                        )
+                                                                    ),
+                                                                    StartsWith(
+                                                                        item,
+                                                                        "12"
                                                                     )
                                                                 ),
-                                                                oper_num = Value(
-                                                                    LookUp(
-                                                                        Maquina_Ordens_1,
-                                                                        Maquina = txt_Maquina_SH_2.Text,
-                                                                        Operacion
+                                                                Filter(
+                                                                    jobmatl,
+                                                                    job = myJob,
+                                                                    oper_num = Value(
+                                                                        LookUp(
+                                                                            Maquina_Ordens_1,
+                                                                            Maquina = txt_Maquina_SH_2.Text,
+                                                                            Operacion
+                                                                        )
+                                                                    ),
+                                                                    !StartsWith(
+                                                                        item,
+                                                                        "12"
                                                                     )
-                                                                ),
-                                                                StartsWith(
-                                                                    item,
-                                                                    "12"
-                                                                )
-                                                            ),
-                                                            Filter(
-                                                                jobmatl,
-                                                                job = Text(
-                                                                    LookUp(
-                                                                        Maquina_Ordens_1,
-                                                                        Maquina = txt_Maquina_SH_2.Text,
-                                                                        Orden
-                                                                    )
-                                                                ),
-                                                                oper_num = Value(
-                                                                    LookUp(
-                                                                        Maquina_Ordens_1,
-                                                                        Maquina = txt_Maquina_SH_2.Text,
-                                                                        Operacion
-                                                                    )
-                                                                ),
-                                                                !StartsWith(
-                                                                    item,
-                                                                    "12"
                                                                 )
                                                             )
-                                                        )
-                                                    ) && LookUp(
-                                                        Maquina_Ordens_1,
-                                                        Maquina = Self.Text,
-                                                        Operacion
-                                                    ) in [
-                                                        "21",
-                                                        "31",
-                                                        "30",
-                                                        "35"
-                                                    ],
-                                                    30,
-                                                    Value(
-                                                        LookUp(
+                                                        ) && LookUp(
                                                             Maquina_Ordens_1,
                                                             Maquina = Self.Text,
                                                             Operacion
+                                                        ) in [
+                                                            "21",
+                                                            "31",
+                                                            "30",
+                                                            "35",
+                                                            "25"
+                                                        ],
+                                                        30,
+                                                        Value(
+                                                            LookUp(
+                                                                Maquina_Ordens_1,
+                                                                Maquina = Self.Text,
+                                                                Operacion
+                                                            )
                                                         )
+                                                    ),
+                                                    Orden: LookUp(
+                                                        Maquina_Ordens_1,
+                                                        Maquina = Self.Text,
+                                                        Orden
+                                                    ),
+                                                    Operacion: LookUp(
+                                                        Maquina_Ordens_1,
+                                                        Maquina = Self.Text,
+                                                        Operacion
                                                     )
-                                                ),
-                                                Orden: LookUp(
-                                                    Maquina_Ordens_1,
-                                                    Maquina = Self.Text,
-                                                    Orden
-                                                ),
-                                                Operacion: LookUp(
-                                                    Maquina_Ordens_1,
-                                                    Maquina = Self.Text,
-                                                    Operacion
-                                                )
+                                                }
                                             }
-                                        }
-                                    );
-                                    Reset(gl_Herramientas_sh_2)
+                                        );
+                                        Reset(gl_Herramientas_sh_2)
+                                    )
                                 OnSelect: |-
                                     =Reset(Self);
                                     ClearCollect(Verificacion, Blank());
@@ -571,7 +571,7 @@ SolicitudesHerramientas As screen:
                         Text: ="Historial"
                         X: =927
                         Y: =80
-                        ZIndex: =23
+                        ZIndex: =2
 
                     btn_enviar_sh_1 As button:
                         DisabledBorderColor: =RGBA(166, 166, 166, 1)
@@ -941,7 +941,7 @@ SolicitudesHerramientas As screen:
                         Text: ="Enviar"
                         X: =1119
                         Y: =80
-                        ZIndex: =24
+                        ZIndex: =3
 
                     txt_DescripcionMatSum_SH_1 As text:
                         Align: =Align.Center
@@ -968,7 +968,7 @@ SolicitudesHerramientas As screen:
                         Width: =285
                         X: =16
                         Y: =88
-                        ZIndex: =27
+                        ZIndex: =4
 
                     Container1_9 As groupContainer.manualLayoutContainer:
                         BorderColor: =RGBA(40, 134, 222, 1)
@@ -982,7 +982,7 @@ SolicitudesHerramientas As screen:
                         Width: =258
                         X: =311
                         Y: =87
-                        ZIndex: =28
+                        ZIndex: =5
 
                         Drop_SeleccionMaterialesSumDescripcion_SH_1 As dropdown:
                             AllowEmptySelection: =true
@@ -1212,7 +1212,7 @@ SolicitudesHerramientas As screen:
                         Width: =112
                         X: =579
                         Y: =88
-                        ZIndex: =30
+                        ZIndex: =6
 
                     ct_ContenedorHerramientas_sh_2 As groupContainer.manualLayoutContainer:
                         BorderColor: =RGBA(71, 158, 245, 1)
@@ -1227,7 +1227,7 @@ SolicitudesHerramientas As screen:
                         Width: =840
                         X: =16
                         Y: =140
-                        ZIndex: =31
+                        ZIndex: =7
 
                         txt_tituloSeleccionHerramientas_sh_2 As text:
                             Align: =Align.Center
@@ -1296,26 +1296,45 @@ SolicitudesHerramientas As screen:
                             DisplayMode: =If(Aviso, DisplayMode.Disabled, DisplayMode.Edit)
                             Height: =480
                             Items: |-
-                                =If(
-                                    Drop_SeleccionHerraSum_SH_1.SelectedText.Value = "Herramientas",
-                                    Filter(
-                                        jobmatl,
-                                        job = info.Orden,
-                                        oper_num = info.OpFiltro,
-                                        probable = 1,
-                                        StartsWith(
+                                =With(
+                                    {
+                                        myJob: LookUp(
                                             item,
-                                            "12"
-                                        )
-                                    ),
-                                    Filter(
-                                        jobmatl,
-                                        job = info.Orden,
-                                        oper_num = info.OpFiltro,
-                                        probable = 1,
-                                        !StartsWith(
-                                            item,
-                                            "12"
+                                            item = LookUp(
+                                                Orden_Ejecucion,
+                                                Operacion = Text(info.OpFiltro) && Orden = info.Orden
+                                            ).'P/N'
+                                        ).job
+                                    },
+                                    If(
+                                        Drop_SeleccionHerraSum_SH_1.SelectedText.Value = "Herramientas",
+                                        Filter(
+                                            jobmatl,
+                                            job = myJob,
+                                            oper_num = If(
+                                                Value(info.OpFiltro) = 25,
+                                                30,
+                                                Value(info.OpFiltro)
+                                            ),
+                                            probable = 1,
+                                            StartsWith(
+                                                item,
+                                                "12"
+                                            )
+                                        ),
+                                        Filter(
+                                            jobmatl,
+                                            job = myJob,
+                                            oper_num = If(
+                                                Value(info.OpFiltro) = 25,
+                                                30,
+                                                Value(info.OpFiltro)
+                                            ),
+                                            probable = 1,
+                                            !StartsWith(
+                                                item,
+                                                "12"
+                                            )
                                         )
                                     )
                                 )
@@ -1324,7 +1343,7 @@ SolicitudesHerramientas As screen:
                             TemplatePadding: =0
                             TemplateSize: =If(Drop_SeleccionHerraSum_SH_1.SelectedText.Value = "Herramientas",161 ,105)
                             Width: =840
-                            Y: =40
+                            Y: =35
                             ZIndex: =3
 
                             icon_Indicador_sh_4 As rectangle:
@@ -1334,7 +1353,7 @@ SolicitudesHerramientas As screen:
                                 OnSelect: =Select(Parent)
                                 Visible: =ThisItem.IsSelected
                                 Width: =4
-                                ZIndex: =34
+                                ZIndex: =2
 
                             Container7_8 As groupContainer.manualLayoutContainer:
                                 BorderColor: =RGBA(40, 134, 222, 1)
@@ -1349,7 +1368,7 @@ SolicitudesHerramientas As screen:
                                 Width: =790
                                 X: =24
                                 Y: =12
-                                ZIndex: =35
+                                ZIndex: =3
 
                                 lbl_Descripcion_SH_4 As label:
                                     Color: =RGBA(0, 0, 0, 1)
@@ -1480,28 +1499,40 @@ SolicitudesHerramientas As screen:
                                     PaddingRight: =0
                                     PaddingTop: =0
                                     Text: |-
-                                        =//Cantidad de insertos
-                                        If(
+                                        =If(
                                             IsBlank(
                                                 LookUp(
                                                     Herramientas,
-                                                    Maquina = txt_Maquina_SH_2.Text && Orden = ThisItem.job && Operacion = Text(ThisItem.oper_num) && ID_Inserto = ThisItem.item
+                                                    Maquina = txt_Maquina_SH_2.Text 
+                                                    && Orden = ThisItem.job 
+                                                    && Operacion = Text(ThisItem.oper_num) 
+                                                    && ID_Inserto = ThisItem.item
                                                 )
                                             ),
-                                            If(
-                                                txt_CantxInserto_SH_2.Text = "0",
+                                            With(
+                                              {
+                                                cantInserto: Value(txt_CantxInserto_SH_2.Text),
+                                                metaOp: LookUp(
+                                                  Orden_Ejecucion,
+                                                  Orden = ThisItem.job 
+                                                  && Operacion = Text(ThisItem.oper_num)
+                                                ).Meta
+                                              },
+                                              If(
+                                                Or(
+                                                  cantInserto <= 0,
+                                                  metaOp <= 0
+                                                ),
                                                 0,
-                                                RoundUp(
-                                                    8 / Value(txt_CantxInserto_SH_2.Text) / LookUp(
-                                                        Orden_Ejecucion,
-                                                        Orden = ThisItem.job && Operacion = Text(ThisItem.oper_num)
-                                                    ).Meta,
-                                                    0
-                                                )
+                                                RoundUp( 8 / cantInserto / metaOp, 0 )
+                                              )
                                             ),
                                             LookUp(
-                                                Herramientas,
-                                                Maquina = txt_Maquina_SH_2.Text && Orden = ThisItem.job && Operacion = Text(ThisItem.oper_num) && ID_Inserto = ThisItem.item
+                                              Herramientas,
+                                              Maquina = txt_Maquina_SH_2.Text 
+                                              && Orden = ThisItem.job 
+                                              && Operacion = Text(ThisItem.oper_num) 
+                                              && ID_Inserto = ThisItem.item
                                             ).Cant_Insertos
                                         )
                                     Width: =53
@@ -1680,42 +1711,28 @@ SolicitudesHerramientas As screen:
                                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                                 DisabledColor: =RGBA(166, 166, 166, 1)
                                 DisabledFill: =RGBA(244, 244, 244, 1)
-                                DisplayMode: |-
+                                DisplayMode: |
                                     =If(
-                                        !IsBlank(
-                                            LookUp(
-                                                Materiales,
-                                                RowID = txt_Row_SH.Text
-                                            )
-                                        ) || Disable,
-                                        DisplayMode.Disabled,
-                                        DisplayMode.Edit
+                                      ! IsBlank(
+                                          LookUp(
+                                            Materiales,
+                                            RowID = txt_Row_SH.Text
+                                              && item = ThisItem.item
+                                          )
+                                        ),
+                                      DisplayMode.Disabled,
+                                      DisplayMode.Edit
                                     )
                                 Fill: =RGBA(72, 163, 62, 1)
                                 FontWeight: =FontWeight.Semibold
                                 Height: =41
                                 HoverColor: =RGBA(255, 255, 255, 1)
                                 HoverFill: =RGBA(45, 128, 40, 1)
-                                OnSelect: |-
-                                    =If(
-                                        !IsBlank(
-                                            LookUp(
-                                                Herramientas,
-                                                Maquina = Upper(txt_Maquina_SH_2.Text) && RowID = txt_Row_SH.Text && 'Estado (crfb9_estado)' in [
-                                                    "Revision",
-                                                    "Aprobado"
-                                                ]
-                                            )
-                                        ),
-                                        UpdateContext(
-                                            {
-                                                TextoAviso: "El material ya tiene una solicitud en estado Revision o en Aprobacion",
-                                                Aviso: true
-                                            }
-                                        ),
-                                        Collect(
-                                            Materiales,
-                                            {
+                                OnSelect: |
+                                    =UpdateContext({
+                                      popupVisible: true,
+                                      btnDisabled: true,
+                                      tempMat: {
                                                 item: ThisItem.item,
                                                 referencia: LookUp(job_ref, suffix = ThisItem.suffix && job = ThisItem.job && sequence = ThisItem.sequence && oper_num = ThisItem.oper_num && StartsWith(txt_Maquina_SH_2.Text, assy_seq), ref_des),
                                                 description: ThisItem.description,
@@ -1772,14 +1789,13 @@ SolicitudesHerramientas As screen:
                                                 ),
                                                 RowID: txt_Row_SH.Text
                                             }
-                                        )
-                                    )
+                                    })
                                 Size: =15
                                 Text: ="Agregar"
                                 Width: =131
                                 X: =656
                                 Y: =If(Drop_SeleccionHerraSum_SH_1.SelectedText.Value = "Herramientas",88 ,38)
-                                ZIndex: =48
+                                ZIndex: =4
 
                     ct_CotenedorSeleccionadas_sh_2 As groupContainer.manualLayoutContainer:
                         BorderColor: =RGBA(71, 158, 245, 1)
@@ -1794,7 +1810,7 @@ SolicitudesHerramientas As screen:
                         Width: =465
                         X: =871
                         Y: =140
-                        ZIndex: =49
+                        ZIndex: =8
 
                         txt_TituloHerramientaSeleccionadas_SH_2 As text:
                             Align: =Align.Center
@@ -2005,7 +2021,7 @@ SolicitudesHerramientas As screen:
                                     DisabledBorderColor: =RGBA(166, 166, 166, 1)
                                     DisabledColor: =RGBA(166, 166, 166, 1)
                                     DisabledFill: =RGBA(244, 244, 244, 1)
-                                    DisplayMode: =If(Disable, DisplayMode.Disabled, DisplayMode.Edit)
+                                    DisplayMode: =DisplayMode.View
                                     Fill: =RGBA(0, 0, 0, 0)
                                     FocusedBorderThickness: =4
                                     FontWeight: =FontWeight.Semibold
@@ -2077,7 +2093,7 @@ SolicitudesHerramientas As screen:
                         Visible: =Aceptar
                         X: =412
                         Y: =278
-                        ZIndex: =61
+                        ZIndex: =9
 
                         TextCanvas2_1 As Texto:
                             Align: ='TextCanvas.Align'.Center
@@ -2111,54 +2127,6 @@ SolicitudesHerramientas As screen:
                             Y: =136
                             ZIndex: =63
 
-    cnt_Aviso_SH_1 As groupContainer.manualLayoutContainer:
-        BorderColor: =RGBA(255, 191, 0, 1)
-        BorderThickness: =5
-        DropShadow: =DropShadow.ExtraBold
-        Fill: =RGBA(255, 255, 255, 1)
-        Height: =218
-        RadiusBottomLeft: =20
-        RadiusBottomRight: =20
-        RadiusTopLeft: =20
-        RadiusTopRight: =20
-        Visible: =Aviso
-        Width: =631
-        X: =367
-        Y: =275
-        ZIndex: =2
-
-        "'Seleccione la causa_2' As label":
-            Align: =Align.Center
-            BorderColor: =App.Theme.Colors.Darker40
-            Color: =RGBA(0, 0, 0, 1)
-            DisabledColor: =RGBA(166, 166, 166, 1)
-            Font: =App.Theme.Font
-            Height: =121
-            Size: =18
-            Text: =TextoAviso
-            Width: =556
-            X: =40
-            Y: =8
-            ZIndex: =64
-
-        btn_GuardarComent_HxH2_3 As button:
-            DisabledBorderColor: =RGBA(166, 166, 166, 1)
-            DisabledColor: =RGBA(166, 166, 166, 1)
-            DisabledFill: =RGBA(244, 244, 244, 1)
-            Fill: =RGBA(255, 191, 0, 1)
-            FontWeight: =FontWeight.Bold
-            Height: =50
-            HoverColor: =RGBA(255, 255, 255, 1)
-            HoverFill: =RGBA(102, 80, 12, 1)
-            OnSelect: |-
-                =UpdateContext({TextoAviso:"", Aviso: false});
-            Size: =15
-            Text: ="Ok"
-            Width: =180
-            X: =228
-            Y: =143
-            ZIndex: =65
-
     cnt_Comentario_HxH_4 As groupContainer.manualLayoutContainer:
         BorderColor: =RGBA(215, 58, 60, 1)
         BorderThickness: =5
@@ -2173,7 +2141,7 @@ SolicitudesHerramientas As screen:
         Width: =576
         X: =395
         Y: =282
-        ZIndex: =3
+        ZIndex: =2
 
         "'Seleccione la causa_3' As label":
             Align: =Align.Center
@@ -2434,4 +2402,193 @@ SolicitudesHerramientas As screen:
             X: =322
             Y: =138
             ZIndex: =69
+
+    Capa1_6 As groupContainer.manualLayoutContainer:
+        BorderColor: =RGBA(0, 0, 0, 0)
+        DropShadow: =DropShadow.Light
+        Fill: =RGBA(0, 0, 0, 0.12)
+        Height: =666
+        RadiusBottomLeft: =4
+        RadiusBottomRight: =4
+        RadiusTopLeft: =4
+        RadiusTopRight: =4
+        Visible: =popupVisible
+        Width: =1343
+        X: =11
+        Y: =92
+        ZIndex: =3
+
+    cnt_agregar As groupContainer.manualLayoutContainer:
+        BorderColor: =RGBA(15, 108, 189, 1)
+        BorderThickness: =5
+        DropShadow: =DropShadow.ExtraBold
+        Fill: =RGBA(255, 255, 255, 1)
+        Height: =645
+        RadiusBottomLeft: =20
+        RadiusBottomRight: =20
+        RadiusTopLeft: =20
+        RadiusTopRight: =20
+        Visible: |
+            =popupVisible
+        Width: =745
+        X: =312
+        Y: =92
+        ZIndex: =4
+
+        btn_GuardarComent_HxH2_5 As button:
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            DisplayMode: =
+            Fill: =RGBA(152, 208, 70, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =45
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(102, 80, 12, 1)
+            OnSelect: |
+                =If(
+                    !IsMatch(txtNuevoInserto.Value, "^\d+$") || Value(txtNuevoInserto.Value) <= 0,
+                    
+                    // Si NO es válido (letras, negativos o 0)
+                    UpdateContext({
+                        TextoAviso: "Por favor, ingrese solo un número entero mayor que 0",
+                        Aviso: true
+                    }),
+                
+                    // Si SÍ es válido
+                    Collect(Materiales, tempMat);
+                    UpdateContext({
+                        popupVisible: false,
+                        btnDisabled: false,
+                        tempMat: Blank()
+                    })
+                )
+            Size: =15
+            Text: ="Agregar"
+            Width: =180
+            X: =378
+            Y: =587
+            ZIndex: =2
+
+        btn_GuardarComent_HxH2_6 As button:
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            Fill: =RGBA(240, 98, 15, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =45
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(102, 80, 12, 1)
+            OnSelect: |-
+                =UpdateContext({ popupVisible: false, btnDisabled: false, tempMat: Blank() })
+            Size: =15
+            Text: ="Cancelar"
+            Width: =180
+            X: =187
+            Y: =587
+            ZIndex: =3
+
+        HtmlText2 As htmlViewer:
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            Font: =App.Theme.Font
+            Height: =582
+            HtmlText: |-
+                =Concatenate(
+                  "<div style='font-family:Segoe UI; font-size:17px; display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:10px; border:1px solid #ccc; border-radius:6px;'>",
+                
+                    // Título
+                    "<div style='grid-column:span 2; text-align:center; font-weight:bold; background:#007ACC; color:#FFFFFF; padding:6px; border-bottom:1px solid #bbb;'>Detalle del Material</div>",
+                
+                    "<div><strong>Material:</strong></div>",           "<div>" & tempMat.item & "</div>",
+                    "<div><strong>Ref.:</strong></div>",               "<div>" & tempMat.referencia & "</div>",
+                    "<div><strong>Descripción:</strong></div>",        "<div>" & tempMat.description & "</div>",
+                    "<div><strong>Cantidad Actual:</strong></div>",    "<div>" & tempMat.Cant_Actual & "</div>",
+                    "<div><strong>Cantidad x Inserto:</strong></div>", "<div>" & tempMat.Cant_x_Inserto & "</div>",
+                
+                  "<div style='grid-column:span 2; display:grid; grid-template-columns:1fr 1fr; padding:6px; border:2px solid #EAB308; border-radius:6px;'>", 
+                      "<div><strong>Cantidad Insertos:</strong></div>",
+                      "<div>" & Value(txtNuevoInserto.Value) & "</div>",
+                    "</div>",
+                
+                    "<div><strong>Cantidad Máxima:</strong></div>",    "<div>" & tempMat.Cant_Maxima & "</div>",
+                    "<div><strong>QTY:</strong></div>",                "<div>" & tempMat.QTY & "</div>",
+                    "<div><strong>Job:</strong></div>",                "<div>" & tempMat.job & "</div>",
+                    "<div><strong>Operación:</strong></div>",          "<div>" & tempMat.oper_num & "</div>",
+                    "<div><strong>Tipo Material:</strong></div>",      "<div>" & tempMat.Tipo_Material & "</div>",
+                    "<div><strong>Requerido:</strong></div>",          "<div>" & tempMat.Requerido & "</div>",
+                    "<div><strong>Surtido:</strong></div>",            "<div>" & tempMat.Surtido & "</div>",
+                    "<div><strong>Inv. Disponible:</strong></div>",    "<div>" & tempMat.CantidadInventario & "</div>",
+                    "<div><strong>Ubicación:</strong></div>",          "<div>" & tempMat.Ubicacion & "</div>",
+                
+                     "<div style='grid-column:span 2; text-align:center; margin-top:10px; font-weight:bold; color:#EAB308;'>Por favor digite el inserto para continuar</div>",
+                
+                
+                  "</div>"
+                )
+            Size: =13
+            Width: =740
+            X: =5
+            ZIndex: =4
+
+        "txtNuevoInserto As 'Entrada numérica'":
+            AccessibleLabel: ="Digite el inserto "
+            Align: =Align.Center
+            Appearance: ='NumberInput.Appearance'.FilledDarker
+            BorderColor: =RGBA(255, 191, 0, 1)
+            BorderStyle: =BorderStyle.Dashed
+            DisplayMode: =DisplayMode.Edit
+            Height: =32
+            Value: =
+            Width: =320
+            X: =405
+            Y: =215
+            ZIndex: =5
+
+    cnt_Aviso_SH_1 As groupContainer.manualLayoutContainer:
+        BorderColor: =RGBA(255, 191, 0, 1)
+        BorderThickness: =5
+        DropShadow: =DropShadow.ExtraBold
+        Fill: =RGBA(255, 255, 255, 1)
+        Height: =218
+        RadiusBottomLeft: =20
+        RadiusBottomRight: =20
+        RadiusTopLeft: =20
+        RadiusTopRight: =20
+        Visible: =Aviso
+        Width: =631
+        X: =367
+        Y: =275
+        ZIndex: =5
+
+        "'Seleccione la causa_2' As label":
+            Align: =Align.Center
+            BorderColor: =App.Theme.Colors.Darker40
+            Color: =RGBA(0, 0, 0, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            Font: =App.Theme.Font
+            Height: =121
+            Size: =18
+            Text: =TextoAviso
+            Width: =556
+            X: =40
+            Y: =8
+            ZIndex: =64
+
+        btn_GuardarComent_HxH2_3 As button:
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            Fill: =RGBA(255, 191, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =50
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(102, 80, 12, 1)
+            OnSelect: |-
+                =UpdateContext({TextoAviso:"", Aviso: false});
+            Size: =15
+            Text: ="Ok"
+            Width: =180
+            X: =228
+            Y: =143
+            ZIndex: =65
 
