@@ -1069,8 +1069,8 @@ SolicitudesHerramientas As screen:
                                             YaSolicitado: !IsBlank(
                                                 LookUp(
                                                     Herramientas,
-                                                    ID_Inserto = ruta.'data-ADB4D7A662F548B49FAC2B986E348A1Bitem' && Maquina = txt_Maquina_SH_2.Text && Orden = info.Orden && Operacion = info.Operacion && 'Estado (crfb9_estado)' in [
-                                                        "Revision",
+                                                    RowID = ThisRecord.RowID && Maquina = txt_Maquina_SH_2.Text && Orden = info.Orden && Operacion = info.Operacion && 'Estado (crfb9_estado)' in [
+                                                        "Aprobado",
                                                         "Aprobado"
                                                     ]
                                                 )
@@ -1446,7 +1446,7 @@ SolicitudesHerramientas As screen:
                                             IsBlank(
                                                 LookUp(
                                                     Herramientas,
-                                                    Maquina = txt_Maquina_SH_2.Text && Orden = ThisItem.job && Operacion = Text(ThisItem.oper_num) && ID_Inserto = ThisItem.item
+                                                    Maquina = txt_Maquina_SH_2.Text && Orden = ThisItem.job && Operacion = Text(ThisItem.oper_num) && RowID = txt_Row_SH.Text
                                                 )
                                             ),
                                             If(
@@ -1500,16 +1500,7 @@ SolicitudesHerramientas As screen:
                                     PaddingRight: =0
                                     PaddingTop: =0
                                     Text: |-
-                                        =If(
-                                            IsBlank(
-                                                LookUp(
-                                                    Herramientas,
-                                                    Maquina = txt_Maquina_SH_2.Text 
-                                                    && Orden = info.Orden
-                                                    && Operacion = Text(info.Operacion) 
-                                                    && RowID = txt_Row_SH.Text
-                                                )
-                                            ),
+                                        =
                                             With(
                                               {
                                                 cantInserto: Value(txt_CantxInserto_SH_2.Text),
@@ -1527,15 +1518,7 @@ SolicitudesHerramientas As screen:
                                                 0,
                                                 RoundUp( 8 / cantInserto / metaOp, 0 )
                                               )
-                                            ),
-                                            LookUp(
-                                              Herramientas,
-                                              Maquina = txt_Maquina_SH_2.Text 
-                                                    && Orden = info.Orden
-                                                    && Operacion = Text(info.Operacion) 
-                                              && RowID = txt_Row_SH.Text
-                                            ).Cant_Insertos
-                                        )
+                                            )
                                     Width: =53
                                     X: =648
                                     Y: =If(Drop_SeleccionHerraSum_SH_1.SelectedText.Value = "Herramientas",7 ,62)
@@ -1661,7 +1644,22 @@ SolicitudesHerramientas As screen:
                                     PaddingRight: =0
                                     PaddingTop: =0
                                     Size: =16
-                                    Text: =Value(txt_CantxInserto_SH_2.Text) * Value(txt_Cant_Insertos_SH_2.Text)
+                                    Text: |-
+                                        =Value(txt_CantxInserto_SH_2.Text) * Value(
+                                            If(
+                                                IsBlank(
+                                                    LookUp(
+                                                        Herramientas,
+                                                        Orden = info.Orden && Operacion = info.Operacion && Maquina = info.Maquina && RowID = txt_Row_SH.Text
+                                                    )
+                                                ),
+                                                txt_Cant_Insertos_SH_2.Text,
+                                                LookUp(
+                                                    Herramientas,
+                                                    Orden = info.Orden && Operacion = info.Operacion && Maquina = info.Maquina && RowID = txt_Row_SH.Text
+                                                ).Cant_Insertos
+                                            )
+                                        )
                                     Visible: =Drop_SeleccionHerraSum_SH_1.SelectedText.Value = "Herramientas"
                                     Width: =145
                                     X: =462
@@ -1714,15 +1712,26 @@ SolicitudesHerramientas As screen:
                                 DisabledFill: =RGBA(244, 244, 244, 1)
                                 DisplayMode: |
                                     =If(
-                                      ! IsBlank(
-                                          LookUp(
-                                            Materiales,
-                                            RowID = txt_Row_SH.Text
-                                              && item = ThisItem.item
-                                          )
+                                        !IsBlank(
+                                            LookUp(
+                                                Materiales,
+                                                RowID = txt_Row_SH.Text && item = ThisItem.item
+                                            )
+                                        ) 
+                                        || 
+                                        !IsBlank(
+                                            LookUp(
+                                                Herramientas,
+                                                RowID =  txt_Row_SH.Text &&
+                                                Maquina = txt_Maquina_SH_2.Text &&
+                                                Orden = info.Orden &&
+                                                Operacion = info.Operacion &&
+                                                'Estado (crfb9_estado)' in ["Aprobado"]
+                                            )
                                         ),
-                                      DisplayMode.Disabled,
-                                      DisplayMode.Edit
+                                    
+                                        DisplayMode.Disabled,
+                                        DisplayMode.Edit
                                     )
                                 Fill: =RGBA(72, 163, 62, 1)
                                 FontWeight: =FontWeight.Semibold
