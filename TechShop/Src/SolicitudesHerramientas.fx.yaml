@@ -1505,9 +1505,9 @@ SolicitudesHerramientas As screen:
                                                 LookUp(
                                                     Herramientas,
                                                     Maquina = txt_Maquina_SH_2.Text 
-                                                    && Orden = ThisItem.job 
-                                                    && Operacion = Text(ThisItem.oper_num) 
-                                                    && ID_Inserto = ThisItem.item
+                                                    && Orden = info.Orden
+                                                    && Operacion = Text(info.Operacion) 
+                                                    && RowID = txt_Row_SH.Text
                                                 )
                                             ),
                                             With(
@@ -1515,8 +1515,8 @@ SolicitudesHerramientas As screen:
                                                 cantInserto: Value(txt_CantxInserto_SH_2.Text),
                                                 metaOp: LookUp(
                                                   Orden_Ejecucion,
-                                                  Orden = ThisItem.job 
-                                                  && Operacion = Text(ThisItem.oper_num)
+                                                    Orden = info.Orden
+                                                    && Operacion = Text(info.Operacion) 
                                                 ).Meta
                                               },
                                               If(
@@ -1531,13 +1531,13 @@ SolicitudesHerramientas As screen:
                                             LookUp(
                                               Herramientas,
                                               Maquina = txt_Maquina_SH_2.Text 
-                                              && Orden = ThisItem.job 
-                                              && Operacion = Text(ThisItem.oper_num) 
-                                              && ID_Inserto = ThisItem.item
+                                                    && Orden = info.Orden
+                                                    && Operacion = Text(info.Operacion) 
+                                              && RowID = txt_Row_SH.Text
                                             ).Cant_Insertos
                                         )
                                     Width: =53
-                                    X: =643
+                                    X: =648
                                     Y: =If(Drop_SeleccionHerraSum_SH_1.SelectedText.Value = "Herramientas",7 ,62)
                                     ZIndex: =41
 
@@ -2241,23 +2241,23 @@ SolicitudesHerramientas As screen:
                         FechaSoli: Text(Today())
                     }
                 );
-                If(
-                    !IsBlank(RazonCausa),
+                /*If(
+                    !IsBlank(RazonCausa);
                     With(
                         {
                             CuerpoCorreo: "<p>Estimado equipo;</p>" & "<p>Se ha enviado una solicitud de herramientas que requiere su revisión para aprobación. A continuación se detallan los datos de la solicitud:</p>" & "<table border='1' cellpadding='5' cellspacing='0'>" & "<tr><td><strong>Máquina</strong></td><td>" & Upper(txt_Maquina_SH_2.Text) & "</td></tr>" & "<tr><td><strong>Orden</strong></td><td>" & info.Orden & "</td></tr>" & "<tr><td><strong>Operario</strong></td><td>" & drop_Operario_SH_3.Selected.Nombre & "</td></tr>" & "<tr><td><strong>Usuario</strong></td><td>" & LookUp(
-                                Empleados,
-                                Codigo = VarName,
+                                Empleados;
+                                Codigo = VarName;
                                 Nombre
                             ) & "</td></tr>" & "<tr><td><strong>Operación</strong></td><td>" & info.Operacion & "</td></tr>" & "<tr><td><strong>Causa</strong></td><td>" & drp_Causas_SH_1.SelectedText.Value & "</td></tr>" & "<tr><td><strong>Razón de la causa</strong></td><td>" & RazonCausa & "</td></tr>" & "<tr><td><strong>Fecha de Solicitud</strong></td><td>" & Text(Today()) & "</td></tr>" & "</table>" & "<p>Por favor, revise los detalles y proceda con la aprobación o el rechazo de la solicitud según corresponda.</p>" & "<p>Saludos cordiales;</p>" & "<p>El equipo de desarrollo</p>" & "<p><em>Nota: Por favor, no responda a este correo.</em></p>"
-                        },
+                        };
                         EnviarCorreo.Run(
-                            "soportegh@tsicr.com; supervisoresTSI@tsicr.com; controlherramientas@tsicr.com; produccionyherramientas@tsicr.com",
-                            "Revisión de Solicitud de Herramientas",
+                            "soportegh@tsicr.com; supervisoresTSI@tsicr.com; controlherramientas@tsicr.com; produccionyherramientas@tsicr.com";
+                            "Revisión de Solicitud de Herramientas";
                             CuerpoCorreo
                         )
                     )
-                );
+                );;*/
                 With(
                     {
                         Id: First(
@@ -2446,22 +2446,37 @@ SolicitudesHerramientas As screen:
             Height: =45
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(102, 80, 12, 1)
-            OnSelect: |
+            OnSelect: |-
                 =If(
-                    !IsMatch(txtNuevoInserto.Value, "^\d+$") || Value(txtNuevoInserto.Value) <= 0,
-                    
-                    UpdateContext({
-                        TextoAviso: "Por favor, ingrese solo un número entero mayor que 0",
-                        Aviso: true
-                    }),
-                
-                    Collect(Materiales, tempMat);
-                    
-                    UpdateContext({
-                        popupVisible: false,
-                        btnDisabled: false,
-                        tempMat: Blank()
-                    })
+                    !IsMatch(
+                        txtNuevoInserto.Value,
+                        "^\d+$"
+                    ) || Value(txtNuevoInserto.Value) <= 0,
+                    UpdateContext(
+                        {
+                            TextoAviso: "Por favor, ingrese solo un número entero mayor que 0",
+                            Aviso: true
+                        }
+                    ),
+                    With(
+                        {
+                            tempModificado: Patch(
+                                tempMat,
+                                {Cant_Inserto: Text(txtNuevoInserto.Value)}
+                            )
+                        },
+                        Collect(
+                            Materiales,
+                            tempModificado
+                        );
+                        UpdateContext(
+                            {
+                                popupVisible: false,
+                                btnDisabled: false,
+                                tempMat: Blank()
+                            }
+                        )
+                    )
                 )
             Size: =15
             Text: ="Agregar"
@@ -2526,6 +2541,7 @@ SolicitudesHerramientas As screen:
             BorderStyle: =BorderStyle.Dashed
             DisplayMode: =DisplayMode.Edit
             Height: =32
+            Min: =0
             Value: =tempMat.Cant_Inserto
             Width: =356
             X: =369
