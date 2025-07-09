@@ -365,13 +365,13 @@ Screens:
                                                           {
                                                               info: {
                                                                   Maquina: Upper(Self.Text),
-                                                                  OpFiltro: If(
+                                                   OpFiltro: If(
                                                                       IsEmpty(
                                                                           If(
                                                                               Drop_SeleccionHerraSum_SH_1.SelectedText.Value = "Herramienta",
                                                                               Filter(
                                                                                   jobmatl,
-                                                                                  job = myJob ,
+                                                                                  job = myJob,
                                                                                   oper_num = Value(
                                                                                       LookUp(
                                                                                           Maquina_Ordens_1,
@@ -1234,47 +1234,45 @@ Screens:
                                           BorderColor: =RGBA(0, 18, 107, 1)
                                           DisplayMode: =If(Aviso, DisplayMode.Disabled, DisplayMode.Edit)
                                           Height: =480
-                                          Items: |-
-                                            =
-                                             With(
+                                          Items: |
+                                            =With(
                                                 {
                                                     myJob: LookUp(
                                                         item,
                                                         item = LookUp(
+                                                        Orden_Ejecucion,
+                                                        Operacion = Text(info.OpFiltro) && Orden = info.Orden
+                                                    ).'P/N'
+                                                    ).job,
+
+                                                    operNum: If(
+                                                        Value(info.OpFiltro) = 25, 30,
+                                                        Value(info.OpFiltro) = 55 && "BD" in LookUp(
                                                             Orden_Ejecucion,
                                                             Operacion = Text(info.OpFiltro) && Orden = info.Orden
-                                                        ).'P/N'
-                                                    ).job
+                                                        ).'P/N', 50,
+                                                        Value(info.OpFiltro) = 45 && "TS" in LookUp(
+                                                            Orden_Ejecucion,
+                                                            Operacion = Text(info.OpFiltro) && Orden = info.Orden
+                                                        ).'P/N', 40,
+                                                        Value(info.OpFiltro)
+                                                    )
                                                 },
                                                 If(
                                                     Drop_SeleccionHerraSum_SH_1.SelectedText.Value = "Herramientas",
                                                     Filter(
                                                         jobmatl,
                                                         job = myJob,
-                                                        oper_num = If(
-                                                            Value(info.OpFiltro) = 25,
-                                                            30,
-                                                            Value(info.OpFiltro)
-                                                        ),
+                                                        oper_num = operNum,
                                                         probable = 1,
-                                                        StartsWith(
-                                                            item,
-                                                            "12"
-                                                        )
+                                                        StartsWith(item, "12")
                                                     ),
                                                     Filter(
                                                         jobmatl,
                                                         job = myJob,
-                                                        oper_num = If(
-                                                            Value(info.OpFiltro) = 25,
-                                                            30,
-                                                            Value(info.OpFiltro)
-                                                        ),
+                                                        oper_num = operNum,
                                                         probable = 1,
-                                                        !StartsWith(
-                                                            item,
-                                                            "12"
-                                                        )
+                                                        !StartsWith(item, "12")
                                                     )
                                                 )
                                             )
