@@ -1897,17 +1897,14 @@ Embalaje As screen:
                 BorderThickness: =0.5
                 Color: =If(ThisItem.'P/N' = Eliminar.item.'P/N' || ThisItem.'P/N' = txt_Destino, RGBA(255, 255, 255, 1))
                 Default: |
-                    =Max(
-                      ThisItem.CantidadTarima
-                        - Sum(
-                            Filter(
-                              gl_Contenedores_EM_2.AllItems,
-                              'P/N' = ThisItem.'P/N'
-                            ),
-                            Coalesce( Value(txt_Cantidad.Text), 0 )
+                    =ThisItem.CantidadTarima
+                      - Sum(
+                          Filter(
+                            gl_Contenedores_EM_2.AllItems,
+                            'P/N' = ThisItem.'P/N'
                           ),
-                      0
-                    )
+                          Coalesce(Value(txt_Cantidad.Text), 0)
+                        )
                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                 DisabledColor: =If(ThisItem.'P/N' = Eliminar.item.'P/N' || ThisItem.'P/N' = txt_Destino, RGBA(255, 255, 255, 1))
                 DisabledFill: =If(ThisItem.'P/N' = Eliminar.item.'P/N'  || ThisItem.'P/N' = txt_Destino, RGBA(15, 108, 189, 1), RGBA(255, 255, 255, 1))
@@ -1964,17 +1961,23 @@ Embalaje As screen:
             Rectangle47 As rectangle:
                 BorderColor: =App.Theme.Colors.Darker40
                 DisplayMode: =If(/*isSaving ||*/ isEditing || Disable, DisplayMode.Disabled, DisplayMode.Edit)
-                Fill: =RGBA(0, 0, 0, 0)
+                Fill: |
+                    =If(
+                        Value(txt_Cantidad_EC_7.Text) < 0,
+                        RGBA(255, 0, 0, 0.30), 
+                        Color.Transparent
+                    )
                 Height: =30
                 HoverFill: =RGBA(180, 214, 250, 0.28)
-                OnSelect: |-
+                OnSelect: |
                     =If(
                       Value( txt_Cantidad_EC_7.Text ) > 0,
                       Collect(
                         RevisionCalidad,
                         AddColumns(
                           Table( ThisItem ),
-                          txt_prioridad, CountRows( RevisionCalidad ) + 1
+                          txt_prioridad, CountRows( RevisionCalidad ) + 1,
+                          cantidadDigitar, 0
                         )
                       ),
                          UpdateContext(
@@ -1984,7 +1987,7 @@ Embalaje As screen:
                                 Disable: true
                             }
                         )
-                    )
+                    );
                 PressedFill: =RGBA(40, 40, 222, 0.3)
                 Width: =465
                 X: =36
@@ -1997,7 +2000,12 @@ Embalaje As screen:
                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                 DisabledColor: =RGBA(244, 244, 244, 1)
                 DisplayMode: =If(/*isSaving ||*/ isEditing || Disable, DisplayMode.Disabled, DisplayMode.Edit)
-                Fill: =If(ThisItem.'P/N' = Eliminar.item.'P/N'  || ThisItem.'P/N' = txt_Destino, RGBA(15, 108, 189, 1), RGBA(255, 255, 255, 1))
+                Fill: |
+                    =If(
+                        Value(txt_Cantidad_EC_7.Text) < 0,
+                        RGBA(255, 0, 0, 0.30), 
+                        Color.Transparent
+                    )
                 FocusedBorderThickness: =20
                 Height: =30
                 HoverBorderColor: =RGBA(52, 152, 47, 1)
@@ -2176,9 +2184,20 @@ Embalaje As screen:
                 Default: =ThisItem.txt_prioridad
                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                 DisabledColor: =If(ThisItem.'P/N' = Eliminar.item.'P/N' || ThisItem.'P/N' = txt_Destino, RGBA(255, 255, 255, 1))
-                DisabledFill: =If(ThisItem.'P/N' = Eliminar.item.'P/N'  || ThisItem.'P/N' = txt_Destino, RGBA(15, 108, 189, 1), RGBA(255, 255, 255, 1))
+                DisabledFill: |
+                    =If(
+                        CountRows(
+                            Filter(
+                                gl_Contenedores_EM_3.AllItems,
+                                'P/N' = ThisItem.'P/N' &&
+                                Value(txt_Cantidad_EC_7.Text) < 0
+                            )
+                        ) > 0,
+                        RGBA(255, 0, 0, 0.20),
+                        Color.White
+                    )
                 DisplayMode: =DisplayMode.Disabled
-                Fill: =If(ThisItem.'P/N' = Eliminar.item.'P/N'  || ThisItem.'P/N' = txt_Destino, RGBA(15, 108, 189, 1), RGBA(255, 255, 255, 1))
+                Fill: =
                 FocusedBorderThickness: =4
                 Font: =App.Theme.Font
                 Height: =30
@@ -2204,9 +2223,20 @@ Embalaje As screen:
                 Default: =ThisItem.'P/N'
                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                 DisabledColor: =If(ThisItem.'P/N' = Eliminar.item.'P/N' || ThisItem.'P/N' = txt_Destino, RGBA(255, 255, 255, 1))
-                DisabledFill: =If(ThisItem.'P/N' = Eliminar.item.'P/N'  || ThisItem.'P/N' = txt_Destino, RGBA(15, 108, 189, 1), RGBA(255, 255, 255, 1))
+                DisabledFill: |
+                    =If(
+                        CountRows(
+                            Filter(
+                                gl_Contenedores_EM_3.AllItems,
+                                'P/N' = ThisItem.'P/N' &&
+                                Value(txt_Cantidad_EC_7.Text) < 0
+                            )
+                        ) > 0,
+                        RGBA(255, 0, 0, 0.20),
+                        Color.White
+                    )
                 DisplayMode: =DisplayMode.Disabled
-                Fill: =If(ThisItem.'P/N' = Eliminar.item.'P/N'  || ThisItem.'P/N' = txt_Destino, RGBA(15, 108, 189, 1), RGBA(255, 255, 255, 1))
+                Fill: =
                 FocusedBorderThickness: =4
                 Font: =App.Theme.Font
                 FontWeight: =FontWeight.Semibold
@@ -2232,33 +2262,49 @@ Embalaje As screen:
                 DisabledColor: =RGBA(244, 244, 244, 1)
                 DisplayMode: |
                     =If(/*isSaving ||*/ isEditing || Disable, DisplayMode.Disabled, DisplayMode.Edit)
-                Fill: =If(ThisItem.'P/N' = Eliminar.item.'P/N'  || ThisItem.'P/N' = txt_Destino, RGBA(15, 108, 189, 1), RGBA(255, 255, 255, 1))
+                Fill: |
+                    =If(
+                        CountRows(
+                            Filter(
+                                gl_Contenedores_EM_3.AllItems,
+                                'P/N' = ThisItem.'P/N' &&
+                                Value(txt_Cantidad_EC_7.Text) < 0
+                            )
+                        ) > 0,
+                        RGBA(255, 0, 0, 0.20),
+                        Color.White
+                    )
                 FocusedBorderThickness: =20
                 Height: =30
                 HoverBorderColor: =RGBA(240, 98, 15, 1)
                 HoverColor: =RGBA(215, 58, 60, 1)
                 HoverFill: =RGBA(247, 204, 198, 1)
                 Icon: =Icon.Trash
-                OnSelect: |-
-                    =// 1) Guardás en varTemp todo menos el que borrás, ordenado por prioridad
+                OnSelect: |
+                    =
+                    RemoveIf(RevisionCalidad, txt_prioridad = ThisItem.txt_prioridad);
+                    
                     Set(
-                      varTemp,
-                      Sort(
-                        Filter( RevisionCalidad, txt_prioridad <> ThisItem.txt_prioridad ),
-                        txt_prioridad
-                      )
+                        varTemp,
+                        Sort(
+                            RevisionCalidad,
+                            txt_prioridad
+                        )
                     );
                     
-                    // 2) Reconstruís la colección renumerando con Sequence
                     ClearCollect(
-                      RevisionCalidad,
-                      ForAll(
-                        Sequence( CountRows(varTemp) ),
-                        With(
-                          { rec: Last( FirstN(varTemp, Value) ) },
-                          Patch( rec, { txt_prioridad: Value } )
+                        RevisionCalidad,
+                        ForAll(
+                            Sequence(CountRows(varTemp)),
+                            With(
+                                { rec: Last(FirstN(varTemp, Value)) },
+                                Patch(
+                                    rec,
+                                    rec,
+                                    { txt_prioridad: Value }
+                                )
+                            )
                         )
-                      )
                     )
                 PaddingBottom: =2
                 PaddingLeft: =2
@@ -2272,23 +2318,52 @@ Embalaje As screen:
                 Align: =Align.Center
                 BorderColor: =RGBA(40, 134, 222, 1)
                 BorderThickness: =0.5
-                Color: =RGBA(0, 0, 0, 1)
-                Default: =
+                Color: =
+                Default: =ThisItem.cantidadDigitar
                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                 DisabledColor: =RGBA(166, 166, 166, 1)
                 DisabledFill: =RGBA(244, 244, 244, 1)
                 DisplayMode: |
                     =If(/*isSaving ||*/ Disable, DisplayMode.Disabled, DisplayMode.Edit)
+                Fill: |
+                    =If(
+                        CountRows(
+                            Filter(
+                                gl_Contenedores_EM_3.AllItems,
+                                'P/N' = ThisItem.'P/N' &&
+                                Value(txt_Cantidad_EC_7.Text) < 0
+                            )
+                        ) > 0,
+                        RGBA(255, 0, 0, 0.20),
+                        Color.White
+                    )
                 FocusedBorderThickness: =4
                 Font: =App.Theme.Font
                 Format: =TextFormat.Number
                 Height: =30
                 HintText: ="Digite la cantidad"
                 HoverBorderColor: =RGBA(40, 134, 222, 1)
-                HoverColor: =RGBA(0, 0, 0, 1)
-                HoverFill: =RGBA(180, 214, 250, 1)
-                OnChange: =
+                HoverColor: =
+                HoverFill: |
+                    =If(
+                        CountRows(
+                            Filter(
+                                gl_Contenedores_EM_3.AllItems,
+                                'P/N' = ThisItem.'P/N' &&
+                                Value(txt_Cantidad_EC_7.Text) < 0
+                            )
+                        ) > 0,
+                        RGBA(255, 0, 0, 0.20),
+                        Color.White
+                    )
+                OnChange: |-
+                    =Patch(
+                        RevisionCalidad,
+                        ThisItem,
+                        { cantidadDigitar: Value(Self.Text) }
+                    )
                 PaddingLeft: =5
+                PressedColor: =
                 PressedFill: =RGBA(255, 255, 255, 1)
                 RadiusBottomLeft: =0
                 RadiusBottomRight: =0
@@ -2335,6 +2410,12 @@ Embalaje As screen:
             HoverFill: =RGBA(12, 59, 94, 1)
             OnSelect: |-
                 =If(
+                        CountRows(
+                        Filter(
+                            gl_Contenedores_EM_3.AllItems,
+                            Value(txt_Cantidad_EC_7.Text) < 0
+                        )
+                    ) > 0 ||
                     IsEmpty(Contenedores) || WeekNum(
                         dp_FechaSalida_EM.SelectedDate,
                         StartOfWeek.Monday
@@ -2342,27 +2423,31 @@ Embalaje As screen:
                         Today(),
                         StartOfWeek.Monday
                     ) || Year(dp_FechaSalida_EM.SelectedDate) < Year(Today()) || IsBlank(dp_FechaSalida_EM.SelectedDate) || IsBlank(drp_Pais_EM.SelectedText),
-                    UpdateContext(
-                        {
-                            mensajeNotificacion: If(
+                UpdateContext(
+                    {
+                        mensajeNotificacion: If(
+                            CountRows(
+                                Filter(
+                                    gl_Contenedores_EM_3.AllItems,
+                                    Value(txt_Cantidad_EC_7.Text) < 0
+                                )
+                            ) > 0,
+                            "No se puede continuar: hay cantidades negativas en la inspección de calidad.",
+                            If(
                                 IsEmpty(Contenedores),
                                 "No hay datos en la tabla Contenedores para guardar.",
                                 If(
-                                    WeekNum(
-                                        dp_FechaSalida_EM.SelectedDate,
-                                        StartOfWeek.Monday
-                                    ) < WeekNum(
-                                        Today(),
-                                        StartOfWeek.Monday
-                                    ) || Year(dp_FechaSalida_EM.SelectedDate) < Year(Today()),
+                                    WeekNum(dp_FechaSalida_EM.SelectedDate, StartOfWeek.Monday) < WeekNum(Today(), StartOfWeek.Monday) ||
+                                    Year(dp_FechaSalida_EM.SelectedDate) < Year(Today()),
                                     "No se puede agregar, la fecha de salida pertenece a una semana anterior. Por favor cambiar a una fecha de la semana actual",
                                     "La fecha y el país son obligatorios."
                                 )
-                            ),
-                            MostrarAviso: true,
-                            Disable: true
-                        }
-                    ),
+                            )
+                        ),
+                        MostrarAviso: true,
+                        Disable: true
+                    }
+                ),
                     UpdateContext({isSaving: true}),
                     ForAll(
                         gl_Contenedores_EM_2.AllItems,
@@ -2503,8 +2588,8 @@ Embalaje As screen:
         RadiusTopRight: =20
         Visible: =MostrarAviso
         Width: =648
-        X: =400
-        Y: =300
+        X: =359
+        Y: =350
         ZIndex: =5
 
         txt_MensajeNoti_EM_1 As label:
@@ -2578,7 +2663,6 @@ Embalaje As screen:
             OnSelect: =
             TemplatePadding: =0
             TemplateSize: =30
-            Transition: =Transition.Pop
             Width: =500
             Y: =55
             ZIndex: =1
