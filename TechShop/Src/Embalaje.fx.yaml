@@ -1770,8 +1770,16 @@ Embalaje As screen:
                         HoverBorderColor: =RGBA(15, 108, 189, 1)
                         HoverColor: =RGBA(255, 255, 255, 1)
                         HoverFill: =RGBA(12, 59, 94, 1)
-                        OnSelect: |-
-                            =UpdateContext({ Revision: true })
+                        OnSelect: |
+                            =If(
+                                IsEmpty(Contenedores),
+                                UpdateContext({
+                                    mensajeNotificacion: "El contenedor esta vacio",
+                                    MostrarAviso: true,
+                                    Disable: true
+                                }),
+                                UpdateContext({ Revision: true })
+                            )
                         PressedBorderColor: =RGBA(15, 108, 189, 1)
                         PressedColor: =RGBA(15, 108, 189, 1)
                         Size: =15
@@ -2378,7 +2386,7 @@ Embalaje As screen:
             DisabledBorderColor: =RGBA(166, 166, 166, 1)
             DisabledColor: =RGBA(166, 166, 166, 1)
             DisabledFill: =RGBA(244, 244, 244, 1)
-            DisplayMode: =If(/*isSaving ||*/ isEditing || Disable, DisplayMode.Disabled, DisplayMode.Edit)
+            DisplayMode: =If(isSaving || isEditing || Disable, DisplayMode.Disabled, DisplayMode.Edit)
             Fill: =RGBA(15, 108, 189, 1)
             FontWeight: =FontWeight.Semibold
             Height: =42
@@ -2401,7 +2409,7 @@ Embalaje As screen:
             DisabledBorderColor: =RGBA(166, 166, 166, 1)
             DisabledColor: =RGBA(166, 166, 166, 1)
             DisabledFill: =RGBA(244, 244, 244, 1)
-            DisplayMode: =If(/*isSaving ||*/ isEditing || Disable, DisplayMode.Disabled, DisplayMode.Edit)
+            DisplayMode: =If(isSaving || isEditing || Disable, DisplayMode.Disabled, DisplayMode.Edit)
             Fill: =RGBA(15, 108, 189, 1)
             FontWeight: =FontWeight.Semibold
             Height: =42
@@ -2410,12 +2418,12 @@ Embalaje As screen:
             HoverFill: =RGBA(12, 59, 94, 1)
             OnSelect: |-
                 =If(
-                        CountRows(
-                        Filter(
-                            gl_Contenedores_EM_3.AllItems,
-                            Value(txt_Cantidad_EC_7.Text) < 0
-                        )
-                    ) > 0 ||
+                CountRows(
+                    Filter(
+                        gl_Contenedores_EM_3.AllItems,
+                        Value(txt_Cantidad_EC_7.Text) <> 0
+                    )
+                ) > 0 ||
                     IsEmpty(Contenedores) || WeekNum(
                         dp_FechaSalida_EM.SelectedDate,
                         StartOfWeek.Monday
@@ -2429,10 +2437,10 @@ Embalaje As screen:
                             CountRows(
                                 Filter(
                                     gl_Contenedores_EM_3.AllItems,
-                                    Value(txt_Cantidad_EC_7.Text) < 0
+                                    Value(txt_Cantidad_EC_7.Text) <> 0
                                 )
                             ) > 0,
-                            "No se puede continuar: hay cantidades negativas en la inspección de calidad.",
+                            "No se puede continuar: todas las cantidades deben ser exactamente cero.",
                             If(
                                 IsEmpty(Contenedores),
                                 "No hay datos en la tabla Contenedores para guardar.",
@@ -2515,6 +2523,7 @@ Embalaje As screen:
                         )
                     );
                     Clear(Contenedores);
+                    Clear(RevisionCalidad);
                     Reset(dp_FechaSalida_EM);
                     Reset(drp_Pais_EM);
                     Reset(txt_PNDato_EM_1);
@@ -2534,6 +2543,8 @@ Embalaje As screen:
                             Disable: true
                         }
                     );
+                    UpdateContext({ Revision: false });
+                    UpdateContext({ VerMaquinas: false });
                     UpdateContext({isSaving: false})
                 )
             PressedBorderColor: =RGBA(15, 108, 189, 1)
@@ -2576,63 +2587,6 @@ Embalaje As screen:
             Y: =0
             ZIndex: =8
 
-    cnt_Comentario_EM_1 As groupContainer.manualLayoutContainer:
-        BorderColor: =RGBA(255, 191, 0, 1)
-        BorderThickness: =5
-        DropShadow: =DropShadow.ExtraBold
-        Fill: =RGBA(255, 255, 255, 1)
-        Height: =210
-        RadiusBottomLeft: =20
-        RadiusBottomRight: =20
-        RadiusTopLeft: =20
-        RadiusTopRight: =20
-        Visible: =MostrarAviso
-        Width: =648
-        X: =359
-        Y: =350
-        ZIndex: =5
-
-        txt_MensajeNoti_EM_1 As label:
-            Align: =Align.Center
-            BorderColor: =App.Theme.Colors.Darker40
-            Color: =RGBA(0, 0, 0, 1)
-            DisabledColor: =RGBA(166, 166, 166, 1)
-            Font: =Font.Arial
-            Height: =129
-            Size: =20
-            Text: =mensajeNotificacion
-            Width: =619
-            X: =18
-            Y: =11
-            ZIndex: =69
-
-        btn_Aceptar_EM_1 As button:
-            BorderColor: =RGBA(255, 191, 0, 1)
-            DisabledBorderColor: =RGBA(166, 166, 166, 1)
-            DisabledColor: =RGBA(166, 166, 166, 1)
-            DisabledFill: =RGBA(244, 244, 244, 1)
-            Fill: =RGBA(255, 191, 0, 1)
-            FontWeight: =FontWeight.Bold
-            Height: =50
-            HoverBorderColor: =RGBA(255, 191, 0, 1)
-            HoverColor: =RGBA(255, 255, 255, 1)
-            HoverFill: =RGBA(84, 63, 0, 1)
-            OnSelect: |-
-                =UpdateContext(
-                    {
-                        MostrarAviso: false,
-                        Disable: false,
-                        mensajeNotificacion: ""
-                    }
-                )
-            PressedBorderColor: =RGBA(255, 191, 0, 1)
-            Size: =15
-            Text: ="Aceptar"
-            Width: =180
-            X: =235
-            Y: =150
-            ZIndex: =71
-
     Container73 As groupContainer.manualLayoutContainer:
         BorderColor: =RGBA(40, 134, 222, 1)
         BorderThickness: =4
@@ -2646,7 +2600,7 @@ Embalaje As screen:
         Visible: =VerMaquinas
         X: =123
         Y: =300
-        ZIndex: =6
+        ZIndex: =5
 
         "gl_Contenedores_EM_4 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
             '#CopilotOverlayLabel': ="Filtrada"
@@ -2841,4 +2795,61 @@ Embalaje As screen:
             Width: =36
             X: =464
             ZIndex: =5
+
+    cnt_Comentario_EM_1 As groupContainer.manualLayoutContainer:
+        BorderColor: =RGBA(255, 191, 0, 1)
+        BorderThickness: =5
+        DropShadow: =DropShadow.ExtraBold
+        Fill: =RGBA(255, 255, 255, 1)
+        Height: =210
+        RadiusBottomLeft: =20
+        RadiusBottomRight: =20
+        RadiusTopLeft: =20
+        RadiusTopRight: =20
+        Visible: =MostrarAviso
+        Width: =648
+        X: =359
+        Y: =350
+        ZIndex: =6
+
+        txt_MensajeNoti_EM_1 As label:
+            Align: =Align.Center
+            BorderColor: =App.Theme.Colors.Darker40
+            Color: =RGBA(0, 0, 0, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            Font: =Font.Arial
+            Height: =129
+            Size: =20
+            Text: =mensajeNotificacion
+            Width: =619
+            X: =18
+            Y: =11
+            ZIndex: =69
+
+        btn_Aceptar_EM_1 As button:
+            BorderColor: =RGBA(255, 191, 0, 1)
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            Fill: =RGBA(255, 191, 0, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =50
+            HoverBorderColor: =RGBA(255, 191, 0, 1)
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(84, 63, 0, 1)
+            OnSelect: |-
+                =UpdateContext(
+                    {
+                        MostrarAviso: false,
+                        Disable: false,
+                        mensajeNotificacion: ""
+                    }
+                )
+            PressedBorderColor: =RGBA(255, 191, 0, 1)
+            Size: =15
+            Text: ="Aceptar"
+            Width: =180
+            X: =235
+            Y: =150
+            ZIndex: =71
 
