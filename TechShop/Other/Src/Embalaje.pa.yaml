@@ -1505,63 +1505,6 @@ Screens:
             Width: =1355
             X: =5
             Y: =97
-      - cnt_Comentario_EM_1:
-          Control: GroupContainer@1.3.0
-          Variant: ManualLayout
-          Properties:
-            BorderColor: =RGBA(255, 191, 0, 1)
-            BorderThickness: =5
-            DropShadow: =DropShadow.ExtraBold
-            Fill: =RGBA(255, 255, 255, 1)
-            Height: =210
-            RadiusBottomLeft: =20
-            RadiusBottomRight: =20
-            RadiusTopLeft: =20
-            RadiusTopRight: =20
-            Visible: =MostrarAviso
-            Width: =648
-            X: =400
-            Y: =300
-          Children:
-            - txt_MensajeNoti_EM_1:
-                Control: Label@2.5.1
-                Properties:
-                  Align: =Align.Center
-                  Font: =Font.Arial
-                  Height: =129
-                  Size: =20
-                  Text: =mensajeNotificacion
-                  Width: =619
-                  X: =18
-                  Y: =11
-            - btn_Aceptar_EM_1:
-                Control: Classic/Button@2.2.0
-                Properties:
-                  BorderColor: =RGBA(255, 191, 0, 1)
-                  Color: =RGBA(255, 255, 255, 1)
-                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
-                  Fill: =RGBA(255, 191, 0, 1)
-                  Font: =Font.'Open Sans'
-                  FontWeight: =FontWeight.Bold
-                  Height: =50
-                  HoverBorderColor: =RGBA(255, 191, 0, 1)
-                  HoverColor: =RGBA(255, 255, 255, 1)
-                  HoverFill: =RGBA(84, 63, 0, 1)
-                  OnSelect: |-
-                    =UpdateContext(
-                        {
-                            MostrarAviso: false,
-                            Disable: false,
-                            mensajeNotificacion: ""
-                        }
-                    )
-                  PressedBorderColor: =RGBA(255, 191, 0, 1)
-                  PressedColor: =Self.Fill
-                  PressedFill: =Self.Color
-                  Text: ="Aceptar"
-                  Width: =180
-                  X: =235
-                  Y: =150
       - Container72_1:
           Control: GroupContainer@1.3.0
           Variant: ManualLayout
@@ -1576,8 +1519,8 @@ Screens:
             RadiusTopLeft: =5
             RadiusTopRight: =5
             Visible: =Revision
-            Width: =480
-            X: =90
+            Width: =501
+            X: =68
             Y: =259
           Children:
             - lbl_PNDato_EM_226:
@@ -1596,7 +1539,7 @@ Screens:
                   Size: =16
                   Text: ="Cantidad"
                   Weight: ='TextCanvas.Weight'.Bold
-                  Width: =204
+                  Width: =225
                   X: =276
             - lbl_PNDato_EM_228:
                 Control: Text@0.0.51
@@ -1615,7 +1558,8 @@ Screens:
                   Size: =16
                   Text: ="P/N"
                   Weight: ='TextCanvas.Weight'.Bold
-                  Width: =276
+                  Width: =240
+                  X: =36
             - gl_Contenedores_EM_3:
                 Control: Gallery@2.15.0
                 Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
@@ -1626,7 +1570,7 @@ Screens:
                   OnSelect: =
                   TemplateSize: =30
                   Transition: =Transition.Pop
-                  Width: =480
+                  Width: =501
                   Y: =25
                 Children:
                   - txt_Cantidad_EC_7:
@@ -1636,7 +1580,18 @@ Screens:
                         BorderColor: =RGBA(40, 134, 222, 1)
                         BorderThickness: =0.5
                         Color: =If(ThisItem.'P/N' = Eliminar.item.'P/N' || ThisItem.'P/N' = txt_Destino, RGBA(255, 255, 255, 1))
-                        Default: =ThisItem.Cantidad
+                        Default: |+
+                          =Max(
+                            ThisItem.CantidadTarima
+                              - Sum(
+                                  Filter(
+                                    gl_Contenedores_EM_2.AllItems,
+                                    'P/N' = ThisItem.'P/N'
+                                  ),
+                                  Coalesce( Value(txt_Cantidad.Text), 0 )
+                                ),
+                            0
+                          )
                         DisabledBorderColor: =RGBA(40, 134, 222, 1)
                         DisabledColor: =If(ThisItem.'P/N' = Eliminar.item.'P/N' || ThisItem.'P/N' = txt_Destino, RGBA(255, 255, 255, 1))
                         DisabledFill: =If(ThisItem.'P/N' = Eliminar.item.'P/N'  || ThisItem.'P/N' = txt_Destino, RGBA(15, 108, 189, 1), RGBA(255, 255, 255, 1))
@@ -1650,7 +1605,7 @@ Screens:
                         RadiusTopLeft: =0
                         RadiusTopRight: =0
                         Size: =15
-                        Width: =204
+                        Width: =225
                         X: =276
                   - txt_PN_EC_5:
                       Control: Classic/TextInput@2.3.2
@@ -1674,24 +1629,75 @@ Screens:
                         RadiusTopLeft: =0
                         RadiusTopRight: =0
                         Size: =15
-                        Width: =276
+                        Width: =240
+                        X: =36
                   - Rectangle47:
                       Control: Rectangle@2.3.0
                       Properties:
+                        DisplayMode: =If(/*isSaving ||*/ isEditing || Disable, DisplayMode.Disabled, DisplayMode.Edit)
                         Fill: =RGBA(0, 0, 0, 0)
                         Height: =30
                         HoverFill: =RGBA(180, 214, 250, 0.28)
                         OnSelect: |-
-                          =Collect(
-                            RevisionCalidad,
-                            AddColumns(
-                              Table(ThisItem),
-                              txt_prioridad,
-                              CountRows(RevisionCalidad) + 1
-                            )
+                          =If(
+                            Value( txt_Cantidad_EC_7.Text ) > 0,
+                            Collect(
+                              RevisionCalidad,
+                              AddColumns(
+                                Table( ThisItem ),
+                                txt_prioridad, CountRows( RevisionCalidad ) + 1
+                              )
+                            ),
+                               UpdateContext(
+                                  {
+                                      mensajeNotificacion: "No se puede agregar: la cantidad debe ser mayor a cero.",
+                                      MostrarAviso: true,
+                                      Disable: true
+                                  }
+                              )
                           )
                         PressedFill: =RGBA(40, 40, 222, 0.3)
-                        Width: =480
+                        Width: =465
+                        X: =36
+                  - icn_Editar_EC_4:
+                      Control: Classic/Icon@2.5.0
+                      Properties:
+                        BorderColor: =RGBA(40, 134, 222, 1)
+                        BorderThickness: =0.5
+                        Color: =If(ThisItem.'P/N' = Eliminar.item.'P/N'  || ThisItem.'P/N' = txt_Destino ,RGBA(255, 255, 255, 1), RGBA(52, 152, 47, 1))
+                        DisplayMode: =If(/*isSaving ||*/ isEditing || Disable, DisplayMode.Disabled, DisplayMode.Edit)
+                        Fill: =If(ThisItem.'P/N' = Eliminar.item.'P/N'  || ThisItem.'P/N' = txt_Destino, RGBA(15, 108, 189, 1), RGBA(255, 255, 255, 1))
+                        FocusedBorderThickness: =20
+                        Height: =30
+                        HoverBorderColor: =RGBA(52, 152, 47, 1)
+                        HoverColor: =RGBA(52, 152, 47, 1)
+                        HoverFill: =RGBA(202, 240, 192, 1)
+                        Icon: =Icon.Search
+                        OnSelect: |-
+                          =UpdateContext({ VerMaquinas: true })
+                        PaddingBottom: =2
+                        PaddingLeft: =2
+                        PaddingRight: =2
+                        PaddingTop: =2
+                        Width: =36
+            - lbl_PNDato_EM_230:
+                Control: Text@0.0.51
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  BorderColor: =RGBA(40, 134, 222, 1)
+                  BorderStyle: =BorderStyle.Solid
+                  BorderThickness: =0.5
+                  Fill: =RGBA(180, 214, 250, 1)
+                  FontColor: =RGBA(0, 0, 0, 1)
+                  Height: =25
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  Size: =16
+                  Text: =
+                  Weight: ='TextCanvas.Weight'.Bold
+                  Width: =36
       - Container72:
           Control: GroupContainer@1.3.0
           Variant: ManualLayout
@@ -1796,7 +1802,7 @@ Screens:
                         Size: =15
                         Width: =172
                         X: =330
-                  - txt_PN_EC_4:
+                  - txt_PN_:
                       Control: Classic/TextInput@2.3.2
                       Properties:
                         Align: =Align.Center
@@ -1860,7 +1866,7 @@ Screens:
                         PaddingTop: =2
                         Width: =44
                         X: =674
-                  - txt_CantidadDato_EM_3:
+                  - txt_Cantidad:
                       Control: Classic/TextInput@2.3.2
                       Properties:
                         Align: =Align.Center
@@ -1919,7 +1925,124 @@ Screens:
                   HoverBorderColor: =RGBA(15, 108, 189, 1)
                   HoverColor: =RGBA(255, 255, 255, 1)
                   HoverFill: =RGBA(12, 59, 94, 1)
-                  OnSelect: "=If(\r\n \r\n    IsEmpty(Contenedores) || \r\n    WeekNum(dp_FechaSalida_EM.SelectedDate, StartOfWeek.Monday) < WeekNum(Today(), StartOfWeek.Monday) || \r\n    Year(dp_FechaSalida_EM.SelectedDate) < Year(Today()) || \r\n    IsBlank(dp_FechaSalida_EM.SelectedDate) || IsBlank(drp_Pais_EM.SelectedText),\r\n    UpdateContext(\r\n        {\r\n            mensajeNotificacion: If(\r\n                IsEmpty(Contenedores),\r\n                \"No hay datos en la tabla Contenedores para guardar.\",\r\n                If(\r\n                    WeekNum(dp_FechaSalida_EM.SelectedDate, StartOfWeek.Monday) < WeekNum(Today(), StartOfWeek.Monday) || \r\n                    Year(dp_FechaSalida_EM.SelectedDate) < Year(Today()),\r\n                    \"No se puede agregar, la fecha de salida pertenece a una semana anterior. Por favor cambiar a una fecha de la semana actual\",\r\n                    \"La fecha y el país son obligatorios.\"\r\n                )\r\n            ),\r\n            MostrarAviso: true,\r\n            Disable: true\r\n        }\r\n    ),\r\n    UpdateContext({ isSaving: true }),\r\n\r\n     Collect(\r\n            Contenedors_2,\r\n            {\r\n                Fecha: dp_FechaSalida_EM.SelectedDate,\r\n                FechaTexto: Text(dp_FechaSalida_EM.SelectedDate),\r\n                Nomenclatura: nomenclaturaGenerada,\r\n                Pais: drp_Pais_EM.SelectedText.Value,\r\n                Estado_Contenedor: \"Activo\",\r\n                NumContenedor: contenedorTexto,\r\n                Semana: Text( WeekNum(\r\n                    dp_FechaSalida_EM.SelectedDate,\r\n                    StartOfWeek.Monday\r\n                )),\r\n                Año: Text(Year(dp_FechaSalida_EM.SelectedDate)),\r\n                User: txt_EmpleadoUso_EM_2.Text,\r\n                Cantidad_Total: Sum(gl_Contenedores_EM_1.AllItems, CantidadTotal),\r\n                Peso_Total:Sum(gl_Contenedores_EM_1.AllItems, PesoTotal) ,\r\n                Valor_Total: Sum(gl_Contenedores_EM_1.AllItems, ValorTotal)\r\n                \r\n            }\r\n        );\r\n\r\n    ForAll(\r\n        Contenedores,\r\n        Collect(\r\n            ContenedorPNS_2,\r\n            {\r\n                'P/N': ThisRecord.'P/N',\r\n                Cantidad: ThisRecord.Cantidad,\r\n                Cantidad_Tarima: ThisRecord.CantidadTarima,\r\n                CantidadActual: 0,\r\n                Valor_Pieza: ThisRecord.ValorPieza,\r\n                Peso: ThisRecord.Peso,\r\n                TipoCaja: ThisRecord.TipoCaja,\r\n                Tipo: ThisRecord.Tipo,\r\n                Nomenclatura: ThisRecord.Nomenclatura,\r\n                'NumContenedorP/N': ThisRecord.Contenedor,\r\n                User: ThisRecord.User,\r\n                Cantidad_Total: ThisRecord.CantidadTotal,\r\n                Valor_Total: ThisRecord.ValorTotal,\r\n                PesoTotal: ThisRecord.PesoTotal\r\n            }\r\n        )\r\n    );\r\n    Clear(Contenedores);\r\n    Reset(dp_FechaSalida_EM);\r\n    Reset(drp_Pais_EM);\r\n    Reset(txt_PNDato_EM_1);\r\n    Reset(txt_CantidadDato_EM_1);\r\n    UpdateContext(\r\n        {\r\n            contenedorTexto: Blank(),\r\n            nomenclaturaGenerada: Blank(),\r\n            txt_Destino2: 0,\r\n            txt_Destino: \"\"\r\n        }\r\n    );\r\n     UpdateContext(\r\n        {\r\n            mensajeNotificacion: \"Datos guardados correctamente.\",\r\n            MostrarAviso: true,\r\n            Disable: true\r\n        }\r\n    );\r\n    UpdateContext({ isSaving: false });\r\n    UpdateContext({ Revision: false })\r\n)\r\n"
+                  OnSelect: |-
+                    =If(
+                        IsEmpty(Contenedores) || WeekNum(
+                            dp_FechaSalida_EM.SelectedDate,
+                            StartOfWeek.Monday
+                        ) < WeekNum(
+                            Today(),
+                            StartOfWeek.Monday
+                        ) || Year(dp_FechaSalida_EM.SelectedDate) < Year(Today()) || IsBlank(dp_FechaSalida_EM.SelectedDate) || IsBlank(drp_Pais_EM.SelectedText),
+                        UpdateContext(
+                            {
+                                mensajeNotificacion: If(
+                                    IsEmpty(Contenedores),
+                                    "No hay datos en la tabla Contenedores para guardar.",
+                                    If(
+                                        WeekNum(
+                                            dp_FechaSalida_EM.SelectedDate,
+                                            StartOfWeek.Monday
+                                        ) < WeekNum(
+                                            Today(),
+                                            StartOfWeek.Monday
+                                        ) || Year(dp_FechaSalida_EM.SelectedDate) < Year(Today()),
+                                        "No se puede agregar, la fecha de salida pertenece a una semana anterior. Por favor cambiar a una fecha de la semana actual",
+                                        "La fecha y el país son obligatorios."
+                                    )
+                                ),
+                                MostrarAviso: true,
+                                Disable: true
+                            }
+                        ),
+                        UpdateContext({isSaving: true}),
+                        ForAll(
+                            gl_Contenedores_EM_2.AllItems,
+                            Collect(
+                                InspeccionCalidadContenedors,
+                                {
+                                    'P/N': txt_PN_.Text,
+                                    Prioridad: txt_prioridad,
+                                    Nomenclatura: ThisRecord.Nomenclatura,
+                                    Cantidad: Value(txt_Cantidad.Text)
+                                }
+                            )
+                        );
+                        Collect(
+                            Contenedors_2,
+                            {
+                                Fecha: dp_FechaSalida_EM.SelectedDate,
+                                FechaTexto: Text(dp_FechaSalida_EM.SelectedDate),
+                                Nomenclatura: nomenclaturaGenerada,
+                                Pais: drp_Pais_EM.SelectedText.Value,
+                                Estado_Contenedor: "Activo",
+                                NumContenedor: contenedorTexto,
+                                Semana: Text(
+                                    WeekNum(
+                                        dp_FechaSalida_EM.SelectedDate,
+                                        StartOfWeek.Monday
+                                    )
+                                ),
+                                Año: Text(Year(dp_FechaSalida_EM.SelectedDate)),
+                                User: txt_EmpleadoUso_EM_2.Text,
+                                Cantidad_Total: Sum(
+                                    gl_Contenedores_EM_1.AllItems,
+                                    CantidadTotal
+                                ),
+                                Peso_Total: Sum(
+                                    gl_Contenedores_EM_1.AllItems,
+                                    PesoTotal
+                                ),
+                                Valor_Total: Sum(
+                                    gl_Contenedores_EM_1.AllItems,
+                                    ValorTotal
+                                )
+                            }
+                        );
+                        ForAll(
+                            Contenedores,
+                            Collect(
+                                ContenedorPNS_2,
+                                {
+                                    'P/N': ThisRecord.'P/N',
+                                    Cantidad: ThisRecord.Cantidad,
+                                    Cantidad_Tarima: ThisRecord.CantidadTarima,
+                                    CantidadActual: 0,
+                                    Valor_Pieza: ThisRecord.ValorPieza,
+                                    Peso: ThisRecord.Peso,
+                                    TipoCaja: ThisRecord.TipoCaja,
+                                    Tipo: ThisRecord.Tipo,
+                                    Nomenclatura: ThisRecord.Nomenclatura,
+                                    'NumContenedorP/N': ThisRecord.Contenedor,
+                                    User: ThisRecord.User,
+                                    Cantidad_Total: ThisRecord.CantidadTotal,
+                                    Valor_Total: ThisRecord.ValorTotal,
+                                    PesoTotal: ThisRecord.PesoTotal
+                                }
+                            )
+                        );
+                        Clear(Contenedores);
+                        Reset(dp_FechaSalida_EM);
+                        Reset(drp_Pais_EM);
+                        Reset(txt_PNDato_EM_1);
+                        Reset(txt_CantidadDato_EM_1);
+                        UpdateContext(
+                            {
+                                contenedorTexto: Blank(),
+                                nomenclaturaGenerada: Blank(),
+                                txt_Destino2: 0,
+                                txt_Destino: ""
+                            }
+                        );
+                        UpdateContext(
+                            {
+                                mensajeNotificacion: "Datos guardados correctamente.",
+                                MostrarAviso: true,
+                                Disable: true
+                            }
+                        );
+                        UpdateContext({isSaving: false})
+                    )
                   PressedBorderColor: =RGBA(15, 108, 189, 1)
                   PressedColor: =RGBA(15, 108, 189, 1)
                   PressedFill: =Self.Color
@@ -1945,3 +2068,164 @@ Screens:
                   Weight: ='TextCanvas.Weight'.Bold
                   Width: =44
                   X: =674
+      - cnt_Comentario_EM_1:
+          Control: GroupContainer@1.3.0
+          Variant: ManualLayout
+          Properties:
+            BorderColor: =RGBA(255, 191, 0, 1)
+            BorderThickness: =5
+            DropShadow: =DropShadow.ExtraBold
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =210
+            RadiusBottomLeft: =20
+            RadiusBottomRight: =20
+            RadiusTopLeft: =20
+            RadiusTopRight: =20
+            Visible: =MostrarAviso
+            Width: =648
+            X: =400
+            Y: =300
+          Children:
+            - txt_MensajeNoti_EM_1:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Font: =Font.Arial
+                  Height: =129
+                  Size: =20
+                  Text: =mensajeNotificacion
+                  Width: =619
+                  X: =18
+                  Y: =11
+            - btn_Aceptar_EM_1:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =RGBA(255, 191, 0, 1)
+                  Color: =RGBA(255, 255, 255, 1)
+                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                  Fill: =RGBA(255, 191, 0, 1)
+                  Font: =Font.'Open Sans'
+                  FontWeight: =FontWeight.Bold
+                  Height: =50
+                  HoverBorderColor: =RGBA(255, 191, 0, 1)
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =RGBA(84, 63, 0, 1)
+                  OnSelect: |-
+                    =UpdateContext(
+                        {
+                            MostrarAviso: false,
+                            Disable: false,
+                            mensajeNotificacion: ""
+                        }
+                    )
+                  PressedBorderColor: =RGBA(255, 191, 0, 1)
+                  PressedColor: =Self.Fill
+                  PressedFill: =Self.Color
+                  Text: ="Aceptar"
+                  Width: =180
+                  X: =235
+                  Y: =150
+      - Container73:
+          Control: GroupContainer@1.3.0
+          Variant: ManualLayout
+          Properties:
+            BorderColor: =RGBA(40, 134, 222, 1)
+            BorderThickness: =4
+            DropShadow: =DropShadow.ExtraBold
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =357
+            Visible: =VerMaquinas
+            X: =123
+            Y: =300
+          Children:
+            - HtmlText3:
+                Control: HtmlViewer@2.1.0
+                Properties:
+                  Height: =357
+                  HtmlText: |+
+                    ="
+                    <div style='font-family:Segoe UI, sans-serif; padding:12px;'>
+                      <h2 style='
+                          background: linear-gradient(90deg, #007ACC, #005B8F);
+                          color: white;
+                          padding:10px 0;
+                          text-align:center;
+                          border-radius:6px;
+                          text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+                          margin-bottom:16px;
+                        '> Máquinas Relacionadas </h2>
+                      <p style='text-align:center; font-weight:bold; color:#005B8F; margin-bottom:12px;'>
+                        P/N Seleccionado: <span style='color:#004A7C;'>" & gl_Contenedores_EM_3.Selected.'P/N' & "</span>
+                      </p>
+                      <table style='
+                          border-collapse:collapse;
+                          width:100%;
+                          border:3px solid #005B8F;
+                        '>
+                        <thead>
+                          <tr>
+                            <th style='
+                              background-color: #007ACC;
+                              border:3px solid #005B8F;
+                              padding:10px;
+                              text-align:center;
+                              color: white;
+                            '>Máquina</th>
+                            <th style='
+                              background-color: #007ACC;
+                              border:3px solid #005B8F;
+                              padding:10px;
+                              text-align:center;
+                              color: white;
+                            '>Operación</th>
+                          </tr>
+                        </thead>
+                        <tbody>" &
+                          Concat(
+                            Filter(
+                              Maquina_Ordens_1,
+                              'P/N' = gl_Contenedores_EM_3.Selected.'P/N'
+                            ),
+                            "<tr>
+                               <td style='
+                                 background-color: rgba(180,214,250,1);
+                                 border:3px solid #005B8F;
+                                 padding:8px;
+                                 text-align:center;
+                               '>" & Maquina & "</td>
+                               <td style='
+                                 background-color: rgba(180,214,250,1);
+                                 border:3px solid #005B8F;
+                                 padding:8px;
+                                 text-align:center;
+                               '>" & Operacion & "</td>
+                             </tr>"
+                          )
+                        & "</tbody>
+                      </table>
+                    </div>
+                    "
+                  Width: =496
+                  X: =4
+            - icn_Editar_EC_5:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  BorderColor: =RGBA(40, 134, 222, 1)
+                  BorderThickness: =0.5
+                  Color: =
+                  DisplayMode: =If(/*isSaving ||*/ isEditing || Disable, DisplayMode.Disabled, DisplayMode.Edit)
+                  Fill: =RGBA(180, 214, 250, 1)
+                  FocusedBorderThickness: =20
+                  Height: =30
+                  HoverBorderColor: =RGBA(52, 152, 47, 1)
+                  HoverColor: =RGBA(52, 152, 47, 1)
+                  HoverFill: =RGBA(202, 240, 192, 1)
+                  Icon: =Icon.Cancel
+                  OnSelect: |-
+                    =UpdateContext({ VerMaquinas: false })
+                  PaddingBottom: =2
+                  PaddingLeft: =2
+                  PaddingRight: =2
+                  PaddingTop: =2
+                  Width: =36
+                  X: =464
