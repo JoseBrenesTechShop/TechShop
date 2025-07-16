@@ -3,7 +3,22 @@
     Fill: =Color.White
     ImagePosition: =ImagePosition.Fill
     LoadingSpinnerColor: =App.Theme.Colors.Primary
-    OnVisible: =
+    OnVisible: |-
+        =UpdateContext(
+            {
+                Nomenclatura: First(
+                    Sort(
+                        Filter(
+                            Contenedors_2,
+                            Estado_Contenedor = "Activo"
+                        ),
+                        Fecha,
+                        SortOrder.Ascending
+                    )
+                ).Nomenclatura,
+                searchNomenclatura: false
+            }
+        )
 
     ScreenContainer3_10 As groupContainer.verticalAutoLayoutContainer:
         DropShadow: =DropShadow.Light
@@ -418,10 +433,10 @@
                     FontSize: =16
                     Height: =30
                     InputTextPlaceholder: ="Buscar Orden"
-                    Items: =Sort(Distinct(Filter(Orden_Ejecucion, Estado_Orden = "Ejecucion"), Orden), Value)
+                    Items: =Sort(Distinct(Filter(Orden_Ejecucion, Estado_Orden = "Ejecucion", IsBlank(drp_PN_SP.Selected.Value) || 'P/N' = drp_PN_SP.Selected.Value), Orden), Value)
                     OnChange: =false
                     PaddingBottom: =2
-                    PaddingLeft: =2
+                    PaddingLeft: =5
                     PaddingRight: =2
                     PaddingTop: =2
                     Width: =230
@@ -436,37 +451,6 @@
                         FieldVariantName: ="textualColumn"
                         Order: =1
                         ZIndex: =24
-
-                txt_PN_SP_1 As text:
-                    Align: =Align.Center
-                    BorderColor: =RGBA(40, 134, 222, 1)
-                    BorderThickness: =If(Self.DisplayMode = DisplayMode.Disabled, 1, 3)
-                    Color: =RGBA(0, 0, 0, 1)
-                    Default: =LookUp(Orden_Ejecucion, Orden = drp_Orden_SP_1.Selected.Value).'P/N'
-                    DisabledBorderColor: =RGBA(40, 134, 222, 1)
-                    DisabledColor: =RGBA(0, 0, 0, 1)
-                    DisabledFill: =RGBA(255, 255, 255, 1)
-                    DisplayMode: =DisplayMode.Disabled
-                    FocusedBorderThickness: =4
-                    Font: =App.Theme.Font
-                    Height: =30
-                    HintText: ="P/N"
-                    HoverBorderColor: =RGBA(40, 134, 222, 1)
-                    HoverColor: =RGBA(0, 0, 0, 1)
-                    HoverFill: =App.Theme.Colors.Lighter70
-                    PaddingBottom: =2
-                    PaddingLeft: =2
-                    PaddingRight: =2
-                    PaddingTop: =2
-                    RadiusBottomLeft: =10
-                    RadiusBottomRight: =10
-                    RadiusTopLeft: =10
-                    RadiusTopRight: =10
-                    Size: =12
-                    Width: =518
-                    X: =368
-                    Y: =67
-                    ZIndex: =28
 
                 lbl_SP_49 As text:
                     Align: =Align.Center
@@ -669,7 +653,7 @@
                     BorderColor: =RGBA(40, 134, 222, 1)
                     BorderThickness: =If(Self.DisplayMode = DisplayMode.Disabled, 1, 3)
                     Color: =RGBA(0, 0, 0, 1)
-                    Default: =drp_Maquina_SP_1.Selected.Ubicacion_Bono
+                    Default: =drp_Maquina_SP_1.Selected.Ubicacion
                     DisabledBorderColor: =RGBA(40, 134, 222, 1)
                     DisabledColor: =RGBA(0, 0, 0, 1)
                     DisabledFill: =RGBA(255, 255, 255, 1)
@@ -805,17 +789,7 @@
                         Align: =Align.Center
                         BorderColor: =
                         Color: =RGBA(0, 0, 0, 1)
-                        Default: |-
-                            =First(
-                                Sort(
-                                    Filter(
-                                        Contenedors_2,
-                                        Estado_Contenedor = "Activo"
-                                    ),
-                                    Fecha,
-                                    SortOrder.Ascending
-                                )
-                            ).Nomenclatura
+                        Default: =Nomenclatura
                         DisabledBorderColor: =RGBA(40, 134, 222, 1)
                         DisabledColor: =RGBA(0, 0, 0, 1)
                         DisabledFill: =RGBA(180, 214, 250, 1)
@@ -839,7 +813,7 @@
                         Width: =440
                         ZIndex: =2
 
-                    "Gallery8 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+                    "glr_PNContenedor_SP As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
                         BorderColor: =App.Theme.Colors.Darker40
                         DelayItemLoading: =true
                         Fill: =RGBA(180, 214, 250, 0.2)
@@ -1101,8 +1075,9 @@
                         HoverBorderColor: =RGBA(0, 0, 0, 0)
                         HoverColor: =RGBA(0, 0, 0, 1)
                         HoverFill: =RGBA(0, 0, 0, 0)
-                        Icon: =Icon.Sync
-                        OnSelect: =Reset(drp_Fecha_SP_1)
+                        Icon: =If(searchNomenclatura, Icon.CancelBadge, Icon.Sync)
+                        OnSelect: |-
+                            =UpdateContext({searchNomenclatura: !searchNomenclatura})
                         PaddingBottom: =5
                         PaddingLeft: =5
                         PaddingRight: =5
@@ -1117,11 +1092,12 @@
                         BorderThickness: =1
                         Fill: =RGBA(255, 255, 255, 1)
                         Height: =226
+                        Visible: =searchNomenclatura
                         Width: =440
                         Y: =30
                         ZIndex: =9
 
-                        TextInput20 As text:
+                        txt_SearchNomenclatura_SP As text:
                             BorderColor: =RGBA(40, 134, 222, 1)
                             BorderThickness: =2
                             Color: =RGBA(0, 0, 0, 1)
@@ -1134,7 +1110,7 @@
                             Font: =App.Theme.Font
                             Height: =30
                             HintText: ="Buscar Contenedor"
-                            HoverBorderColor: =App.Theme.Colors.Darker40
+                            HoverBorderColor: =RGBA(40, 134, 222, 1)
                             HoverColor: =RGBA(0, 0, 0, 1)
                             HoverFill: =App.Theme.Colors.Lighter70
                             PaddingLeft: =5
@@ -1172,6 +1148,8 @@
                             HoverBorderColor: =App.Theme.Colors.Darker40
                             HoverColor: =RGBA(0, 0, 0, 1)
                             HoverFill: =App.Theme.Colors.Lighter70
+                            OnSelect: |-
+                                =UpdateContext({Nomenclatura: Self.Text, searchNomenclatura: false})
                             PaddingBottom: =2
                             PaddingLeft: =2
                             PaddingRight: =2
@@ -1217,11 +1195,20 @@
                             BorderColor: =App.Theme.Colors.Darker40
                             DelayItemLoading: =true
                             Height: =152
-                            Items: =CustomGallerySample
+                            Items: |-
+                                =Sort(
+                                    Filter(
+                                        Contenedors_2,
+                                        Estado_Contenedor = "Activo",
+                                        IsBlank(txt_SearchNomenclatura_SP.Text) || txt_SearchNomenclatura_SP.Text in Nomenclatura
+                                    ),
+                                    Fecha,
+                                    SortOrder.Ascending
+                                )
                             Layout: =Layout.Vertical
                             LoadingSpinner: =LoadingSpinner.Data
                             OnSelect: |-
-                                =UpdateContext({Nomenclatura: ThisItem})
+                                =UpdateContext({Nomenclatura: ThisItem.Nomenclatura, searchNomenclatura: false})
                             TemplatePadding: =0
                             TemplateSize: =31
                             Transition: =Transition.Push
@@ -1235,17 +1222,7 @@
                                 BorderColor: =
                                 BorderThickness: =2
                                 Color: =RGBA(0, 0, 0, 1)
-                                Default: |-
-                                    =First(
-                                        Sort(
-                                            Filter(
-                                                Contenedors_2,
-                                                Estado_Contenedor = "Activo"
-                                            ),
-                                            Fecha,
-                                            SortOrder.Ascending
-                                        )
-                                    ).Nomenclatura
+                                Default: =ThisItem.Nomenclatura
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =RGBA(0, 0, 0, 1)
                                 DisabledFill: =RGBA(180, 214, 250, 0.3)
@@ -1258,6 +1235,8 @@
                                 HoverBorderColor: =App.Theme.Colors.Darker40
                                 HoverColor: =RGBA(0, 0, 0, 1)
                                 HoverFill: =App.Theme.Colors.Lighter70
+                                OnSelect: |-
+                                    =UpdateContext({Nomenclatura: ThisItem.Nomenclatura, searchNomenclatura: false})
                                 PaddingBottom: =2
                                 PaddingLeft: =2
                                 PaddingRight: =2
@@ -1267,6 +1246,73 @@
                                 X: =12
                                 Y: =3
                                 ZIndex: =1
+
+                            Rectangle49 As rectangle:
+                                BorderColor: =App.Theme.Colors.Darker40
+                                Fill: =RGBA(0, 0, 0, 0)
+                                Height: =31
+                                OnSelect: =Select(Parent)
+                                Width: =140
+                                ZIndex: =2
+
+                        Rectangle49_1 As rectangle:
+                            BorderColor: =App.Theme.Colors.Darker40
+                            Fill: =RGBA(0, 0, 0, 0)
+                            Height: =23
+                            OnSelect: |-
+                                =UpdateContext({Nomenclatura: txt_Nomenclatura_SP_1.Text, searchNomenclatura: false})
+                            Width: =96
+                            X: =264
+                            Y: =45
+                            ZIndex: =5
+
+                "drp_PN_SP As 'Cuadro combinado'.pcfdataset":
+                    AccessibleLabel: =""
+                    Appearance: ='ComboboxCanvas.Appearance'.Outline
+                    BasePaletteColor: =RGBA(5, 102, 178, 1)
+                    BorderColor: =RGBA(40, 134, 222, 1)
+                    BorderRadius: =10
+                    BorderStyle: =BorderStyle.Solid
+                    BorderThickness: =3
+                    ContentLanguage: =""
+                    DisplayMode: =DisplayMode.Edit
+                    Fill: =RGBA(255, 255, 255, 1)
+                    Font: =""
+                    FontColor: =RGBA(0, 0, 0, 1)
+                    FontItalic: =false
+                    FontSize: =16
+                    FontStrikethrough: =false
+                    FontUnderline: =false
+                    FontWeight: =""
+                    Height: =31
+                    InputTextPlaceholder: ="Buscar Orden"
+                    IsSearchable: =true
+                    Items: =Distinct(glr_PNContenedor_SP.AllItems, 'P/N')
+                    MultiValueDelimiter: =", "
+                    OnChange: =false
+                    PaddingBottom: =2
+                    PaddingLeft: =5
+                    PaddingRight: =2
+                    PaddingTop: =2
+                    Required: =false
+                    SelectMultiple: =false
+                    TabIndex: =0
+                    Tooltip: =""
+                    TriggerOutput: ="Keypress"
+                    ValidationState: ="None"
+                    Visible: =true
+                    Width: =518
+                    X: =368
+                    Y: =66
+                    ZIndex: =48
+
+                    Value2_5 As PowerApps_CoreControls_ComboboxCanvasTemplate_dataField.textualColumn:
+                        FieldDisplayName: ="Value"
+                        FieldName: ="Value"
+                        FieldType: ="e"
+                        Order: =1
+                        Type: ="s"
+                        ZIndex: =1
 
                 lbl_SP_53 As text:
                     Align: =Align.Center
@@ -1293,6 +1339,26 @@
                     Y: =167
                     ZIndex: =48
 
+                icn_Home_Sp_31 As icon:
+                    BorderColor: =App.Theme.Colors.Primary
+                    BorderStyle: =BorderStyle.None
+                    BorderThickness: =2
+                    DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                    DisabledColor: =RGBA(244, 244, 244, 1)
+                    FocusedBorderThickness: =20
+                    Height: =20
+                    HoverBorderColor: =RGBA(0, 0, 0, 0)
+                    HoverColor: =RGBA(15, 108, 189, 1)
+                    HoverFill: =RGBA(0, 0, 0, 0)
+                    Icon: =Icon.Reload
+                    OnSelect: =Reset(drp_PN_SP)
+                    PaddingBottom: =2
+                    PaddingTop: =2
+                    Width: =18
+                    X: =868
+                    Y: =47
+                    ZIndex: =49
+
                 lbl_SP_54 As text:
                     Align: =Align.Center
                     BorderColor: =App.Theme.Colors.Darker40
@@ -1317,6 +1383,43 @@
                     X: =322
                     Y: =167
                     ZIndex: =49
+
+                txt_PN_SP_1 As text:
+                    Align: =Align.Center
+                    BorderColor: =RGBA(40, 134, 222, 1)
+                    BorderThickness: =If(Self.DisplayMode = DisplayMode.Disabled, 1, 3)
+                    Color: =RGBA(0, 0, 0, 1)
+                    Default: |-
+                        =LookUp(
+                            Orden_Ejecucion,
+                            Estado_Orden = "Ejecucion" &&
+                            Orden = drp_Orden_SP_1.Selected.Value
+                        ).'P/N'
+                    DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                    DisabledColor: =RGBA(0, 0, 0, 1)
+                    DisabledFill: =RGBA(255, 255, 255, 1)
+                    DisplayMode: =DisplayMode.Disabled
+                    FocusedBorderThickness: =4
+                    Font: =App.Theme.Font
+                    Height: =31
+                    HintText: ="Zona"
+                    HoverBorderColor: =RGBA(40, 134, 222, 1)
+                    HoverColor: =RGBA(0, 0, 0, 1)
+                    HoverFill: =App.Theme.Colors.Lighter70
+                    PaddingBottom: =2
+                    PaddingLeft: =2
+                    PaddingRight: =2
+                    PaddingTop: =2
+                    RadiusBottomLeft: =10
+                    RadiusBottomRight: =10
+                    RadiusTopLeft: =10
+                    RadiusTopRight: =10
+                    Size: =12
+                    Visible: =IsBlank(drp_PN_SP.Selected.Value) && !IsBlank(drp_Orden_SP_1.Selected.Value)
+                    Width: =518
+                    X: =368
+                    Y: =66
+                    ZIndex: =50
 
                 lbl_SP_55 As text:
                     Align: =Align.Center
@@ -1374,11 +1477,10 @@
                     BorderThickness: =If(Self.DisplayMode = DisplayMode.Disabled, 1, 3)
                     Clear: =true
                     Color: =RGBA(0, 0, 0, 1)
-                    Default: ="50"
+                    Default: =
                     DisabledBorderColor: =RGBA(40, 134, 222, 1)
                     DisabledColor: =RGBA(0, 0, 0, 1)
                     DisabledFill: =RGBA(255, 255, 255, 1)
-                    DisplayMode: =DisplayMode.Disabled
                     FocusedBorderThickness: =4
                     Font: =App.Theme.Font
                     Format: =TextFormat.Number
@@ -1670,13 +1772,26 @@
                     HoverBorderColor: =RGBA(52, 152, 47, 1)
                     HoverColor: =App.Theme.Colors.PrimaryForeground
                     HoverFill: =RGBA(45, 128, 40, 1)
-                    OnSelect: |+
-                        =
-                        If(
+                    OnSelect: |
+                        =If(
                             IsBlank(drp_Orden_SP_1.Selected) || IsBlank(drp_Maquina_SP_1.Selected) || IsBlank(txt_Zona_SP_1.Text) || IsBlank(drp_Operario_SP_1.Selected) || IsBlank(drp_Turno_SP_1.Selected) || IsBlank(txt_Bache_SP_1.Text) || IsBlank(txt_Cant_SP_1.Text) || IsBlank(txt_Tarima_SP_1.Text) || IsBlank(drp_Insepccion_SP_1.Selected) || IsBlank(drp_Incoformidad_SP_1.Selected) || IsBlank(txt_Item_SP_1.Text),
                             UpdateContext(
                                 {
                                     TextoAviso: "Todos los campos deben estar completos antes de guardar el registro",
+                                    aviso: true
+                                }
+                            ),
+                            Value(txt_Bache_SP_1.Text) <= 0 || Value(txt_Bache_SP_1.Text) > 50,
+                            UpdateContext(
+                                {
+                                    TextoAviso: "El bache debe ser mayor a 0 y menor a 50",
+                                    aviso: true
+                                }
+                            ),
+                            Value(txt_Cant_SP_1.Text) <= 0 || Value(txt_Cant_SP_1.Text) > Value(txt_Bache_SP_1.Text),
+                            UpdateContext(
+                                {
+                                    TextoAviso: "La cantidad de scrap no puede ser menor que 0 ni mayor que el bache",
                                     aviso: true
                                 }
                             ),
@@ -1705,7 +1820,16 @@
                                     Codigo: drp_Operario_SP_1.Selected.Codigo,
                                     Operario: drp_Operario_SP_1.Selected.Nombre,
                                     Turno: drp_Turno_SP_1.Selected.Turno_Op,
-                                    Bache: If(IsBlank(LookUp(Scrap_1, Orden = drp_Orden_SP_1.Selected.Value && Tarima = Upper(txt_Tarima_SP_1.Text))), Value(txt_Bache_SP_1.Text), 0),
+                                    Bache: If(
+                                        IsBlank(
+                                            LookUp(
+                                                Scrap_1,
+                                                Orden = drp_Orden_SP_1.Selected.Value && Tarima = Upper(txt_Tarima_SP_1.Text)
+                                            )
+                                        ),
+                                        Value(txt_Bache_SP_1.Text),
+                                        0
+                                    ),
                                     Cantidad: Value(txt_Cant_SP_1.Text),
                                     Tarima: Upper(txt_Tarima_SP_1.Text),
                                     Inspeccion: drp_Insepccion_SP_1.Selected.Value,
@@ -1750,9 +1874,11 @@
                             Reset(drp_Insepccion_SP_1);
                             Reset(drp_Incoformidad_SP_1);
                             Reset(txt_Item_SP_1);
-                            Notify("Guardado exitoso", NotificationType.Success)
+                            Notify(
+                                "Guardado exitoso",
+                                NotificationType.Success
+                            )
                         );
-                        
                     PressedBorderColor: =RGBA(52, 152, 47, 1)
                     PressedColor: =RGBA(52, 152, 47, 1)
                     PressedFill: =RGBA(255, 255, 255, 1)
