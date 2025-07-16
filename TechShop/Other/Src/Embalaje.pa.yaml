@@ -448,7 +448,88 @@ Screens:
                                           HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
                                           HoverColor: =RGBA(255, 255, 255, 1)
                                           HoverFill: =RGBA(15, 84, 140, 1)
-                                          OnSelect: "=If(\n    !IsNumeric(txt_CantidadDato_EM_1.Text) || \n    Value(txt_CantidadDato_EM_1.Text) <= 0 || \n    IsBlank(txt_PNDato_EM_1.Text) || \n    IsBlank(drp_Pais_EM.SelectedText) || \n    IsBlank(txt_Contenedor_EM.Text) || \n    WeekNum(dp_FechaSalida_EM.SelectedDate, StartOfWeek.Monday) < WeekNum(Today(), StartOfWeek.Monday) || \n    Year(dp_FechaSalida_EM.SelectedDate) < Year(Today()),\n    UpdateContext(\n        {\n            mensajeNotificacion: If(\n                WeekNum(dp_FechaSalida_EM.SelectedDate, StartOfWeek.Monday) < WeekNum(Today(), StartOfWeek.Monday) || \n                Year(dp_FechaSalida_EM.SelectedDate) < Year(Today()),\n                \"No se pudieron agregar los datos. La fecha de salida seleccionada corresponde a una semana o año anterior. Por favor, seleccione una fecha dentro de la semana actual para continuar.\",\n                \"Todos los campos son obligatorios (Fecha, País, P/N y la cantidad debe ser mayor a 0).\"\n            ),\n            MostrarAviso: true,\n            Disable: true\n        }\n    ),\n    If(\n        IsBlank(\n            LookUp(\n                Contenedores,\n                'P/N' = txt_PNDato_EM_1.Text\n            )\n        ),\n        Collect(\n            Contenedores,\n            {\n                Fecha: dp_FechaSalida_EM.SelectedDate,\n                Nomenclatura: nomenclaturaGenerada,\n                Pais: drp_Pais_EM.SelectedText,\n                Contenedor: txt_Contenedor_EM.Text,\n                'P/N': txt_PNDato_EM_1.Text,\n                Cantidad: Value(txt_CantidadDato_EM_1.Text),\n                CantidadTarima: Value(txt_CantidadTarimaDato_EM_1.Text),\n                ValorPieza: Value(txt_ValorPiezaDato_EM_1.Text),\n                Peso: Value(txt_PesoDato_EM_1.Text),\n                TipoCaja: LookUp(\n                    item,\n                    item = txt_PNDato_EM_1.Text,\n                    Uf_TipoCaja\n                ),\n                Tipo: LookUp(\n                    item,\n                    item = txt_PNDato_EM_1.Text,\n                    charfld4\n                ),\n                Ano: Year(dp_FechaSalida_EM.SelectedDate),\n                Semana: WeekNum(\n                    dp_FechaSalida_EM.SelectedDate,\n                    StartOfWeek.Monday\n                ),\n                User: txt_EmpleadoUso_EM_1.Text,\n                CantidadTotal: Value(txt_CantidadTarimaDato_EM_1.Text) * Value(txt_CantidadDato_EM_1.Text),\n                ValorTotal: (Value(txt_CantidadTarimaDato_EM_1.Text) * Value(txt_CantidadDato_EM_1.Text)) * Value(txt_ValorPiezaDato_EM_1.Text),\n                PesoTotal: (Value(txt_CantidadTarimaDato_EM_1.Text) * Value(txt_CantidadDato_EM_1.Text)) * Value(txt_PesoDato_EM_1.Text)\n                \n            }\n        ),\n        UpdateContext(\n            {\n                mensajeNotificacion: \"Datos agregados exitosamente.\",\n                MostrarAviso: true\n            }\n        ),\n        UpdateContext(\n            {\n                mensajeNotificacion: \"El número de parte (PN) ya existe en los contenedores.\",\n                MostrarAviso: true\n            }\n        )\n    )\n);\nUpdateContext({txt_Destino2: 0});\nUpdateContext({txt_Destino: \"\"});\nReset(txt_PNDato_EM_1);\nReset(txt_CantidadDato_EM_1)"
+                                          OnSelect: |-
+                                            =If(
+                                                !IsNumeric(txt_CantidadDato_EM_1.Text) || Value(txt_CantidadDato_EM_1.Text) <= 0 || IsBlank(txt_PNDato_EM_1.Text) || IsBlank(drp_Pais_EM.SelectedText) || IsBlank(txt_Contenedor_EM.Text) || IsBlank(dp_FechaSalida_EM.SelectedDate),
+                                                UpdateContext(
+                                                    {
+                                                        mensajeNotificacion: "Todos los campos son obligatorios (Fecha, País, P/N y la cantidad debe ser mayor a 0).",
+                                                        MostrarAviso: true,
+                                                        Disable: true
+                                                    }
+                                                ),
+                                                (WeekNum(
+                                                    dp_FechaSalida_EM.SelectedDate,
+                                                    StartOfWeek.Monday
+                                                ) < WeekNum(
+                                                    Today(),
+                                                    StartOfWeek.Monday
+                                                ) && Year(dp_FechaSalida_EM.SelectedDate) = Year(Today())) || Year(dp_FechaSalida_EM.SelectedDate) < Year(Today()),
+                                                UpdateContext(
+                                                    {
+                                                        mensajeNotificacion: "No se pudieron agregar los datos. La fecha de salida seleccionada corresponde a una semana o año anterior. Por favor, seleccione una fecha dentro de la semana actual para continuar.",
+                                                        MostrarAviso: true,
+                                                        Disable: true
+                                                    }
+                                                ),
+                                                If(
+                                                    IsBlank(
+                                                        LookUp(
+                                                            Contenedores,
+                                                            'P/N' = txt_PNDato_EM_1.Text
+                                                        )
+                                                    ),
+                                                    Collect(
+                                                        Contenedores,
+                                                        {
+                                                            Fecha: dp_FechaSalida_EM.SelectedDate,
+                                                            Nomenclatura: nomenclaturaGenerada,
+                                                            Pais: drp_Pais_EM.SelectedText,
+                                                            Contenedor: txt_Contenedor_EM.Text,
+                                                            'P/N': txt_PNDato_EM_1.Text,
+                                                            Cantidad: Value(txt_CantidadDato_EM_1.Text),
+                                                            CantidadTarima: Value(txt_CantidadTarimaDato_EM_1.Text),
+                                                            ValorPieza: Value(txt_ValorPiezaDato_EM_1.Text),
+                                                            Peso: Value(txt_PesoDato_EM_1.Text),
+                                                            TipoCaja: LookUp(
+                                                                item,
+                                                                item = txt_PNDato_EM_1.Text,
+                                                                Uf_TipoCaja
+                                                            ),
+                                                            Tipo: LookUp(
+                                                                item,
+                                                                item = txt_PNDato_EM_1.Text,
+                                                                charfld4
+                                                            ),
+                                                            Ano: Year(dp_FechaSalida_EM.SelectedDate),
+                                                            Semana: WeekNum(
+                                                                dp_FechaSalida_EM.SelectedDate,
+                                                                StartOfWeek.Monday
+                                                            ),
+                                                            User: txt_EmpleadoUso_EM_1.Text,
+                                                            CantidadTotal: Value(txt_CantidadTarimaDato_EM_1.Text) * Value(txt_CantidadDato_EM_1.Text),
+                                                            ValorTotal: (Value(txt_CantidadTarimaDato_EM_1.Text) * Value(txt_CantidadDato_EM_1.Text)) * Value(txt_ValorPiezaDato_EM_1.Text),
+                                                            PesoTotal: (Value(txt_CantidadTarimaDato_EM_1.Text) * Value(txt_CantidadDato_EM_1.Text)) * Value(txt_PesoDato_EM_1.Text)
+                                                        }
+                                                    ),
+                                                    UpdateContext(
+                                                        {
+                                                            mensajeNotificacion: "Datos agregados exitosamente.",
+                                                            MostrarAviso: true
+                                                        }
+                                                    ),
+                                                    UpdateContext(
+                                                        {
+                                                            mensajeNotificacion: "El número de parte (PN) ya existe en los contenedores.",
+                                                            MostrarAviso: true
+                                                        }
+                                                    )
+                                                )
+                                            );
+                                            UpdateContext({txt_Destino2: 0});
+                                            UpdateContext({txt_Destino: ""});
+                                            Reset(txt_PNDato_EM_1);
+                                            Reset(txt_CantidadDato_EM_1)
                                           PressedBorderColor: =Self.Fill
                                           PressedColor: =Self.Fill
                                           PressedFill: =RGBA(255, 255, 255, 1)
@@ -1488,7 +1569,7 @@ Screens:
                                     HoverBorderColor: =RGBA(15, 108, 189, 1)
                                     HoverColor: =RGBA(255, 255, 255, 1)
                                     HoverFill: =RGBA(12, 59, 94, 1)
-                                    OnSelect: |+
+                                    OnSelect: |
                                       =If(
                                           IsEmpty(Contenedores),
                                           UpdateContext({
@@ -1591,7 +1672,7 @@ Screens:
                         BorderColor: =RGBA(40, 134, 222, 1)
                         BorderThickness: =0.5
                         Color: =If(ThisItem.'P/N' = Eliminar.item.'P/N' || ThisItem.'P/N' = txt_Destino, RGBA(255, 255, 255, 1))
-                        Default: |+
+                        Default: |
                           =ThisItem.CantidadTotal
                             - Sum(
                                 Filter(
@@ -1643,7 +1724,7 @@ Screens:
                       Control: Rectangle@2.3.0
                       Properties:
                         DisplayMode: =If(/*isSaving ||*/ isEditing || Disable, DisplayMode.Disabled, DisplayMode.Edit)
-                        Fill: |+
+                        Fill: |
                           =If(
                               Value(txt_Cantidad_EC_7.Text) < 0,
                               RGBA(255, 0, 0, 0.30), 
@@ -1680,7 +1761,7 @@ Screens:
                         BorderThickness: =0.5
                         Color: =If(ThisItem.'P/N' = Eliminar.item.'P/N'  || ThisItem.'P/N' = txt_Destino ,RGBA(255, 255, 255, 1), RGBA(52, 152, 47, 1))
                         DisplayMode: =If(/*isSaving ||*/ isEditing || Disable, DisplayMode.Disabled, DisplayMode.Edit)
-                        Fill: |+
+                        Fill: |
                           =If(
                               Value(txt_Cantidad_EC_7.Text) < 0,
                               RGBA(255, 0, 0, 0.30), 
@@ -1809,7 +1890,7 @@ Screens:
                         Default: =ThisItem.txt_prioridad
                         DisabledBorderColor: =RGBA(40, 134, 222, 1)
                         DisabledColor: =If(ThisItem.'P/N' = Eliminar.item.'P/N' || ThisItem.'P/N' = txt_Destino, RGBA(255, 255, 255, 1))
-                        DisabledFill: |+
+                        DisabledFill: |
                           =If(
                               CountRows(
                                   Filter(
@@ -1842,7 +1923,7 @@ Screens:
                         Default: =ThisItem.'P/N'
                         DisabledBorderColor: =RGBA(40, 134, 222, 1)
                         DisabledColor: =If(ThisItem.'P/N' = Eliminar.item.'P/N' || ThisItem.'P/N' = txt_Destino, RGBA(255, 255, 255, 1))
-                        DisabledFill: |+
+                        DisabledFill: |
                           =If(
                               CountRows(
                                   Filter(
@@ -1873,7 +1954,7 @@ Screens:
                         Color: =If(ThisItem.'P/N' = Eliminar.item.'P/N'  || ThisItem.'P/N' = txt_Destino,RGBA(255, 255, 255, 1), RGBA(215, 58, 60, 1))
                         DisplayMode: |
                           =If(/*isSaving ||*/ isEditing || Disable, DisplayMode.Disabled, DisplayMode.Edit)
-                        Fill: |+
+                        Fill: |
                           =If(
                               CountRows(
                                   Filter(
@@ -1933,7 +2014,7 @@ Screens:
                         Default: =ThisItem.cantidadDigitar
                         DisplayMode: |
                           =If(/*isSaving ||*/ Disable, DisplayMode.Disabled, DisplayMode.Edit)
-                        Fill: |+
+                        Fill: |
                           =If(
                               CountRows(
                                   Filter(
@@ -1950,7 +2031,7 @@ Screens:
                         HintText: ="Digite la cantidad"
                         HoverBorderColor: =RGBA(40, 134, 222, 1)
                         HoverColor: =
-                        HoverFill: |+
+                        HoverFill: |
                           =If(
                               CountRows(
                                   Filter(
@@ -2015,44 +2096,48 @@ Screens:
                   HoverFill: =RGBA(12, 59, 94, 1)
                   OnSelect: |-
                     =If(
-                    CountRows(
-                        Filter(
-                            gl_Contenedores_EM_3.AllItems,
-                            Value(txt_Cantidad_EC_7.Text) <> 0
-                        )
-                    ) > 0 ||
-                        IsEmpty(Contenedores) || WeekNum(
+                        CountRows(
+                            Filter(
+                                gl_Contenedores_EM_3.AllItems,
+                                Value(txt_Cantidad_EC_7.Text) <> 0
+                            )
+                        ) > 0 || IsEmpty(Contenedores) || (WeekNum(
                             dp_FechaSalida_EM.SelectedDate,
                             StartOfWeek.Monday
                         ) < WeekNum(
                             Today(),
                             StartOfWeek.Monday
-                        ) || Year(dp_FechaSalida_EM.SelectedDate) < Year(Today()) || IsBlank(dp_FechaSalida_EM.SelectedDate) || IsBlank(drp_Pais_EM.SelectedText),
-                    UpdateContext(
-                        {
-                            mensajeNotificacion: If(
-                                CountRows(
-                                    Filter(
-                                        gl_Contenedores_EM_3.AllItems,
-                                        Value(txt_Cantidad_EC_7.Text) <> 0
-                                    )
-                                ) > 0,
-                                "No se puede continuar: todas las cantidades deben ser exactamente cero.",
-                                If(
-                                    IsEmpty(Contenedores),
-                                    "No hay datos en la tabla Contenedores para guardar.",
+                        ) && Year(dp_FechaSalida_EM.SelectedDate) = Year(Today())) || Year(dp_FechaSalida_EM.SelectedDate) < Year(Today()) || IsBlank(dp_FechaSalida_EM.SelectedDate) || IsBlank(drp_Pais_EM.SelectedText),
+                        UpdateContext(
+                            {
+                                mensajeNotificacion: If(
+                                    CountRows(
+                                        Filter(
+                                            gl_Contenedores_EM_3.AllItems,
+                                            Value(txt_Cantidad_EC_7.Text) <> 0
+                                        )
+                                    ) > 0,
+                                    "No se puede continuar: todas las cantidades deben ser exactamente cero.",
                                     If(
-                                        WeekNum(dp_FechaSalida_EM.SelectedDate, StartOfWeek.Monday) < WeekNum(Today(), StartOfWeek.Monday) ||
-                                        Year(dp_FechaSalida_EM.SelectedDate) < Year(Today()),
-                                        "No se puede agregar, la fecha de salida pertenece a una semana anterior. Por favor cambiar a una fecha de la semana actual",
-                                        "La fecha y el país son obligatorios."
+                                        IsEmpty(Contenedores),
+                                        "No hay datos en la tabla Contenedores para guardar.",
+                                        If(
+                                            WeekNum(
+                                                dp_FechaSalida_EM.SelectedDate,
+                                                StartOfWeek.Monday
+                                            ) < WeekNum(
+                                                Today(),
+                                                StartOfWeek.Monday
+                                            ) || Year(dp_FechaSalida_EM.SelectedDate) < Year(Today()),
+                                            "No se puede agregar, la fecha de salida pertenece a una semana anterior. Por favor cambiar a una fecha de la semana actual",
+                                            "La fecha y el país son obligatorios."
+                                        )
                                     )
-                                )
-                            ),
-                            MostrarAviso: true,
-                            Disable: true
-                        }
-                    ),
+                                ),
+                                MostrarAviso: true,
+                                Disable: true
+                            }
+                        ),
                         UpdateContext({isSaving: true}),
                         ForAll(
                             gl_Contenedores_EM_2.AllItems,
@@ -2140,8 +2225,8 @@ Screens:
                                 Disable: true
                             }
                         );
-                        UpdateContext({ Revision: false });
-                        UpdateContext({ VerMaquinas: false });
+                        UpdateContext({Revision: false});
+                        UpdateContext({VerMaquinas: false});
                         UpdateContext({isSaving: false})
                     )
                   PressedBorderColor: =RGBA(15, 108, 189, 1)
@@ -2188,7 +2273,7 @@ Screens:
                 Properties:
                   BorderColor: =RGBA(0, 18, 107, 1)
                   Height: =299
-                  Items: |+
+                  Items: |
                     =Filter(
                       Maquina_Ordens_1,
                       'P/N' = gl_Contenedores_EM_3.Selected.'P/N'

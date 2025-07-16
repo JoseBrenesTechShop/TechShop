@@ -533,21 +533,24 @@ Embalaje As screen:
                             HoverFill: =RGBA(15, 84, 140, 1)
                             OnSelect: |-
                                 =If(
-                                    !IsNumeric(txt_CantidadDato_EM_1.Text) || 
-                                    Value(txt_CantidadDato_EM_1.Text) <= 0 || 
-                                    IsBlank(txt_PNDato_EM_1.Text) || 
-                                    IsBlank(drp_Pais_EM.SelectedText) || 
-                                    IsBlank(txt_Contenedor_EM.Text) || 
-                                    WeekNum(dp_FechaSalida_EM.SelectedDate, StartOfWeek.Monday) < WeekNum(Today(), StartOfWeek.Monday) || 
-                                    Year(dp_FechaSalida_EM.SelectedDate) < Year(Today()),
+                                    !IsNumeric(txt_CantidadDato_EM_1.Text) || Value(txt_CantidadDato_EM_1.Text) <= 0 || IsBlank(txt_PNDato_EM_1.Text) || IsBlank(drp_Pais_EM.SelectedText) || IsBlank(txt_Contenedor_EM.Text) || IsBlank(dp_FechaSalida_EM.SelectedDate),
                                     UpdateContext(
                                         {
-                                            mensajeNotificacion: If(
-                                                WeekNum(dp_FechaSalida_EM.SelectedDate, StartOfWeek.Monday) < WeekNum(Today(), StartOfWeek.Monday) || 
-                                                Year(dp_FechaSalida_EM.SelectedDate) < Year(Today()),
-                                                "No se pudieron agregar los datos. La fecha de salida seleccionada corresponde a una semana o año anterior. Por favor, seleccione una fecha dentro de la semana actual para continuar.",
-                                                "Todos los campos son obligatorios (Fecha, País, P/N y la cantidad debe ser mayor a 0)."
-                                            ),
+                                            mensajeNotificacion: "Todos los campos son obligatorios (Fecha, País, P/N y la cantidad debe ser mayor a 0).",
+                                            MostrarAviso: true,
+                                            Disable: true
+                                        }
+                                    ),
+                                    (WeekNum(
+                                        dp_FechaSalida_EM.SelectedDate,
+                                        StartOfWeek.Monday
+                                    ) < WeekNum(
+                                        Today(),
+                                        StartOfWeek.Monday
+                                    ) && Year(dp_FechaSalida_EM.SelectedDate) = Year(Today())) || Year(dp_FechaSalida_EM.SelectedDate) < Year(Today()),
+                                    UpdateContext(
+                                        {
+                                            mensajeNotificacion: "No se pudieron agregar los datos. La fecha de salida seleccionada corresponde a una semana o año anterior. Por favor, seleccione una fecha dentro de la semana actual para continuar.",
                                             MostrarAviso: true,
                                             Disable: true
                                         }
@@ -590,7 +593,6 @@ Embalaje As screen:
                                                 CantidadTotal: Value(txt_CantidadTarimaDato_EM_1.Text) * Value(txt_CantidadDato_EM_1.Text),
                                                 ValorTotal: (Value(txt_CantidadTarimaDato_EM_1.Text) * Value(txt_CantidadDato_EM_1.Text)) * Value(txt_ValorPiezaDato_EM_1.Text),
                                                 PesoTotal: (Value(txt_CantidadTarimaDato_EM_1.Text) * Value(txt_CantidadDato_EM_1.Text)) * Value(txt_PesoDato_EM_1.Text)
-                                                
                                             }
                                         ),
                                         UpdateContext(
@@ -2421,44 +2423,48 @@ Embalaje As screen:
             HoverFill: =RGBA(12, 59, 94, 1)
             OnSelect: |-
                 =If(
-                CountRows(
-                    Filter(
-                        gl_Contenedores_EM_3.AllItems,
-                        Value(txt_Cantidad_EC_7.Text) <> 0
-                    )
-                ) > 0 ||
-                    IsEmpty(Contenedores) || WeekNum(
+                    CountRows(
+                        Filter(
+                            gl_Contenedores_EM_3.AllItems,
+                            Value(txt_Cantidad_EC_7.Text) <> 0
+                        )
+                    ) > 0 || IsEmpty(Contenedores) || (WeekNum(
                         dp_FechaSalida_EM.SelectedDate,
                         StartOfWeek.Monday
                     ) < WeekNum(
                         Today(),
                         StartOfWeek.Monday
-                    ) || Year(dp_FechaSalida_EM.SelectedDate) < Year(Today()) || IsBlank(dp_FechaSalida_EM.SelectedDate) || IsBlank(drp_Pais_EM.SelectedText),
-                UpdateContext(
-                    {
-                        mensajeNotificacion: If(
-                            CountRows(
-                                Filter(
-                                    gl_Contenedores_EM_3.AllItems,
-                                    Value(txt_Cantidad_EC_7.Text) <> 0
-                                )
-                            ) > 0,
-                            "No se puede continuar: todas las cantidades deben ser exactamente cero.",
-                            If(
-                                IsEmpty(Contenedores),
-                                "No hay datos en la tabla Contenedores para guardar.",
+                    ) && Year(dp_FechaSalida_EM.SelectedDate) = Year(Today())) || Year(dp_FechaSalida_EM.SelectedDate) < Year(Today()) || IsBlank(dp_FechaSalida_EM.SelectedDate) || IsBlank(drp_Pais_EM.SelectedText),
+                    UpdateContext(
+                        {
+                            mensajeNotificacion: If(
+                                CountRows(
+                                    Filter(
+                                        gl_Contenedores_EM_3.AllItems,
+                                        Value(txt_Cantidad_EC_7.Text) <> 0
+                                    )
+                                ) > 0,
+                                "No se puede continuar: todas las cantidades deben ser exactamente cero.",
                                 If(
-                                    WeekNum(dp_FechaSalida_EM.SelectedDate, StartOfWeek.Monday) < WeekNum(Today(), StartOfWeek.Monday) ||
-                                    Year(dp_FechaSalida_EM.SelectedDate) < Year(Today()),
-                                    "No se puede agregar, la fecha de salida pertenece a una semana anterior. Por favor cambiar a una fecha de la semana actual",
-                                    "La fecha y el país son obligatorios."
+                                    IsEmpty(Contenedores),
+                                    "No hay datos en la tabla Contenedores para guardar.",
+                                    If(
+                                        WeekNum(
+                                            dp_FechaSalida_EM.SelectedDate,
+                                            StartOfWeek.Monday
+                                        ) < WeekNum(
+                                            Today(),
+                                            StartOfWeek.Monday
+                                        ) || Year(dp_FechaSalida_EM.SelectedDate) < Year(Today()),
+                                        "No se puede agregar, la fecha de salida pertenece a una semana anterior. Por favor cambiar a una fecha de la semana actual",
+                                        "La fecha y el país son obligatorios."
+                                    )
                                 )
-                            )
-                        ),
-                        MostrarAviso: true,
-                        Disable: true
-                    }
-                ),
+                            ),
+                            MostrarAviso: true,
+                            Disable: true
+                        }
+                    ),
                     UpdateContext({isSaving: true}),
                     ForAll(
                         gl_Contenedores_EM_2.AllItems,
@@ -2546,8 +2552,8 @@ Embalaje As screen:
                             Disable: true
                         }
                     );
-                    UpdateContext({ Revision: false });
-                    UpdateContext({ VerMaquinas: false });
+                    UpdateContext({Revision: false});
+                    UpdateContext({VerMaquinas: false});
                     UpdateContext({isSaving: false})
                 )
             PressedBorderColor: =RGBA(15, 108, 189, 1)
