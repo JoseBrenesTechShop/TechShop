@@ -211,6 +211,7 @@ Screens:
                                     BorderThickness: =0
                                     Color: =RGBA(255, 255, 255, 1)
                                     Default: ="Fecha"
+                                    DisabledFill: =RGBA(166, 215, 153, 1)
                                     DisplayMode: =DisplayMode.View
                                     Fill: =RGBA(0, 0, 0, 0)
                                     FontWeight: =FontWeight.Semibold
@@ -719,7 +720,7 @@ Screens:
                                   Properties:
                                     Fill: =RGBA(180, 214, 250, 0.2)
                                     Height: =204
-                                    Items: |+
+                                    Items: |
                                       =Sort(Filter(InspeccionCalidadContenedors, Nomenclatura = txt_Nomenclatura_SP.Text), Prioridad, SortOrder.Ascending)
                                     TemplateSize: =25
                                     Width: =440
@@ -735,7 +736,7 @@ Screens:
                                           Default: =ThisItem.'P/N'
                                           DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                           DisabledColor: =RGBA(0, 0, 0, 1)
-                                          DisabledFill: =RGBA(255, 255, 255, 1)
+                                          DisabledFill: =If(ThisItem.Cantidad = ThisItem.Revisado, RGBA(166, 215, 153, 1), RGBA(255, 255, 255, 1))
                                           DisplayMode: =DisplayMode.Disabled
                                           Height: =25
                                           PaddingBottom: =2
@@ -758,7 +759,7 @@ Screens:
                                           Default: =ThisItem.Prioridad
                                           DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                           DisabledColor: =RGBA(0, 0, 0, 1)
-                                          DisabledFill: =RGBA(255, 255, 255, 1)
+                                          DisabledFill: =If(ThisItem.Cantidad = ThisItem.Revisado, RGBA(166, 215, 153, 1), RGBA(255, 255, 255, 1))
                                           DisplayMode: =DisplayMode.Disabled
                                           Height: =25
                                           PaddingBottom: =2
@@ -780,7 +781,7 @@ Screens:
                                           Default: =ThisItem.Cantidad
                                           DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                           DisabledColor: =RGBA(0, 0, 0, 1)
-                                          DisabledFill: =RGBA(255, 255, 255, 1)
+                                          DisabledFill: =If(ThisItem.Cantidad = ThisItem.Revisado, RGBA(166, 215, 153, 1), RGBA(255, 255, 255, 1))
                                           DisplayMode: =DisplayMode.Disabled
                                           Height: =25
                                           PaddingBottom: =2
@@ -803,7 +804,7 @@ Screens:
                                           Default: =ThisItem.Revisado
                                           DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                           DisabledColor: =RGBA(0, 0, 0, 1)
-                                          DisabledFill: =RGBA(255, 255, 255, 1)
+                                          DisabledFill: =If(ThisItem.Cantidad = ThisItem.Revisado, RGBA(166, 215, 153, 1), RGBA(255, 255, 255, 1))
                                           DisplayMode: =DisplayMode.Disabled
                                           Height: =25
                                           PaddingBottom: =2
@@ -1517,6 +1518,84 @@ Screens:
                                             Item: txt_Item_SP_1.Text,
                                             Usuario: txt_User_Sp_1.Text
                                         }
+                                    );
+                                    ClearCollect(//InspecionCalidadContenedor Asigna las cantidades buenas a los P/N correspondientes segun el contenedor seleccionado.
+                                        colContenedor,
+                                        Filter(
+                                            Sort(
+                                                InspeccionCalidadContenedors,
+                                                Prioridad,
+                                                SortOrder.Ascending
+                                            ),
+                                            Nomenclatura = txt_Nomenclatura_SP.Text && 'P/N' = txt_PN_SP_1.Text && Value(Revisado) < Value(Cantidad)
+                                        )
+                                    );
+                                    UpdateContext({restante: Value(txt_Bache_SP_1.Text) - Value(txt_Cant_SP_1.Text)});
+                                    With(
+                                        {dato1: First(colContenedor)},
+                                        If(
+                                            restante + dato1.Revisado <= dato1.Cantidad,
+                                            Patch(
+                                                InspeccionCalidadContenedors,
+                                                dato1,
+                                                {Revisado: dato1.Revisado + restante}
+                                            ),
+                                            Patch(
+                                                InspeccionCalidadContenedors,
+                                                dato1,
+                                                {Revisado: dato1.Revisado + (dato1.Cantidad - dato1.Revisado)}
+                                            );
+                                            UpdateContext({restante: restante - (dato1.Cantidad - dato1.Revisado)});
+                                            Remove(
+                                                colContenedor,
+                                                dato1
+                                            );
+                                            If(
+                                                IsEmpty(colContenedor),
+                                                Patch(
+                                                    InspeccionCalidadContenedors,
+                                                    dato1,
+                                                    {Revisado: dato1.Revisado + restante}
+                                                ),
+                                                With(
+                                                    {dato2: First(colContenedor)},
+                                                    If(
+                                                        restante + dato2.Revisado <= dato2.Cantidad,
+                                                        Patch(
+                                                            InspeccionCalidadContenedors,
+                                                            dato2,
+                                                            {Revisado: dato2.Revisado + restante}
+                                                        ),
+                                                        Patch(
+                                                            InspeccionCalidadContenedors,
+                                                            dato2,
+                                                            {Revisado: dato2.Revisado + (dato2.Cantidad - dato2.Revisado)}
+                                                        );
+                                                        UpdateContext({restante: restante - (dato1.Cantidad - dato1.Revisado)});
+                                                        Remove(
+                                                            colContenedor,
+                                                            dato1
+                                                        );
+                                                        If(
+                                                            IsEmpty(colContenedor),
+                                                            Patch(
+                                                                InspeccionCalidadContenedors,
+                                                                dato2,
+                                                                {Revisado: dato2.Revisado + restante}
+                                                            ),
+                                                            With(
+                                                                {dato3: First(colContenedor)},
+                                                                Patch(
+                                                                    InspeccionCalidadContenedors,
+                                                                    dato3,
+                                                                    {Revisado: dato3.Revisado + restante}
+                                                                )
+                                                            )
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        )
                                     );
                                     With(
                                         {
