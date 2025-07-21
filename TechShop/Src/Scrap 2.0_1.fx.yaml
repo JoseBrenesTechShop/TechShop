@@ -1891,10 +1891,10 @@
                                                     dato2,
                                                     {Revisado: dato2.Revisado + (dato2.Cantidad - dato2.Revisado)}
                                                 );
-                                                UpdateContext({restante: restante - (dato1.Cantidad - dato1.Revisado)});
+                                                UpdateContext({restante: restante - (dato2.Cantidad - dato2.Revisado)});
                                                 Remove(
                                                     colContenedor,
-                                                    dato1
+                                                    dato2
                                                 );
                                                 If(
                                                     IsEmpty(colContenedor),
@@ -3160,6 +3160,68 @@
                         tarimaScrap,
                         {Cantidad: (tarimaScrap.Cantidad - tbl_Scrap_SP_1.Selected.Cantidad)}
                     );
+                    ClearCollect(//InspecionCalidadContenedor Asigna las cantidades buenas a los P/N correspondientes segun el contenedor seleccionado.
+                        colContenedor,
+                        Filter(
+                            Sort(
+                                InspeccionCalidadContenedors,
+                                Prioridad,
+                                SortOrder.Descending
+                            ),
+                            Nomenclatura = txt_Nomenclatura_SP.Text && 'P/N' = tbl_Scrap_SP_1.Selected.'P/N' && Value(Revisado) > 0
+                        )
+                    );
+                    UpdateContext({restante: Value(tbl_Scrap_SP_1.Selected.Bache) - Value(tbl_Scrap_SP_1.Selected.Cantidad)});
+                    With(
+                        {dato1: First(colContenedor)},
+                        If(
+                            dato1.Revisado >= restante,
+                            Patch(
+                                InspeccionCalidadContenedors,
+                                dato1,
+                                {Revisado: dato1.Revisado - restante}
+                            ),
+                            Patch(
+                                InspeccionCalidadContenedors,
+                                dato1,
+                                {Revisado: 0}
+                            );
+                            UpdateContext({restante: restante - dato1.Revisado});
+                            Remove(
+                                colContenedor,
+                                dato1
+                            );
+                            With(
+                                {dato2: First(colContenedor)},
+                                If(
+                                    restante <= dato2.Revisado,
+                                    Patch(
+                                        InspeccionCalidadContenedors,
+                                        dato2,
+                                        {Revisado: dato2.Revisado - restante}
+                                    ),
+                                    Patch(
+                                        InspeccionCalidadContenedors,
+                                        dato2,
+                                        {Revisado: 0}
+                                    );
+                                    UpdateContext({restante: restante - dato2.Revisado});
+                                    Remove(
+                                        colContenedor,
+                                        dato2
+                                    );
+                                    With(
+                                        {dato3: First(colContenedor)},
+                                        Patch(
+                                            InspeccionCalidadContenedors,
+                                            dato3,
+                                            {Revisado: dato3.Revisado - restante}
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    );
                     Remove(
                         Scrap_1,
                         tbl_Scrap_SP_1.Selected
@@ -3221,11 +3283,11 @@
                         {
                             tarimaScrap: LookUp(
                                 Scrap_Tarimas,
-                                Tarima = tbl_Scrap_SP.Selected.Tarima && Orden = tbl_Scrap_SP.Selected.Orden
+                                Tarima = tbl_Scrap_SP_1.Selected.Tarima && Orden = tbl_Scrap_SP_1.Selected.Orden
                             )
                         },
                         If(
-                            ((tarimaScrap.Cantidad - tbl_Scrap_SP.Selected.Cantidad) + txt_Edit_Cant_SP.Text) > 50,
+                            ((tarimaScrap.Cantidad - tbl_Scrap_SP_1.Selected.Cantidad) + txt_Edit_Cant_SP_1.Text) > 50,
                             UpdateContext(
                                 {
                                     aviso: true,
@@ -3235,27 +3297,170 @@
                             Patch(
                                 Scrap_Tarimas,
                                 tarimaScrap,
-                                {Cantidad: (tarimaScrap.Cantidad - tbl_Scrap_SP.Selected.Cantidad) + txt_Edit_Cant_SP.Text}
+                                {Cantidad: (tarimaScrap.Cantidad - tbl_Scrap_SP_1.Selected.Cantidad) + txt_Edit_Cant_SP_1.Text}
+                            );
+                            If(
+                                tbl_Scrap_SP_1.Selected.Cantidad < Value(txt_Edit_Cant_SP_1.Text),
+                                ClearCollect(//InspecionCalidadContenedor Asigna las cantidades buenas a los P/N correspondientes segun el contenedor seleccionado.
+                                    colContenedor,
+                                    Filter(
+                                        Sort(
+                                            InspeccionCalidadContenedors,
+                                            Prioridad,
+                                            SortOrder.Descending
+                                        ),
+                                        Nomenclatura = txt_Nomenclatura_SP.Text && 'P/N' = tbl_Scrap_SP_1.Selected.'P/N' && Value(Revisado) > 0
+                                    )
+                                );
+                                UpdateContext({restante: Value(txt_Edit_Cant_SP_1.Text) - tbl_Scrap_SP_1.Selected.Cantidad});
+                                With(
+                                    {dato1: First(colContenedor)},
+                                    If(
+                                        dato1.Revisado >= restante,
+                                        Patch(
+                                            InspeccionCalidadContenedors,
+                                            dato1,
+                                            {Revisado: dato1.Revisado - restante}
+                                        ),
+                                        Patch(
+                                            InspeccionCalidadContenedors,
+                                            dato1,
+                                            {Revisado: 0}
+                                        );
+                                        UpdateContext({restante: restante - dato1.Revisado});
+                                        Remove(
+                                            colContenedor,
+                                            dato1
+                                        );
+                                        With(
+                                            {dato2: First(colContenedor)},
+                                            If(
+                                                restante <= dato2.Revisado,
+                                                Patch(
+                                                    InspeccionCalidadContenedors,
+                                                    dato2,
+                                                    {Revisado: dato2.Revisado - restante}
+                                                ),
+                                                Patch(
+                                                    InspeccionCalidadContenedors,
+                                                    dato2,
+                                                    {Revisado: 0}
+                                                );
+                                                UpdateContext({restante: restante - dato2.Revisado});
+                                                Remove(
+                                                    colContenedor,
+                                                    dato2
+                                                );
+                                                With(
+                                                    {dato3: First(colContenedor)},
+                                                    Patch(
+                                                        InspeccionCalidadContenedors,
+                                                        dato3,
+                                                        {Revisado: dato3.Revisado - restante}
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    )
+                                ),
+                                ClearCollect(//InspecionCalidadContenedor Asigna las cantidades buenas a los P/N correspondientes segun el contenedor seleccionado.
+                                    colContenedor,
+                                    Filter(
+                                        Sort(
+                                            InspeccionCalidadContenedors,
+                                            Prioridad,
+                                            SortOrder.Ascending
+                                        ),
+                                        Nomenclatura = txt_Nomenclatura_SP.Text && 'P/N' = tbl_Scrap_SP_1.Selected.'P/N' && Value(Revisado) < Value(Cantidad)
+                                    )
+                                );
+                                UpdateContext({restante: tbl_Scrap_SP_1.Selected.Cantidad - Value(txt_Edit_Cant_SP_1.Text)});
+                                With(
+                                    {dato1: First(colContenedor)},
+                                    If(
+                                        restante + dato1.Revisado <= dato1.Cantidad,
+                                        Patch(
+                                            InspeccionCalidadContenedors,
+                                            dato1,
+                                            {Revisado: dato1.Revisado + restante}
+                                        ),
+                                        Patch(
+                                            InspeccionCalidadContenedors,
+                                            dato1,
+                                            {Revisado: dato1.Revisado + (dato1.Cantidad - dato1.Revisado)}
+                                        );
+                                        UpdateContext({restante: restante - (dato1.Cantidad - dato1.Revisado)});
+                                        Remove(
+                                            colContenedor,
+                                            dato1
+                                        );
+                                        If(
+                                            IsEmpty(colContenedor),
+                                            Patch(
+                                                InspeccionCalidadContenedors,
+                                                dato1,
+                                                {Revisado: dato1.Revisado + restante}
+                                            ),
+                                            With(
+                                                {dato2: First(colContenedor)},
+                                                If(
+                                                    restante + dato2.Revisado <= dato2.Cantidad,
+                                                    Patch(
+                                                        InspeccionCalidadContenedors,
+                                                        dato2,
+                                                        {Revisado: dato2.Revisado + restante}
+                                                    ),
+                                                    Patch(
+                                                        InspeccionCalidadContenedors,
+                                                        dato2,
+                                                        {Revisado: dato2.Revisado + (dato2.Cantidad - dato2.Revisado)}
+                                                    );
+                                                    UpdateContext({restante: restante - (dato2.Cantidad - dato2.Revisado)});
+                                                    Remove(
+                                                        colContenedor,
+                                                        dato2
+                                                    );
+                                                    If(
+                                                        IsEmpty(colContenedor),
+                                                        Patch(
+                                                            InspeccionCalidadContenedors,
+                                                            dato2,
+                                                            {Revisado: dato2.Revisado + restante}
+                                                        ),
+                                                        With(
+                                                            {dato3: First(colContenedor)},
+                                                            Patch(
+                                                                InspeccionCalidadContenedors,
+                                                                dato3,
+                                                                {Revisado: dato3.Revisado + restante}
+                                                            )
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
                             );
                             Patch(
                                 Scrap_1,
-                                tbl_Scrap_SP.Selected,
+                                tbl_Scrap_SP_1.Selected,
                                 {
-                                    Operario: drp_Edit_Operario_SP.Selected.Nombre,
-                                    Turno: drp_Edit_Turno_SP.Selected.Turno_Op,
-                                    Ubicacion: txt_Edit_Zona_SP.Text,
-                                    Maquina: drp_Edit_Maquina_SP.Selected.M,
-                                    Bache: Value(txt_Edit_Bache_SP.Text),
-                                    Cantidad: Value(txt_Edit_Cant_SP.Text),
-                                    Usuario: txt_User_Sp.Text
+                                    Operario: drp_Edit_Operario_SP_1.Selected.Nombre,
+                                    Turno: drp_Edit_Turno_SP_1.Selected.Turno_Op,
+                                    Ubicacion: txt_Edit_Zona_SP_1.Text,
+                                    Maquina: drp_Edit_Maquina_SP_1.Selected.M,
+                                    Bache: Value(txt_Edit_Bache_SP_1.Text),
+                                    Cantidad: Value(txt_Edit_Cant_SP_1.Text),
+                                    Usuario: txt_User_Sp_1.Text
                                 }
                             );
-                            Reset(drp_Edit_Maquina_SP);
-                            Reset(drp_Edit_Operario_SP);
-                            Reset(drp_Edit_Turno_SP);
-                            Reset(txt_Edit_Zona_SP);
-                            Reset(txt_Edit_Bache_SP);
-                            Reset(txt_Edit_Cant_SP);
+                            Reset(drp_Edit_Maquina_SP_1);
+                            Reset(drp_Edit_Operario_SP_1);
+                            Reset(drp_Edit_Turno_SP_1);
+                            Reset(txt_Edit_Zona_SP_1);
+                            Reset(txt_Edit_Bache_SP_1);
+                            Reset(txt_Edit_Cant_SP_1);
                             UpdateContext({Editar: false})
                         )
                     );

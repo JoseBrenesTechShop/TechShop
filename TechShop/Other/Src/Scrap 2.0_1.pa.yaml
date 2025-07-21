@@ -1572,10 +1572,10 @@ Screens:
                                                             dato2,
                                                             {Revisado: dato2.Revisado + (dato2.Cantidad - dato2.Revisado)}
                                                         );
-                                                        UpdateContext({restante: restante - (dato1.Cantidad - dato1.Revisado)});
+                                                        UpdateContext({restante: restante - (dato2.Cantidad - dato2.Revisado)});
                                                         Remove(
                                                             colContenedor,
-                                                            dato1
+                                                            dato2
                                                         );
                                                         If(
                                                             IsEmpty(colContenedor),
@@ -2536,6 +2536,68 @@ Screens:
                             tarimaScrap,
                             {Cantidad: (tarimaScrap.Cantidad - tbl_Scrap_SP_1.Selected.Cantidad)}
                         );
+                        ClearCollect(//InspecionCalidadContenedor Asigna las cantidades buenas a los P/N correspondientes segun el contenedor seleccionado.
+                            colContenedor,
+                            Filter(
+                                Sort(
+                                    InspeccionCalidadContenedors,
+                                    Prioridad,
+                                    SortOrder.Descending
+                                ),
+                                Nomenclatura = txt_Nomenclatura_SP.Text && 'P/N' = tbl_Scrap_SP_1.Selected.'P/N' && Value(Revisado) > 0
+                            )
+                        );
+                        UpdateContext({restante: Value(tbl_Scrap_SP_1.Selected.Bache) - Value(tbl_Scrap_SP_1.Selected.Cantidad)});
+                        With(
+                            {dato1: First(colContenedor)},
+                            If(
+                                dato1.Revisado >= restante,
+                                Patch(
+                                    InspeccionCalidadContenedors,
+                                    dato1,
+                                    {Revisado: dato1.Revisado - restante}
+                                ),
+                                Patch(
+                                    InspeccionCalidadContenedors,
+                                    dato1,
+                                    {Revisado: 0}
+                                );
+                                UpdateContext({restante: restante - dato1.Revisado});
+                                Remove(
+                                    colContenedor,
+                                    dato1
+                                );
+                                With(
+                                    {dato2: First(colContenedor)},
+                                    If(
+                                        restante <= dato2.Revisado,
+                                        Patch(
+                                            InspeccionCalidadContenedors,
+                                            dato2,
+                                            {Revisado: dato2.Revisado - restante}
+                                        ),
+                                        Patch(
+                                            InspeccionCalidadContenedors,
+                                            dato2,
+                                            {Revisado: 0}
+                                        );
+                                        UpdateContext({restante: restante - dato2.Revisado});
+                                        Remove(
+                                            colContenedor,
+                                            dato2
+                                        );
+                                        With(
+                                            {dato3: First(colContenedor)},
+                                            Patch(
+                                                InspeccionCalidadContenedors,
+                                                dato3,
+                                                {Revisado: dato3.Revisado - restante}
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        );
                         Remove(
                             Scrap_1,
                             tbl_Scrap_SP_1.Selected
@@ -2590,7 +2652,7 @@ Screens:
                   HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
                   HoverColor: =RGBA(255, 255, 255, 1)
                   HoverFill: =RGBA(21, 68, 18, 1)
-                  OnSelect: "=If(\n    IsBlank(drp_Edit_Maquina_SP_1.Selected) || IsBlank(drp_Edit_Turno_SP_1.Selected) || IsBlank(txt_Edit_Zona_SP_1.Text) || IsBlank(drp_Edit_Operario_SP_1.Selected) || IsBlank(txt_Edit_Bache_SP_1.Text) || IsBlank(txt_Edit_Cant_SP_1.Text),\n    UpdateContext(\n        {\n            aviso: true,\n            TextoAviso: \"Debe llenar todos los campos\"\n        }\n    ),\n    With(\n        {\n            tarimaScrap: LookUp(\n                Scrap_Tarimas,\n                Tarima = tbl_Scrap_SP.Selected.Tarima && Orden = tbl_Scrap_SP.Selected.Orden\n            )\n        },\n        If(\n            ((tarimaScrap.Cantidad - tbl_Scrap_SP.Selected.Cantidad) + txt_Edit_Cant_SP.Text) > 50,\n            UpdateContext(\n                {\n                    aviso: true,\n                    TextoAviso: \"La cantidad maxima por tarima es de 50 unidades\"\n                }\n            ),\n            Patch(\n                Scrap_Tarimas,\n                tarimaScrap,\n                {Cantidad: (tarimaScrap.Cantidad - tbl_Scrap_SP.Selected.Cantidad) + txt_Edit_Cant_SP.Text}\n            );\n            Patch(\n                Scrap_1,\n                tbl_Scrap_SP.Selected,\n                {\n                    Operario: drp_Edit_Operario_SP.Selected.Nombre,\n                    Turno: drp_Edit_Turno_SP.Selected.Turno_Op,\n                    Ubicacion: txt_Edit_Zona_SP.Text,\n                    Maquina: drp_Edit_Maquina_SP.Selected.M,\n                    Bache: Value(txt_Edit_Bache_SP.Text),\n                    Cantidad: Value(txt_Edit_Cant_SP.Text),\n                    Usuario: txt_User_Sp.Text\n                }\n            );\n            Reset(drp_Edit_Maquina_SP);\n            Reset(drp_Edit_Operario_SP);\n            Reset(drp_Edit_Turno_SP);\n            Reset(txt_Edit_Zona_SP);\n            Reset(txt_Edit_Bache_SP);\n            Reset(txt_Edit_Cant_SP);\n            UpdateContext({Editar: false})\n        )\n    );\n    \n)"
+                  OnSelect: "=If(\n    IsBlank(drp_Edit_Maquina_SP_1.Selected) || IsBlank(drp_Edit_Turno_SP_1.Selected) || IsBlank(txt_Edit_Zona_SP_1.Text) || IsBlank(drp_Edit_Operario_SP_1.Selected) || IsBlank(txt_Edit_Bache_SP_1.Text) || IsBlank(txt_Edit_Cant_SP_1.Text),\n    UpdateContext(\n        {\n            aviso: true,\n            TextoAviso: \"Debe llenar todos los campos\"\n        }\n    ),\n    With(\n        {\n            tarimaScrap: LookUp(\n                Scrap_Tarimas,\n                Tarima = tbl_Scrap_SP_1.Selected.Tarima && Orden = tbl_Scrap_SP_1.Selected.Orden\n            )\n        },\n        If(\n            ((tarimaScrap.Cantidad - tbl_Scrap_SP_1.Selected.Cantidad) + txt_Edit_Cant_SP_1.Text) > 50,\n            UpdateContext(\n                {\n                    aviso: true,\n                    TextoAviso: \"La cantidad maxima por tarima es de 50 unidades\"\n                }\n            ),\n            Patch(\n                Scrap_Tarimas,\n                tarimaScrap,\n                {Cantidad: (tarimaScrap.Cantidad - tbl_Scrap_SP_1.Selected.Cantidad) + txt_Edit_Cant_SP_1.Text}\n            );\n            If(\n                tbl_Scrap_SP_1.Selected.Cantidad < Value(txt_Edit_Cant_SP_1.Text),\n                ClearCollect(//InspecionCalidadContenedor Asigna las cantidades buenas a los P/N correspondientes segun el contenedor seleccionado.\n                    colContenedor,\n                    Filter(\n                        Sort(\n                            InspeccionCalidadContenedors,\n                            Prioridad,\n                            SortOrder.Descending\n                        ),\n                        Nomenclatura = txt_Nomenclatura_SP.Text && 'P/N' = tbl_Scrap_SP_1.Selected.'P/N' && Value(Revisado) > 0\n                    )\n                );\n                UpdateContext({restante: Value(txt_Edit_Cant_SP_1.Text) - tbl_Scrap_SP_1.Selected.Cantidad});\n                With(\n                    {dato1: First(colContenedor)},\n                    If(\n                        dato1.Revisado >= restante,\n                        Patch(\n                            InspeccionCalidadContenedors,\n                            dato1,\n                            {Revisado: dato1.Revisado - restante}\n                        ),\n                        Patch(\n                            InspeccionCalidadContenedors,\n                            dato1,\n                            {Revisado: 0}\n                        );\n                        UpdateContext({restante: restante - dato1.Revisado});\n                        Remove(\n                            colContenedor,\n                            dato1\n                        );\n                        With(\n                            {dato2: First(colContenedor)},\n                            If(\n                                restante <= dato2.Revisado,\n                                Patch(\n                                    InspeccionCalidadContenedors,\n                                    dato2,\n                                    {Revisado: dato2.Revisado - restante}\n                                ),\n                                Patch(\n                                    InspeccionCalidadContenedors,\n                                    dato2,\n                                    {Revisado: 0}\n                                );\n                                UpdateContext({restante: restante - dato2.Revisado});\n                                Remove(\n                                    colContenedor,\n                                    dato2\n                                );\n                                With(\n                                    {dato3: First(colContenedor)},\n                                    Patch(\n                                        InspeccionCalidadContenedors,\n                                        dato3,\n                                        {Revisado: dato3.Revisado - restante}\n                                    )\n                                )\n                            )\n                        )\n                    )\n                ),\n                ClearCollect(//InspecionCalidadContenedor Asigna las cantidades buenas a los P/N correspondientes segun el contenedor seleccionado.\n                    colContenedor,\n                    Filter(\n                        Sort(\n                            InspeccionCalidadContenedors,\n                            Prioridad,\n                            SortOrder.Ascending\n                        ),\n                        Nomenclatura = txt_Nomenclatura_SP.Text && 'P/N' = tbl_Scrap_SP_1.Selected.'P/N' && Value(Revisado) < Value(Cantidad)\n                    )\n                );\n                UpdateContext({restante: tbl_Scrap_SP_1.Selected.Cantidad - Value(txt_Edit_Cant_SP_1.Text)});\n                With(\n                    {dato1: First(colContenedor)},\n                    If(\n                        restante + dato1.Revisado <= dato1.Cantidad,\n                        Patch(\n                            InspeccionCalidadContenedors,\n                            dato1,\n                            {Revisado: dato1.Revisado + restante}\n                        ),\n                        Patch(\n                            InspeccionCalidadContenedors,\n                            dato1,\n                            {Revisado: dato1.Revisado + (dato1.Cantidad - dato1.Revisado)}\n                        );\n                        UpdateContext({restante: restante - (dato1.Cantidad - dato1.Revisado)});\n                        Remove(\n                            colContenedor,\n                            dato1\n                        );\n                        If(\n                            IsEmpty(colContenedor),\n                            Patch(\n                                InspeccionCalidadContenedors,\n                                dato1,\n                                {Revisado: dato1.Revisado + restante}\n                            ),\n                            With(\n                                {dato2: First(colContenedor)},\n                                If(\n                                    restante + dato2.Revisado <= dato2.Cantidad,\n                                    Patch(\n                                        InspeccionCalidadContenedors,\n                                        dato2,\n                                        {Revisado: dato2.Revisado + restante}\n                                    ),\n                                    Patch(\n                                        InspeccionCalidadContenedors,\n                                        dato2,\n                                        {Revisado: dato2.Revisado + (dato2.Cantidad - dato2.Revisado)}\n                                    );\n                                    UpdateContext({restante: restante - (dato2.Cantidad - dato2.Revisado)});\n                                    Remove(\n                                        colContenedor,\n                                        dato2\n                                    );\n                                    If(\n                                        IsEmpty(colContenedor),\n                                        Patch(\n                                            InspeccionCalidadContenedors,\n                                            dato2,\n                                            {Revisado: dato2.Revisado + restante}\n                                        ),\n                                        With(\n                                            {dato3: First(colContenedor)},\n                                            Patch(\n                                                InspeccionCalidadContenedors,\n                                                dato3,\n                                                {Revisado: dato3.Revisado + restante}\n                                            )\n                                        )\n                                    )\n                                )\n                            )\n                        )\n                    )\n                )\n            );\n            Patch(\n                Scrap_1,\n                tbl_Scrap_SP_1.Selected,\n                {\n                    Operario: drp_Edit_Operario_SP_1.Selected.Nombre,\n                    Turno: drp_Edit_Turno_SP_1.Selected.Turno_Op,\n                    Ubicacion: txt_Edit_Zona_SP_1.Text,\n                    Maquina: drp_Edit_Maquina_SP_1.Selected.M,\n                    Bache: Value(txt_Edit_Bache_SP_1.Text),\n                    Cantidad: Value(txt_Edit_Cant_SP_1.Text),\n                    Usuario: txt_User_Sp_1.Text\n                }\n            );\n            Reset(drp_Edit_Maquina_SP_1);\n            Reset(drp_Edit_Operario_SP_1);\n            Reset(drp_Edit_Turno_SP_1);\n            Reset(txt_Edit_Zona_SP_1);\n            Reset(txt_Edit_Bache_SP_1);\n            Reset(txt_Edit_Cant_SP_1);\n            UpdateContext({Editar: false})\n        )\n    );\n    \n)"
                   PressedBorderColor: =Self.Fill
                   PressedColor: =Self.Fill
                   PressedFill: =Self.Color
