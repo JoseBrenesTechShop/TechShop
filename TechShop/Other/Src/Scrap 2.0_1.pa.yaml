@@ -1501,16 +1501,17 @@ Screens:
                                             Codigo: drp_Operario_SP_1.Selected.Codigo,
                                             Operario: drp_Operario_SP_1.Selected.Nombre,
                                             Turno: drp_Turno_SP_1.Selected.Turno_Op,
-                                            Bache: If(
+                                            Bache: Value(txt_Bache_SP_1.Text),
+                                            /*If(
                                                 IsBlank(
                                                     LookUp(
-                                                        Scrap_1,
+                                                        Scrap_1;
                                                         Orden = drp_Orden_SP_1.Selected.Value && Tarima = Upper(txt_Tarima_SP_1.Text)
                                                     )
-                                                ),
-                                                Value(txt_Bache_SP_1.Text),
+                                                );
+                                                Value(txt_Bache_SP_1.Text);
                                                 0
-                                            ),
+                                            );*/
                                             Cantidad: Value(txt_Cant_SP_1.Text),
                                             Tarima: Upper(txt_Tarima_SP_1.Text),
                                             Inspeccion: drp_Insepccion_SP_1.Selected.Value,
@@ -2527,7 +2528,7 @@ Screens:
                         {
                             tarimaScrap: LookUp(
                                 Scrap_Tarimas,
-                                Tarima = tbl_Scrap_SP_1.Selected.Tarima && Orden = tbl_Scrap_SP_1.Selected.Orden && Operacion = Text(tbl_Scrap_SP_1.Selected.OP)
+                                Tarima = tbl_Scrap_SP_1.Selected.Tarima && Orden = tbl_Scrap_SP_1.Selected.Orden
                             )
                         },
                         Patch(
@@ -2589,7 +2590,7 @@ Screens:
                   HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
                   HoverColor: =RGBA(255, 255, 255, 1)
                   HoverFill: =RGBA(21, 68, 18, 1)
-                  OnSelect: "=If(\n    IsBlank(drp_Edit_Maquina_SP_1.Selected) || IsBlank(drp_Edit_Turno_SP_1.Selected) || IsBlank(txt_Edit_Zona_SP_1.Text) || IsBlank(drp_Edit_Operario_SP_1.Selected) || IsBlank(txt_Edit_Bache_SP_1.Text) || IsBlank(txt_Edit_Cant_SP_1.Text),\n    UpdateContext(\n        {\n            aviso: true,\n            TextoAviso: \"Debe llenar todos los campos\"\n        }\n    ),\n    With(\n        {\n            tarimaScrap: LookUp(\n                Scrap_Tarimas,\n                Tarima = tbl_Scrap_SP.Selected.Tarima && Orden = tbl_Scrap_SP.Selected.Orden && Operacion = Text(tbl_Scrap_SP.Selected.OP)\n            )\n        },\n        If(\n            ((tarimaScrap.Cantidad - tbl_Scrap_SP.Selected.Cantidad) + txt_Edit_Cant_SP.Text) > 50,\n            UpdateContext(\n                {\n                    aviso: true,\n                    TextoAviso: \"La cantidad maxima por tarima es de 50 unidades\"\n                }\n            ),\n            Patch(\n                Scrap_Tarimas,\n                tarimaScrap,\n                {Cantidad: (tarimaScrap.Cantidad - tbl_Scrap_SP.Selected.Cantidad) + txt_Edit_Cant_SP.Text}\n            );\n            Patch(\n                Scrap_1,\n                tbl_Scrap_SP.Selected,\n                {\n                    Operario: drp_Edit_Operario_SP.Selected.Nombre,\n                    Turno: drp_Edit_Turno_SP.Selected.Turno_Op,\n                    Ubicacion: txt_Edit_Zona_SP.Text,\n                    Maquina: drp_Edit_Maquina_SP.Selected.M,\n                    Bache: Value(txt_Edit_Bache_SP.Text),\n                    Cantidad: Value(txt_Edit_Cant_SP.Text),\n                    Usuario: txt_User_Sp.Text\n                }\n            );\n            Reset(drp_Edit_Maquina_SP);\n            Reset(drp_Edit_Operario_SP);\n            Reset(drp_Edit_Turno_SP);\n            Reset(txt_Edit_Zona_SP);\n            Reset(txt_Edit_Bache_SP);\n            Reset(txt_Edit_Cant_SP);\n            UpdateContext({Editar: false})\n        )\n    );\n    \n)"
+                  OnSelect: "=If(\n    IsBlank(drp_Edit_Maquina_SP_1.Selected) || IsBlank(drp_Edit_Turno_SP_1.Selected) || IsBlank(txt_Edit_Zona_SP_1.Text) || IsBlank(drp_Edit_Operario_SP_1.Selected) || IsBlank(txt_Edit_Bache_SP_1.Text) || IsBlank(txt_Edit_Cant_SP_1.Text),\n    UpdateContext(\n        {\n            aviso: true,\n            TextoAviso: \"Debe llenar todos los campos\"\n        }\n    ),\n    With(\n        {\n            tarimaScrap: LookUp(\n                Scrap_Tarimas,\n                Tarima = tbl_Scrap_SP.Selected.Tarima && Orden = tbl_Scrap_SP.Selected.Orden\n            )\n        },\n        If(\n            ((tarimaScrap.Cantidad - tbl_Scrap_SP.Selected.Cantidad) + txt_Edit_Cant_SP.Text) > 50,\n            UpdateContext(\n                {\n                    aviso: true,\n                    TextoAviso: \"La cantidad maxima por tarima es de 50 unidades\"\n                }\n            ),\n            Patch(\n                Scrap_Tarimas,\n                tarimaScrap,\n                {Cantidad: (tarimaScrap.Cantidad - tbl_Scrap_SP.Selected.Cantidad) + txt_Edit_Cant_SP.Text}\n            );\n            Patch(\n                Scrap_1,\n                tbl_Scrap_SP.Selected,\n                {\n                    Operario: drp_Edit_Operario_SP.Selected.Nombre,\n                    Turno: drp_Edit_Turno_SP.Selected.Turno_Op,\n                    Ubicacion: txt_Edit_Zona_SP.Text,\n                    Maquina: drp_Edit_Maquina_SP.Selected.M,\n                    Bache: Value(txt_Edit_Bache_SP.Text),\n                    Cantidad: Value(txt_Edit_Cant_SP.Text),\n                    Usuario: txt_User_Sp.Text\n                }\n            );\n            Reset(drp_Edit_Maquina_SP);\n            Reset(drp_Edit_Operario_SP);\n            Reset(drp_Edit_Turno_SP);\n            Reset(txt_Edit_Zona_SP);\n            Reset(txt_Edit_Bache_SP);\n            Reset(txt_Edit_Cant_SP);\n            UpdateContext({Editar: false})\n        )\n    );\n    \n)"
                   PressedBorderColor: =Self.Fill
                   PressedColor: =Self.Fill
                   PressedFill: =Self.Color
