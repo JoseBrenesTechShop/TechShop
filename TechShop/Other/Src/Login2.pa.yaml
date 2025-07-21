@@ -63,7 +63,51 @@ Screens:
                   HoverBorderColor: =RGBA(15, 108, 189, 1)
                   HoverColor: =RGBA(255, 255, 255, 1)
                   HoverFill: =RGBA(15, 108, 189, 1)
-                  OnSelect: =
+                  OnSelect: |-
+                    =UpdateContext(
+                        {
+                            Valida: LookUp(
+                                Empleados,
+                                txt_Codigo_Lg.Text = Codigo,
+                                Contraseña
+                            )
+                        }
+                    );
+                    If(
+                        IsNumeric(txt_Codigo_Lg.Text),
+                        If(
+                            Valida = txt_Contrasena_Lg.Text,
+                            Set(
+                                VarName,
+                                txt_Codigo_Lg.Text
+                            );
+                            If(
+                                Text(
+                                    Today(),
+                                    "dd/mm/yyyy"
+                                ) = "14/02/2025",
+                                Navigate(
+                                    Screen1,
+                                    ScreenTransition.Fade
+                                ),
+                                Navigate(
+                                    MenuPrincipal,
+                                    ScreenTransition.Fade
+                                )
+                            );
+                            Reset(txt_Codigo_Lg);
+                            Reset(txt_Contrasena_Lg);
+                            UpdateContext({Varpw_visible: false}),
+                            Notify(
+                                "El usuario y la contrasena no coinciden, por favor verificar los datos",
+                                NotificationType.Error
+                            )
+                        ),
+                        Notify(
+                            "El usuario y la contrasena no coinciden, por favor verificar los datos",
+                            NotificationType.Error
+                        )
+                    )
                   PressedBorderColor: =RGBA(15, 108, 189, 1)
                   PressedFill: =RGBA(15, 108, 189, 1)
                   RadiusBottomLeft: =12
