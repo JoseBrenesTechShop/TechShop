@@ -3,6 +3,14 @@ EmbalajeEditor As screen:
     Fill: =Color.White
     ImagePosition: =ImagePosition.Fill
     LoadingSpinnerColor: =App.Theme.Colors.Primary
+    OnVisible: |-
+        =ClearCollect(
+          EdicionContenedor,
+          AddColumns(
+            Filter(ContenedorPNS_2, Nomenclatura = txt_Nomenclatura_EC.Text),
+            Operation, "None"
+          )
+        );
 
     ScreenContainer_EC_1 As groupContainer.verticalAutoLayoutContainer:
         DropShadow: =DropShadow.Light
@@ -525,109 +533,7 @@ EmbalajeEditor As screen:
                             Height: =35
                             HoverColor: =RGBA(255, 255, 255, 1)
                             HoverFill: =RGBA(15, 84, 140, 1)
-                            OnSelect: |
-                                =If(
-                                    !IsNumeric(txt_CantidadDato_EM_2.Text) || Value(txt_CantidadDato_EM_2.Text) <= 0 || IsBlank(txt_PNDato_EM_2.Text),
-                                    UpdateContext(
-                                        {
-                                            mensajeNotificacion: "Todos los campos son obligatorios y la cantidad debe ser mayor a 0.",
-                                            MostrarAviso: true,
-                                            Disable: true
-                                        }
-                                    ),
-                                    UpdateContext({isSaving: true}),
-                                    If(
-                                        IsBlank(
-                                            LookUp(
-                                                ContenedorPNS_2,
-                                                'P/N' = txt_PNDato_EM_2.Text && Nomenclatura = txt_Nomenclatura_EC.Text
-                                            )
-                                        ),
-                                        Collect(
-                                            ContenedorPNS_2,
-                                            {
-                                                'P/N': txt_PNDato_EM_2.Text,
-                                                Cantidad: Value(txt_CantidadDato_EM_2.Text),
-                                                Cantidad_Tarima: Value(txt_CantidadTarimaDato_EM_2.Text),
-                                                Valor_Pieza: Value(txt_ValorPiezaDato_EM_2.Text),
-                                                Peso: Value(txt_PesoDato_EM_2.Text),
-                                                TipoCaja: LookUp(
-                                                    item,
-                                                    item = txt_PNDato_EM_2.Text,
-                                                    Uf_TipoCaja
-                                                ),
-                                                Tipo: LookUp(
-                                                    item,
-                                                    item = txt_PNDato_EM_2.Text,
-                                                    charfld4
-                                                ),
-                                                'NumContenedorP/N': gl_ListaContenedores_LE.Selected.Contenedor,
-                                                Nomenclatura: txt_Nomenclatura_EC.Text,
-                                                User: txt_User_EC.Text,
-                                                Cantidad_Total: Value(txt_CantidadTarimaDato_EM_2.Text * txt_CantidadDato_EM_2.Text),
-                                                Valor_Total: Value((txt_CantidadTarimaDato_EM_2.Text * txt_CantidadDato_EM_2.Text) * txt_ValorPiezaDato_EM_2.Text),
-                                                PesoTotal: Value((txt_CantidadTarimaDato_EM_2.Text * txt_CantidadDato_EM_2.Text) * txt_PesoDato_EM_2.Text)
-                                            }
-                                        );
-                                        Patch(
-                                            Contenedors_2,
-                                            gl_ListaContenedores_LE.Selected,
-                                            {
-                                                User: txt_User_EC.Text,
-                                                Cantidad_Total: Sum(
-                                                    gl_Contenedores_EC.AllItems,
-                                                    Cantidad_Total
-                                                ),
-                                                Peso_Total: Sum(
-                                                    gl_Contenedores_EC.AllItems,
-                                                    PesoTotal
-                                                ),
-                                                Valor_Total: Sum(
-                                                    gl_Contenedores_EC.AllItems,
-                                                    Valor_Total
-                                                )
-                                            }
-                                        ),
-                                        UpdateContext(
-                                            {
-                                                mensajeNotificacion: "Datos agregados exitosamente.",
-                                                MostrarAviso: true
-                                            }
-                                        ),
-                                        UpdateContext(
-                                            {
-                                                mensajeNotificacion: "El número de parte (PN) ya existe en los contenedores.",
-                                                MostrarAviso: true
-                                            }
-                                        )
-                                    )
-                                );
-                                Reset(txt_CantidadDato_EM_2);
-                                Reset(txt_PNDato_EM_2);
-                                UpdateContext({isSaving: false});
-                                UpdateContext({txt_Destino2: 0});
-                                UpdateContext({txt_Destino: ""});
-                            PressedFill: =RGBA(255, 255, 255, 1)
-                            Size: =15
-                            Text: ="Agregar"
-                            Visible: =!isEditing
-                            Width: =168
-                            X: =1171
-                            Y: =23
-                            ZIndex: =37
-
-                        btn_Editar_EM_3 As button:
-                            BorderColor: =RGBA(40, 134, 222, 1)
-                            BorderThickness: =3
-                            DisabledBorderColor: =RGBA(166, 166, 166, 1)
-                            DisabledColor: =RGBA(166, 166, 166, 1)
-                            DisabledFill: =RGBA(244, 244, 244, 1)
-                            Fill: =RGBA(40, 134, 222, 1)
-                            FontWeight: =FontWeight.Semibold
-                            Height: =35
-                            HoverColor: =RGBA(255, 255, 255, 1)
-                            HoverFill: =RGBA(15, 108, 189, 1)
-                            OnSelect: |
+                            OnSelect: |-
                                 =If(
                                     !IsNumeric(txt_CantidadDato_EM_2.Text) || Value(txt_CantidadDato_EM_2.Text) <= 0 || IsBlank(txt_PNDato_EM_2.Text),
                                     UpdateContext(
@@ -637,10 +543,22 @@ EmbalajeEditor As screen:
                                             Disable: true
                                         }
                                     ),
-                                    isEditing && !IsBlank(varRegistroSeleccionado),
-                                    Patch(
-                                        ContenedorPNS_2,
-                                        varRegistroSeleccionado,
+                                    !IsBlank(
+                                        LookUp(
+                                            EdicionContenedor,
+                                            'P/N' = txt_PNDato_EM_2.Text && Nomenclatura = txt_Nomenclatura_EC.Text
+                                        )
+                                    ),
+                                    UpdateContext(
+                                        {
+                                            mensajeNotificacion: "El número de parte (PN) ya existe en el contenedor.",
+                                            MostrarAviso: true,
+                                            Disable: true
+                                        }
+                                    ),
+                                    true,
+                                    Collect(
+                                        EdicionContenedor,
                                         {
                                             'P/N': txt_PNDato_EM_2.Text,
                                             Cantidad: Value(txt_CantidadDato_EM_2.Text),
@@ -661,43 +579,94 @@ EmbalajeEditor As screen:
                                             Nomenclatura: txt_Nomenclatura_EC.Text,
                                             User: txt_User_EC.Text,
                                             Cantidad_Total: Value(txt_CantidadTarimaDato_EM_2.Text) * Value(txt_CantidadDato_EM_2.Text),
-                                            Valor_Total: (Value(txt_CantidadTarimaDato_EM_2.Text) * Value(txt_CantidadDato_EM_2.Text)) * Value(txt_ValorPiezaDato_EM_2.Text),
-                                            PesoTotal: (Value(txt_CantidadTarimaDato_EM_2.Text) * Value(txt_CantidadDato_EM_2.Text)) * Value(txt_PesoDato_EM_2.Text)
+                                            Valor_Total: Value(txt_CantidadTarimaDato_EM_2.Text) * Value(txt_CantidadDato_EM_2.Text) * Value(txt_ValorPiezaDato_EM_2.Text),
+                                            PesoTotal: Value(txt_CantidadTarimaDato_EM_2.Text) * Value(txt_CantidadDato_EM_2.Text) * Value(txt_PesoDato_EM_2.Text),
+                                            Operation: "Add"
                                         }
-                                    );
-                                    Patch(
-                                        Contenedors_2,
-                                        gl_ListaContenedores_LE.Selected,
-                                        {
-                                            User: txt_User_EC.Text,
-                                            Cantidad_Total: Sum(
-                                                gl_Contenedores_EC.AllItems,
-                                                Cantidad_Total
-                                            ),
-                                            Peso_Total: Sum(
-                                                gl_Contenedores_EC.AllItems,
-                                                PesoTotal
-                                            ),
-                                            Valor_Total: Sum(
-                                                gl_Contenedores_EC.AllItems,
-                                                Valor_Total
-                                            )
-                                        }
-                                    );
+                                    ),
                                     UpdateContext(
                                         {
-                                            mensajeNotificacion: "Datos editados exitosamente.",
+                                            mensajeNotificacion: "Datos agregados exitosamente.",
+                                            MostrarAviso: true,
+                                            Disable: false
+                                        }
+                                    ),
+                                    Reset(txt_PNDato_EM_2),
+                                    Reset(txt_CantidadDato_EM_2)
+                                )
+                            PressedFill: =RGBA(255, 255, 255, 1)
+                            Size: =15
+                            Text: ="Agregar"
+                            Visible: =!isEditing
+                            Width: =168
+                            X: =1171
+                            Y: =23
+                            ZIndex: =37
+
+                        btn_Editar_EM_3 As button:
+                            BorderColor: =RGBA(40, 134, 222, 1)
+                            BorderThickness: =3
+                            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                            DisabledColor: =RGBA(166, 166, 166, 1)
+                            DisabledFill: =RGBA(244, 244, 244, 1)
+                            Fill: =RGBA(40, 134, 222, 1)
+                            FontWeight: =FontWeight.Semibold
+                            Height: =35
+                            HoverColor: =RGBA(255, 255, 255, 1)
+                            HoverFill: =RGBA(15, 108, 189, 1)
+                            OnSelect: |-
+                                =If(
+                                    !IsNumeric(txt_CantidadDato_EM_2.Text) || Value(txt_CantidadDato_EM_2.Text) <= 0 || IsBlank(txt_PNDato_EM_2.Text),
+                                    UpdateContext(
+                                        {
+                                            mensajeNotificacion: "Todos los campos son obligatorios y la cantidad debe ser un número mayor a 0.",
                                             MostrarAviso: true,
                                             Disable: true
                                         }
+                                    ),
+                                    isEditing && !IsBlank(varRegistroSeleccionado),
+                                    Patch(
+                                        EdicionContenedor,
+                                        varRegistroSeleccionado,
+                                        {
+                                            'P/N': txt_PNDato_EM_2.Text,
+                                            Cantidad: Value(txt_CantidadDato_EM_2.Text),
+                                            Cantidad_Tarima: Value(txt_CantidadTarimaDato_EM_2.Text),
+                                            Valor_Pieza: Value(txt_ValorPiezaDato_EM_2.Text),
+                                            Peso: Value(txt_PesoDato_EM_2.Text),
+                                            TipoCaja: LookUp(
+                                                item,
+                                                item = txt_PNDato_EM_2.Text,
+                                                Uf_TipoCaja
+                                            ),
+                                            Tipo: LookUp(
+                                                item,
+                                                item = txt_PNDato_EM_2.Text,
+                                                charfld4
+                                            ),
+                                            Cantidad_Total: Value(txt_CantidadTarimaDato_EM_2.Text) * Value(txt_CantidadDato_EM_2.Text),
+                                            Valor_Total: Value(txt_CantidadTarimaDato_EM_2.Text) * Value(txt_CantidadDato_EM_2.Text) * Value(txt_ValorPiezaDato_EM_2.Text),
+                                            PesoTotal: Value(txt_CantidadTarimaDato_EM_2.Text) * Value(txt_CantidadDato_EM_2.Text) * Value(txt_PesoDato_EM_2.Text),
+                                            Operation: If(
+                                                LookUp(
+                                                    EdicionContenedor,
+                                                    ID = varRegistroSeleccionado.ID
+                                                ).Operation = "Add",
+                                                "Add",
+                                                "Update"
+                                            )
+                                        }
+                                    ),
+                                    UpdateContext(
+                                        {
+                                            mensajeNotificacion: "Datos editados en el buffer exitosamente.",
+                                            MostrarAviso: true,
+                                            Disable: false,
+                                            isEditing: false,
+                                            varRegistroSeleccionado: Blank()
+                                        }
                                     )
-                                );
-                                UpdateContext({
-                                    isEditing: Blank(), 
-                                    varRegistroSeleccionado: Blank(),
-                                    txt_Destino: Blank(),
-                                    txt_Destino2: Blank()
-                                });
+                                )
                             Size: =15
                             Text: ="Editar"
                             Visible: =isEditing
@@ -750,7 +719,7 @@ EmbalajeEditor As screen:
                             BorderColor: =RGBA(0, 18, 107, 1)
                             DelayItemLoading: =true
                             Height: =487
-                            Items: =Filter(ContenedorPNS_2, Nomenclatura = txt_Nomenclatura_EC.Text)
+                            Items: =Filter( EdicionContenedor, Nomenclatura = txt_Nomenclatura_EC.Text )
                             Layout: =Layout.Vertical
                             LoadingSpinner: =LoadingSpinner.Data
                             TemplatePadding: =0
@@ -1895,7 +1864,7 @@ EmbalajeEditor As screen:
                         Y: =5
                         ZIndex: =14
 
-                    btn_Agregar_EM_6 As button:
+                    "'btn_guardar cambios' As button":
                         BorderColor: =RGBA(40, 134, 222, 1)
                         BorderThickness: =3
                         DisabledBorderColor: =RGBA(166, 166, 166, 1)
@@ -1908,88 +1877,10 @@ EmbalajeEditor As screen:
                         Height: =34
                         HoverColor: =RGBA(255, 255, 255, 1)
                         HoverFill: =RGBA(15, 84, 140, 1)
-                        OnSelect: |
-                            =If(
-                                !IsNumeric(txt_CantidadDato_EM_2.Text) || Value(txt_CantidadDato_EM_2.Text) <= 0 || IsBlank(txt_PNDato_EM_2.Text),
-                                UpdateContext(
-                                    {
-                                        mensajeNotificacion: "Todos los campos son obligatorios y la cantidad debe ser mayor a 0.",
-                                        MostrarAviso: true,
-                                        Disable: true
-                                    }
-                                ),
-                                UpdateContext({isSaving: true}),
-                                If(
-                                    IsBlank(
-                                        LookUp(
-                                            ContenedorPNS_2,
-                                            'P/N' = txt_PNDato_EM_2.Text && Nomenclatura = txt_Nomenclatura_EC.Text
-                                        )
-                                    ),
-                                    Collect(
-                                        ContenedorPNS_2,
-                                        {
-                                            'P/N': txt_PNDato_EM_2.Text,
-                                            Cantidad: Value(txt_CantidadDato_EM_2.Text),
-                                            Cantidad_Tarima: Value(txt_CantidadTarimaDato_EM_2.Text),
-                                            Valor_Pieza: Value(txt_ValorPiezaDato_EM_2.Text),
-                                            Peso: Value(txt_PesoDato_EM_2.Text),
-                                            TipoCaja: LookUp(
-                                                item,
-                                                item = txt_PNDato_EM_2.Text,
-                                                Uf_TipoCaja
-                                            ),
-                                            Tipo: LookUp(
-                                                item,
-                                                item = txt_PNDato_EM_2.Text,
-                                                charfld4
-                                            ),
-                                            'NumContenedorP/N': gl_ListaContenedores_LE.Selected.Contenedor,
-                                            Nomenclatura: txt_Nomenclatura_EC.Text,
-                                            User: txt_User_EC.Text,
-                                            Cantidad_Total: Value(txt_CantidadTarimaDato_EM_2.Text * txt_CantidadDato_EM_2.Text),
-                                            Valor_Total: Value((txt_CantidadTarimaDato_EM_2.Text * txt_CantidadDato_EM_2.Text) * txt_ValorPiezaDato_EM_2.Text),
-                                            PesoTotal: Value((txt_CantidadTarimaDato_EM_2.Text * txt_CantidadDato_EM_2.Text) * txt_PesoDato_EM_2.Text)
-                                        }
-                                    );
-                                    Patch(
-                                        Contenedors_2,
-                                        gl_ListaContenedores_LE.Selected,
-                                        {
-                                            User: txt_User_EC.Text,
-                                            Cantidad_Total: Sum(
-                                                gl_Contenedores_EC.AllItems,
-                                                Cantidad_Total
-                                            ),
-                                            Peso_Total: Sum(
-                                                gl_Contenedores_EC.AllItems,
-                                                PesoTotal
-                                            ),
-                                            Valor_Total: Sum(
-                                                gl_Contenedores_EC.AllItems,
-                                                Valor_Total
-                                            )
-                                        }
-                                    ),
-                                    UpdateContext(
-                                        {
-                                            mensajeNotificacion: "Datos agregados exitosamente.",
-                                            MostrarAviso: true
-                                        }
-                                    ),
-                                    UpdateContext(
-                                        {
-                                            mensajeNotificacion: "El número de parte (PN) ya existe en los contenedores.",
-                                            MostrarAviso: true
-                                        }
-                                    )
-                                )
-                            );
-                            Reset(txt_CantidadDato_EM_2);
-                            Reset(txt_PNDato_EM_2);
-                            UpdateContext({isSaving: false});
-                            UpdateContext({txt_Destino2: 0});
-                            UpdateContext({txt_Destino: ""});
+                        OnSelect: |+
+                            =
+                                UpdateContext({ Revision: true })
+                            
                         PressedFill: =RGBA(255, 255, 255, 1)
                         Size: =15
                         Text: ="Guardar Cambios"
@@ -1999,62 +1890,20 @@ EmbalajeEditor As screen:
                         Y: =113
                         ZIndex: =15
 
-    cnt_Comentario_EC_1 As groupContainer.manualLayoutContainer:
-        BorderColor: =RGBA(255, 191, 0, 1)
-        BorderThickness: =5
-        DropShadow: =DropShadow.ExtraBold
-        Fill: =RGBA(255, 255, 255, 1)
-        Height: =210
-        RadiusBottomLeft: =20
-        RadiusBottomRight: =20
-        RadiusTopLeft: =20
-        RadiusTopRight: =20
-        Visible: =MostrarAviso
-        Width: =648
-        X: =400
-        Y: =300
+    Capa1_11 As groupContainer.manualLayoutContainer:
+        BorderColor: =RGBA(0, 0, 0, 0)
+        DropShadow: =DropShadow.Light
+        Fill: =RGBA(0, 0, 0, 0.12)
+        Height: =665
+        RadiusBottomLeft: =4
+        RadiusBottomRight: =4
+        RadiusTopLeft: =4
+        RadiusTopRight: =4
+        Visible: =Revision
+        Width: =1355
+        X: =5
+        Y: =97
         ZIndex: =2
-
-        txt_MensajeNoti_EC_1 As label:
-            Align: =Align.Center
-            BorderColor: =App.Theme.Colors.Darker40
-            Color: =RGBA(0, 0, 0, 1)
-            DisabledColor: =RGBA(166, 166, 166, 1)
-            Font: =Font.Arial
-            Height: =129
-            Size: =20
-            Text: =mensajeNotificacion
-            Width: =619
-            X: =18
-            Y: =11
-            ZIndex: =69
-
-        btn_Aceptar_EC_1 As button:
-            BorderColor: =RGBA(52, 152, 47, 1)
-            DisabledBorderColor: =RGBA(166, 166, 166, 1)
-            DisabledColor: =RGBA(166, 166, 166, 1)
-            DisabledFill: =RGBA(244, 244, 244, 1)
-            Fill: =RGBA(52, 152, 47, 1)
-            FontWeight: =FontWeight.Bold
-            Height: =50
-            HoverBorderColor: =RGBA(180, 214, 250, 1)
-            HoverColor: =RGBA(255, 255, 255, 1)
-            HoverFill: =RGBA(52, 152, 47, 1)
-            OnSelect: |-
-                =UpdateContext(
-                    {
-                        MostrarAviso: false,
-                        Disable: false,
-                        mensajeNotificacion: ""
-                    }
-                )
-            PressedBorderColor: =RGBA(52, 152, 47, 1)
-            Size: =15
-            Text: ="Aceptar"
-            Width: =180
-            X: =235
-            Y: =150
-            ZIndex: =71
 
     cnt_Eliminar_HxHR_3 As groupContainer.manualLayoutContainer:
         BorderColor: =RGBA(215, 58, 60, 1)
@@ -2103,37 +1952,22 @@ EmbalajeEditor As screen:
             FontWeight: =FontWeight.Semibold
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(138, 10, 10, 1)
-            OnSelect: |-
-                =Remove(
-                    ContenedorPNS_2,
+            OnSelect: |
+                =If(
+                  true,
+                
+                  Remove(
+                    EdicionContenedor,
                     Eliminar.item
-                );
-                Patch(
-                    Contenedors_2,
-                    gl_ListaContenedores_LE.Selected,
+                  ),
+                  UpdateContext(
                     {
-                        User: txt_User_EC.Text,
-                        Cantidad_Total: Sum(
-                            gl_Contenedores_EC.AllItems,
-                            Cantidad_Total
-                        ),
-                        Peso_Total: Sum(
-                            gl_Contenedores_EC.AllItems,
-                            PesoTotal
-                        ),
-                        Valor_Total: Sum(
-                            gl_Contenedores_EC.AllItems,
-                            Valor_Total
-                        )
+                      mensajeNotificacion: "Eliminado Exitosamente.",
+                      MostrarAviso: true,
+                      Disable: false,
+                      Eliminar: { Ver: false, item: Blank() }
                     }
-                );
-                UpdateContext(
-                    {
-                        Eliminar: {
-                            Ver: false,
-                            item: Blank()
-                        }
-                    }
+                  )
                 )
             Size: =15
             Text: ="Eliminar"
@@ -2156,4 +1990,809 @@ EmbalajeEditor As screen:
             X: =29
             Y: =83
             ZIndex: =3
+
+    Container72_4 As groupContainer.manualLayoutContainer:
+        BorderColor: =RGBA(40, 134, 222, 1)
+        BorderThickness: =4
+        DropShadow: =DropShadow.ExtraBold
+        Fill: =RGBA(255, 255, 255, 1)
+        Height: =485
+        RadiusBottomLeft: =5
+        RadiusBottomRight: =5
+        RadiusTopLeft: =5
+        RadiusTopRight: =5
+        Visible: =Revision
+        Width: =501
+        X: =68
+        Y: =259
+        ZIndex: =4
+
+        lbl_PNDato_EM_254 As Texto:
+            Align: ='TextCanvas.Align'.Center
+            AutoHeight: =false
+            BorderColor: =RGBA(40, 134, 222, 1)
+            BorderStyle: =BorderStyle.Solid
+            BorderThickness: =0.5
+            ContentLanguage: =""
+            DisplayMode: =DisplayMode.Edit
+            Fill: =RGBA(180, 214, 250, 1)
+            Font: =""
+            FontItalic: =false
+            FontStrikethrough: =false
+            FontUnderline: =false
+            Height: =25
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =16
+            TabIndex: =0
+            Text: ="Cantidad"
+            Tooltip: =""
+            VerticalAlign: =""
+            Visible: =true
+            Weight: ='TextCanvas.Weight'.Bold
+            Width: =225
+            Wrap: =true
+            X: =276
+            Y: =0
+            ZIndex: =1
+
+        lbl_PNDato_EM_255 As Texto:
+            Align: ='TextCanvas.Align'.Center
+            AutoHeight: =false
+            BorderColor: =RGBA(40, 134, 222, 1)
+            BorderStyle: =BorderStyle.Solid
+            BorderThickness: =0.5
+            ContentLanguage: =""
+            DisplayMode: =DisplayMode.Edit
+            Fill: =RGBA(180, 214, 250, 1)
+            Font: =""
+            FontColor: =RGBA(0, 0, 0, 1)
+            FontItalic: =false
+            FontStrikethrough: =false
+            FontUnderline: =false
+            Height: =25
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =16
+            TabIndex: =0
+            Text: ="P/N"
+            Tooltip: =""
+            VerticalAlign: =""
+            Visible: =true
+            Weight: ='TextCanvas.Weight'.Bold
+            Width: =240
+            Wrap: =true
+            X: =36
+            Y: =0
+            ZIndex: =2
+
+        "gl_Contenedores_EM_9 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+            '#CopilotOverlayLabel': ="Filtrada"
+            BorderColor: =RGBA(0, 18, 107, 1)
+            DelayItemLoading: =true
+            Height: =460
+            Items: =EdicionContenedor
+            Layout: =Layout.Vertical
+            LoadingSpinner: =LoadingSpinner.Data
+            OnSelect: =
+            TemplatePadding: =0
+            TemplateSize: =30
+            Transition: =Transition.Pop
+            Width: =501
+            Y: =25
+            ZIndex: =3
+
+            txt_Cantidad_EC_11 As text:
+                Align: =Align.Center
+                BorderColor: =RGBA(40, 134, 222, 1)
+                BorderThickness: =0.5
+                Color: =If(ThisItem.'P/N' = Eliminar.item.'P/N' || ThisItem.'P/N' = txt_Destino, RGBA(255, 255, 255, 1))
+                Default: |
+                    =ThisItem.Cantidad_Total
+                      - Sum(
+                          Filter(
+                            gl_Contenedores_EM_10.AllItems,
+                            'P/N' = ThisItem.'P/N'
+                          ),
+                          Coalesce(Value(txt_Cantidad_2.Text), 0)
+                        )
+                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                DisabledColor: =If(ThisItem.'P/N' = Eliminar.item.'P/N' || ThisItem.'P/N' = txt_Destino, RGBA(255, 255, 255, 1))
+                DisabledFill: =If(ThisItem.'P/N' = Eliminar.item.'P/N'  || ThisItem.'P/N' = txt_Destino, RGBA(15, 108, 189, 1), RGBA(255, 255, 255, 1))
+                DisplayMode: =DisplayMode.Disabled
+                Fill: =If(ThisItem.'P/N' = Eliminar.item.'P/N'  || ThisItem.'P/N' = txt_Destino, RGBA(15, 108, 189, 1), RGBA(255, 255, 255, 1))
+                FocusedBorderThickness: =4
+                Font: =App.Theme.Font
+                Height: =30
+                HintText: =""
+                HoverBorderColor: =App.Theme.Colors.Darker40
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =App.Theme.Colors.Lighter70
+                OnSelect: =
+                PaddingLeft: =5
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =15
+                Width: =225
+                X: =276
+                ZIndex: =1
+
+            txt_PN_EC_9 As text:
+                Align: =Align.Center
+                BorderColor: =RGBA(40, 134, 222, 1)
+                BorderThickness: =0.5
+                Color: =If(ThisItem.'P/N' = Eliminar.item.'P/N' || ThisItem.'P/N' = txt_Destino, RGBA(255, 255, 255, 1))
+                Default: =ThisItem.'P/N'
+                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                DisabledColor: =If(ThisItem.'P/N' = Eliminar.item.'P/N' || ThisItem.'P/N' = txt_Destino, RGBA(255, 255, 255, 1))
+                DisabledFill: =If(ThisItem.'P/N' = Eliminar.item.'P/N'  || ThisItem.'P/N' = txt_Destino, RGBA(15, 108, 189, 1), RGBA(255, 255, 255, 1))
+                DisplayMode: =DisplayMode.Disabled
+                Fill: =If(ThisItem.'P/N' = Eliminar.item.'P/N'  || ThisItem.'P/N' = txt_Destino, RGBA(15, 108, 189, 1), RGBA(255, 255, 255, 1))
+                FocusedBorderThickness: =4
+                Font: =App.Theme.Font
+                FontWeight: =FontWeight.Semibold
+                Height: =30
+                HintText: =""
+                HoverBorderColor: =App.Theme.Colors.Darker40
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =App.Theme.Colors.Lighter70
+                OnSelect: =
+                PaddingLeft: =5
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =15
+                Width: =240
+                X: =36
+                ZIndex: =2
+
+            Rectangle47_2 As rectangle:
+                BorderColor: =App.Theme.Colors.Darker40
+                DisplayMode: =If(/*isSaving ||*/ isEditing || Disable, DisplayMode.Disabled, DisplayMode.Edit)
+                Fill: |
+                    =If(
+                        Value(txt_Cantidad_EC_11.Text) < 0,
+                        RGBA(255, 0, 0, 0.30), 
+                        Color.Transparent
+                    )
+                Height: =30
+                HoverFill: =RGBA(180, 214, 250, 0.28)
+                OnSelect: |-
+                    =
+                    If(
+                    
+                      CountRows( Filter( RevisionCalidad, cantidadDigitar = 0 ) ) > 0,
+                      
+                        UpdateContext({
+                          mensajeNotificacion: "Digitar la cantidad antes de continuar agregando",
+                          MostrarAviso: true,
+                          Disable: true
+                        }),
+                      
+                      Value( txt_Cantidad_EC_11.Text ) > 0,
+                      
+                        Collect(
+                          RevisionCalidad,
+                          AddColumns(
+                            Table( ThisItem ),
+                            txt_prioridad, CountRows( RevisionCalidad ) + 1,
+                            cantidadDigitar, 0
+                          )
+                        ),
+                        Reset( txt_Cantidad_EC_11 ),
+                      
+                      UpdateContext({
+                        mensajeNotificacion: "No se puede agregar: la cantidad debe ser mayor a cero.",
+                        MostrarAviso: true,
+                        Disable: true
+                      })
+                    )
+                PressedFill: =RGBA(40, 40, 222, 0.3)
+                Width: =465
+                X: =36
+                ZIndex: =3
+
+            icn_Editar_EC_9 As icon:
+                BorderColor: =RGBA(40, 134, 222, 1)
+                BorderThickness: =0.5
+                Color: =If(ThisItem.'P/N' = Eliminar.item.'P/N'  || ThisItem.'P/N' = txt_Destino ,RGBA(255, 255, 255, 1), RGBA(52, 152, 47, 1))
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                DisabledColor: =RGBA(244, 244, 244, 1)
+                DisplayMode: =If(/*isSaving ||*/ isEditing || Disable, DisplayMode.Disabled, DisplayMode.Edit)
+                Fill: |
+                    =If(
+                        Value(txt_Cantidad_EC_11.Text) < 0,
+                        RGBA(255, 0, 0, 0.30), 
+                        Color.Transparent
+                    )
+                FocusedBorderThickness: =20
+                Height: =30
+                HoverBorderColor: =RGBA(52, 152, 47, 1)
+                HoverColor: =RGBA(52, 152, 47, 1)
+                HoverFill: =RGBA(202, 240, 192, 1)
+                Icon: =Icon.Search
+                OnSelect: |-
+                    =UpdateContext({ VerMaquinas: true })
+                PaddingBottom: =2
+                PaddingLeft: =2
+                PaddingRight: =2
+                PaddingTop: =2
+                Width: =36
+                ZIndex: =4
+
+        lbl_PNDato_EM_256 As Texto:
+            Align: ='TextCanvas.Align'.Center
+            AutoHeight: =false
+            BorderColor: =RGBA(40, 134, 222, 1)
+            BorderStyle: =BorderStyle.Solid
+            BorderThickness: =0.5
+            ContentLanguage: =""
+            DisplayMode: =DisplayMode.Edit
+            Fill: =RGBA(180, 214, 250, 1)
+            Font: =""
+            FontColor: =RGBA(0, 0, 0, 1)
+            FontItalic: =false
+            FontStrikethrough: =false
+            FontUnderline: =false
+            Height: =25
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =16
+            TabIndex: =0
+            Text: =
+            Tooltip: =""
+            VerticalAlign: =""
+            Visible: =true
+            Weight: ='TextCanvas.Weight'.Bold
+            Width: =36
+            Wrap: =true
+            X: =0
+            Y: =0
+            ZIndex: =4
+
+    Container72_5 As groupContainer.manualLayoutContainer:
+        BorderColor: =RGBA(40, 134, 222, 1)
+        BorderThickness: =4
+        DropShadow: =DropShadow.ExtraBold
+        Fill: =RGBA(255, 255, 255, 1)
+        Height: =486
+        RadiusBottomLeft: =5
+        RadiusBottomRight: =5
+        RadiusTopLeft: =5
+        RadiusTopRight: =5
+        Visible: =Revision
+        Width: =718
+        X: =589
+        Y: =259
+        ZIndex: =5
+
+        lbl_PNDato_EM_257 As Texto:
+            Align: ='TextCanvas.Align'.Center
+            AutoHeight: =false
+            BorderColor: =RGBA(40, 134, 222, 1)
+            BorderStyle: =BorderStyle.Solid
+            BorderThickness: =0.5
+            ContentLanguage: =""
+            DisplayMode: =DisplayMode.Edit
+            Fill: =RGBA(180, 214, 250, 1)
+            Font: =""
+            FontItalic: =false
+            FontStrikethrough: =false
+            FontUnderline: =false
+            Height: =25
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =16
+            TabIndex: =0
+            Text: ="Cantidad"
+            Tooltip: =""
+            VerticalAlign: =""
+            Visible: =true
+            Weight: ='TextCanvas.Weight'.Bold
+            Width: =172
+            Wrap: =true
+            X: =502
+            Y: =0
+            ZIndex: =1
+
+        lbl_PNDato_EM_258 As Texto:
+            Align: ='TextCanvas.Align'.Center
+            AutoHeight: =false
+            BorderColor: =RGBA(40, 134, 222, 1)
+            BorderStyle: =BorderStyle.Solid
+            BorderThickness: =0.5
+            ContentLanguage: =""
+            DisplayMode: =DisplayMode.Edit
+            Fill: =RGBA(180, 214, 250, 1)
+            Font: =""
+            FontItalic: =false
+            FontStrikethrough: =false
+            FontUnderline: =false
+            Height: =25
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =16
+            TabIndex: =0
+            Text: ="P/N"
+            Tooltip: =""
+            VerticalAlign: =""
+            Visible: =true
+            Weight: ='TextCanvas.Weight'.Bold
+            Width: =330
+            Wrap: =true
+            X: =0
+            Y: =0
+            ZIndex: =2
+
+        lbl_PNDato_EM_259 As Texto:
+            Align: ='TextCanvas.Align'.Center
+            AutoHeight: =false
+            BorderColor: =RGBA(40, 134, 222, 1)
+            BorderStyle: =BorderStyle.Solid
+            BorderThickness: =0.5
+            ContentLanguage: =""
+            DisplayMode: =DisplayMode.Edit
+            Fill: =RGBA(180, 214, 250, 1)
+            Font: =""
+            FontItalic: =false
+            FontStrikethrough: =false
+            FontUnderline: =false
+            Height: =25
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =16
+            TabIndex: =0
+            Text: ="Prioridad"
+            Tooltip: =""
+            VerticalAlign: =""
+            Visible: =true
+            Weight: ='TextCanvas.Weight'.Bold
+            Width: =172
+            Wrap: =true
+            X: =330
+            Y: =0
+            ZIndex: =3
+
+        "gl_Contenedores_EM_10 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+            '#CopilotOverlayLabel': ="Filtrada"
+            BorderColor: =RGBA(0, 18, 107, 1)
+            DelayItemLoading: =true
+            Height: =400
+            Items: =RevisionCalidad
+            Layout: =Layout.Vertical
+            LoadingSpinner: =LoadingSpinner.Data
+            TemplatePadding: =0
+            TemplateSize: =30
+            Width: =718
+            Y: =25
+            ZIndex: =4
+
+            txt_proridad_2 As text:
+                Align: =Align.Center
+                BorderColor: =RGBA(40, 134, 222, 1)
+                BorderThickness: =0.5
+                Color: =If(ThisItem.'P/N' = Eliminar.item.'P/N' || ThisItem.'P/N' = txt_Destino, RGBA(255, 255, 255, 1))
+                Default: =ThisItem.txt_prioridad
+                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                DisabledColor: =If(ThisItem.'P/N' = Eliminar.item.'P/N' || ThisItem.'P/N' = txt_Destino, RGBA(255, 255, 255, 1))
+                DisabledFill: |
+                    =If(
+                        CountRows(
+                            Filter(
+                                gl_Contenedores_EM_9.AllItems,
+                                'P/N' = ThisItem.'P/N' &&
+                                Value(txt_Cantidad_EC_7.Text) < 0
+                            )
+                        ) > 0,
+                        RGBA(255, 0, 0, 0.20),
+                        Color.White
+                    )
+                DisplayMode: =DisplayMode.Disabled
+                Fill: =
+                FocusedBorderThickness: =4
+                Font: =App.Theme.Font
+                Height: =30
+                HintText: =""
+                HoverBorderColor: =App.Theme.Colors.Darker40
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =App.Theme.Colors.Lighter70
+                PaddingLeft: =5
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =15
+                Width: =172
+                X: =330
+                ZIndex: =1
+
+            txt_PN__2 As text:
+                Align: =Align.Center
+                BorderColor: =RGBA(40, 134, 222, 1)
+                BorderThickness: =0.5
+                Color: =If(ThisItem.'P/N' = Eliminar.item.'P/N' || ThisItem.'P/N' = txt_Destino, RGBA(255, 255, 255, 1))
+                Default: =ThisItem.'P/N'
+                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                DisabledColor: =If(ThisItem.'P/N' = Eliminar.item.'P/N' || ThisItem.'P/N' = txt_Destino, RGBA(255, 255, 255, 1))
+                DisabledFill: |
+                    =If(
+                        CountRows(
+                            Filter(
+                                gl_Contenedores_EM_9.AllItems,
+                                'P/N' = ThisItem.'P/N' &&
+                                Value(txt_Cantidad_EC_7.Text) < 0
+                            )
+                        ) > 0,
+                        RGBA(255, 0, 0, 0.20),
+                        Color.White
+                    )
+                DisplayMode: =DisplayMode.Disabled
+                Fill: =
+                FocusedBorderThickness: =4
+                Font: =App.Theme.Font
+                FontWeight: =FontWeight.Semibold
+                Height: =30
+                HintText: =""
+                HoverBorderColor: =App.Theme.Colors.Darker40
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =App.Theme.Colors.Lighter70
+                PaddingLeft: =5
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Size: =15
+                Width: =330
+                ZIndex: =2
+
+            icn_Eliminar_EC_7 As icon:
+                BorderColor: =RGBA(40, 134, 222, 1)
+                BorderThickness: =0.5
+                Color: =If(ThisItem.'P/N' = Eliminar.item.'P/N'  || ThisItem.'P/N' = txt_Destino,RGBA(255, 255, 255, 1), RGBA(215, 58, 60, 1))
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                DisabledColor: =RGBA(244, 244, 244, 1)
+                DisplayMode: |
+                    =If(/*isSaving ||*/ isEditing || Disable, DisplayMode.Disabled, DisplayMode.Edit)
+                Fill: |
+                    =If(
+                        CountRows(
+                            Filter(
+                                gl_Contenedores_EM_9.AllItems,
+                                'P/N' = ThisItem.'P/N' &&
+                                Value(txt_Cantidad_EC_7.Text) < 0
+                            )
+                        ) > 0,
+                        RGBA(255, 0, 0, 0.20),
+                        Color.White
+                    )
+                FocusedBorderThickness: =20
+                Height: =30
+                HoverBorderColor: =RGBA(240, 98, 15, 1)
+                HoverColor: =RGBA(215, 58, 60, 1)
+                HoverFill: =RGBA(247, 204, 198, 1)
+                Icon: =Icon.Trash
+                OnSelect: |
+                    =
+                    RemoveIf(RevisionCalidad, txt_prioridad = ThisItem.txt_prioridad);
+                    
+                    Set(
+                        varTemp,
+                        Sort(
+                            RevisionCalidad,
+                            txt_prioridad
+                        )
+                    );
+                    
+                    ClearCollect(
+                        RevisionCalidad,
+                        ForAll(
+                            Sequence(CountRows(varTemp)),
+                            With(
+                                { rec: Last(FirstN(varTemp, Value)) },
+                                Patch(
+                                    rec,
+                                    rec,
+                                    { txt_prioridad: Value }
+                                )
+                            )
+                        )
+                    )
+                PaddingBottom: =2
+                PaddingLeft: =2
+                PaddingRight: =2
+                PaddingTop: =2
+                Width: =44
+                X: =674
+                ZIndex: =3
+
+            txt_Cantidad_2 As text:
+                Align: =Align.Center
+                BorderColor: =RGBA(40, 134, 222, 1)
+                BorderThickness: =0.5
+                Color: =
+                Default: =ThisItem.cantidadDigitar
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                DisabledFill: =RGBA(244, 244, 244, 1)
+                DisplayMode: |
+                    =If(/*isSaving ||*/ Disable, DisplayMode.Disabled, DisplayMode.Edit)
+                Fill: |
+                    =If(
+                        CountRows(
+                            Filter(
+                                gl_Contenedores_EM_9.AllItems,
+                                'P/N' = ThisItem.'P/N' &&
+                                Value(txt_Cantidad_EC_7.Text) < 0
+                            )
+                        ) > 0,
+                        RGBA(255, 0, 0, 0.20),
+                        Color.White
+                    )
+                FocusedBorderThickness: =4
+                Font: =App.Theme.Font
+                Format: =TextFormat.Number
+                Height: =30
+                HintText: ="Digite la cantidad"
+                HoverBorderColor: =RGBA(40, 134, 222, 1)
+                HoverColor: =
+                HoverFill: |
+                    =If(
+                        CountRows(
+                            Filter(
+                                gl_Contenedores_EM_9.AllItems,
+                                'P/N' = ThisItem.'P/N' &&
+                                Value(txt_Cantidad_EC_7.Text) < 0
+                            )
+                        ) > 0,
+                        RGBA(255, 0, 0, 0.20),
+                        Color.White
+                    )
+                OnChange: |-
+                    =Patch(
+                        RevisionCalidad,
+                        ThisItem,
+                        { cantidadDigitar: Value(Self.Text) }
+                    );
+                    
+                    UpdateContext({ Disable: false })
+                PaddingLeft: =5
+                PressedColor: =
+                PressedFill: =RGBA(255, 255, 255, 1)
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Width: =172
+                X: =502
+                ZIndex: =4
+
+        btn_GuardarContenedor_EM_9 As button:
+            BorderColor: =RGBA(15, 108, 189, 1)
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            DisplayMode: =If(isSaving || isEditing || Disable, DisplayMode.Disabled, DisplayMode.Edit)
+            Fill: =RGBA(15, 108, 189, 1)
+            FontWeight: =FontWeight.Semibold
+            Height: =42
+            HoverBorderColor: =RGBA(15, 108, 189, 1)
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(12, 59, 94, 1)
+            OnSelect: |-
+                =UpdateContext({ Revision: false })
+            PressedBorderColor: =RGBA(15, 108, 189, 1)
+            PressedColor: =RGBA(15, 108, 189, 1)
+            Size: =15
+            Text: ="Volver"
+            Width: =231
+            X: =108
+            Y: =435
+            ZIndex: =5
+
+        btn_GuardarContenedor_EM_10 As button:
+            BorderColor: =RGBA(15, 108, 189, 1)
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            DisplayMode: =If(isSaving || isEditing || Disable, DisplayMode.Disabled, DisplayMode.Edit)
+            Fill: =RGBA(15, 108, 189, 1)
+            FontWeight: =FontWeight.Semibold
+            Height: =42
+            HoverBorderColor: =RGBA(15, 108, 189, 1)
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(12, 59, 94, 1)
+            OnSelect: |
+                =If(
+                
+                  CountIf(EdicionContenedor, true) = 0,
+                  
+                    UpdateContext({
+                      mensajeNotificacion: "No hay datos para guardar.",
+                      MostrarAviso: true,
+                      Disable: true
+                    })
+                  
+                  ,
+                  
+                 
+                  UpdateContext({ isSaving: true });
+                  
+                  RemoveIf(
+                    ContenedorPNS_2,
+                    Nomenclatura = txt_Nomenclatura_EC.Text
+                  );
+                  
+                  ForAll(
+                    EdicionContenedor,
+                    Collect(
+                      ContenedorPNS_2,
+                      {
+                        'P/N': ThisRecord.'P/N',
+                        Cantidad: ThisRecord.Cantidad,
+                        Cantidad_Tarima: ThisRecord.Cantidad_Tarima,
+                        Valor_Pieza: ThisRecord.Valor_Pieza,
+                        Peso: ThisRecord.Peso,
+                        TipoCaja: ThisRecord.TipoCaja,
+                        Tipo: ThisRecord.Tipo,
+                        'NumContenedorP/N': ThisRecord.'NumContenedorP/N',
+                        Nomenclatura: ThisRecord.Nomenclatura,
+                        User: ThisRecord.User,
+                        Cantidad_Total: ThisRecord.Cantidad_Total,
+                        Valor_Total: ThisRecord.Valor_Total,
+                        PesoTotal: ThisRecord.PesoTotal
+                      }
+                    )
+                  );
+                  
+                  Patch(
+                    Contenedors_2,
+                    gl_ListaContenedores_LE.Selected,
+                    {
+                      Cantidad_Total: Sum(
+                        Filter(ContenedorPNS_2, Nomenclatura = txt_Nomenclatura_EC.Text),
+                        Cantidad_Total
+                      ),
+                      Peso_Total: Sum(
+                        Filter(ContenedorPNS_2, Nomenclatura = txt_Nomenclatura_EC.Text),
+                        PesoTotal
+                      ),
+                      Valor_Total: Sum(
+                        Filter(ContenedorPNS_2, Nomenclatura = txt_Nomenclatura_EC.Text),
+                        Valor_Total
+                      )
+                    }
+                  );
+                  
+                  ForAll(
+                    EdicionContenedor,
+                    Collect(
+                      InspeccionCalidadContenedors_1,
+                      {
+                        'P/N': ThisRecord.'P/N',
+                        Prioridad: Value(txt_proridad_2.Text),
+                        Nomenclatura: ThisRecord.Nomenclatura,
+                        Cantidad: ThisRecord.Cantidad,
+                        Revisado: 0
+                      }
+                    )
+                  );
+                  Clear(EdicionContenedor);
+                  UpdateContext({
+                    mensajeNotificacion: "Cambios guardados exitosamente.",
+                    MostrarAviso: true,
+                    Disable: false,
+                    isSaving: false
+                  })
+                )
+            PressedBorderColor: =RGBA(15, 108, 189, 1)
+            PressedColor: =RGBA(15, 108, 189, 1)
+            Size: =15
+            Text: ="Guardar"
+            Width: =231
+            X: =354
+            Y: =435
+            ZIndex: =6
+
+        lbl_PNDato_EM_260 As Texto:
+            Align: ='TextCanvas.Align'.Center
+            AutoHeight: =false
+            BorderColor: =RGBA(40, 134, 222, 1)
+            BorderStyle: =BorderStyle.Solid
+            BorderThickness: =0.5
+            ContentLanguage: =""
+            DisplayMode: =DisplayMode.Edit
+            Fill: =RGBA(180, 214, 250, 1)
+            Font: =""
+            FontItalic: =false
+            FontStrikethrough: =false
+            FontUnderline: =false
+            Height: =25
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =16
+            TabIndex: =0
+            Text: =
+            Tooltip: =""
+            VerticalAlign: =""
+            Visible: =true
+            Weight: ='TextCanvas.Weight'.Bold
+            Width: =44
+            Wrap: =true
+            X: =674
+            Y: =0
+            ZIndex: =7
+
+    cnt_Comentario_EC_1 As groupContainer.manualLayoutContainer:
+        BorderColor: =RGBA(255, 191, 0, 1)
+        BorderThickness: =5
+        DropShadow: =DropShadow.ExtraBold
+        Fill: =RGBA(255, 255, 255, 1)
+        Height: =210
+        RadiusBottomLeft: =20
+        RadiusBottomRight: =20
+        RadiusTopLeft: =20
+        RadiusTopRight: =20
+        Visible: =MostrarAviso
+        Width: =648
+        X: =358
+        Y: =299
+        ZIndex: =6
+
+        txt_MensajeNoti_EC_1 As label:
+            Align: =Align.Center
+            BorderColor: =App.Theme.Colors.Darker40
+            Color: =RGBA(0, 0, 0, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            Font: =Font.Arial
+            Height: =129
+            Size: =20
+            Text: =mensajeNotificacion
+            Width: =619
+            X: =18
+            Y: =11
+            ZIndex: =69
+
+        btn_Aceptar_EC_1 As button:
+            BorderColor: =RGBA(52, 152, 47, 1)
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            Fill: =RGBA(52, 152, 47, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =50
+            HoverBorderColor: =RGBA(180, 214, 250, 1)
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(52, 152, 47, 1)
+            OnSelect: |-
+                =UpdateContext(
+                    {
+                        MostrarAviso: false,
+                        Disable: false,
+                        mensajeNotificacion: ""
+                    }
+                )
+            PressedBorderColor: =RGBA(52, 152, 47, 1)
+            Size: =15
+            Text: ="Aceptar"
+            Width: =180
+            X: =235
+            Y: =150
+            ZIndex: =71
 
