@@ -1570,149 +1570,14 @@ Screens:
                                     HoverColor: =RGBA(255, 255, 255, 1)
                                     HoverFill: =RGBA(12, 59, 94, 1)
                                     OnSelect: |
-                                      =/*If(
-                                          IsEmpty(Contenedores);
+                                      =If(
+                                          IsEmpty(Contenedores),
                                           UpdateContext({
-                                              mensajeNotificacion: "El contenedor esta vacio";
-                                              MostrarAviso: true;
+                                              mensajeNotificacion: "El contenedor esta vacio",
+                                              MostrarAviso: true,
                                               Disable: true
-                                          });
+                                          }),
                                           UpdateContext({ Revision: true })
-                                      )*/
-                                      If(
-                                          CountRows(
-                                              Filter(
-                                                  gl_Contenedores_EM_3.AllItems,
-                                                  Value(txt_Cantidad_EC_7.Text) <> 0
-                                              )
-                                          ) > 0 || IsEmpty(Contenedores) || (WeekNum(
-                                              dp_FechaSalida_EM.SelectedDate,
-                                              StartOfWeek.Monday
-                                          ) < WeekNum(
-                                              Today(),
-                                              StartOfWeek.Monday
-                                          ) && Year(dp_FechaSalida_EM.SelectedDate) = Year(Today())) || Year(dp_FechaSalida_EM.SelectedDate) < Year(Today()) || IsBlank(dp_FechaSalida_EM.SelectedDate) || IsBlank(drp_Pais_EM.SelectedText),
-                                          UpdateContext(
-                                              {
-                                                  mensajeNotificacion: If(
-                                                      CountRows(
-                                                          Filter(
-                                                              gl_Contenedores_EM_3.AllItems,
-                                                              Value(txt_Cantidad_EC_7.Text) <> 0
-                                                          )
-                                                      ) > 0,
-                                                      "No se puede continuar: todas las cantidades deben ser exactamente cero.",
-                                                      If(
-                                                          IsEmpty(Contenedores),
-                                                          "No hay datos en la tabla Contenedores para guardar.",
-                                                          If(
-                                                              WeekNum(
-                                                                  dp_FechaSalida_EM.SelectedDate,
-                                                                  StartOfWeek.Monday
-                                                              ) < WeekNum(
-                                                                  Today(),
-                                                                  StartOfWeek.Monday
-                                                              ) || Year(dp_FechaSalida_EM.SelectedDate) < Year(Today()),
-                                                              "No se puede agregar, la fecha de salida pertenece a una semana anterior. Por favor cambiar a una fecha de la semana actual",
-                                                              "La fecha y el país son obligatorios."
-                                                          )
-                                                      )
-                                                  ),
-                                                  MostrarAviso: true,
-                                                  Disable: true
-                                              }
-                                          ),
-                                          UpdateContext({isSaving: true}),
-                                          ForAll(
-                                              gl_Contenedores_EM_2.AllItems,
-                                              Collect(
-                                                  InspeccionCalidadContenedors,
-                                                  {
-                                                      'P/N': txt_PN_.Text,
-                                                      Prioridad: txt_prioridad,
-                                                      Nomenclatura: ThisRecord.Nomenclatura,
-                                                      Cantidad: Value(txt_Cantidad.Text),
-                                                      Revisado: 0
-                                                  }
-                                              )
-                                          );
-                                          Collect(
-                                              Contenedors_2,
-                                              {
-                                                  Fecha: dp_FechaSalida_EM.SelectedDate,
-                                                  FechaTexto: Text(dp_FechaSalida_EM.SelectedDate),
-                                                  Nomenclatura: nomenclaturaGenerada,
-                                                  Pais: drp_Pais_EM.SelectedText.Value,
-                                                  Estado_Contenedor: "Activo",
-                                                  NumContenedor: contenedorTexto,
-                                                  Semana: Text(
-                                                      WeekNum(
-                                                          dp_FechaSalida_EM.SelectedDate,
-                                                          StartOfWeek.Monday
-                                                      )
-                                                  ),
-                                                  Año: Text(Year(dp_FechaSalida_EM.SelectedDate)),
-                                                  User: txt_EmpleadoUso_EM_2.Text,
-                                                  Cantidad_Total: Sum(
-                                                      gl_Contenedores_EM_1.AllItems,
-                                                      CantidadTotal
-                                                  ),
-                                                  Peso_Total: Sum(
-                                                      gl_Contenedores_EM_1.AllItems,
-                                                      PesoTotal
-                                                  ),
-                                                  Valor_Total: Sum(
-                                                      gl_Contenedores_EM_1.AllItems,
-                                                      ValorTotal
-                                                  )
-                                              }
-                                          );
-                                          ForAll(
-                                              Contenedores,
-                                              Collect(
-                                                  ContenedorPNS_2,
-                                                  {
-                                                      'P/N': ThisRecord.'P/N',
-                                                      Cantidad: ThisRecord.Cantidad,
-                                                      Cantidad_Tarima: ThisRecord.CantidadTarima,
-                                                      CantidadActual: 0,
-                                                      Valor_Pieza: ThisRecord.ValorPieza,
-                                                      Peso: ThisRecord.Peso,
-                                                      TipoCaja: ThisRecord.TipoCaja,
-                                                      Tipo: ThisRecord.Tipo,
-                                                      Nomenclatura: ThisRecord.Nomenclatura,
-                                                      'NumContenedorP/N': ThisRecord.Contenedor,
-                                                      User: ThisRecord.User,
-                                                      Cantidad_Total: ThisRecord.CantidadTotal,
-                                                      Valor_Total: ThisRecord.ValorTotal,
-                                                      PesoTotal: ThisRecord.PesoTotal
-                                                  }
-                                              )
-                                          );
-                                          Clear(Contenedores);
-                                          Clear(RevisionCalidad);
-                                          Reset(dp_FechaSalida_EM);
-                                          Reset(drp_Pais_EM);
-                                          Reset(txt_PNDato_EM_1);
-                                          Reset(txt_CantidadDato_EM_1);
-                                          UpdateContext(
-                                              {
-                                                  contenedorTexto: Blank(),
-                                                  nomenclaturaGenerada: Blank(),
-                                                  txt_Destino2: 0,
-                                                  txt_Destino: ""
-                                              }
-                                          );
-                                          UpdateContext(
-                                              {
-                                                  mensajeNotificacion: "Datos guardados correctamente.",
-                                                  MostrarAviso: true,
-                                                  Disable: true
-                                              }
-                                          );
-                                          UpdateContext({Revision: false});
-                                          UpdateContext({VerMaquinas: false});
-                                          UpdateContext({isSaving: false})
                                       )
                                     PressedBorderColor: =RGBA(15, 108, 189, 1)
                                     PressedColor: =RGBA(15, 108, 189, 1)
@@ -1867,25 +1732,7 @@ Screens:
                           )
                         Height: =30
                         HoverFill: =RGBA(180, 214, 250, 0.28)
-                        OnSelect: |
-                          =If(
-                            Value( txt_Cantidad_EC_7.Text ) > 0,
-                            Collect(
-                              RevisionCalidad,
-                              AddColumns(
-                                Table( ThisItem ),
-                                txt_prioridad, CountRows( RevisionCalidad ) + 1,
-                                cantidadDigitar, 0
-                              )
-                            ),
-                               UpdateContext(
-                                  {
-                                      mensajeNotificacion: "No se puede agregar: la cantidad debe ser mayor a cero.",
-                                      MostrarAviso: true,
-                                      Disable: true
-                                  }
-                              )
-                          );
+                        OnSelect: "=\nIf(\n\n  CountRows( Filter( RevisionCalidad, cantidadDigitar = 0 ) ) > 0,\n  \n    UpdateContext({\n      mensajeNotificacion: \"Digitar la cantidad antes de continuar agregando\",\n      MostrarAviso: true,\n      Disable: true\n    }),\n  \n  Value( txt_Cantidad_EC_7.Text ) > 0,\n  \n    Collect(\n      RevisionCalidad,\n      AddColumns(\n        Table( ThisItem ),\n        txt_prioridad, CountRows( RevisionCalidad ) + 1,\n        cantidadDigitar, 0\n      )\n    ),\n    Reset( txt_Cantidad_EC_7 ),\n  \n  UpdateContext({\n    mensajeNotificacion: \"No se puede agregar: la cantidad debe ser mayor a cero.\",\n    MostrarAviso: true,\n    Disable: true\n  })\n)"
                         PressedFill: =RGBA(40, 40, 222, 0.3)
                         Width: =465
                         X: =36
@@ -2183,7 +2030,9 @@ Screens:
                               RevisionCalidad,
                               ThisItem,
                               { cantidadDigitar: Value(Self.Text) }
-                          )
+                          );
+
+                          UpdateContext({ Disable: false })
                         PaddingLeft: =5
                         PressedColor: =
                         PressedFill: =RGBA(255, 255, 255, 1)
@@ -2277,7 +2126,7 @@ Screens:
                         ForAll(
                             gl_Contenedores_EM_2.AllItems,
                             Collect(
-                                InspeccionCalidadContenedors,
+                                InspeccionCalidadContenedors_1,
                                 {
                                     'P/N': txt_PN_.Text,
                                     Prioridad: txt_prioridad,
