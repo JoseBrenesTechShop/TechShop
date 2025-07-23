@@ -583,16 +583,20 @@ EmbalajeEditor As screen:
                                             PesoTotal: Value(txt_CantidadTarimaDato_EM_2.Text) * Value(txt_CantidadDato_EM_2.Text) * Value(txt_PesoDato_EM_2.Text),
                                             Operation: "Add"
                                         }
-                                    ),
+                                    );
                                     UpdateContext(
                                         {
                                             mensajeNotificacion: "Datos agregados exitosamente.",
                                             MostrarAviso: true,
                                             Disable: false
                                         }
-                                    ),
-                                    Reset(txt_PNDato_EM_2),
-                                    Reset(txt_CantidadDato_EM_2)
+                                    );
+                                    Reset(txt_PNDato_EM_2);
+                                    Reset(txt_CantidadDato_EM_2);
+                                    Reset(txt_CantidadTarimaDato_EM_2);
+                                    UpdateContext({isSaving: false});
+                                UpdateContext({txt_Destino2: 0});
+                                UpdateContext({txt_Destino: ""})
                                 )
                             PressedFill: =RGBA(255, 255, 255, 1)
                             Size: =15
@@ -656,14 +660,16 @@ EmbalajeEditor As screen:
                                                 "Update"
                                             )
                                         }
-                                    ),
+                                    );
                                     UpdateContext(
                                         {
-                                            mensajeNotificacion: "Datos editados en el buffer exitosamente.",
+                                            mensajeNotificacion: "Datos editados exitosamente.",
                                             MostrarAviso: true,
                                             Disable: false,
                                             isEditing: false,
-                                            varRegistroSeleccionado: Blank()
+                                            varRegistroSeleccionado: Blank(),
+                                            txt_Destino: Blank(),
+                                            txt_Destino2: Blank()
                                         }
                                     )
                                 )
@@ -719,7 +725,7 @@ EmbalajeEditor As screen:
                             BorderColor: =RGBA(0, 18, 107, 1)
                             DelayItemLoading: =true
                             Height: =487
-                            Items: =Filter( EdicionContenedor, Nomenclatura = txt_Nomenclatura_EC.Text )
+                            Items: =Filter( EdicionContenedor, Nomenclatura = txt_Nomenclatura_EC.Text && Operation <> "Delete" )
                             Layout: =Layout.Vertical
                             LoadingSpinner: =LoadingSpinner.Data
                             TemplatePadding: =0
@@ -1884,7 +1890,7 @@ EmbalajeEditor As screen:
                         PressedFill: =RGBA(255, 255, 255, 1)
                         Size: =15
                         Text: ="Guardar Cambios"
-                        Visible: =!isEditing
+                        Visible: =!isEditing && CountIf(EdicionContenedor,Operation <> "None"  )
                         Width: =206
                         X: =1133
                         Y: =113
@@ -1956,10 +1962,13 @@ EmbalajeEditor As screen:
                 =If(
                   true,
                 
-                  Remove(
+                  Patch(
                     EdicionContenedor,
-                    Eliminar.item
-                  ),
+                    Eliminar.item, 
+                    {
+                        Operation: "Delete"
+                    }
+                  );
                   UpdateContext(
                     {
                       mensajeNotificacion: "Eliminado Exitosamente.",
@@ -2075,7 +2084,7 @@ EmbalajeEditor As screen:
             BorderColor: =RGBA(0, 18, 107, 1)
             DelayItemLoading: =true
             Height: =460
-            Items: =EdicionContenedor
+            Items: =Filter(EdicionContenedor, Operation <> "Delete")
             Layout: =Layout.Vertical
             LoadingSpinner: =LoadingSpinner.Data
             OnSelect: =

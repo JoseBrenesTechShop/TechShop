@@ -499,16 +499,20 @@ Screens:
                                                         PesoTotal: Value(txt_CantidadTarimaDato_EM_2.Text) * Value(txt_CantidadDato_EM_2.Text) * Value(txt_PesoDato_EM_2.Text),
                                                         Operation: "Add"
                                                     }
-                                                ),
+                                                );
                                                 UpdateContext(
                                                     {
                                                         mensajeNotificacion: "Datos agregados exitosamente.",
                                                         MostrarAviso: true,
                                                         Disable: false
                                                     }
-                                                ),
-                                                Reset(txt_PNDato_EM_2),
-                                                Reset(txt_CantidadDato_EM_2)
+                                                );
+                                                Reset(txt_PNDato_EM_2);
+                                                Reset(txt_CantidadDato_EM_2);
+                                                Reset(txt_CantidadTarimaDato_EM_2);
+                                                UpdateContext({isSaving: false});
+                                            UpdateContext({txt_Destino2: 0});
+                                            UpdateContext({txt_Destino: ""})
                                             )
                                           PressedBorderColor: =Self.Fill
                                           PressedColor: =Self.Fill
@@ -573,14 +577,16 @@ Screens:
                                                             "Update"
                                                         )
                                                     }
-                                                ),
+                                                );
                                                 UpdateContext(
                                                     {
-                                                        mensajeNotificacion: "Datos editados en el buffer exitosamente.",
+                                                        mensajeNotificacion: "Datos editados exitosamente.",
                                                         MostrarAviso: true,
                                                         Disable: false,
                                                         isEditing: false,
-                                                        varRegistroSeleccionado: Blank()
+                                                        varRegistroSeleccionado: Blank(),
+                                                        txt_Destino: Blank(),
+                                                        txt_Destino2: Blank()
                                                     }
                                                 )
                                             )
@@ -639,7 +645,7 @@ Screens:
                                         Properties:
                                           BorderColor: =RGBA(0, 18, 107, 1)
                                           Height: =487
-                                          Items: =Filter( EdicionContenedor, Nomenclatura = txt_Nomenclatura_EC.Text )
+                                          Items: =Filter( EdicionContenedor, Nomenclatura = txt_Nomenclatura_EC.Text && Operation <> "Delete" )
                                           TemplateSize: =30
                                           Width: =1352
                                           Y: =25
@@ -1663,7 +1669,7 @@ Screens:
                                     PressedColor: =Self.Fill
                                     PressedFill: =RGBA(255, 255, 255, 1)
                                     Text: ="Guardar Cambios"
-                                    Visible: =!isEditing
+                                    Visible: =!isEditing && CountIf(EdicionContenedor,Operation <> "None"  )
                                     Width: =206
                                     X: =1133
                                     Y: =113
@@ -1728,10 +1734,13 @@ Screens:
                     =If(
                       true,
 
-                      Remove(
+                      Patch(
                         EdicionContenedor,
-                        Eliminar.item
-                      ),
+                        Eliminar.item, 
+                        {
+                            Operation: "Delete"
+                        }
+                      );
                       UpdateContext(
                         {
                           mensajeNotificacion: "Eliminado Exitosamente.",
@@ -1827,7 +1836,7 @@ Screens:
                 Properties:
                   BorderColor: =RGBA(0, 18, 107, 1)
                   Height: =460
-                  Items: =EdicionContenedor
+                  Items: =Filter(EdicionContenedor, Operation <> "Delete")
                   OnSelect: =
                   TemplateSize: =30
                   Transition: =Transition.Pop
