@@ -2091,6 +2091,7 @@ EmbalajeEditor As screen:
             TemplatePadding: =0
             TemplateSize: =30
             Transition: =Transition.Pop
+            Visible: =Revision
             Width: =501
             Y: =25
             ZIndex: =3
@@ -2641,10 +2642,20 @@ EmbalajeEditor As screen:
                  
                   UpdateContext({ isSaving: true });
                   
+                If(
+                  !IsBlank( LookUp( ContenedorPNS_2, Nomenclatura = txt_Nomenclatura_EC.Text ) ),
                   RemoveIf(
                     ContenedorPNS_2,
                     Nomenclatura = txt_Nomenclatura_EC.Text
-                  );
+                  )
+                );
+                If(
+                  !IsBlank( LookUp( InspeccionCalidadContenedors_1, Nomenclatura = txt_Nomenclatura_EC.Text) ),
+                  RemoveIf(
+                    InspeccionCalidadContenedors_1,
+                    Nomenclatura = txt_Nomenclatura_EC.Text
+                  )
+                );
                   
                   ForAll(
                     EdicionContenedor,
@@ -2686,7 +2697,7 @@ EmbalajeEditor As screen:
                       )
                     }
                   );
-                  
+                
                   ForAll(
                     EdicionContenedor,
                     Collect(
@@ -2700,12 +2711,28 @@ EmbalajeEditor As screen:
                       }
                     )
                   );
-                  Clear(EdicionContenedor);
+                  Clear(RevisionCalidad);
+                  Refresh(ContenedorPNS_2);
+                
+                //Volver Refrescar galeria xd
+                    ClearCollect(
+                    EdicionContenedor,
+                    AddColumns(
+                      Filter(
+                        ContenedorPNS_2,
+                        Nomenclatura = txt_Nomenclatura_EC.Text
+                      ),
+                      Operation, "None"
+                    )
+                  );
+                  Reset(gl_Contenedores_EC);
                   UpdateContext({
                     mensajeNotificacion: "Cambios guardados exitosamente.",
                     MostrarAviso: true,
                     Disable: false,
-                    isSaving: false
+                    isSaving: false,
+                   Revision: false ,
+                   VerMaquinas: false
                   })
                 )
             PressedBorderColor: =RGBA(15, 108, 189, 1)
