@@ -2604,7 +2604,16 @@ EmbalajeEditor As screen:
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(12, 59, 94, 1)
             OnSelect: |-
-                =UpdateContext({ Revision: false })
+                =UpdateContext({ Revision: false });
+                  Clear(RevisionCalidad);
+                  Refresh(ContenedorPNS_2);
+                    Reset(gl_Contenedores_EC);
+                  UpdateContext({
+                    Disable: false,
+                    isSaving: false,
+                   Revision: false ,
+                   VerMaquinas: false
+                  })
             PressedBorderColor: =RGBA(15, 108, 189, 1)
             PressedColor: =RGBA(15, 108, 189, 1)
             Size: =15
@@ -2626,114 +2635,160 @@ EmbalajeEditor As screen:
             HoverBorderColor: =RGBA(15, 108, 189, 1)
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(12, 59, 94, 1)
-            OnSelect: |
+            OnSelect: |-
                 =If(
-                
-                  CountIf(EdicionContenedor, true) = 0,
-                  
-                    UpdateContext({
-                      mensajeNotificacion: "No hay datos para guardar.",
-                      MostrarAviso: true,
-                      Disable: true
-                    })
-                  
-                  ,
-                  
-                 
-                  UpdateContext({ isSaving: true });
-                  
-                If(
-                  !IsBlank( LookUp( ContenedorPNS_2, Nomenclatura = txt_Nomenclatura_EC.Text ) ),
-                  RemoveIf(
-                    ContenedorPNS_2,
-                    Nomenclatura = txt_Nomenclatura_EC.Text
-                  )
-                );
-                If(
-                  !IsBlank( LookUp( InspeccionCalidadContenedors_1, Nomenclatura = txt_Nomenclatura_EC.Text) ),
-                  RemoveIf(
-                    InspeccionCalidadContenedors_1,
-                    Nomenclatura = txt_Nomenclatura_EC.Text
-                  )
-                );
-                  
-                  ForAll(
-                    EdicionContenedor,
-                    Collect(
-                      ContenedorPNS_2,
-                      {
-                        'P/N': ThisRecord.'P/N',
-                        Cantidad: ThisRecord.Cantidad,
-                        Cantidad_Tarima: ThisRecord.Cantidad_Tarima,
-                        Valor_Pieza: ThisRecord.Valor_Pieza,
-                        Peso: ThisRecord.Peso,
-                        TipoCaja: ThisRecord.TipoCaja,
-                        Tipo: ThisRecord.Tipo,
-                        'NumContenedorP/N': ThisRecord.'NumContenedorP/N',
-                        Nomenclatura: ThisRecord.Nomenclatura,
-                        User: ThisRecord.User,
-                        Cantidad_Total: ThisRecord.Cantidad_Total,
-                        Valor_Total: ThisRecord.Valor_Total,
-                        PesoTotal: ThisRecord.PesoTotal
-                      }
-                    )
-                  );
-                  
-                  Patch(
-                    Contenedors_2,
-                    gl_ListaContenedores_LE.Selected,
-                    {
-                      Cantidad_Total: Sum(
-                        Filter(ContenedorPNS_2, Nomenclatura = txt_Nomenclatura_EC.Text),
-                        Cantidad_Total
-                      ),
-                      Peso_Total: Sum(
-                        Filter(ContenedorPNS_2, Nomenclatura = txt_Nomenclatura_EC.Text),
-                        PesoTotal
-                      ),
-                      Valor_Total: Sum(
-                        Filter(ContenedorPNS_2, Nomenclatura = txt_Nomenclatura_EC.Text),
-                        Valor_Total
-                      )
-                    }
-                  );
-                
-                  ForAll(
-                    EdicionContenedor,
-                    Collect(
-                      InspeccionCalidadContenedors_1,
-                      {
-                        'P/N': ThisRecord.'P/N',
-                        Prioridad: Value(txt_proridad_2.Text),
-                        Nomenclatura: ThisRecord.Nomenclatura,
-                        Cantidad: ThisRecord.Cantidad,
-                        Revisado: 0
-                      }
-                    )
-                  );
-                  Clear(RevisionCalidad);
-                  Refresh(ContenedorPNS_2);
-                
-                //Volver Refrescar galeria xd
+                    CountIf(
+                        EdicionContenedor,
+                        true
+                    ) = 0,
+                    UpdateContext(
+                        {
+                            mensajeNotificacion: "No hay datos para guardar.",
+                            MostrarAviso: true,
+                            Disable: true
+                        }
+                    ),
+                    CountRows(
+                        Filter(
+                            gl_Contenedores_EM_9.AllItems,
+                            Value(txt_Cantidad_EC_11.Text) <> 0
+                        )
+                    ) > 0,
+                    UpdateContext(
+                        {
+                            mensajeNotificacion: "No se puede continuar: todas las cantidades deben ser exactamente cero.",
+                            MostrarAviso: true,
+                            Disable: true,
+                            isSaving: false
+                        }
+                    ),
+                    CountRows(
+                        Filter(
+                            gl_Contenedores_EM_10.AllItems,
+                            Value(cantidadDigitar) = 0
+                        )
+                    ) > 0,
+                    UpdateContext(
+                        {
+                            mensajeNotificacion: "No se puede guardar, por favor revisar si las cantidades no sean 0",
+                            MostrarAviso: true,
+                            Disable: true,
+                            isSaving: false
+                        }
+                    ),
+                    UpdateContext({isSaving: true});
+                    If(
+                        !IsBlank(
+                            LookUp(
+                                ContenedorPNS_2,
+                                Nomenclatura = txt_Nomenclatura_EC.Text
+                            )
+                        ),
+                        RemoveIf(
+                            ContenedorPNS_2,
+                            Nomenclatura = txt_Nomenclatura_EC.Text
+                        )
+                    );
+                    If(
+                        !IsBlank(
+                            LookUp(
+                                InspeccionCalidadContenedors_2,
+                                Nomenclatura = txt_Nomenclatura_EC.Text
+                            )
+                        ),
+                        RemoveIf(
+                            InspeccionCalidadContenedors_2,
+                            Nomenclatura = txt_Nomenclatura_EC.Text
+                        )
+                    );
+                    ForAll(
+                        Filter(
+                            EdicionContenedor,
+                            Operation <> "Delete"
+                        ),
+                        Collect(
+                            ContenedorPNS_2,
+                            {
+                                'P/N': ThisRecord.'P/N',
+                                Cantidad: ThisRecord.Cantidad,
+                                Cantidad_Tarima: ThisRecord.Cantidad_Tarima,
+                                Valor_Pieza: ThisRecord.Valor_Pieza,
+                                Peso: ThisRecord.Peso,
+                                TipoCaja: ThisRecord.TipoCaja,
+                                Tipo: ThisRecord.Tipo,
+                                'NumContenedorP/N': ThisRecord.'NumContenedorP/N',
+                                Nomenclatura: ThisRecord.Nomenclatura,
+                                User: ThisRecord.User,
+                                Cantidad_Total: ThisRecord.Cantidad_Total,
+                                Valor_Total: ThisRecord.Valor_Total,
+                                PesoTotal: ThisRecord.PesoTotal
+                            }
+                        )
+                    );
+                    Patch(
+                        Contenedors_2,
+                        gl_ListaContenedores_LE.Selected,
+                        {
+                            Cantidad_Total: Sum(
+                                Filter(
+                                    ContenedorPNS_2,
+                                    Nomenclatura = txt_Nomenclatura_EC.Text
+                                ),
+                                Cantidad_Total
+                            ),
+                            Peso_Total: Sum(
+                                Filter(
+                                    ContenedorPNS_2,
+                                    Nomenclatura = txt_Nomenclatura_EC.Text
+                                ),
+                                PesoTotal
+                            ),
+                            Valor_Total: Sum(
+                                Filter(
+                                    ContenedorPNS_2,
+                                    Nomenclatura = txt_Nomenclatura_EC.Text
+                                ),
+                                Valor_Total
+                            )
+                        }
+                    );
+                    ForAll(
+                        RevisionCalidad,
+                        Collect(
+                            InspeccionCalidadContenedors_2,
+                            {
+                                'P/N': ThisRecord.'P/N',
+                                Prioridad: ThisRecord.txt_prioridad,
+                                Nomenclatura: ThisRecord.Nomenclatura,
+                                Cantidad: ThisRecord.cantidadDigitar,
+                                Revisado: 0
+                            }
+                        )
+                    );
+                    Clear(RevisionCalidad);
+                    Refresh(ContenedorPNS_2);
                     ClearCollect(
-                    EdicionContenedor,
-                    AddColumns(
-                      Filter(
-                        ContenedorPNS_2,
-                        Nomenclatura = txt_Nomenclatura_EC.Text
-                      ),
-                      Operation, "None"
+                        EdicionContenedor,
+                        AddColumns(
+                            Filter(
+                                ContenedorPNS_2,
+                                Nomenclatura = txt_Nomenclatura_EC.Text
+                            ),
+                            Operation,
+                            "None"
+                        )
+                    );
+                    Reset(gl_Contenedores_EC);
+                    UpdateContext(
+                        {
+                            mensajeNotificacion: "Cambios guardados exitosamente.",
+                            MostrarAviso: true,
+                            Disable: false,
+                            isSaving: false,
+                            Revision: false,
+                            VerMaquinas: false
+                        }
                     )
-                  );
-                  Reset(gl_Contenedores_EC);
-                  UpdateContext({
-                    mensajeNotificacion: "Cambios guardados exitosamente.",
-                    MostrarAviso: true,
-                    Disable: false,
-                    isSaving: false,
-                   Revision: false ,
-                   VerMaquinas: false
-                  })
                 )
             PressedBorderColor: =RGBA(15, 108, 189, 1)
             PressedColor: =RGBA(15, 108, 189, 1)
