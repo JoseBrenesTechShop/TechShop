@@ -1986,7 +1986,7 @@ Embalaje As screen:
                     =
                     If(
                     
-                      CountRows( Filter( RevisionCalidad, cantidadDigitar = 0 ) ) > 0,
+                      CountRows( Filter( RevisionCalidad1, cantidadDigitar = 0 ) ) > 0,
                       
                         UpdateContext({
                           mensajeNotificacion: "Digitar la cantidad antes de continuar agregando",
@@ -1997,10 +1997,10 @@ Embalaje As screen:
                       Value( txt_Cantidad_EC_7.Text ) > 0,
                       
                         Collect(
-                          RevisionCalidad,
+                          RevisionCalidad1,
                           AddColumns(
                             Table( ThisItem ),
-                            txt_prioridad, CountRows( RevisionCalidad ) + 1,
+                            txt_prioridad, CountRows( RevisionCalidad1 ) + 1,
                             cantidadDigitar, 0
                           )
                         ),
@@ -2191,7 +2191,7 @@ Embalaje As screen:
             BorderColor: =RGBA(0, 18, 107, 1)
             DelayItemLoading: =true
             Height: =400
-            Items: =RevisionCalidad
+            Items: =RevisionCalidad1
             Layout: =Layout.Vertical
             LoadingSpinner: =LoadingSpinner.Data
             TemplatePadding: =0
@@ -2412,7 +2412,8 @@ Embalaje As screen:
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(12, 59, 94, 1)
             OnSelect: |-
-                =UpdateContext({ Revision: false })
+                =UpdateContext({ Revision: false });
+                    Clear(RevisionCalidad1);
             PressedBorderColor: =RGBA(15, 108, 189, 1)
             PressedColor: =RGBA(15, 108, 189, 1)
             Size: =15
@@ -2476,6 +2477,34 @@ Embalaje As screen:
                             ),
                             MostrarAviso: true,
                             Disable: true
+                        }
+                    ),
+                     CountRows(
+                        Filter(
+                            gl_Contenedores_EM_3.AllItems,
+                            Value(txt_Cantidad_EC_7.Text) <> 0
+                        )
+                    ) > 0,
+                    UpdateContext(
+                        {
+                            mensajeNotificacion: "No se puede continuar: todas las cantidades deben ser exactamente cero.",
+                            MostrarAviso: true,
+                            Disable: true,
+                            isSaving: false
+                        }
+                    ),
+                    CountRows(
+                        Filter(
+                            gl_Contenedores_EM_2.AllItems,
+                            Value(cantidadDigitar) = 0
+                        )
+                    ) > 0,
+                    UpdateContext(
+                        {
+                            mensajeNotificacion: "No se puede guardar, por favor revisar si las cantidades no sean 0",
+                            MostrarAviso: true,
+                            Disable: true,
+                            isSaving: false
                         }
                     ),
                     UpdateContext({isSaving: true}),
@@ -2546,7 +2575,7 @@ Embalaje As screen:
                         )
                     );
                     Clear(Contenedores);
-                    Clear(RevisionCalidad);
+                    Clear(RevisionCalidad1);
                     Reset(dp_FechaSalida_EM);
                     Reset(drp_Pais_EM);
                     Reset(txt_PNDato_EM_1);

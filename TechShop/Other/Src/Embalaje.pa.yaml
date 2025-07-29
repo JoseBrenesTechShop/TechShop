@@ -1732,7 +1732,7 @@ Screens:
                           )
                         Height: =30
                         HoverFill: =RGBA(180, 214, 250, 0.28)
-                        OnSelect: "=\nIf(\n\n  CountRows( Filter( RevisionCalidad, cantidadDigitar = 0 ) ) > 0,\n  \n    UpdateContext({\n      mensajeNotificacion: \"Digitar la cantidad antes de continuar agregando\",\n      MostrarAviso: true,\n      Disable: true\n    }),\n  \n  Value( txt_Cantidad_EC_7.Text ) > 0,\n  \n    Collect(\n      RevisionCalidad,\n      AddColumns(\n        Table( ThisItem ),\n        txt_prioridad, CountRows( RevisionCalidad ) + 1,\n        cantidadDigitar, 0\n      )\n    ),\n    Reset( txt_Cantidad_EC_7 ),\n  \n  UpdateContext({\n    mensajeNotificacion: \"No se puede agregar: la cantidad debe ser mayor a cero.\",\n    MostrarAviso: true,\n    Disable: true\n  })\n)"
+                        OnSelect: "=\nIf(\n\n  CountRows( Filter( RevisionCalidad1, cantidadDigitar = 0 ) ) > 0,\n  \n    UpdateContext({\n      mensajeNotificacion: \"Digitar la cantidad antes de continuar agregando\",\n      MostrarAviso: true,\n      Disable: true\n    }),\n  \n  Value( txt_Cantidad_EC_7.Text ) > 0,\n  \n    Collect(\n      RevisionCalidad1,\n      AddColumns(\n        Table( ThisItem ),\n        txt_prioridad, CountRows( RevisionCalidad1 ) + 1,\n        cantidadDigitar, 0\n      )\n    ),\n    Reset( txt_Cantidad_EC_7 ),\n  \n  UpdateContext({\n    mensajeNotificacion: \"No se puede agregar: la cantidad debe ser mayor a cero.\",\n    MostrarAviso: true,\n    Disable: true\n  })\n)"
                         PressedFill: =RGBA(40, 40, 222, 0.3)
                         Width: =465
                         X: =36
@@ -1857,7 +1857,7 @@ Screens:
                 Properties:
                   BorderColor: =RGBA(0, 18, 107, 1)
                   Height: =400
-                  Items: =RevisionCalidad
+                  Items: =RevisionCalidad1
                   TemplateSize: =30
                   Width: =718
                   Y: =25
@@ -2057,7 +2057,8 @@ Screens:
                   HoverColor: =RGBA(255, 255, 255, 1)
                   HoverFill: =RGBA(12, 59, 94, 1)
                   OnSelect: |-
-                    =UpdateContext({ Revision: false })
+                    =UpdateContext({ Revision: false });
+                        Clear(RevisionCalidad1);
                   PressedBorderColor: =RGBA(15, 108, 189, 1)
                   PressedColor: =RGBA(15, 108, 189, 1)
                   PressedFill: =Self.Color
@@ -2120,6 +2121,34 @@ Screens:
                                 ),
                                 MostrarAviso: true,
                                 Disable: true
+                            }
+                        ),
+                         CountRows(
+                            Filter(
+                                gl_Contenedores_EM_3.AllItems,
+                                Value(txt_Cantidad_EC_7.Text) <> 0
+                            )
+                        ) > 0,
+                        UpdateContext(
+                            {
+                                mensajeNotificacion: "No se puede continuar: todas las cantidades deben ser exactamente cero.",
+                                MostrarAviso: true,
+                                Disable: true,
+                                isSaving: false
+                            }
+                        ),
+                        CountRows(
+                            Filter(
+                                gl_Contenedores_EM_2.AllItems,
+                                Value(cantidadDigitar) = 0
+                            )
+                        ) > 0,
+                        UpdateContext(
+                            {
+                                mensajeNotificacion: "No se puede guardar, por favor revisar si las cantidades no sean 0",
+                                MostrarAviso: true,
+                                Disable: true,
+                                isSaving: false
                             }
                         ),
                         UpdateContext({isSaving: true}),
@@ -2190,7 +2219,7 @@ Screens:
                             )
                         );
                         Clear(Contenedores);
-                        Clear(RevisionCalidad);
+                        Clear(RevisionCalidad1);
                         Reset(dp_FechaSalida_EM);
                         Reset(drp_Pais_EM);
                         Reset(txt_PNDato_EM_1);
