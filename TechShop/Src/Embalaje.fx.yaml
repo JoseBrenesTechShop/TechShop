@@ -1986,7 +1986,7 @@ Embalaje As screen:
                     =
                     If(
                     
-                      CountRows( Filter( RevisionCalidad1, cantidadDigitar = 0 ) ) > 0,
+                      CountIf(RevisionCalidad1, cantidadDigitar = 0) > 0,
                       
                         UpdateContext({
                           mensajeNotificacion: "Digitar la cantidad antes de continuar agregando",
@@ -2304,29 +2304,33 @@ Embalaje As screen:
                 HoverColor: =RGBA(215, 58, 60, 1)
                 HoverFill: =RGBA(247, 204, 198, 1)
                 Icon: =Icon.Trash
-                OnSelect: |
-                    =
-                    RemoveIf(RevisionCalidad, txt_prioridad = ThisItem.txt_prioridad);
-                    
-                    Set(
-                        varTemp,
-                        Sort(
-                            RevisionCalidad,
-                            txt_prioridad
-                        )
+                OnSelect: |-
+                    =UpdateContext(
+                        {
+                            varTemp: Sort(
+                                Filter(
+                                    RevisionCalidad1,
+                                    txt_prioridad > ThisItem.txt_prioridad
+                                ),
+                                txt_prioridad
+                            )
+                        }
                     );
-                    
-                    ClearCollect(
-                        RevisionCalidad,
-                        ForAll(
-                            Sequence(CountRows(varTemp)),
-                            With(
-                                { rec: Last(FirstN(varTemp, Value)) },
-                                Patch(
-                                    rec,
-                                    rec,
-                                    { txt_prioridad: Value }
-                                )
+                    RemoveIf(
+                        RevisionCalidad1,
+                        txt_prioridad = ThisItem.txt_prioridad
+                    );
+                    ForAll(
+                        varTemp,
+                        With(
+                            {p: ThisRecord.txt_prioridad},
+                            Patch(
+                                RevisionCalidad1,
+                                LookUp(
+                                    RevisionCalidad1,
+                                    txt_prioridad = p
+                                ),
+                                {txt_prioridad: Value(p) - 1}
                             )
                         )
                     )
@@ -2382,7 +2386,7 @@ Embalaje As screen:
                     )
                 OnChange: |-
                     =Patch(
-                        RevisionCalidad,
+                        RevisionCalidad1,
                         ThisItem,
                         { cantidadDigitar: Value(Self.Text) }
                     );
