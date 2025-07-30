@@ -1671,10 +1671,110 @@ Screens:
                                     HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
                                     HoverColor: =RGBA(255, 255, 255, 1)
                                     HoverFill: =RGBA(15, 84, 140, 1)
-                                    OnSelect: |+
+                                    OnSelect: |-
                                       =
-                                          UpdateContext({ Revision: true })
-
+                                          /*UpdateContext({ Revision: true })*/
+                                      If(
+                                          CountIf(
+                                              EdicionContenedor,
+                                              true
+                                          ) = 0,
+                                          UpdateContext(
+                                              {
+                                                  mensajeNotificacion: "No hay datos para guardar.",
+                                                  MostrarAviso: true,
+                                                  Disable: true
+                                              }
+                                          ),
+                                          UpdateContext({isSaving: true});
+                                          If(
+                                              !IsBlank(
+                                                  LookUp(
+                                                      ContenedorPNS_2,
+                                                      Nomenclatura = txt_Nomenclatura_EC.Text
+                                                  )
+                                              ),
+                                              RemoveIf(
+                                                  ContenedorPNS_2,
+                                                  Nomenclatura = txt_Nomenclatura_EC.Text
+                                              )
+                                          );
+                                          ForAll(
+                                              Filter(
+                                                  EdicionContenedor,
+                                                  Operation <> "Delete"
+                                              ),
+                                              Collect(
+                                                  ContenedorPNS_2,
+                                                  {
+                                                      'P/N': ThisRecord.'P/N',
+                                                      Cantidad: ThisRecord.Cantidad,
+                                                      Cantidad_Tarima: ThisRecord.Cantidad_Tarima,
+                                                      Valor_Pieza: ThisRecord.Valor_Pieza,
+                                                      Peso: ThisRecord.Peso,
+                                                      TipoCaja: ThisRecord.TipoCaja,
+                                                      Tipo: ThisRecord.Tipo,
+                                                      'NumContenedorP/N': ThisRecord.'NumContenedorP/N',
+                                                      Nomenclatura: ThisRecord.Nomenclatura,
+                                                      User: ThisRecord.User,
+                                                      Cantidad_Total: ThisRecord.Cantidad_Total,
+                                                      Valor_Total: ThisRecord.Valor_Total,
+                                                      PesoTotal: ThisRecord.PesoTotal
+                                                  }
+                                              )
+                                          );
+                                          Patch(
+                                              Contenedors_2,
+                                              gl_ListaContenedores_LE.Selected,
+                                              {
+                                                  Cantidad_Total: Sum(
+                                                      Filter(
+                                                          ContenedorPNS_2,
+                                                          Nomenclatura = txt_Nomenclatura_EC.Text
+                                                      ),
+                                                      Cantidad_Total
+                                                  ),
+                                                  Peso_Total: Sum(
+                                                      Filter(
+                                                          ContenedorPNS_2,
+                                                          Nomenclatura = txt_Nomenclatura_EC.Text
+                                                      ),
+                                                      PesoTotal
+                                                  ),
+                                                  Valor_Total: Sum(
+                                                      Filter(
+                                                          ContenedorPNS_2,
+                                                          Nomenclatura = txt_Nomenclatura_EC.Text
+                                                      ),
+                                                      Valor_Total
+                                                  )
+                                              }
+                                          );
+                                          Clear(RevisionCalidad);
+                                          Refresh(ContenedorPNS_2);
+                                          ClearCollect(
+                                              EdicionContenedor,
+                                              AddColumns(
+                                                  Filter(
+                                                      ContenedorPNS_2,
+                                                      Nomenclatura = txt_Nomenclatura_EC.Text
+                                                  ),
+                                                  Operation,
+                                                  "None"
+                                              )
+                                          );
+                                          Reset(gl_Contenedores_EC);
+                                          UpdateContext(
+                                              {
+                                                  mensajeNotificacion: "Cambios guardados exitosamente.",
+                                                  MostrarAviso: true,
+                                                  Disable: false,
+                                                  isSaving: false,
+                                                  Revision: false,
+                                                  VerMaquinas: false
+                                              }
+                                          )
+                                      )
                                     PressedBorderColor: =Self.Fill
                                     PressedColor: =Self.Fill
                                     PressedFill: =RGBA(255, 255, 255, 1)
@@ -2333,12 +2433,12 @@ Screens:
                         If(
                             !IsBlank(
                                 LookUp(
-                                    InspeccionCalidadContenedors_1,
+                                    InspeccionCalidadContenedors,
                                     Nomenclatura = txt_Nomenclatura_EC.Text
                                 )
                             ),
                             RemoveIf(
-                                InspeccionCalidadContenedors_1,
+                                InspeccionCalidadContenedors,
                                 Nomenclatura = txt_Nomenclatura_EC.Text
                             )
                         );
@@ -2396,7 +2496,7 @@ Screens:
                         ForAll(
                             RevisionCalidad,
                             Collect(
-                                InspeccionCalidadContenedors_1,
+                                InspeccionCalidadContenedors,
                                 {
                                     'P/N': ThisRecord.'P/N',
                                     Prioridad: ThisRecord.txt_prioridad,
