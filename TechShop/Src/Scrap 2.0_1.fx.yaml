@@ -347,7 +347,7 @@
                         PaddingBottom: =2
                         PaddingTop: =2
                         Width: =18
-                        X: =1320
+                        X: =1324
                         Y: =10
                         ZIndex: =16
 
@@ -456,8 +456,8 @@
                     FontColor: =RGBA(0, 0, 0, 1)
                     FontSize: =16
                     Height: =30
-                    InputTextPlaceholder: ="Buscar Orden"
-                    Items: =Sort(Distinct(Filter(Orden_Ejecucion, Estado_Orden = "Ejecucion", IsBlank(drp_PN_SP.Selected.Value) || 'P/N' = drp_PN_SP.Selected.Value), Orden), Value)
+                    InputTextPlaceholder: =If(IsBlank(drp_PN_SP.Selected.Value), "Debe seleccionar el P/N", "Buscar Orden")
+                    Items: =Sort(Distinct(Filter(Orden_Ejecucion, Estado_Orden = "Ejecucion",'P/N' = drp_PN_SP.Selected.Value), Orden), Value)
                     OnChange: =false
                     PaddingBottom: =2
                     PaddingLeft: =5
@@ -1338,7 +1338,7 @@
                     FontUnderline: =false
                     FontWeight: =""
                     Height: =31
-                    InputTextPlaceholder: ="Buscar Orden"
+                    InputTextPlaceholder: ="Buscar P/N"
                     IsSearchable: =true
                     Items: =Distinct(glr_PNContenedor_SP.AllItems, 'P/N')
                     MultiValueDelimiter: =", "
@@ -1645,7 +1645,7 @@
                     Color: =RGBA(0, 0, 0, 1)
                     Default: |-
                         =If(
-                            IsBlank(txt_PN_SP_1.Text),
+                            IsBlank(drp_PN_SP.Selected.Value),
                             "",
                             With(
                                 {
@@ -1654,7 +1654,7 @@
                                             tarima: Sort(
                                                 Filter(
                                                     Scrap_Tarimas,
-                                                    'P/N' = txt_PN_SP_1.Text && Contenedor = Nomenclatura
+                                                    'P/N' = drp_PN_SP.Selected.Value && Contenedor = Nomenclatura
                                                 ),
                                                 Value(ID),
                                                 SortOrder.Descending
@@ -1684,7 +1684,7 @@
                                     {
                                         tarima: LookUp(
                                             Scrap_Tarimas,
-                                            Tarima = tarimaTexto && 'P/N' = txt_PN_SP_1.Text && Contenedor = Nomenclatura
+                                            Tarima = tarimaTexto && 'P/N' = drp_PN_SP.Selected.Value && Contenedor = Nomenclatura
                                         )
                                     },
                                     If(
@@ -3332,26 +3332,27 @@
                         With(
                             {
                                 suma: (Value(txt_Edit_Bache_SP_1.Text - txt_Edit_Cant_SP_1.Text) - TarimaScrap.Cantidad),
-                                tarimaNumber: Mid(
-                                    TarimaScrap.Tarima,
-                                    2
+                                newTarima: Text(
+                                    "T" & Text(
+                                        Value(
+                                            Mid(
+                                                TarimaScrap.Tarima,
+                                                2
+                                            )
+                                        ) - 1,
+                                        "00"
+                                    )
                                 )
                             },
-                            Patch(
+                            Remove(
                                 Scrap_Tarimas,
-                                TarimaScrap,
-                                {Cantidad: 0}
+                                TarimaScrap
                             );
                             Patch(
                                 Scrap_Tarimas,
                                 LookUp(
                                     Scrap_Tarimas,
-                                    'P/N' = tbl_Scrap_SP_1.Selected.'P/N' && Contenedor = tbl_Scrap_SP_1.Selected.Contenedor && Tarima = Text(
-                                        "T" & Text(
-                                            Value(tarimaNumber) - 1,
-                                            "00"
-                                        )
-                                    )
+                                    'P/N' = tbl_Scrap_SP_1.Selected.'P/N' && Contenedor = tbl_Scrap_SP_1.Selected.Contenedor && Tarima = newTarima
                                 ),
                                 {Cantidad: 50 - suma}
                             )
@@ -3585,26 +3586,27 @@
                                         With(
                                             {
                                                 suma: ((Value(txt_Edit_Cant_SP_1.Text) - tbl_Scrap_SP_1.Selected.Cantidad) - TarimaScrap.Cantidad),
-                                                tarimaNumber: Mid(
-                                                    TarimaScrap.Tarima,
-                                                    2
+                                                tarimaNumber: Text(
+                                                    "T" & Text(
+                                                        Value(
+                                                            Mid(
+                                                                TarimaScrap.Tarima,
+                                                                2
+                                                            )
+                                                        ) - 1,
+                                                        "00"
+                                                    )
                                                 )
                                             },
-                                            Patch(
+                                            Remove(
                                                 Scrap_Tarimas,
-                                                TarimaScrap,
-                                                {Cantidad: 0}
+                                                TarimaScrap
                                             );
                                             Patch(
                                                 Scrap_Tarimas,
                                                 LookUp(
                                                     Scrap_Tarimas,
-                                                    'P/N' = tbl_Scrap_SP_1.Selected.'P/N' && Contenedor = tbl_Scrap_SP_1.Selected.Contenedor && Tarima = Text(
-                                                        "T" & Text(
-                                                            Value(tarimaNumber) - 1,
-                                                            "00"
-                                                        )
-                                                    )
+                                                    'P/N' = tbl_Scrap_SP_1.Selected.'P/N' && Contenedor = tbl_Scrap_SP_1.Selected.Contenedor && Tarima = tarimaNumber
                                                 ),
                                                 {Cantidad: 50 - suma}
                                             )
@@ -3729,11 +3731,12 @@
                                                 {
                                                     'P/N': tbl_Scrap_SP_1.Selected.'P/N',
                                                     Contenedor: tbl_Scrap_SP_1.Selected.Contenedor,
-                                                    Tarima:"T" & Text(
-                                                            Value(tarimaNumber) - 1,
-                                                            "00"
-                                                        ),
-                                                    Cantidad: Value(tbl_Scrap_SP_1.Selected.Cantidad - Value(txt_Edit_Cant_SP_1.Text))- suma}
+                                                    Tarima: "T" & Text(
+                                                        Value(tarimaNumber) + 1,
+                                                        "00"
+                                                    ),
+                                                    Cantidad: Value(tbl_Scrap_SP_1.Selected.Cantidad - Value(txt_Edit_Cant_SP_1.Text)) - suma
+                                                }
                                             )
                                         )
                                     )
