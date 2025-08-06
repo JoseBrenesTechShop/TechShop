@@ -351,6 +351,30 @@
                         Y: =10
                         ZIndex: =16
 
+                    lbl_SP_46 As text:
+                        BorderColor: =App.Theme.Colors.Darker40
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =0
+                        Color: =RGBA(255, 255, 255, 1)
+                        Default: |-
+                            ="Tarimas completas: " & RoundUp(Sum(Filter(Scrap_1, FechaIngreso = DateValue(drp_Fecha_SP_1.Selected.fecha)), Bache)/50, 0)
+                        DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                        DisabledColor: =RGBA(166, 166, 166, 1)
+                        DisabledFill: =RGBA(166, 215, 153, 1)
+                        DisplayMode: =DisplayMode.View
+                        Fill: =RGBA(0, 0, 0, 0)
+                        FocusedBorderThickness: =4
+                        Font: =App.Theme.Font
+                        FontWeight: =FontWeight.Semibold
+                        HintText: =""
+                        HoverBorderColor: =App.Theme.Colors.Darker40
+                        HoverColor: =RGBA(0, 0, 0, 1)
+                        HoverFill: =App.Theme.Colors.Lighter70
+                        PaddingLeft: =8
+                        Size: =13
+                        Width: =401
+                        ZIndex: =17
+
                 lbl_SP_37 As text:
                     Align: =Align.Center
                     BorderColor: =App.Theme.Colors.Darker40
@@ -1581,38 +1605,7 @@
                     BorderThickness: =If(Self.DisplayMode = DisplayMode.Disabled, 1, 3)
                     Clear: =true
                     Color: =RGBA(0, 0, 0, 1)
-                    Default: |-
-                        =If(
-                            IsBlank(drp_Orden_SP_1.Selected.Value),
-                            "",
-                            With(
-                                {
-                                    tarima: Sort(
-                                        Filter(
-                                            Scrap_Tarimas,
-                                            Orden = drp_Orden_SP_1.Selected.Value
-                                        ),
-                                        Value(ID),
-                                        SortOrder.Descending
-                                    )
-                                },
-                                If(
-                                    IsEmpty(tarima),
-                                    "T01",
-                                    First(tarima).Cantidad < 50,
-                                    First(tarima).Tarima,
-                                    With(
-                                        {
-                                            tarimaNumber: Mid(
-                                                First(tarima).Tarima,
-                                                2
-                                            )
-                                        },
-                                        "T" & Text(Value(tarimaNumber) + 1, "00")
-                                    )
-                                )
-                            )
-                        )
+                    Default: =
                     DisabledBorderColor: =RGBA(40, 134, 222, 1)
                     DisabledColor: =RGBA(0, 0, 0, 1)
                     DisabledFill: =RGBA(255, 255, 255, 1)
@@ -1644,29 +1637,66 @@
                     Y: =187
                     ZIndex: =54
 
-                txt_CantTarima_SP_1 As text:
+                txt_ContenedorTarima_SP_1 As text:
                     Align: =Align.Center
                     BorderColor: =RGBA(40, 134, 222, 1)
                     BorderThickness: =If(Self.DisplayMode = DisplayMode.Disabled, 1, 3)
                     Clear: =true
                     Color: =RGBA(0, 0, 0, 1)
                     Default: |-
-                        =With(
-                            {
-                                tarima: LookUp(
-                                    Scrap_Tarimas,
-                                    Tarima = txt_Tarima_SP_1.Text &&
-                                    Orden = drp_Orden_SP_1.Selected.Value
+                        =If(
+                            IsBlank(drp_Orden_SP_1.Selected.Value),
+                            "",
+                            With(
+                                {
+                                    tarimaTexto: With(
+                                        {
+                                            tarima: Sort(
+                                                Filter(
+                                                    Scrap_Tarimas,
+                                                    'P/N' = txt_PN_SP_1.Text && Contenedor = Nomenclatura
+                                                ),
+                                                Value(ID),
+                                                SortOrder.Descending
+                                            )
+                                        },
+                                        If(
+                                            IsEmpty(tarima),
+                                            "T01",
+                                            First(tarima).Cantidad < 50,
+                                            First(tarima).Tarima,
+                                            With(
+                                                {
+                                                    tarimaNumber: Mid(
+                                                        First(tarima).Tarima,
+                                                        2
+                                                    )
+                                                },
+                                                "T" & Text(
+                                                    Value(tarimaNumber) + 1,
+                                                    "00"
+                                                )
+                                            )
+                                        )
+                                    )
+                                },
+                                tarimaTexto & " - " & With(
+                                    {
+                                        tarima: LookUp(
+                                            Scrap_Tarimas,
+                                            Tarima = tarimaTexto && 'P/N' = txt_PN_SP_1.Text && Contenedor = Nomenclatura
+                                        )
+                                    },
+                                    If(
+                                        IsBlank(tarima),
+                                        "0",
+                                        Text(
+                                            tarima.Cantidad,
+                                            "#0"
+                                        )
+                                    ) & "/50"
                                 )
-                            },
-                            If(
-                                IsBlank(tarima),
-                                "0",
-                                Text(
-                                    tarima.Cantidad,
-                                    "#0"
-                                )
-                            ) & "/50"
+                            )
                         )
                     DisabledBorderColor: =RGBA(40, 134, 222, 1)
                     DisabledColor: =RGBA(0, 0, 0, 1)
@@ -1959,25 +1989,27 @@
                                 {
                                     TarimaScrap: LookUp(
                                         Scrap_Tarimas,
-                                        Tarima = Upper(txt_Tarima_SP_1.Text) && Orden = drp_Orden_SP_1.Selected.Value
-                                    )
+                                        Tarima = First(Split(txt_ContenedorTarima_SP_1.Text, " - ")).Value && 'P/N' = txt_PN_SP_1.Text && Contenedor = Nomenclatura
+                                    ),
+                                    tarimaText: First(Split(txt_ContenedorTarima_SP_1.Text, " - ")).Value
                                 },
                                 If(
                                     IsBlank(TarimaScrap),
                                     Collect(
                                         Scrap_Tarimas,
                                         {
-                                            Orden: drp_Orden_SP_1.Selected.Value,
-                                            Tarima: Upper(txt_Tarima_SP_1.Text),
-                                            Cantidad: Value(txt_Cant_SP_1.Text)
+                                            'P/N': txt_PN_SP_1.Text,
+                                            Contenedor: Nomenclatura,
+                                            Tarima: tarimaText,
+                                            Cantidad: Value(txt_Bache_SP_1.Text - txt_Cant_SP_1.Text)
                                         }
-                                    ); UpdateContext({UsedTarimas: Upper(txt_Tarima_SP_1.Text)}),
-                                    TarimaScrap.Cantidad + Value(txt_Cant_SP_1.Text) <= 50,
+                                    ); UpdateContext({UsedTarimas: tarimaText}),
+                                    TarimaScrap.Cantidad + Value(txt_Bache_SP_1.Text - txt_Cant_SP_1.Text) <= 50,
                                     Patch(
                                         Scrap_Tarimas,
                                         TarimaScrap,
-                                        {Cantidad: TarimaScrap.Cantidad + Value(txt_Cant_SP_1.Text)}
-                                    ); UpdateContext({UsedTarimas: Upper(txt_Tarima_SP_1.Text)}),
+                                        {Cantidad: TarimaScrap.Cantidad + Value(txt_Bache_SP_1.Text - txt_Cant_SP_1.Text)}
+                                    ); UpdateContext({UsedTarimas: tarimaText}),
                                     With(
                                         {
                                             suma: (50 - TarimaScrap.Cantidad),
@@ -1994,11 +2026,12 @@
                                         Collect(
                                             Scrap_Tarimas,
                                             {
-                                                Orden: drp_Orden_SP_1.Selected.Value,
+                                                'P/N': txt_PN_SP_1.Text,
+                                                Contenedor: Nomenclatura,
                                                 Tarima: "T" & Text(Value(tarimaNumber) + 1, "00"),
-                                                Cantidad: Value(txt_Cant_SP_1.Text) - suma
+                                                Cantidad: Value(txt_Bache_SP_1.Text - txt_Cant_SP_1.Text) - suma
                                             }
-                                        ); UpdateContext({UsedTarimas: Upper(txt_Tarima_SP_1.Text) & " - T" & Text(Value(tarimaNumber) + 1, "00")})
+                                        ); UpdateContext({UsedTarimas: tarimaText & " - T" & Text(Value(tarimaNumber) + 1, "00")})
                                     )
                                 )
                             );
@@ -2029,7 +2062,8 @@
                                         0
                                     );*/
                                     Cantidad: Value(txt_Cant_SP_1.Text),
-                                    Tarima: Upper(UsedTarimas),
+                                    Tarima: Upper(txt_Tarima_SP_1.Text),
+                                    Tarima_Contenedor: Upper(UsedTarimas),
                                     Inspeccion: drp_Insepccion_SP_1.Selected.Value,
                                     'No-conformidad': drp_Incoformidad_SP_1.Selected.Value,
                                     Item: txt_Item_SP_1.Text,
