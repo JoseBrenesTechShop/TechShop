@@ -176,7 +176,35 @@ Screens:
                                     BorderColor: =RGBA(40, 134, 222, 1)
                                     BorderThickness: =3
                                     Height: =537
-                                    Items: =Sort(Filter('RegistroOredenes_1.5_1', Respuesta = drp_Estado_AO.SelectedText.Value, 'Fecha de creación' > DateAdd(Today(), -30)), 'Fecha de creación',SortOrder.Descending)
+                                    Items: |-
+                                      =If(
+                                          varEmpleado.Codigo = "2328" || varEmpleado.Rol = "ADMIN",
+                                          Sort(
+                                              Filter(
+                                                  'RegistroOredenes_1.5_1',
+                                                  Respuesta = drp_Estado_AO.SelectedText.Value,
+                                                  'Fecha de creación' > DateAdd(
+                                                      Today(),
+                                                      -30
+                                                  )
+                                              ),
+                                              'Fecha de creación',
+                                              SortOrder.Descending
+                                          ),
+                                          Sort(
+                                              Filter(
+                                                  'RegistroOredenes_1.5_1',
+                                                  Respuesta = drp_Estado_AO.SelectedText.Value,
+                                                  'Fecha de creación' > DateAdd(
+                                                      Today(),
+                                                      -30
+                                                  ),
+                                                  Permiso_5 <> "SI"
+                                              ),
+                                              'Fecha de creación',
+                                              SortOrder.Descending
+                                          )
+                                      )
                                     TemplatePadding: =15
                                     TemplateSize: =120
                                     Width: =1352
@@ -185,10 +213,40 @@ Screens:
                                         Control: GroupContainer@1.3.0
                                         Variant: ManualLayout
                                         Properties:
-                                          BorderColor: =RGBA(40, 134, 222, 1)
-                                          BorderThickness: =3
+                                          BorderColor: |-
+                                            =If(
+                                                ThisItem.Permiso_5 = "SI",
+                                                RGBA(
+                                                    255,
+                                                    191,
+                                                    0,
+                                                    1
+                                                ),
+                                                RGBA(
+                                                    40,
+                                                    134,
+                                                    222,
+                                                    1
+                                                )
+                                            )
+                                          BorderThickness: =4
                                           DropShadow: =DropShadow.Regular
-                                          Fill: =RGBA(180, 214, 250, 1)
+                                          Fill: |-
+                                            =If(
+                                                ThisItem.Permiso_5 = "SI",
+                                                RGBA(
+                                                    255,
+                                                    224,
+                                                    133,
+                                                    1
+                                                ),
+                                                RGBA(
+                                                    180,
+                                                    214,
+                                                    250,
+                                                    1
+                                                )
+                                            )
                                           Height: =120
                                           RadiusBottomLeft: =10
                                           RadiusBottomRight: =10
@@ -214,7 +272,7 @@ Screens:
                                                 RadiusTopRight: =8
                                                 Size: =18
                                                 Width: =200
-                                                X: =121
+                                                X: =161
                                                 Y: =25
                                           - txt_OP_AO:
                                               Control: Classic/TextInput@2.3.2
@@ -233,7 +291,7 @@ Screens:
                                                 RadiusTopRight: =8
                                                 Size: =18
                                                 Width: =100
-                                                X: =338
+                                                X: =378
                                                 Y: =25
                                           - txt_Emisor_AO:
                                               Control: Classic/TextInput@2.3.2
@@ -252,7 +310,7 @@ Screens:
                                                 RadiusTopRight: =8
                                                 Size: =18
                                                 Width: =450
-                                                X: =92
+                                                X: =132
                                                 Y: =80
                                           - txt_Receptor_AO:
                                               Control: Classic/TextInput@2.3.2
@@ -271,7 +329,7 @@ Screens:
                                                 RadiusTopRight: =8
                                                 Size: =18
                                                 Width: =450
-                                                X: =557
+                                                X: =597
                                                 Y: =80
                                           - btn_Aprobado_AO:
                                               Control: Classic/Button@2.2.0
@@ -286,26 +344,48 @@ Screens:
                                                 HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
                                                 HoverColor: =RGBA(255, 255, 255, 1)
                                                 HoverFill: =RGBA(102, 182, 227, 1)
-                                                OnSelect: |
-                                                  =Patch(
-                                                      Orden_Ejecucion,
-                                                      LookUp(
+                                                OnSelect: |-
+                                                  =If(
+                                                      ThisItem.Permiso_5 = "SI",
+                                                      Patch(
                                                           Orden_Ejecucion,
-                                                          Orden = ThisItem.Orden && Operacion = ThisItem.Operacion
-                                                      ),
-                                                      {'Permiso_1.5': "Aprobado"}
-                                                  );
-                                                  Patch(
-                                                      'RegistroOredenes_1.5_1',
-                                                      LookUp(
+                                                          LookUp(
+                                                              Orden_Ejecucion,
+                                                              Orden = ThisItem.Orden && Operacion = ThisItem.Operacion
+                                                          ),
+                                                          {Permiso_5: "Aprobado"}
+                                                      );
+                                                      Patch(
                                                           'RegistroOredenes_1.5_1',
-                                                          Orden = ThisItem.Orden && Operacion = ThisItem.Operacion
+                                                          LookUp(
+                                                              'RegistroOredenes_1.5_1',
+                                                              Orden = ThisItem.Orden && Operacion = ThisItem.Operacion && Permiso_5 = "SI"
+                                                          ),
+                                                          {
+                                                              Respuesta: "Aprobado",
+                                                              User_Respuesta: txtEmpleadoEnUso_3.Text
+                                                          }
                                                       ),
-                                                      {
-                                                          Respuesta: "Aprobado",
-                                                          User_Respuesta: txtEmpleadoEnUso_3.Text
-                                                      }
-                                                  );
+                                                      Patch(
+                                                          Orden_Ejecucion,
+                                                          LookUp(
+                                                              Orden_Ejecucion,
+                                                              Orden = ThisItem.Orden && Operacion = ThisItem.Operacion
+                                                          ),
+                                                          {'Permiso_1.5': "Aprobado"}
+                                                      );
+                                                      Patch(
+                                                          'RegistroOredenes_1.5_1',
+                                                          LookUp(
+                                                              'RegistroOredenes_1.5_1',
+                                                              Orden = ThisItem.Orden && Operacion = ThisItem.Operacion && Permiso_5 <> "SI"
+                                                          ),
+                                                          {
+                                                              Respuesta: "Aprobado",
+                                                              User_Respuesta: txtEmpleadoEnUso_3.Text
+                                                          }
+                                                      )
+                                                  )
                                                 PressedBorderColor: =Self.Fill
                                                 PressedColor: =Self.Fill
                                                 PressedFill: =Self.Color
@@ -327,26 +407,48 @@ Screens:
                                                 HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
                                                 HoverColor: =RGBA(255, 255, 255, 1)
                                                 HoverFill: =RGBA(102, 182, 227, 1)
-                                                OnSelect: |
-                                                  =Patch(
-                                                      Orden_Ejecucion,
-                                                      LookUp(
+                                                OnSelect: |-
+                                                  =If(
+                                                      ThisItem.Permiso_5 = "SI",
+                                                      Patch(
                                                           Orden_Ejecucion,
-                                                          Orden = ThisItem.Orden && Operacion = ThisItem.Operacion
-                                                      ),
-                                                      {'Permiso_1.5': "Desaprobado"}
-                                                  );
-                                                  Patch(
-                                                      'RegistroOredenes_1.5_1',
-                                                      LookUp(
+                                                          LookUp(
+                                                              Orden_Ejecucion,
+                                                              Orden = ThisItem.Orden && Operacion = ThisItem.Operacion
+                                                          ),
+                                                          {Permiso_5: "Desaprobado"}
+                                                      );
+                                                      Patch(
                                                           'RegistroOredenes_1.5_1',
-                                                          Orden = ThisItem.Orden && Operacion = ThisItem.Operacion
+                                                          LookUp(
+                                                              'RegistroOredenes_1.5_1',
+                                                              Orden = ThisItem.Orden && Operacion = ThisItem.Operacion && Permiso_5 = "SI"
+                                                          ),
+                                                          {
+                                                              Respuesta: "Desaprobado",
+                                                              User_Respuesta: txtEmpleadoEnUso_3.Text
+                                                          }
                                                       ),
-                                                      {
-                                                          Respuesta: "Desaprobado",
-                                                          User_Respuesta: txtEmpleadoEnUso_3.Text
-                                                      }
-                                                  );
+                                                      Patch(
+                                                          Orden_Ejecucion,
+                                                          LookUp(
+                                                              Orden_Ejecucion,
+                                                              Orden = ThisItem.Orden && Operacion = ThisItem.Operacion
+                                                          ),
+                                                          {'Permiso_1.5': "Desaprobado"}
+                                                      );
+                                                      Patch(
+                                                          'RegistroOredenes_1.5_1',
+                                                          LookUp(
+                                                              'RegistroOredenes_1.5_1',
+                                                              Orden = ThisItem.Orden && Operacion = ThisItem.Operacion && Permiso_5 <> "SI"
+                                                          ),
+                                                          {
+                                                              Respuesta: "Desaprobado",
+                                                              User_Respuesta: txtEmpleadoEnUso_3.Text
+                                                          }
+                                                      )
+                                                  )
                                                 PressedBorderColor: =Self.Fill
                                                 PressedColor: =Self.Fill
                                                 PressedFill: =Self.Color
@@ -375,7 +477,7 @@ Screens:
                                                 RadiusTopRight: =8
                                                 Size: =18
                                                 Width: =250
-                                                X: =453
+                                                X: =493
                                                 Y: =25
                                           - txt_OP_AO_2:
                                               Control: Classic/TextInput@2.3.2
@@ -397,7 +499,7 @@ Screens:
                                                 RadiusTopRight: =8
                                                 Size: =18
                                                 Width: =250
-                                                X: =718
+                                                X: =758
                                                 Y: =25
                                           - TextInput7_11:
                                               Control: Classic/TextInput@2.3.2
@@ -417,7 +519,7 @@ Screens:
                                                 RadiusTopRight: =8
                                                 Size: =12
                                                 Width: =200
-                                                X: =121
+                                                X: =161
                                                 Y: =5
                                           - TextInput7_12:
                                               Control: Classic/TextInput@2.3.2
@@ -437,7 +539,7 @@ Screens:
                                                 RadiusTopRight: =8
                                                 Size: =12
                                                 Width: =100
-                                                X: =338
+                                                X: =378
                                                 Y: =5
                                           - TextInput7_13:
                                               Control: Classic/TextInput@2.3.2
@@ -457,7 +559,7 @@ Screens:
                                                 RadiusTopRight: =8
                                                 Size: =12
                                                 Width: =250
-                                                X: =453
+                                                X: =493
                                                 Y: =5
                                           - TextInput7_14:
                                               Control: Classic/TextInput@2.3.2
@@ -477,7 +579,7 @@ Screens:
                                                 RadiusTopRight: =8
                                                 Size: =12
                                                 Width: =250
-                                                X: =718
+                                                X: =758
                                                 Y: =5
                                           - TextInput7_15:
                                               Control: Classic/TextInput@2.3.2
@@ -497,13 +599,13 @@ Screens:
                                                 RadiusTopRight: =8
                                                 Size: =12
                                                 Width: =420
-                                                X: =117
+                                                X: =157
                                                 Y: =60
                                           - TextInput7_16:
                                               Control: Classic/TextInput@2.3.2
                                               Properties:
                                                 Align: =Align.Center
-                                                Default: ="Supervisdor"
+                                                Default: ="Supervisor"
                                                 DisabledBorderColor: =RGBA(0, 0, 0, 0)
                                                 DisabledColor: =RGBA(0, 0, 0, 1)
                                                 DisabledFill: =RGBA(0, 0, 0, 0)
@@ -517,8 +619,30 @@ Screens:
                                                 RadiusTopRight: =8
                                                 Size: =12
                                                 Width: =420
-                                                X: =552
+                                                X: =592
                                                 Y: =60
+                                          - TextInput7_19:
+                                              Control: Classic/TextInput@2.3.2
+                                              Properties:
+                                                Align: =Align.Center
+                                                BorderThickness: =4
+                                                Default: =If(ThisItem.Permiso_5 = "SI", "5%", "1.5%")
+                                                DisabledBorderColor: =If(ThisItem.Permiso_5 = "SI",RGBA(148, 111, 0, 1) ,RGBA(15, 84, 140, 1))
+                                                DisabledColor: =RGBA(255, 255, 255, 1)
+                                                DisabledFill: =If(ThisItem.Permiso_5 = "SI",RGBA(255, 191, 0, 1) ,RGBA(40, 134, 222, 1))
+                                                DisplayMode: =DisplayMode.Disabled
+                                                Fill: =RGBA(180, 214, 250, 0.3)
+                                                FontWeight: =FontWeight.Bold
+                                                Height: =80
+                                                PaddingLeft: =5
+                                                RadiusBottomLeft: =40
+                                                RadiusBottomRight: =40
+                                                RadiusTopLeft: =40
+                                                RadiusTopRight: =40
+                                                Size: =20
+                                                Width: =80
+                                                X: =21
+                                                Y: =20
                               - TextInput7_17:
                                   Control: Classic/TextInput@2.3.2
                                   Properties:

@@ -1532,7 +1532,7 @@
                                 IsBlank(
                                     LookUp(
                                         'RegistroOredenes_1.5_1',
-                                        Orden = OrdenInfo.Orden && Operacion = OrdenInfo.Operacion
+                                        Orden = OrdenInfo.Orden && Operacion = OrdenInfo.Operacion && Permiso_5 <> "SI"
                                     )
                                 ),
                                 Collect(
@@ -1541,14 +1541,15 @@
                                         Orden: OrdenInfo.Orden,
                                         Operacion: OrdenInfo.Operacion,
                                         User_Solicitud: txtEmpleadoEnUso_HxHE_1.Text,
-                                        Respuesta: "En Espera"
+                                        Respuesta: "En Espera",
+                                        Permiso_5: "NO"
                                     }
                                 ),
                                 Remove(
                                     'RegistroOredenes_1.5_1',
                                     LookUp(
                                         'RegistroOredenes_1.5_1',
-                                        Orden = OrdenInfo.Orden && Operacion = OrdenInfo.Operacion
+                                        Orden = OrdenInfo.Orden && Operacion = OrdenInfo.Operacion && Permiso_5 <> "SI"
                                     )
                                 );
                                 Collect(
@@ -1557,7 +1558,46 @@
                                         Orden: OrdenInfo.Orden,
                                         Operacion: OrdenInfo.Operacion,
                                         User_Solicitud: txtEmpleadoEnUso_HxHE_1.Text,
-                                        Respuesta: "En Espera"
+                                        Respuesta: "En Espera",
+                                        Permiso_5: "NO"
+                                    }
+                                )
+                            );
+                            UpdateContext({MostraBloqueo: true}),
+                            //Aprovacion del 5%
+                            (txt_CantProducida_HxH2.Text + txt_CantTotal_HxH2.Text) > (txt_CantMax_HxH2.Text + (txt_CantMax_HxH2.Text * 0.05)) && OrdenInfo.Permiso_5 <> "Aprobado",
+                            If(
+                                IsBlank(
+                                    LookUp(
+                                        'RegistroOredenes_1.5_1',
+                                        Orden = OrdenInfo.Orden && Operacion = OrdenInfo.Operacion && Permiso_5 = "SI"
+                                    )
+                                ),
+                                Collect(
+                                    'RegistroOredenes_1.5_1',
+                                    {
+                                        Orden: OrdenInfo.Orden,
+                                        Operacion: OrdenInfo.Operacion,
+                                        User_Solicitud: txtEmpleadoEnUso_HxHE_1.Text,
+                                        Respuesta: "En Espera",
+                                        Permiso_5: "SI"
+                                    }
+                                ),
+                                Remove(
+                                    'RegistroOredenes_1.5_1',
+                                    LookUp(
+                                        'RegistroOredenes_1.5_1',
+                                        Orden = OrdenInfo.Orden && Operacion = OrdenInfo.Operacion && Permiso_5 = "SI"
+                                    )
+                                );
+                                Collect(
+                                    'RegistroOredenes_1.5_1',
+                                    {
+                                        Orden: OrdenInfo.Orden,
+                                        Operacion: OrdenInfo.Operacion,
+                                        User_Solicitud: txtEmpleadoEnUso_HxHE_1.Text,
+                                        Respuesta: "En Espera",
+                                        Permiso_5: "SI"
                                     }
                                 )
                             );
@@ -2312,6 +2352,44 @@
                     Y: =631
                     ZIndex: =53
 
+                icn_Home_HxH_27 As icon:
+                    BorderColor: =App.Theme.Colors.Primary
+                    BorderStyle: =BorderStyle.None
+                    BorderThickness: =2
+                    Color: =RGBA(255, 255, 255, 1)
+                    DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                    DisabledColor: =RGBA(244, 244, 244, 1)
+                    DisabledFill: =RGBA(214, 221, 224, 1)
+                    DisplayMode: =If(Disable, DisplayMode.Disabled, DisplayMode.Edit)
+                    Fill: =RGBA(71, 158, 245, 1)
+                    FocusedBorderThickness: =20
+                    Height: =39
+                    HoverBorderColor: =RGBA(0, 134, 208, 1)
+                    HoverColor: =RGBA(255, 255, 255, 1)
+                    HoverFill: =RGBA(0, 134, 208, 1)
+                    Icon: =Icon.Reload
+                    OnSelect: |
+                        =Collect(
+                            'RegistroOredenes_1.5_1',
+                            {
+                                Orden: "OP0000Prueba",
+                                Operacion: "00",
+                                User_Solicitud: txtEmpleadoEnUso_HxHE_1.Text,
+                                Respuesta: "En Espera",
+                                Permiso_5: "SI"
+                            }
+                        );
+                        UpdateContext({MostraBloqueo: true, porciento5: true});
+                    PaddingBottom: =5
+                    PaddingLeft: =5
+                    PaddingRight: =5
+                    PaddingTop: =5
+                    Visible: =varEmpleado.Codigo = "2692"
+                    Width: =44
+                    X: =1271
+                    Y: =449
+                    ZIndex: =54
+
     cnt_Comentario_HxH_2 As groupContainer.manualLayoutContainer:
         BorderColor: =RGBA(215, 58, 60, 1)
         BorderThickness: =5
@@ -2711,38 +2789,68 @@
             Height: =52
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(255, 0, 0, 1)
-            OnSelect: |
+            OnSelect: |-
                 =UpdateContext({MostraBloqueoAcesso: true});
                 EnviarCorreo.Run(
                     "supervisoresTSI@tsicr.com",
-                    "Solicitud de 1.5",
-                    "Estimado/a,<br><br>
-                Se ha realizado una solicitud para ingresar datos que superen el 1.5 en la Orden: " & txt_OrdenView_HxH.Text & ",  Operacion: " & txt_OP_HxH.Text & " y P/N: " & txt_PN_HxH.Text & "<br>
+                    If(
+                        porciento5,
+                        "Solicitud del 5%",
+                        "Solicitud de 1.5%"
+                    ),
+                    If(
+                        porciento5,
+                        "Estimado/a,<br><br>
+                Se ha realizado una solicitud para ingresar datos que superen el 5% en la Orden: " & txt_OrdenView_HxH.Text & ",  Operacion: " & txt_OP_HxH.Text & " y P/N: " & txt_PN_HxH.Text & "<br>
+                Por favor, revise y apruebe esta solicitud a la brevedad posible.
+                <br>Gracias por su atención.",
+                        "Estimado/a,<br><br>
+                Se ha realizado una solicitud para ingresar datos que superen el 1.5% en la Orden: " & txt_OrdenView_HxH.Text & ",  Operacion: " & txt_OP_HxH.Text & " y P/N: " & txt_PN_HxH.Text & "<br>
                 Por favor, revise y apruebe esta solicitud a la brevedad posible.
                 <br>Gracias por su atención."
+                    )
                 )
             Size: =18
             Text: ="Continuar"
             Width: =199
             X: =583
-            Y: =393
+            Y: =448
             ZIndex: =3
 
-        Label15_7 As label:
+        TextInput19 As text:
             Align: =Align.Center
-            BorderColor: =App.Theme.Colors.Darker40
+            BorderColor: =RGBA(132, 40, 38, 1)
+            BorderThickness: =4
             Color: =RGBA(255, 255, 255, 1)
-            DisabledColor: =RGBA(166, 166, 166, 1)
+            Default: |-
+                =If(
+                    porciento5,
+                    "Está intentando hacer un registro que supera el 5% de la cantidad máxima de la orden. Actualmente, la orden y la operación no tienen permiso para guardar este tipo de registros. Al darle continuar, estará enviando una solicitud al supervisor a cargo para aprobar el ingreso de registros que superen el 5%.",
+                    "Está intentando hacer un registro que supera el 1.5% de la cantidad máxima de la orden. Actualmente, la orden y la operación no tienen permiso para guardar este tipo de registros. Al darle continuar, estará enviando una solicitud al supervisor a cargo para aprobar el ingreso de registros que superen el 1.5%."
+                )
+            DisabledBorderColor: =RGBA(132, 40, 38, 1)
+            DisabledColor: =RGBA(255, 255, 255, 1)
+            DisabledFill: =RGBA(189, 49, 51, 1)
+            DisplayMode: =DisplayMode.Disabled
             Fill: =RGBA(189, 49, 51, 1)
+            FocusedBorderThickness: =4
             Font: =App.Theme.Font
             FontWeight: =FontWeight.Bold
             Height: =187
+            HoverBorderColor: =App.Theme.Colors.Darker40
+            HoverColor: =RGBA(0, 0, 0, 1)
+            HoverFill: =App.Theme.Colors.Lighter70
+            Mode: =TextMode.MultiLine
+            PaddingLeft: =5
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
             Size: =20
-            Text: ="Está intentando hacer un registro que supera el 1.5 de la cantidad máxima de la orden. Actualmente, la orden y la operación no tienen permiso para guardar este tipo de registros. Al darle continuar, estará enviando una solicitud al supervisor a cargo para aprobar el ingreso de registros que superen el 1.5."
             Width: =864
             X: =250
-            Y: =176
-            ZIndex: =4
+            Y: =215
+            ZIndex: =5
 
     cnt_BloqueoAviso_HxH_2 As groupContainer.manualLayoutContainer:
         DropShadow: =DropShadow.Light
@@ -2754,8 +2862,8 @@
         RadiusTopRight: =30
         Visible: =MostraBloqueoAcesso
         Width: =907
-        X: =229
-        Y: =163
+        X: =227
+        Y: =215
         ZIndex: =5
 
         btn_ContinuarBloqueo_HxH_2 As button:
