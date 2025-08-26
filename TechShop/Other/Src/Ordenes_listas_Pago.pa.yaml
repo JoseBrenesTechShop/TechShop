@@ -287,8 +287,9 @@ Screens:
                                                 HoverColor: =RGBA(52, 152, 47, 1)
                                                 HoverFill: =RGBA(166, 215, 153, 1)
                                                 Icon: =Icon.LikeDislike
-                                                OnSelect: |-
-                                                  =UpdateContext({AbrirC: true})
+                                                OnSelect: |+
+                                                  =UpdateContext({AbrirC: true});
+
                                                 PaddingBottom: =6
                                                 PaddingLeft: =2
                                                 PaddingRight: =2
@@ -1375,7 +1376,7 @@ Screens:
                 Properties:
                   BorderColor: =RGBA(0, 18, 107, 1)
                   Height: =353
-                  Items: '=Distinct(Filter(poitem, req_num =  Text(First(Split(gl_ListaContenedores_LE_2.Selected.soli_num, "-")).Value)), po_num) '
+                  Items: =Distinct(Filter(poitem, req_num = Text(First(Split(gl_ListaContenedores_LE_2.Selected.soli_num, "-")).Value)), po_num)
                   TemplateSize: =53
                   Visible: =AbrirC
                   Width: =1133
@@ -1560,6 +1561,8 @@ Screens:
                         - CheckboxCanvas1:
                             Control: CheckBox@0.0.30
                             Properties:
+                              Checked: |+
+                                =!IsBlank(LookUp(colSelectedPOTs, POT = ThisItem.Value))
                               Font: =Font.Arial
                               FontColor: =RGBA(9, 33, 98, 1)
                               Label: =
@@ -1739,8 +1742,7 @@ Screens:
                   HoverColor: =RGBA(0, 0, 0, 1)
                   HoverFill: =RGBA(40, 134, 222, 1)
                   Icon: =Icon.CancelBadge
-                  OnSelect: |-
-                    =UpdateContext({AbrirC: false, Disable: false})
+                  OnSelect: "=UpdateContext(\n    {\n        AbrirC: false,\n        Disable: false\n        \n    }\n);\nClear(colSelectedPOTs);\nClear(colPOTtoProcess);\n"
                   PaddingBottom: =5
                   PaddingLeft: =5
                   PaddingRight: =5
@@ -2455,7 +2457,13 @@ Screens:
                         BorderColor: =RGBA(40, 134, 222, 1)
                         Color: =RGBA(255, 255, 255, 1)
                         DisabledBorderColor: =RGBA(166, 166, 166, 1)
-                        DisplayMode: =
+                        DisplayMode: |+
+                          =If(
+                              drp_EstadoPago_OLP_1.Selected.Value = "Parcial" &&
+                              CountRows(colPOTtoProcess) >= 2,
+                              DisplayMode.Disabled,
+                              DisplayMode.Edit
+                          )
                         Fill: =RGBA(40, 134, 222, 1)
                         Font: =Font.'Open Sans'
                         Height: =47
