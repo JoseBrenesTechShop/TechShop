@@ -158,6 +158,7 @@ Ordenes_listas_Pago As screen:
                     Refresh(Metodo_Pagos);
                     Refresh(RegistroPagos);
                     Refresh(Solicitud_Compras);
+                     UpdateContext({ varReloadContenedores: Now() });
                     Back()
                 PaddingBottom: =5
                 PaddingLeft: =5
@@ -233,7 +234,7 @@ Ordenes_listas_Pago As screen:
                                     IsBlank(drp_Ano_OLP.Selected.Value) &&
                                     IsBlank(dt_Fecha_OLP.SelectedDate),
                                     Sort(
-                                        Solicitud_Compras,
+                                         Filter(Solicitud_Compras, varReloadContenedores = varReloadContenedores),
                                         fecha,
                                         SortOrder.Descending
                                     ),
@@ -242,7 +243,8 @@ Ordenes_listas_Pago As screen:
                                         (IsBlank(txt_Requisicion_OLP.Text) || txt_Requisicion_OLP.Text in soli_num),
                                         (IsBlank(drp_Estado_OLP.Selected.Value) || estado = drp_Estado_OLP.Selected.Value),
                                         (IsBlank(dt_Fecha_OLP.SelectedDate) || DateValue(fecha) = DateValue(dt_Fecha_OLP.SelectedDate)),
-                                        IsBlank(drp_Ano_OLP.SelectedText.Value) || Year(DateValue(fecha)) = Value(drp_Ano_OLP.SelectedText.Value)
+                                        IsBlank(drp_Ano_OLP.SelectedText.Value) || Year(DateValue(fecha)) = Value(drp_Ano_OLP.SelectedText.Value) &&
+                                         (varReloadContenedores = varReloadContenedores)
                                     )
                                 )
                             Layout: =Layout.Vertical
@@ -328,9 +330,17 @@ Ordenes_listas_Pago As screen:
                                 HoverColor: =RGBA(52, 152, 47, 1)
                                 HoverFill: =RGBA(166, 215, 153, 1)
                                 Icon: =Icon.LikeDislike
-                                OnSelect: |+
-                                    =UpdateContext({AbrirC: true});
+                                OnSelect: |-
+                                    =UpdateContext({ AbrirC: true, isLoadingPOTs: true, Disable: true });
                                     
+                                    Refresh(poitem);
+                                    Refresh(po);
+                                    UpdateContext({ varReloadPOTs: Now() });
+                                    
+                                    Clear(colSelectedPOTs);
+                                    Clear(colPOTtoProcess);
+                                    
+                                    UpdateContext({ isLoadingPOTs: false, Disable: false });
                                 PaddingBottom: =6
                                 PaddingLeft: =2
                                 PaddingRight: =2
@@ -1516,7 +1526,21 @@ Ordenes_listas_Pago As screen:
             BorderColor: =RGBA(0, 18, 107, 1)
             DelayItemLoading: =true
             Height: =353
-            Items: =Distinct(Filter(poitem, req_num = Text(First(Split(gl_ListaContenedores_LE_2.Selected.soli_num, "-")).Value)), po_num)
+            Items: |-
+                =Distinct(
+                    Filter(
+                        poitem,
+                        req_num = Text(
+                            First(
+                                Split(
+                                    gl_ListaContenedores_LE_2.Selected.soli_num,
+                                    "-"
+                                )
+                            ).Value
+                        ) && (varReloadPOTs = varReloadPOTs)
+                    ),
+                    po_num
+                )
             Layout: =Layout.Vertical
             LoadingSpinner: =LoadingSpinner.Data
             TemplatePadding: =0
@@ -1744,46 +1768,6 @@ Ordenes_listas_Pago As screen:
                     Y: =5
                     ZIndex: =8
 
-                CheckboxCanvas1 As Casilla:
-                    Checked: |
-                        =!IsBlank(LookUp(colSelectedPOTs, POT = ThisItem.Value))
-                    DisplayMode: =DisplayMode.Edit
-                    Font: =Font.Arial
-                    FontColor: =RGBA(9, 33, 98, 1)
-                    Height: =32
-                    Label: =
-                    OnCheck: |-
-                        =Collect(
-                            colSelectedPOTs,
-                            {
-                                POT: ThisItem.Value,
-                                MontoAPagar: Value(txt_Total_Pagar_OLP.Text),
-                                Moneda: Coalesce(
-                                    Upper(
-                                        LookUp(
-                                            vendor,
-                                            vend_num = LookUp(
-                                                po,
-                                                po_num = ThisItem.Value,
-                                                vend_num
-                                            ),
-                                            curr_code
-                                        )
-                                    ),
-                                    "SIN MONEDA"
-                                ),
-                                Nombre_Proveedor:LookUp(vendaddr, vend_num = LookUp(po, po_num = ThisItem.Value, vend_num), name),
-                                Codigo_Proveedor: LookUp(po, po_num = ThisItem.Value, vend_num)
-                            }
-                        )
-                    OnSelect: =
-                    OnUncheck: |
-                        =RemoveIf(colSelectedPOTs, POT = ThisItem.Value)
-                    Width: =33
-                    X: =1078
-                    Y: =5
-                    ZIndex: =9
-
                 txt_Total_Pagar_OLP_3 As text:
                     Align: =Align.Center
                     BorderColor: =RGBA(40, 134, 222, 1)
@@ -1825,6 +1809,55 @@ Ordenes_listas_Pago As screen:
                     X: =950
                     Y: =6
                     ZIndex: =10
+
+                chkSelect As checkbox:
+                    BorderColor: =
+                    CheckboxBorderColor: =
+                    CheckboxSize: =30
+                    CheckmarkFill: =RGBA(9, 33, 98, 1)
+                    Color: =RGBA(0, 0, 0, 1)
+                    Default: |
+                        =CountRows( Filter( colSelectedPOTs, POT = ThisItem.Value ) ) > 0
+                    DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                    DisplayMode: =If(isLoadingPOTs || Disable, DisplayMode.Disabled, DisplayMode.Edit)
+                    Font: =App.Theme.Font
+                    Height: =29
+                    HoverBorderColor: =
+                    HoverColor: =App.Theme.Colors.Darker30
+                    OnCheck: |-
+                        =Collect(
+                            colSelectedPOTs,
+                            {
+                                POT: ThisItem.Value,
+                                MontoAPagar: Value(txt_Total_Pagar_OLP.Text),
+                                Moneda: Coalesce(
+                                    Upper(
+                                        LookUp(
+                                            vendor,
+                                            vend_num = LookUp(
+                                                po,
+                                                po_num = ThisItem.Value,
+                                                vend_num
+                                            ),
+                                            curr_code
+                                        )
+                                    ),
+                                    "SIN MONEDA"
+                                ),
+                                Nombre_Proveedor:LookUp(vendaddr, vend_num = LookUp(po, po_num = ThisItem.Value, vend_num), name),
+                                Codigo_Proveedor: LookUp(po, po_num = ThisItem.Value, vend_num)
+                            }
+                        )
+                    OnUncheck: |
+                        =RemoveIf(colSelectedPOTs, POT = ThisItem.Value)
+                    PressedBorderColor: =
+                    PressedColor: =
+                    Size: =13
+                    Text: =
+                    Width: =29
+                    X: =1078
+                    Y: =6
+                    ZIndex: =11
 
         txt_OrdenView_HxH_28 As text:
             Align: =Align.Center
@@ -1960,15 +1993,14 @@ Ordenes_listas_Pago As screen:
             HoverFill: =RGBA(40, 134, 222, 1)
             Icon: =Icon.CancelBadge
             OnSelect: |
-                =UpdateContext(
-                    {
-                        AbrirC: false,
-                        Disable: false
-                        
-                    }
-                );
-                Clear(colSelectedPOTs);
-                Clear(colPOTtoProcess);
+                =Concurrent(
+                  Refresh(poitem),
+                  Refresh(po),
+                  Clear(colSelectedPOTs),
+                  Clear(colPOTtoProcess),
+                   UpdateContext({ varReloadPOTs: Now() }),
+                  UpdateContext({ AbrirC: false, Disable: false })
+                )
             PaddingBottom: =5
             PaddingLeft: =5
             PaddingRight: =5
@@ -2031,7 +2063,7 @@ Ordenes_listas_Pago As screen:
             DisabledColor: =RGBA(166, 166, 166, 1)
             DisabledFill: =RGBA(244, 244, 244, 1)
             DisplayMode: |
-                =If(Value(txt_Total_Pagar_OLP.Text) = 0 || AbrirConfirmar, DisplayMode.Disabled, DisplayMode.Edit)
+                =If(isLoadingPOTs || Value(txt_Total_Pagar_OLP.Text) = 0 || AbrirConfirmar, DisplayMode.Disabled, DisplayMode.Edit)
             Fill: =RGBA(15, 108, 189, 1)
             FontWeight: =FontWeight.Semibold
             Height: =30
@@ -3027,6 +3059,11 @@ Ordenes_listas_Pago As screen:
                         Reset(drp_EstadoPago_OLP_1);
                         Reset(txt_montopagar_OPL);
                         Reset(txt_NumTransferencia_OLP_1);
+                    
+                        Clear(colSelectedPOTs);
+                        Clear(colPOTtoProcess);
+                        
+                        UpdateContext({ varReloadPOTs: Now(), varReloadContenedores: Now() });
                         UpdateContext({AbrirConfirmar: false});
                         UpdateContext({isProcesando: false});
                         UpdateContext(
@@ -3036,6 +3073,8 @@ Ordenes_listas_Pago As screen:
                             }
                         )
                     );
+                    Refresh(poitem);
+                    Refresh(po);
                     Refresh(RegistroPagos);
                     Refresh(Solicitud_Compras)
                 Size: =15
@@ -3094,7 +3133,7 @@ Ordenes_listas_Pago As screen:
                 Weight: ='TextCanvas.Weight'.Semibold
                 Width: =155
                 Wrap: =true
-                X: =20
+                X: =13
                 Y: =62
                 ZIndex: =8
 
@@ -3137,8 +3176,8 @@ Ordenes_listas_Pago As screen:
                 RadiusTopRight: =10
                 Size: =15
                 Width: =453
-                X: =175
-                Y: =66
+                X: =168
+                Y: =62
                 ZIndex: =9
 
             ContainerGaleria_EM_23 As groupContainer.manualLayoutContainer:
@@ -3635,10 +3674,34 @@ Ordenes_listas_Pago As screen:
                 RadiusTopLeft: =10
                 RadiusTopRight: =10
                 Size: =15
-                Width: =118
-                X: =653
-                Y: =66
+                Width: =99
+                X: =675
+                Y: =62
                 ZIndex: =19
+
+            lbl_Total_OLP_3 As Texto:
+                Align: ='TextCanvas.Align'.Center
+                AutoHeight: =false
+                BorderStyle: =""
+                ContentLanguage: =""
+                DisplayMode: =DisplayMode.Edit
+                Font: =Font.Arial
+                FontItalic: =false
+                FontStrikethrough: =false
+                FontUnderline: =false
+                Height: =34
+                Size: =21
+                TabIndex: =0
+                Text: ="ID"
+                Tooltip: =""
+                VerticalAlign: =VerticalAlign.Middle
+                Visible: =true
+                Weight: ='TextCanvas.Weight'.Semibold
+                Width: =30
+                Wrap: =true
+                X: =640
+                Y: =62
+                ZIndex: =20
 
     cnt_Comentario_EM_2 As groupContainer.manualLayoutContainer:
         BorderColor: =RGBA(40, 134, 222, 1)
