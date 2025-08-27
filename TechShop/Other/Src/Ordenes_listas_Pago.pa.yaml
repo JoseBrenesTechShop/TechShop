@@ -1561,7 +1561,7 @@ Screens:
                         - CheckboxCanvas1:
                             Control: CheckBox@0.0.30
                             Properties:
-                              Checked: |+
+                              Checked: |
                                 =!IsBlank(LookUp(colSelectedPOTs, POT = ThisItem.Value))
                               Font: =Font.Arial
                               FontColor: =RGBA(9, 33, 98, 1)
@@ -1595,11 +1595,13 @@ Screens:
                                                 )
                                             ),
                                             "SIN MONEDA"
-                                        )
+                                        ),
+                                        Nombre_Proveedor:LookUp(vendaddr, vend_num = LookUp(po, po_num = ThisItem.Value, vend_num), name),
+                                        Codigo_Proveedor: LookUp(po, po_num = ThisItem.Value, vend_num)
                                     }
                                 )
                               OnSelect: =
-                              OnUncheck: |+
+                              OnUncheck: |
                                 =RemoveIf(colSelectedPOTs, POT = ThisItem.Value)
                               Width: =33
                               X: =1078
@@ -1797,24 +1799,21 @@ Screens:
                         Width: =180
                         X: =69
                         Y: =90
-            - icn_Home_EM_37:
-                Control: Classic/Icon@2.5.0
+            - btn_Guardar_EC_16:
+                Control: Classic/Button@2.2.0
                 Properties:
-                  BorderColor: =App.Theme.Colors.Primary
-                  BorderStyle: =BorderStyle.None
-                  BorderThickness: =2
+                  BorderColor: =RGBA(9, 33, 98, 1)
                   Color: =RGBA(255, 255, 255, 1)
-                  DisabledColor: =RGBA(214, 221, 224, 1)
+                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
                   DisplayMode: |
                     =If(Value(txt_Total_Pagar_OLP.Text) = 0 || AbrirConfirmar, DisplayMode.Disabled, DisplayMode.Edit)
-                  Fill: =RGBA(40, 134, 222, 1)
-                  FocusedBorderThickness: =20
-                  Height: =40
-                  HoverBorderColor: =RGBA(0, 134, 208, 1)
-                  HoverColor: =RGBA(0, 0, 0, 1)
-                  HoverFill: =RGBA(40, 134, 222, 1)
-                  Icon: =Icon.Money
-                  OnSelect: |+
+                  Fill: =RGBA(15, 108, 189, 1)
+                  Font: =Font.'Open Sans'
+                  Height: =30
+                  HoverBorderColor: =RGBA(40, 134, 222, 1)
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =RGBA(15, 84, 140, 1)
+                  OnSelect: |
                     =If(
                         CountRows(colSelectedPOTs) = 0,
                         UpdateContext(
@@ -1845,12 +1844,13 @@ Screens:
                             UpdateContext({ AbrirConfirmar: true, Disable: true })
                         )
                     )
-                  PaddingBottom: =5
-                  PaddingLeft: =5
-                  PaddingRight: =5
-                  PaddingTop: =5
-                  Width: =40
-                  X: =1026
+                  PressedBorderColor: =Self.Fill
+                  PressedColor: =Self.Fill
+                  PressedFill: =Self.Color
+                  Text: ="Pagar"
+                  Width: =141
+                  X: =930
+                  Y: =6
       - Container5_2:
           Control: GroupContainer@1.3.0
           Variant: ManualLayout
@@ -2457,7 +2457,7 @@ Screens:
                         BorderColor: =RGBA(40, 134, 222, 1)
                         Color: =RGBA(255, 255, 255, 1)
                         DisabledBorderColor: =RGBA(166, 166, 166, 1)
-                        DisplayMode: |+
+                        DisplayMode: |
                           =If(
                               drp_EstadoPago_OLP_1.Selected.Value = "Parcial" &&
                               CountRows(colPOTtoProcess) >= 2,
@@ -2470,7 +2470,7 @@ Screens:
                         HoverBorderColor: =RGBA(40, 134, 222, 1)
                         HoverColor: =RGBA(255, 255, 255, 1)
                         HoverFill: =RGBA(15, 84, 140, 1)
-                        OnSelect: "=UpdateContext({isProcesando: true});\n\nIf(\n    IsBlank(txt_montopagar_OPL.Text) || Value(txt_montopagar_OPL.Text) <= 0,\n    UpdateContext(\n        {\n            MostrarAviso: true,\n            mensajeNotificacion: \"El monto a pagar no puede estar vacío o ser negativo.\"\n        }\n    ),\n        IsBlank(drp_MetodoPago_OLP_1.SelectedText.Value) || IsBlank(drp_EstadoPago_OLP_1.SelectedText.Value),\n    UpdateContext(\n        {\n            MostrarAviso: true,\n            mensajeNotificacion: \"Asegurese de seleccionar el metodo de pago y el estado de pago\"\n        }\n    ),\n    IsBlank(txt_totalPOT_OLP.Text) || Value(txt_totalPOT_OLP.Text) < 0,\n    UpdateContext(\n        {\n            MostrarAviso: true,\n            mensajeNotificacion: \"El total no puede ser negativo o estar vacío. Revisa los valores antes de continuar.\"\n        }\n    ),\n    (drp_MetodoPago_OLP_1.SelectedText.Metodo = \"Cheque\" || drp_MetodoPago_OLP_1.SelectedText.Metodo = \"Transferencia\") && IsBlank(txt_NumTransferencia_OLP_1.Text),\n    UpdateContext(\n        {\n            MostrarAviso: true,\n            mensajeNotificacion: \"El número de transferencia es obligatorio si el método de pago es Cheque o Transferencia.\"\n        }\n    ),\n    // Si todas las validaciones pasan:\n    UpdateContext({MostrarAviso: false}),\n    \n    Collect(\n        RegistroPagos,\n        {\n            Fecha_Solicitud: gl_ListaContenedores_LE_2.Selected.fecha,\n            Requisicion: gl_ListaContenedores_LE_2.Selected.soli_num,\n            POT: gl_Contenedores_RC_4.Selected.Value,\n            Codigo_Proveedor: gl_Contenedores_RC_4.Selected.txt_CodigoProvedor_OLP.Text,\n            Nombre_Proveedor: gl_Contenedores_RC_4.Selected.txt_NombreProveedor_OLP.Text,\n            Total_Pagar: Value(gl_Contenedores_RC_4.Selected.txt_Total_Pagar_OLP.Text),\n            Total_Cancelado: Value(lbl_montoCancelado_OLP.Text),\n            Total: Value(txt_totalPOT_OLP.Text),\n            Fecha_UltimoPago: Today(),\n            'Estado (crfb9_estado)': drp_EstadoPago_OLP_1.Selected.Value,\n            Metodo_Pago: drp_MetodoPago_OLP_1.SelectedText.Metodo,\n            Num_Transferencia: txt_NumTransferencia_OLP_1.Text\n        }\n    );\n    If( \n        IsBlank(LookUp(Compras_Pots, POT = gl_Contenedores_RC_4.Selected.Value)),\n        Collect(\n            Compras_Pots,\n            {\n                Requisicion: gl_ListaContenedores_LE_2.Selected.soli_num,\n                POT: gl_Contenedores_RC_4.Selected.Value,\n                Total: Value(lbl_montoTotal_OLP.Text),\n                'Estado (crfb9_estado)': drp_EstadoPago_OLP_1.Selected.Value,\n                Num_Vend: gl_Contenedores_RC_4.Selected.txt_CodigoProvedor_OLP.Text,\n                Provedor: gl_Contenedores_RC_4.Selected.txt_NombreProveedor_OLP.Text\n            }\n        ),\n        LookUp(Compras_Pots, POT = gl_Contenedores_RC_4.Selected.Value).'Estado (crfb9_estado)' = \"Parcial\" && Value(txt_totalPOT_OLP.Text) = 0,\n        Patch(\n            Compras_Pots,\n            LookUp(Compras_Pots, POT = gl_Contenedores_RC_4.Selected.Value),\n            {\n                'Estado (crfb9_estado)': drp_EstadoPago_OLP_1.Selected.Value\n            }\n        )\n    );\n    Refresh(RegistroPagos);\n    \n    If(\n        Sum(\n            gl_Contenedores_RC_4.AllItems,\n            txt_Total_Pagar_OLP.Text \n        ) - Value(lbl_montoCancelado_OLP.Text) = 0,\n        Patch(\n            Solicitud_Compras,\n            LookUp(\n                Solicitud_Compras,\n                soli_num = gl_ListaContenedores_LE_2.Selected.soli_num\n            ),\n            {estado: \"Cancelado\"}\n        )\n    );\n    \n    Reset(drp_MetodoPago_OLP_1);\n    Reset(drp_EstadoPago_OLP_1);\n    Reset(txt_montopagar_OPL);\n    Reset(txt_NumTransferencia_OLP_1);\n    \n    UpdateContext({AbrirConfirmar: false});    \n    UpdateContext({isProcesando: false});\n    UpdateContext({AbrirC: false, Disable: false})\n);\n\nRefresh(RegistroPagos);\nRefresh(Solicitud_Compras)\n"
+                        OnSelect: "=UpdateContext({isProcesando: true});\n\nIf(\n\n    CountRows(colPOTtoProcess) = 0,\n    UpdateContext({ MostrarAviso: true, mensajeNotificacion: \"Selecciona al menos un POT\" }),\n\n    IsBlank(txt_montopagar_OPL.Text) || Value(txt_montopagar_OPL.Text) <= 0,\n    UpdateContext(\n        {\n            MostrarAviso: true,\n            mensajeNotificacion: \"El monto a pagar no puede estar vacío o ser negativo.\"\n        }\n    ),\n        IsBlank(drp_MetodoPago_OLP_1.SelectedText.Value) || IsBlank(drp_EstadoPago_OLP_1.SelectedText.Value),\n    UpdateContext(\n        {\n            MostrarAviso: true,\n            mensajeNotificacion: \"Asegurese de seleccionar el metodo de pago y el estado de pago\"\n        }\n    ),\n    IsBlank(txt_totalPOT_OLP.Text) || Value(txt_totalPOT_OLP.Text) < 0,\n    UpdateContext(\n        {\n            MostrarAviso: true,\n            mensajeNotificacion: \"El total no puede ser negativo o estar vacío. Revisa los valores antes de continuar.\"\n        }\n    ),\n    (drp_MetodoPago_OLP_1.SelectedText.Metodo = \"Cheque\" || drp_MetodoPago_OLP_1.SelectedText.Metodo = \"Transferencia\") && IsBlank(txt_NumTransferencia_OLP_1.Text),\n    UpdateContext(\n        {\n            MostrarAviso: true,\n            mensajeNotificacion: \"El número de transferencia es obligatorio si el método de pago es Cheque o Transferencia.\"\n        }\n    ),\n    // Si todas las validaciones pasan:\n    UpdateContext({MostrarAviso: false}),\nForAll(\n    colPOTtoProcess,\n    With(\n        {\n            codigoVend: If(\n                !IsBlank(ThisRecord.POT),\n                ThisRecord.Codigo_Proveedor,\n                LookUp(po, po_num = ThisRecord.POT, vend_num)\n            ),\n            nombreVend: If(\n                !IsBlank(ThisRecord.Nombre_Proveedor),\n                ThisRecord.Nombre_Proveedor,\n                LookUp(vendor, vend_num = If(IsBlank(ThisRecord.Codigo_Proveedor), LookUp(po, po_num = ThisRecord.POT, vend_num), ThisRecord.Codigo_Proveedor), Nombre)\n            ),\n            totalPo: If(\n                !IsBlank(ThisRecord.Total),\n                ThisRecord.Total,\n                LookUp(po, po_num = ThisRecord.POT, po_cost)\n            ),\n            totalCancelado: If(\n                !IsBlank(ThisRecord.TotalCancelado),\n                ThisRecord.TotalCancelado,\n                Sum(Filter(RegistroPagos, POT = ThisRecord.POT), Total_Cancelado)\n            ),\n            montoPago: ThisRecord.MontoAPagar\n        },\n        // registrar el pago por cada POT\n        Collect(\n            RegistroPagos,\n            {\n                Fecha_Solicitud: gl_ListaContenedores_LE_2.Selected.fecha,\n                Requisicion: gl_ListaContenedores_LE_2.Selected.soli_num,\n                POT: ThisRecord.POT,\n                Codigo_Proveedor: codigoVend,\n                Nombre_Proveedor: nombreVend,\n                Total_Pagar: montoPago,\n                Total_Cancelado: totalCancelado,\n                Total: totalPo,\n                Fecha_UltimoPago: Today(),\n                'Estado (crfb9_estado)': drp_EstadoPago_OLP_1.Selected.Value,\n                Metodo_Pago: drp_MetodoPago_OLP_1.SelectedText.Metodo,\n                Num_Transferencia: txt_NumTransferencia_OLP_1.Text\n            }\n        ),\n\n        // crear o actualizar Compras_Pots\n        If(\n            IsBlank(LookUp(Compras_Pots, POT = ThisRecord.POT)),\n            Collect(\n                Compras_Pots,\n                {\n                    Requisicion: gl_ListaContenedores_LE_2.Selected.soli_num,\n                    POT: ThisRecord.POT,\n                    Total: totalPo,\n                    'Estado (crfb9_estado)': drp_EstadoPago_OLP_1.Selected.Value,\n                    Num_Vend: codigoVend,\n                    Provedor: nombreVend\n                }\n            ),\n            // else: ya existe -> si estaba Parcial y ahora montoPago = 0, actualiza estado\n            If(\n                LookUp(Compras_Pots, POT = ThisRecord.POT).'Estado (crfb9_estado)' = \"Parcial\" && montoPago = 0,\n                Patch(\n                    Compras_Pots,\n                    LookUp(Compras_Pots, POT = ThisRecord.POT),\n                    { 'Estado (crfb9_estado)': drp_EstadoPago_OLP_1.Selected.Value }\n                )\n            )\n        )\n    )\n),\n\n\n    \n    If( \n        IsBlank(LookUp(Compras_Pots, POT = gl_Contenedores_RC_4.Selected.Value)),\n        Collect(\n            Compras_Pots,\n            {\n                Requisicion: gl_ListaContenedores_LE_2.Selected.soli_num,\n                POT: gl_Contenedores_RC_4.Selected.Value,\n                Total: Value(lbl_montoTotal_OLP.Text),\n                'Estado (crfb9_estado)': drp_EstadoPago_OLP_1.Selected.Value,\n                Num_Vend: gl_Contenedores_RC_4.Selected.txt_CodigoProvedor_OLP.Text,\n                Provedor: gl_Contenedores_RC_4.Selected.txt_NombreProveedor_OLP.Text\n            }\n        ),\n        LookUp(Compras_Pots, POT = gl_Contenedores_RC_4.Selected.Value).'Estado (crfb9_estado)' = \"Parcial\" && Value(txt_totalPOT_OLP.Text) = 0,\n        Patch(\n            Compras_Pots,\n            LookUp(Compras_Pots, POT = gl_Contenedores_RC_4.Selected.Value),\n            {\n                'Estado (crfb9_estado)': drp_EstadoPago_OLP_1.Selected.Value\n            }\n        )\n    );\n    Refresh(RegistroPagos);\n    \n    If(\n        Sum(\n            gl_Contenedores_RC_4.AllItems,\n            txt_Total_Pagar_OLP.Text \n        ) - Value(lbl_montoCancelado_OLP.Text) = 0,\n        Patch(\n            Solicitud_Compras,\n            LookUp(\n                Solicitud_Compras,\n                soli_num = gl_ListaContenedores_LE_2.Selected.soli_num\n            ),\n            {estado: \"Cancelado\"}\n        )\n    );\n    \n    Reset(drp_MetodoPago_OLP_1);\n    Reset(drp_EstadoPago_OLP_1);\n    Reset(txt_montopagar_OPL);\n    Reset(txt_NumTransferencia_OLP_1);\n    \n    UpdateContext({AbrirConfirmar: false});    \n    UpdateContext({isProcesando: false});\n    UpdateContext({AbrirC: false, Disable: false})\n);\n\nRefresh(RegistroPagos);\nRefresh(Solicitud_Compras)\n"
                         PressedBorderColor: =Self.Fill
                         PressedColor: =Self.Fill
                         PressedFill: =Self.Color
@@ -2589,7 +2589,7 @@ Screens:
                               BorderColor: =RGBA(9, 33, 98, 1)
                               BorderThickness: =2
                               Height: =208
-                              Items: |+
+                              Items: |
                                 =colPOTtoProcess
                               TemplateSize: =35
                               Width: =331
