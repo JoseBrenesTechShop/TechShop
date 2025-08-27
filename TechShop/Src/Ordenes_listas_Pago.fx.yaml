@@ -471,32 +471,8 @@ Ordenes_listas_Pago As screen:
                                 Color: =RGBA(0, 0, 0, 1)
                                 Default: |
                                     =Text(
-                                        Sum(
-                                            ForAll(
-                                                Distinct(
-                                                    Filter(
-                                                        poitem,
-                                                        req_num = Text(First(Split(ThisItem.soli_num, "-")).Value)
-                                                    ),
-                                                    po_num
-                                                ),
-                                                With(
-                                                    {Valor: ThisRecord.Value},
-                                                    LookUp(
-                                                        po,
-                                                        po_num = Valor,
-                                                        po_cost
-                                                    ) - Sum(
-                                                        Filter(
-                                                            RegistroPagos,
-                                                            POT = Valor
-                                                        ),
-                                                        Total_Cancelado
-                                                    )
-                                                )
-                                            ),
-                                            Value
-                                        ),
+                                        Value(txt_TotalPagar_OLP.Text) -Sum(Filter(RegistroPagos, Requisicion = ThisItem.soli_num),Total_Cancelado),
+                                    
                                         "[$-es-ES]#.###.###.###,00"
                                     )
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
@@ -1646,7 +1622,7 @@ Ordenes_listas_Pago As screen:
                     Color: =RGBA(0, 0, 0, 1)
                     Default: |-
                         =LookUp(po, po_num = ThisItem.Value, po_cost) - 
-                        Sum(Filter(RegistroPagos, POT = ThisItem.Value), Total_Cancelado)
+                        Sum(Filter(Compras_Pots, POT = ThisItem.Value), Total)
                     DisabledBorderColor: =RGBA(166, 166, 166, 1)
                     DisabledColor: =RGBA(166, 166, 166, 1)
                     DisabledFill: =RGBA(244, 244, 244, 1)
@@ -1781,17 +1757,7 @@ Ordenes_listas_Pago As screen:
                             colSelectedPOTs,
                             {
                                 POT: ThisItem.Value,
-                                MontoAPagar: LookUp(
-                                    po,
-                                    po_num = ThisItem.Value,
-                                    po_cost
-                                ) - Sum(
-                                    Filter(
-                                        RegistroPagos,
-                                        POT = ThisItem.Value
-                                    ),
-                                    Total_Cancelado
-                                ),
+                                MontoAPagar: Value(txt_Total_Pagar_OLP.Text),
                                 Moneda: Coalesce(
                                     Upper(
                                         LookUp(
@@ -2072,7 +2038,7 @@ Ordenes_listas_Pago As screen:
             HoverBorderColor: =RGBA(40, 134, 222, 1)
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(15, 84, 140, 1)
-            OnSelect: |
+            OnSelect: |-
                 =If(
                     CountRows(colSelectedPOTs) = 0,
                     UpdateContext(
@@ -2081,7 +2047,12 @@ Ordenes_listas_Pago As screen:
                             mensajeNotificacion: "Selecciona al menos un POT"
                         }
                     ),
-                    CountRows(Distinct(colSelectedPOTs, Moneda)) > 1,
+                    CountRows(
+                        Distinct(
+                            colSelectedPOTs,
+                            Moneda
+                        )
+                    ) > 1,
                     UpdateContext(
                         {
                             MostrarAviso: true,
@@ -2096,11 +2067,18 @@ Ordenes_listas_Pago As screen:
                                 {
                                     POT: ThisRecord.POT,
                                     MontoAPagar: ThisRecord.MontoAPagar,
-                                    Moneda: ThisRecord.Moneda
+                                    Moneda: ThisRecord.Moneda,
+                                    Codigo_Proveedor: ThisRecord.Codigo_Proveedor,
+                                    Nombre_Proveedor: ThisRecord.Nombre_Proveedor
                                 }
                             )
                         ),
-                        UpdateContext({ AbrirConfirmar: true, Disable: true })
+                        UpdateContext(
+                            {
+                                AbrirConfirmar: true,
+                                Disable: true
+                            }
+                        )
                     )
                 )
             Size: =15
@@ -2939,14 +2917,16 @@ Ordenes_listas_Pago As screen:
                 HoverBorderColor: =RGBA(40, 134, 222, 1)
                 HoverColor: =RGBA(255, 255, 255, 1)
                 HoverFill: =RGBA(15, 84, 140, 1)
-                OnSelect: |
+                OnSelect: |-
                     =UpdateContext({isProcesando: true});
-                    
                     If(
-                    
                         CountRows(colPOTtoProcess) = 0,
-                        UpdateContext({ MostrarAviso: true, mensajeNotificacion: "Selecciona al menos un POT" }),
-                    
+                        UpdateContext(
+                            {
+                                MostrarAviso: true,
+                                mensajeNotificacion: "Selecciona al menos un POT"
+                            }
+                        ),
                         IsBlank(txt_montopagar_OPL.Text) || Value(txt_montopagar_OPL.Text) <= 0,
                         UpdateContext(
                             {
@@ -2954,7 +2934,7 @@ Ordenes_listas_Pago As screen:
                                 mensajeNotificacion: "El monto a pagar no puede estar vacío o ser negativo."
                             }
                         ),
-                            IsBlank(drp_MetodoPago_OLP_1.SelectedText.Value) || IsBlank(drp_EstadoPago_OLP_1.SelectedText.Value),
+                        IsBlank(drp_MetodoPago_OLP_1.SelectedText.Value) || IsBlank(drp_EstadoPago_OLP_1.SelectedText.Value),
                         UpdateContext(
                             {
                                 MostrarAviso: true,
@@ -2975,111 +2955,65 @@ Ordenes_listas_Pago As screen:
                                 mensajeNotificacion: "El número de transferencia es obligatorio si el método de pago es Cheque o Transferencia."
                             }
                         ),
-                        // Si todas las validaciones pasan:
                         UpdateContext({MostrarAviso: false}),
-                    ForAll(
-                        colPOTtoProcess,
-                        With(
+                        Collect(
+                            RegistroPagos,
                             {
-                                codigoVend: If(
-                                    !IsBlank(ThisRecord.POT),
-                                    ThisRecord.Codigo_Proveedor,
-                                    LookUp(po, po_num = ThisRecord.POT, vend_num)
-                                ),
-                                nombreVend: If(
-                                    !IsBlank(ThisRecord.Nombre_Proveedor),
-                                    ThisRecord.Nombre_Proveedor,
-                                    LookUp(vendor, vend_num = If(IsBlank(ThisRecord.Codigo_Proveedor), LookUp(po, po_num = ThisRecord.POT, vend_num), ThisRecord.Codigo_Proveedor), Nombre)
-                                ),
-                                totalPo: If(
-                                    !IsBlank(ThisRecord.Total),
-                                    ThisRecord.Total,
-                                    LookUp(po, po_num = ThisRecord.POT, po_cost)
-                                ),
-                                totalCancelado: If(
-                                    !IsBlank(ThisRecord.TotalCancelado),
-                                    ThisRecord.TotalCancelado,
-                                    Sum(Filter(RegistroPagos, POT = ThisRecord.POT), Total_Cancelado)
-                                ),
-                                montoPago: ThisRecord.MontoAPagar
-                            },
-                            // registrar el pago por cada POT
-                            Collect(
-                                RegistroPagos,
+                                Fecha_Solicitud: gl_ListaContenedores_LE_2.Selected.fecha,
+                                Requisicion: gl_ListaContenedores_LE_2.Selected.soli_num,
+                                Total_Pagar: Value(lbl_montoTotal_OLP.Text),
+                                Total_Cancelado: Value(lbl_montoCancelado_OLP.Text),
+                                Total: Value(txt_totalPOT_OLP.Text),
+                                Fecha_UltimoPago: Today(),
+                                'Estado (crfb9_estado)': drp_EstadoPago_OLP_1.Selected.Value,
+                                Metodo_Pago: drp_MetodoPago_OLP_1.SelectedText.Metodo,
+                                Num_Transferencia: txt_NumTransferencia_OLP_1.Text
+                            }
+                        );
+                        ForAll(
+                            colPOTtoProcess,
+                            With(
                                 {
-                                    Fecha_Solicitud: gl_ListaContenedores_LE_2.Selected.fecha,
-                                    Requisicion: gl_ListaContenedores_LE_2.Selected.soli_num,
-                                    POT: ThisRecord.POT,
-                                    Codigo_Proveedor: codigoVend,
-                                    Nombre_Proveedor: nombreVend,
-                                    Total_Pagar: montoPago,
-                                    Total_Cancelado: totalCancelado,
-                                    Total: totalPo,
-                                    Fecha_UltimoPago: Today(),
-                                    'Estado (crfb9_estado)': drp_EstadoPago_OLP_1.Selected.Value,
-                                    Metodo_Pago: drp_MetodoPago_OLP_1.SelectedText.Metodo,
-                                    Num_Transferencia: txt_NumTransferencia_OLP_1.Text
-                                }
-                            ),
-                    
-                            // crear o actualizar Compras_Pots
-                            If(
-                                IsBlank(LookUp(Compras_Pots, POT = ThisRecord.POT)),
-                                Collect(
-                                    Compras_Pots,
-                                    {
-                                        Requisicion: gl_ListaContenedores_LE_2.Selected.soli_num,
-                                        POT: ThisRecord.POT,
-                                        Total: totalPo,
-                                        'Estado (crfb9_estado)': drp_EstadoPago_OLP_1.Selected.Value,
-                                        Num_Vend: codigoVend,
-                                        Provedor: nombreVend
-                                    }
-                                ),
-                                // else: ya existe -> si estaba Parcial y ahora montoPago = 0, actualiza estado
+                                    pot: ThisRecord.POT,
+                                    codigoproveedor: ThisRecord.Codigo_Proveedor,
+                                    nombreproveedor: ThisRecord.Nombre_Proveedor,
+                                    totalPo: Value(txt_totalPOT_OLP.Text),
+                                    totalCancelado: Value(lbl_montoCancelado_OLP.Text),
+                                    montoPago: Value(ThisRecord.MontoAPagar)
+                                },
                                 If(
-                                    LookUp(Compras_Pots, POT = ThisRecord.POT).'Estado (crfb9_estado)' = "Parcial" && montoPago = 0,
-                                    Patch(
+                                    drp_EstadoPago_OLP_1.SelectedText.Value = "Parcial",
+                                    Collect(
                                         Compras_Pots,
-                                        LookUp(Compras_Pots, POT = ThisRecord.POT),
-                                        { 'Estado (crfb9_estado)': drp_EstadoPago_OLP_1.Selected.Value }
+                                        {
+                                            Requisicion: gl_ListaContenedores_LE_2.Selected.soli_num,
+                                            POT: pot,
+                                            Total: Value(txt_montopagar_OPL.Text),
+                                            'Estado (crfb9_estado)': drp_EstadoPago_OLP_1.Selected.Value,
+                                            Num_Vend: codigoproveedor,
+                                            Provedor: nombreproveedor,
+                                            Num_Transferencia: txt_NumTransferencia_OLP_2.Text
+                                        }
+                                    ),
+                                    Collect(
+                                        Compras_Pots,
+                                        {
+                                            Requisicion: gl_ListaContenedores_LE_2.Selected.soli_num,
+                                            POT: pot,
+                                            Total: montoPago,
+                                            'Estado (crfb9_estado)': drp_EstadoPago_OLP_1.Selected.Value,
+                                            Num_Vend: codigoproveedor,
+                                            Provedor: nombreproveedor,
+                                            Num_Transferencia: txt_NumTransferencia_OLP_2.Text
+                                        }
                                     )
                                 )
-                            )
-                        )
-                    ),
-                    
-                    
-                        
-                        If( 
-                            IsBlank(LookUp(Compras_Pots, POT = gl_Contenedores_RC_4.Selected.Value)),
-                            Collect(
-                                Compras_Pots,
-                                {
-                                    Requisicion: gl_ListaContenedores_LE_2.Selected.soli_num,
-                                    POT: gl_Contenedores_RC_4.Selected.Value,
-                                    Total: Value(lbl_montoTotal_OLP.Text),
-                                    'Estado (crfb9_estado)': drp_EstadoPago_OLP_1.Selected.Value,
-                                    Num_Vend: gl_Contenedores_RC_4.Selected.txt_CodigoProvedor_OLP.Text,
-                                    Provedor: gl_Contenedores_RC_4.Selected.txt_NombreProveedor_OLP.Text
-                                }
-                            ),
-                            LookUp(Compras_Pots, POT = gl_Contenedores_RC_4.Selected.Value).'Estado (crfb9_estado)' = "Parcial" && Value(txt_totalPOT_OLP.Text) = 0,
-                            Patch(
-                                Compras_Pots,
-                                LookUp(Compras_Pots, POT = gl_Contenedores_RC_4.Selected.Value),
-                                {
-                                    'Estado (crfb9_estado)': drp_EstadoPago_OLP_1.Selected.Value
-                                }
                             )
                         );
                         Refresh(RegistroPagos);
                         
                         If(
-                            Sum(
-                                gl_Contenedores_RC_4.AllItems,
-                                txt_Total_Pagar_OLP.Text 
-                            ) - Value(lbl_montoCancelado_OLP.Text) = 0,
+                         Value(gl_ListaContenedores_LE_2.Selected.txt_TotalPagar_OLP.Text) - Value( gl_ListaContenedores_LE_2.Selected.txt_Cantidad_EM_58.Text) = 0  ,
                             Patch(
                                 Solicitud_Compras,
                                 LookUp(
@@ -3089,17 +3023,19 @@ Ordenes_listas_Pago As screen:
                                 {estado: "Cancelado"}
                             )
                         );
-                        
                         Reset(drp_MetodoPago_OLP_1);
                         Reset(drp_EstadoPago_OLP_1);
                         Reset(txt_montopagar_OPL);
                         Reset(txt_NumTransferencia_OLP_1);
-                        
-                        UpdateContext({AbrirConfirmar: false});    
+                        UpdateContext({AbrirConfirmar: false});
                         UpdateContext({isProcesando: false});
-                        UpdateContext({AbrirC: false, Disable: false})
+                        UpdateContext(
+                            {
+                                AbrirC: false,
+                                Disable: false
+                            }
+                        )
                     );
-                    
                     Refresh(RegistroPagos);
                     Refresh(Solicitud_Compras)
                 Size: =15
@@ -3158,8 +3094,8 @@ Ordenes_listas_Pago As screen:
                 Weight: ='TextCanvas.Weight'.Semibold
                 Width: =155
                 Wrap: =true
-                X: =86
-                Y: =65
+                X: =20
+                Y: =62
                 ZIndex: =8
 
             txt_NumTransferencia_OLP_1 As text:
@@ -3201,8 +3137,8 @@ Ordenes_listas_Pago As screen:
                 RadiusTopRight: =10
                 Size: =15
                 Width: =453
-                X: =249
-                Y: =65
+                X: =175
+                Y: =66
                 ZIndex: =9
 
             ContainerGaleria_EM_23 As groupContainer.manualLayoutContainer:
@@ -3667,6 +3603,42 @@ Ordenes_listas_Pago As screen:
                 X: =245
                 Y: =220
                 ZIndex: =18
+
+            txt_NumTransferencia_OLP_2 As text:
+                Align: =Align.Center
+                BorderColor: =RGBA(13, 50, 61, 1)
+                BorderThickness: =3
+                Clear: =true
+                Color: =RGBA(0, 0, 0, 1)
+                Default: =First(Sort(RegistroPagos, Value(ID), SortOrder.Descending)).ID +1
+                DisabledBorderColor: =RGBA(180, 214, 250, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                DisabledFill: =RGBA(255, 255, 255, 1)
+                DisplayMode: =DisplayMode.Disabled
+                FocusedBorderThickness: =4
+                Font: =App.Theme.Font
+                Height: =34
+                HoverBorderColor: =RGBA(180, 214, 250, 1)
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =RGBA(227, 240, 252, 1)
+                OnChange: =
+                OnSelect: |
+                    =
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                PressedColor: =RGBA(0, 0, 0, 1)
+                PressedFill: =RGBA(255, 255, 255, 1)
+                RadiusBottomLeft: =10
+                RadiusBottomRight: =10
+                RadiusTopLeft: =10
+                RadiusTopRight: =10
+                Size: =15
+                Width: =118
+                X: =653
+                Y: =66
+                ZIndex: =19
 
     cnt_Comentario_EM_2 As groupContainer.manualLayoutContainer:
         BorderColor: =RGBA(40, 134, 222, 1)
