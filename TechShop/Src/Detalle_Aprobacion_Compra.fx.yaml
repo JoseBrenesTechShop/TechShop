@@ -24,13 +24,19 @@ Detalle_Aprobacion_Compra As screen:
         );
         Clear(compras);
         If(
-            "-" in glr_Solicitud_AC.Selected.soli_num && IsEmpty(Filter(Detalle_Solicitud_Compras, soli_num = glr_Solicitud_AC.Selected.soli_num)),
+            "-" in glr_Solicitud_AC.Selected.soli_num && IsEmpty(
+                Filter(
+                    Detalle_Solicitud_Compras,
+                    soli_num = glr_Solicitud_AC.Selected.soli_num
+                )
+            ),
+            
             ForAll(
                 With(
                     {
                         Nfila: Filter(
                             Compras_NoMarcadas,
-                            NSolicitud = Nsoli
+                            NSolicitud = Nsoli && Enviado = 1
                         ).NFilaSolicitud
                     },
                     Filter(
@@ -56,10 +62,22 @@ Detalle_Aprobacion_Compra As screen:
                     }
                 )
             ),
+            "-" in glr_Solicitud_AC.Selected.soli_num,
             ForAll(
-                Filter(
-                    preqitem,
-                    req_num = Nsoli
+                With(
+                    {
+                        Nfila: Filter(
+                            Detalle_Solicitud_Compras,
+                            soli_num = glr_Solicitud_AC.Selected.soli_num
+                        ).linea
+                    },
+                    Filter(
+                        Filter(
+                            preqitem,
+                            req_num = Nsoli
+                        ),
+                        req_line in Nfila
+                    )
                 ),
                 Collect(
                     compras,
@@ -74,6 +92,37 @@ Detalle_Aprobacion_Compra As screen:
                         aprobado: true,
                         comentario: ""
                     }
+                )
+            ),
+            With(
+                {
+                    NoMarcadas: Filter(
+                        Compras_NoMarcadas,
+                        NSolicitud = Nsoli
+                    )
+                },
+                ForAll(
+                    Filter(
+                        Filter(
+                            preqitem,
+                            req_num = Nsoli
+                        ),
+                        Not(req_line in NoMarcadas.NFilaSolicitud)
+                    ),
+                    Collect(
+                        compras,
+                        {
+                            req_line: ThisRecord.req_line,
+                            item: ThisRecord.item,
+                            descripcion: ThisRecord.description,
+                            medida: ThisRecord.u_m,
+                            cantidad: ThisRecord.qty_ordered,
+                            precio: ThisRecord.unit_mat_cost,
+                            num_vendedor: ThisRecord.vend_num,
+                            aprobado: true,
+                            comentario: ""
+                        }
+                    )
                 )
             )
         )
@@ -306,7 +355,7 @@ Detalle_Aprobacion_Compra As screen:
                             HoverColor: =App.Theme.Colors.PrimaryForeground
                             HoverFill: =RGBA(21, 68, 18, 1)
                             OnSelect: |-
-                                =RemoveIf(Compras_NoMarcadas, NSolicitud = Nsoli);
+                                =RemoveIf(Compras_NoMarcadas, NSolicitud = Nsoli && NFilaSolicitud in Filter( compras, aprobado = false ).req_line);
                                 // Limpia y recolecto los no-aprobados en Compras_NoMarcadas
                                 ForAll(
                                     Filter( compras, aprobado = false ),
@@ -320,11 +369,13 @@ Detalle_Aprobacion_Compra As screen:
                                     )
                                 );
                                 
+                                RemoveIf(Compras_NoMarcadas, NSolicitud = Nsoli && NFilaSolicitud in Filter( compras, aprobado = true ).req_line && Enviado = 1);
                                 ForAll(
-                                    compras,
+                                    Filter( compras, aprobado = true ),
                                     Collect(
                                         Detalle_Solicitud_Compras,
                                         {
+                                            item: ThisRecord.item,
                                             linea: ThisRecord.req_line,
                                             soli_num: txt_Num_Soli_DAC.Text,
                                             descripcion: ThisRecord.descripcion,
@@ -341,11 +392,7 @@ Detalle_Aprobacion_Compra As screen:
                                                     name
                                                 )
                                             ),
-                                            aprobado: If(
-                                                ThisRecord.aprobado,
-                                                1,
-                                                0
-                                            ),
+                                            aprobado: 1,
                                             comentario: ThisRecord.comentario
                                         }
                                     )

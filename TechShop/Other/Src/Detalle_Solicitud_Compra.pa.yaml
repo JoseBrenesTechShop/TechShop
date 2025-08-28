@@ -904,15 +904,27 @@ Screens:
                                                 IsBlank(
                                                     LookUp(
                                                         Solicitud_Compras,
-                                                        soli_num = txt_Num_Soli_DSC.Text
+                                                        soli_num = txt_Num_Soli_DSC.Text && estado <> "Gerencia"
                                                     )
                                                 ),
-                                                Collect(
+                                                ForAll(
+                                                    Filter(
+                                                        glr_Detalles_DSC.AllItems,
+                                                        !Checkbox3.Value
+                                                    ),
+                                                    Collect(
+                                                        Compras_NoMarcadas,
+                                                        {
+                                                            NSolicitud: Upper(txt_Num_Soli_DSC.Text),
+                                                            NFilaSolicitud: ThisRecord.req_line,
+                                                            Enviado: 0
+                                                        }
+                                                    )
+                                                );
+                                                Patch(
                                                     Solicitud_Compras,
+                                                    glr_Solicitudes_SC.Selected,
                                                     {
-                                                        soli_num: Upper(txt_Num_Soli_DSC.Text),
-                                                        fecha: DateValue(txt_Fecha_DSC.Text),
-                                                        solicitante: txt_Solicitante_DSC.Text,
                                                         user: txt_User_DSC.Text,
                                                         total: Value(txt_Total_DSC.Text),
                                                         estado: "Listo"

@@ -17,74 +17,7 @@ Screens:
         Clear(compras);
         Reset(txt_Num_Soli_DAC);
         Reset(txt_Comentario_DAC);
-      OnVisible: |-
-        =UpdateContext(
-            {
-                Nsoli: Text(
-                    First(
-                        Split(
-                            glr_Solicitud_AC.Selected.soli_num,
-                            "-"
-                        )
-                    ).Value
-                )
-            }
-        );
-        Clear(compras);
-        If(
-            "-" in glr_Solicitud_AC.Selected.soli_num && IsEmpty(Filter(Detalle_Solicitud_Compras, soli_num = glr_Solicitud_AC.Selected.soli_num)),
-            ForAll(
-                With(
-                    {
-                        Nfila: Filter(
-                            Compras_NoMarcadas,
-                            NSolicitud = Nsoli
-                        ).NFilaSolicitud
-                    },
-                    Filter(
-                        Filter(
-                            preqitem,
-                            req_num = Nsoli
-                        ),
-                        req_line in Nfila
-                    )
-                ),
-                Collect(
-                    compras,
-                    {
-                        req_line: ThisRecord.req_line,
-                        item: ThisRecord.item,
-                        descripcion: ThisRecord.description,
-                        medida: ThisRecord.u_m,
-                        cantidad: ThisRecord.qty_ordered,
-                        precio: ThisRecord.unit_mat_cost,
-                        num_vendedor: ThisRecord.vend_num,
-                        aprobado: true,
-                        comentario: ""
-                    }
-                )
-            ),
-            ForAll(
-                Filter(
-                    preqitem,
-                    req_num = Nsoli
-                ),
-                Collect(
-                    compras,
-                    {
-                        req_line: ThisRecord.req_line,
-                        item: ThisRecord.item,
-                        descripcion: ThisRecord.description,
-                        medida: ThisRecord.u_m,
-                        cantidad: ThisRecord.qty_ordered,
-                        precio: ThisRecord.unit_mat_cost,
-                        num_vendedor: ThisRecord.vend_num,
-                        aprobado: true,
-                        comentario: ""
-                    }
-                )
-            )
-        )
+      OnVisible: "=UpdateContext(\n    {\n        Nsoli: Text(\n            First(\n                Split(\n                    glr_Solicitud_AC.Selected.soli_num,\n                    \"-\"\n                )\n            ).Value\n        )\n    }\n);\nClear(compras);\nIf(\n    \"-\" in glr_Solicitud_AC.Selected.soli_num && IsEmpty(\n        Filter(\n            Detalle_Solicitud_Compras,\n            soli_num = glr_Solicitud_AC.Selected.soli_num\n        )\n    ),\n    \n    ForAll(\n        With(\n            {\n                Nfila: Filter(\n                    Compras_NoMarcadas,\n                    NSolicitud = Nsoli && Enviado = 1\n                ).NFilaSolicitud\n            },\n            Filter(\n                Filter(\n                    preqitem,\n                    req_num = Nsoli\n                ),\n                req_line in Nfila\n            )\n        ),\n        Collect(\n            compras,\n            {\n                req_line: ThisRecord.req_line,\n                item: ThisRecord.item,\n                descripcion: ThisRecord.description,\n                medida: ThisRecord.u_m,\n                cantidad: ThisRecord.qty_ordered,\n                precio: ThisRecord.unit_mat_cost,\n                num_vendedor: ThisRecord.vend_num,\n                aprobado: true,\n                comentario: \"\"\n            }\n        )\n    ),\n    \"-\" in glr_Solicitud_AC.Selected.soli_num,\n    ForAll(\n        With(\n            {\n                Nfila: Filter(\n                    Detalle_Solicitud_Compras,\n                    soli_num = glr_Solicitud_AC.Selected.soli_num\n                ).linea\n            },\n            Filter(\n                Filter(\n                    preqitem,\n                    req_num = Nsoli\n                ),\n                req_line in Nfila\n            )\n        ),\n        Collect(\n            compras,\n            {\n                req_line: ThisRecord.req_line,\n                item: ThisRecord.item,\n                descripcion: ThisRecord.description,\n                medida: ThisRecord.u_m,\n                cantidad: ThisRecord.qty_ordered,\n                precio: ThisRecord.unit_mat_cost,\n                num_vendedor: ThisRecord.vend_num,\n                aprobado: true,\n                comentario: \"\"\n            }\n        )\n    ),\n    With(\n        {\n            NoMarcadas: Filter(\n                Compras_NoMarcadas,\n                NSolicitud = Nsoli\n            )\n        },\n        ForAll(\n            Filter(\n                Filter(\n                    preqitem,\n                    req_num = Nsoli\n                ),\n                Not(req_line in NoMarcadas.NFilaSolicitud)\n            ),\n            Collect(\n                compras,\n                {\n                    req_line: ThisRecord.req_line,\n                    item: ThisRecord.item,\n                    descripcion: ThisRecord.description,\n                    medida: ThisRecord.u_m,\n                    cantidad: ThisRecord.qty_ordered,\n                    precio: ThisRecord.unit_mat_cost,\n                    num_vendedor: ThisRecord.vend_num,\n                    aprobado: true,\n                    comentario: \"\"\n                }\n            )\n        )\n    )\n)"
     Children:
       - ScreenContainer_EM_5:
           Control: GroupContainer@1.3.0
@@ -279,7 +212,7 @@ Screens:
                                           HoverBorderColor: =RGBA(52, 152, 47, 1)
                                           HoverFill: =RGBA(21, 68, 18, 1)
                                           OnSelect: |-
-                                            =RemoveIf(Compras_NoMarcadas, NSolicitud = Nsoli);
+                                            =RemoveIf(Compras_NoMarcadas, NSolicitud = Nsoli && NFilaSolicitud in Filter( compras, aprobado = false ).req_line);
                                             // Limpia y recolecto los no-aprobados en Compras_NoMarcadas
                                             ForAll(
                                                 Filter( compras, aprobado = false ),
@@ -293,11 +226,13 @@ Screens:
                                                 )
                                             );
 
+                                            RemoveIf(Compras_NoMarcadas, NSolicitud = Nsoli && NFilaSolicitud in Filter( compras, aprobado = true ).req_line && Enviado = 1);
                                             ForAll(
-                                                compras,
+                                                Filter( compras, aprobado = true ),
                                                 Collect(
                                                     Detalle_Solicitud_Compras,
                                                     {
+                                                        item: ThisRecord.item,
                                                         linea: ThisRecord.req_line,
                                                         soli_num: txt_Num_Soli_DAC.Text,
                                                         descripcion: ThisRecord.descripcion,
@@ -314,11 +249,7 @@ Screens:
                                                                 name
                                                             )
                                                         ),
-                                                        aprobado: If(
-                                                            ThisRecord.aprobado,
-                                                            1,
-                                                            0
-                                                        ),
+                                                        aprobado: 1,
                                                         comentario: ThisRecord.comentario
                                                     }
                                                 )
