@@ -278,7 +278,7 @@ Screens:
                                                 DisabledFill: =
                                                 DisplayMode: |
                                                   =If(
-                                                      AbrirInfo || !(varEmpleado.Codigo in ["786", "2693", "1"]),
+                                                      AbrirInfo || !(varEmpleado.Codigo in ["786", "2693", "1", "2692"]),
                                                       DisplayMode.Disabled,
                                                       DisplayMode.Edit
                                                   )
@@ -1468,7 +1468,7 @@ Screens:
                               BorderThickness: =4
                               Default: |-
                                 =LookUp(po, po_num = ThisItem.Value, po_cost) - 
-                                Sum(Filter(Compras_Pots, POT = ThisItem.Value), Total)
+                                Sum(Filter(Compras_Pots, POT = ThisItem.Value && Requisicion = gl_ListaContenedores_LE_2.Selected.soli_num), Total)
                               DisplayMode: =DisplayMode.View
                               FontWeight: =FontWeight.Semibold
                               Height: =30
@@ -1597,10 +1597,10 @@ Screens:
                               CheckboxBorderColor: =
                               CheckboxSize: =30
                               CheckmarkFill: =RGBA(9, 33, 98, 1)
-                              Default: |+
+                              Default: |
                                 =CountRows( Filter( colSelectedPOTs, POT = ThisItem.Value ) ) > 0
                               DisabledBorderColor: =RGBA(0, 0, 0, 0)
-                              DisplayMode: =If(isLoadingPOTs || Disable, DisplayMode.Disabled, DisplayMode.Edit)
+                              DisplayMode: =If(isLoadingPOTs || Disable || Value(txt_Total_Pagar_OLP.Text) = 0, DisplayMode.Disabled, DisplayMode.Edit)
                               Height: =29
                               HoverBorderColor: =
                               OnCheck: |-
@@ -1627,7 +1627,7 @@ Screens:
                                         Codigo_Proveedor: LookUp(po, po_num = ThisItem.Value, vend_num)
                                     }
                                 )
-                              OnUncheck: |+
+                              OnUncheck: |
                                 =RemoveIf(colSelectedPOTs, POT = ThisItem.Value)
                               PressedBorderColor: =
                               PressedColor: =
@@ -1741,14 +1741,20 @@ Screens:
                   HoverColor: =RGBA(0, 0, 0, 1)
                   HoverFill: =RGBA(40, 134, 222, 1)
                   Icon: =Icon.CancelBadge
-                  OnSelect: |
+                  OnSelect: |-
                     =Concurrent(
-                      Refresh(poitem),
-                      Refresh(po),
-                      Clear(colSelectedPOTs),
-                      Clear(colPOTtoProcess),
-                       UpdateContext({ varReloadPOTs: Now() }),
-                      UpdateContext({ AbrirC: false, Disable: false })
+                        Refresh(poitem),
+                        Refresh(po),
+                        Clear(colSelectedPOTs),
+                        Clear(colPOTtoProcess),
+                        Reset(gl_Contenedores_RC_4),
+                        UpdateContext({varReloadPOTs: Now()}),
+                        UpdateContext(
+                            {
+                                AbrirC: false,
+                                Disable: false
+                            }
+                        )
                     )
                   PaddingBottom: =5
                   PaddingLeft: =5

@@ -376,7 +376,7 @@ Detalle_Solicitud_Compra As screen:
                                     =!IsBlank(
                                         LookUp(
                                             Solicitud_Compras,
-                                            soli_num = txt_Num_Soli_DSC.Text
+                                            soli_num = txt_Num_Soli_DSC.Text && estado <> "Gerencia"
                                         )
                                     )
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
@@ -387,7 +387,7 @@ Detalle_Solicitud_Compra As screen:
                                         IsBlank(
                                             LookUp(
                                                 Solicitud_Compras,
-                                                soli_num = txt_Num_Soli_DSC.Text
+                                                soli_num = txt_Num_Soli_DSC.Text && estado <> "Gerencia"
                                             )
                                         ),
                                         DisplayMode.Edit,
@@ -399,7 +399,7 @@ Detalle_Solicitud_Compra As screen:
                                 HoverColor: =App.Theme.Colors.Darker30
                                 OnCheck: =Collect(CheckList_DSC, ThisItem)
                                 OnSelect: =Select(Parent)
-                                OnUncheck: =Remove(CheckList_DSC, LookUp(CheckList_DSC, ThisItem.req_line in CheckList_DSC.req_line && ThisItem.ref_num in CheckList_DSC.ref_num))
+                                OnUncheck: =Remove(CheckList_DSC, LookUp(CheckList_DSC, req_line = ThisItem.req_line && ref_num = ThisItem.ref_num))
                                 PaddingBottom: =3
                                 PaddingLeft: =5
                                 Size: =10
@@ -918,7 +918,7 @@ Detalle_Solicitud_Compra As screen:
                             BorderThickness: =3
                             Clear: =true
                             Color: =RGBA(0, 0, 0, 1)
-                            Default: =glr_Solicitudes_SC.Selected.Value
+                            Default: =glr_Solicitudes_SC.Selected.soli_num
                             DisabledBorderColor: =RGBA(180, 214, 250, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             DisabledFill: =RGBA(255, 255, 255, 1)
@@ -970,7 +970,7 @@ Detalle_Solicitud_Compra As screen:
                             BorderThickness: =3
                             Clear: =true
                             Color: =RGBA(0, 0, 0, 1)
-                            Default: =Text(LookUp(preq, req_num = txt_Num_Soli_DSC.Text, req_date), "dd/mm/yyyy") 
+                            Default: =Text(glr_Solicitudes_SC.Selected.fecha, "dd/mm/yyyy") 
                             DisabledBorderColor: =RGBA(180, 214, 250, 1)
                             DisabledColor: =RGBA(0, 0, 0, 1)
                             DisabledFill: =RGBA(255, 255, 255, 1)
@@ -1024,10 +1024,10 @@ Detalle_Solicitud_Compra As screen:
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             DisabledFill: =RGBA(244, 244, 244, 1)
                             DisplayMode: |-
-                                =If(CountIf(CheckList_DSC, true) = CountIf(glr_Detalles_DSC.AllItems, true) && CountIf(glr_Detalles_DSC.AllItems, true) > 0 && IsBlank(
+                                =If(CountIf(glr_Detalles_DSC.AllItems, true) > 0 && IsBlank(
                                         LookUp(
                                             Solicitud_Compras,
-                                            soli_num = txt_Num_Soli_DSC.Text
+                                            soli_num = txt_Num_Soli_DSC.Text && estado <> "Gerencia"
                                         )
                                     ), DisplayMode.Edit, DisplayMode.Disabled)
                             Fill: =RGBA(15, 108, 189, 1)
@@ -1081,7 +1081,7 @@ Detalle_Solicitud_Compra As screen:
                             PaddingTop: =0
                             Size: =20
                             Text: |-
-                                ="Revisado: " & CountIf(CheckList_DSC, true) & "/" & glr_Detalles_DSC.AllItemsCount
+                                ="Aprovados: " & CountIf(CheckList_DSC, true) & "/" & glr_Detalles_DSC.AllItemsCount
                             VerticalAlign: =VerticalAlign.Middle
                             Weight: ='TextCanvas.Weight'.Bold
                             Width: =174
@@ -1095,37 +1095,7 @@ Detalle_Solicitud_Compra As screen:
                             BorderThickness: =3
                             Clear: =true
                             Color: =RGBA(0, 0, 0, 1)
-                            Default: |-
-                                =With(
-                                    {
-                                        email: LookUp(
-                                            preq,
-                                            req_num = txt_Num_Soli_DSC.Text,
-                                            requester
-                                        ),
-                                        name: First(
-                                            Filter(
-                                                Empleados,
-                                                Left(
-                                                    Correo,
-                                                    Find(
-                                                        "@",
-                                                        Correo
-                                                    ) - 1
-                                                ) = LookUp(
-                                                    preq,
-                                                    req_num = txt_Num_Soli_DSC.Text,
-                                                    requester
-                                                )
-                                            )
-                                        ).Nombre
-                                    },
-                                    If(
-                                        IsBlank(name),
-                                        email,
-                                        name
-                                    )
-                                )
+                            Default: =glr_Solicitudes_SC.Selected.solicitante
                             DisabledBorderColor: =RGBA(180, 214, 250, 1)
                             DisabledColor: =RGBA(0, 0, 0, 1)
                             DisabledFill: =RGBA(255, 255, 255, 1)
@@ -1179,7 +1149,7 @@ Detalle_Solicitud_Compra As screen:
                             Clear: =true
                             Color: =RGBA(0, 0, 0, 1)
                             Default: |-
-                                =Text(Sum(Filter(preqitem, req_num = txt_Num_Soli_DSC.Text), qty_ordered * unit_mat_cost), "###,###,##0.00")
+                                =Text(glr_Solicitudes_SC.Selected.total, "###,###,##0.00")
                             DisabledBorderColor: =RGBA(180, 214, 250, 1)
                             DisabledColor: =RGBA(0, 0, 0, 1)
                             DisabledFill: =RGBA(255, 255, 255, 1)

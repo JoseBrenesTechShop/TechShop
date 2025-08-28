@@ -184,16 +184,10 @@ Screens:
                                           Items: |-
                                             =Sort(
                                                 Filter(
-                                                    Distinct(
-                                                        Filter(
-                                                            preqitem,
-                                                            stat = "R"
-                                                        ),
-                                                        req_num
-                                                    ),
-                                                    (IsBlank(txt_Num_Soli_SC.Text) || txt_Num_Soli_SC.Text in Value) && Not(Value in Solicitud_Compras.soli_num)
+                                                    Solicitud_Compras,
+                                                    (IsBlank(txt_Num_Soli_SC.Text) || txt_Num_Soli_SC.Text in soli_num) && estado = "Gerencia"
                                                 ),
-                                                Value,
+                                                soli_num,
                                                 SortOrder.Ascending
                                             )
                                             //codigo original anterior
@@ -232,7 +226,7 @@ Screens:
                                                 Align: =Align.Center
                                                 BorderColor: =RGBA(40, 134, 222, 1)
                                                 BorderThickness: =0.5
-                                                Default: =Upper(ThisItem.Value)
+                                                Default: =Upper(ThisItem.soli_num)
                                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                                 DisabledColor: =
                                                 DisabledFill: =
@@ -254,7 +248,7 @@ Screens:
                                                 Align: =Align.Center
                                                 BorderColor: =RGBA(40, 134, 222, 1)
                                                 BorderThickness: =0.5
-                                                Default: =Text(LookUp(preq, req_num = ThisItem.Value, req_date), "dd/mm/yyyy")
+                                                Default: =Text(ThisItem.fecha, "dd/mm/yyyy")
                                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                                 DisabledColor: =
                                                 DisabledFill: =
@@ -277,37 +271,7 @@ Screens:
                                                 Align: =Align.Center
                                                 BorderColor: =RGBA(40, 134, 222, 1)
                                                 BorderThickness: =0.5
-                                                Default: |-
-                                                  =With(
-                                                      {
-                                                          email: LookUp(
-                                                              preq,
-                                                              req_num = ThisItem.Value,
-                                                              requester
-                                                          ),
-                                                          name: First(
-                                                              Filter(
-                                                                  Empleados,
-                                                                  Left(
-                                                                      Correo,
-                                                                      Find(
-                                                                          "@",
-                                                                          Correo
-                                                                      ) - 1
-                                                                  ) = LookUp(
-                                                                      preq,
-                                                                      req_num = ThisItem.Value,
-                                                                      requester
-                                                                  )
-                                                              )
-                                                          ).Nombre
-                                                      },
-                                                      If(
-                                                          IsBlank(name),
-                                                          email,
-                                                          name
-                                                      )
-                                                  )
+                                                Default: =ThisItem.solicitante
                                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                                 DisabledColor: =
                                                 DisabledFill: =
@@ -378,7 +342,7 @@ Screens:
                                                 Align: =Align.Center
                                                 BorderColor: =RGBA(40, 134, 222, 1)
                                                 BorderThickness: =0.5
-                                                Default: =Text(Sum(Filter(preqitem, req_num = ThisItem.Value), qty_ordered * unit_mat_cost), "###,###,##0.00")
+                                                Default: =Text(ThisItem.total, "###,###,##0.00")
                                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                                 DisabledColor: =
                                                 DisabledFill: =
@@ -576,6 +540,7 @@ Screens:
                                     RadiusBottomRight: =10
                                     RadiusTopLeft: =10
                                     RadiusTopRight: =10
+                                    Visible: =false
                                     Width: =100
                                     X: =370
                                     Y: =10
@@ -621,6 +586,7 @@ Screens:
                                     Height: =30
                                     Size: =20
                                     Text: ="Año"
+                                    Visible: =false
                                     Weight: ='TextCanvas.Weight'.Bold
                                     Width: =60
                                     X: =310
