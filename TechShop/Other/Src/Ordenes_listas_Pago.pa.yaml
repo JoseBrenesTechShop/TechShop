@@ -290,17 +290,63 @@ Screens:
                                                 HoverColor: =RGBA(52, 152, 47, 1)
                                                 HoverFill: =RGBA(166, 215, 153, 1)
                                                 Icon: =Icon.LikeDislike
-                                                OnSelect: |-
-                                                  =UpdateContext({ AbrirC: true, isLoadingPOTs: true, Disable: true });
+                                                OnSelect: |
+                                                  =//Use tress collects para que no me diera advertencias...
+                                                  //Este trae las pots de esta requisicion
 
+                                                  ClearCollect(
+                                                      colComprasFiltered,
+                                                      Filter(
+                                                          Compras_Pots,
+                                                          Requisicion = gl_ListaContenedores_LE_2.Selected.soli_num
+                                                      )
+                                                  );
+                                                  //Este hace el filtrado y distinct
+
+                                                  ClearCollect(
+                                                      colPOs,
+                                                      Distinct(
+                                                          Filter(
+                                                              poitem,
+                                                              req_num = Text(First(Split(gl_ListaContenedores_LE_2.Selected.soli_num, "-")).Value),
+                                                              varReloadPOTs = varReloadPOTs
+                                                          ),
+                                                          po_num
+                                                      )
+                                                  );
+
+                                                  //Este traemos el filtrado y le agrego columnas y ya 
+
+                                                  ClearCollect(
+                                                      colContenedores,
+                                                      AddColumns(
+                                                          colPOs,
+                                                          pon, Value,   
+                                                          TotalPagar,
+                                                              Value( LookUp(po, po_num = Value, po_cost) )
+                                                              - Sum( Filter(colComprasFiltered, POT = Value), Value(Total) )
+                                                      )
+                                                  );
+
+                                                  UpdateContext({ AbrirC: true, isLoadingPOTs: true, Disable: true });
+                                                  UpdateContext(
+                                                      {
+                                                          AbrirC: true,
+                                                          isLoadingPOTs: true,
+                                                          Disable: true
+                                                      }
+                                                  );
                                                   Refresh(poitem);
                                                   Refresh(po);
-                                                  UpdateContext({ varReloadPOTs: Now() });
-
+                                                  UpdateContext({varReloadPOTs: Now()});
                                                   Clear(colSelectedPOTs);
                                                   Clear(colPOTtoProcess);
-
-                                                  UpdateContext({ isLoadingPOTs: false, Disable: false });
+                                                  UpdateContext(
+                                                      {
+                                                          isLoadingPOTs: false,
+                                                          Disable: false
+                                                      }
+                                                  );
                                                 PaddingBottom: =6
                                                 PaddingLeft: =2
                                                 PaddingRight: =2
@@ -999,21 +1045,24 @@ Screens:
                   BorderColor: =RGBA(0, 18, 107, 1)
                   Height: =353
                   Items: |-
-                    =Distinct(
+                    =
+                    Sort(colContenedores, TotalPagar, SortOrder.Descending)
+
+                    /*Distinct(
                         Filter(
-                            poitem,
+                            poitem;
                             req_num = Text(
                                 First(
                                     Split(
-                                        gl_ListaContenedores_LE_2.Selected.soli_num,
+                                        gl_ListaContenedores_LE_2.Selected.soli_num;
                                         "-"
                                     )
                                 ).Value
-                            ),
+                            );
                             (varReloadPOTs = varReloadPOTs)
-                        ),
+                        );
                         po_num
-                    )
+                    )*/
                   TemplateSize: =53
                   Width: =1133
                   Y: =40
@@ -1102,9 +1151,7 @@ Screens:
                               Align: =Align.Center
                               BorderColor: =RGBA(40, 134, 222, 1)
                               BorderThickness: =4
-                              Default: |-
-                                =LookUp(po, po_num = ThisItem.Value, po_cost) - 
-                                Sum(Filter(Compras_Pots, POT = ThisItem.Value && Requisicion = gl_ListaContenedores_LE_2.Selected.soli_num), Total)
+                              Default: =ThisItem.TotalPagar
                               DisplayMode: =DisplayMode.View
                               FontWeight: =FontWeight.Semibold
                               Height: =30
@@ -1194,7 +1241,7 @@ Screens:
                               Width: =276
                               X: =624
                               Y: =5
-                        - txt_Total_Pagar_OLP_3:
+                        - txt_Moneda:
                             Control: Classic/TextInput@2.3.2
                             Properties:
                               Align: =Align.Center

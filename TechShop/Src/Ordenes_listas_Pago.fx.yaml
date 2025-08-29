@@ -331,17 +331,63 @@ Ordenes_listas_Pago As screen:
                                 HoverColor: =RGBA(52, 152, 47, 1)
                                 HoverFill: =RGBA(166, 215, 153, 1)
                                 Icon: =Icon.LikeDislike
-                                OnSelect: |-
-                                    =UpdateContext({ AbrirC: true, isLoadingPOTs: true, Disable: true });
+                                OnSelect: |
+                                    =//Use tress collects para que no me diera advertencias...
+                                    //Este trae las pots de esta requisicion
                                     
+                                    ClearCollect(
+                                        colComprasFiltered,
+                                        Filter(
+                                            Compras_Pots,
+                                            Requisicion = gl_ListaContenedores_LE_2.Selected.soli_num
+                                        )
+                                    );
+                                    //Este hace el filtrado y distinct
+                                    
+                                    ClearCollect(
+                                        colPOs,
+                                        Distinct(
+                                            Filter(
+                                                poitem,
+                                                req_num = Text(First(Split(gl_ListaContenedores_LE_2.Selected.soli_num, "-")).Value),
+                                                varReloadPOTs = varReloadPOTs
+                                            ),
+                                            po_num
+                                        )
+                                    );
+                                    
+                                    //Este traemos el filtrado y le agrego columnas y ya 
+                                    
+                                    ClearCollect(
+                                        colContenedores,
+                                        AddColumns(
+                                            colPOs,
+                                            pon, Value,   
+                                            TotalPagar,
+                                                Value( LookUp(po, po_num = Value, po_cost) )
+                                                - Sum( Filter(colComprasFiltered, POT = Value), Value(Total) )
+                                        )
+                                    );
+                                    
+                                    UpdateContext({ AbrirC: true, isLoadingPOTs: true, Disable: true });
+                                    UpdateContext(
+                                        {
+                                            AbrirC: true,
+                                            isLoadingPOTs: true,
+                                            Disable: true
+                                        }
+                                    );
                                     Refresh(poitem);
                                     Refresh(po);
-                                    UpdateContext({ varReloadPOTs: Now() });
-                                    
+                                    UpdateContext({varReloadPOTs: Now()});
                                     Clear(colSelectedPOTs);
                                     Clear(colPOTtoProcess);
-                                    
-                                    UpdateContext({ isLoadingPOTs: false, Disable: false });
+                                    UpdateContext(
+                                        {
+                                            isLoadingPOTs: false,
+                                            Disable: false
+                                        }
+                                    );
                                 PaddingBottom: =6
                                 PaddingLeft: =2
                                 PaddingRight: =2
@@ -1092,21 +1138,24 @@ Ordenes_listas_Pago As screen:
             DelayItemLoading: =true
             Height: =353
             Items: |-
-                =Distinct(
+                =
+                Sort(colContenedores, TotalPagar, SortOrder.Descending)
+                
+                /*Distinct(
                     Filter(
-                        poitem,
+                        poitem;
                         req_num = Text(
                             First(
                                 Split(
-                                    gl_ListaContenedores_LE_2.Selected.soli_num,
+                                    gl_ListaContenedores_LE_2.Selected.soli_num;
                                     "-"
                                 )
                             ).Value
-                        ),
+                        );
                         (varReloadPOTs = varReloadPOTs)
-                    ),
+                    );
                     po_num
-                )
+                )*/
             Layout: =Layout.Vertical
             LoadingSpinner: =LoadingSpinner.Data
             TemplatePadding: =0
@@ -1209,9 +1258,7 @@ Ordenes_listas_Pago As screen:
                     BorderColor: =RGBA(40, 134, 222, 1)
                     BorderThickness: =4
                     Color: =RGBA(0, 0, 0, 1)
-                    Default: |-
-                        =LookUp(po, po_num = ThisItem.Value, po_cost) - 
-                        Sum(Filter(Compras_Pots, POT = ThisItem.Value && Requisicion = gl_ListaContenedores_LE_2.Selected.soli_num), Total)
+                    Default: =ThisItem.TotalPagar
                     DisabledBorderColor: =RGBA(166, 166, 166, 1)
                     DisabledColor: =RGBA(166, 166, 166, 1)
                     DisabledFill: =RGBA(244, 244, 244, 1)
@@ -1333,7 +1380,7 @@ Ordenes_listas_Pago As screen:
                     Y: =5
                     ZIndex: =8
 
-                txt_Total_Pagar_OLP_3 As text:
+                txt_Moneda As text:
                     Align: =Align.Center
                     BorderColor: =RGBA(40, 134, 222, 1)
                     BorderThickness: =4
