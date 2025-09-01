@@ -1161,7 +1161,7 @@ Ordenes_listas_Pago As screen:
             TemplatePadding: =0
             TemplateSize: =53
             Width: =1133
-            Y: =40
+            Y: =35
             ZIndex: =45
 
             Container46_5 As groupContainer.manualLayoutContainer:
@@ -1721,7 +1721,8 @@ Ordenes_listas_Pago As screen:
                                     MontoAPagar: ThisRecord.MontoAPagar,
                                     Moneda: ThisRecord.Moneda,
                                     Codigo_Proveedor: ThisRecord.Codigo_Proveedor,
-                                    Nombre_Proveedor: ThisRecord.Nombre_Proveedor
+                                    Nombre_Proveedor: ThisRecord.Nombre_Proveedor,
+                                    Num_Referencia: ""
                                 }
                             )
                         ),
@@ -2436,8 +2437,8 @@ Ordenes_listas_Pago As screen:
                 Weight: ='TextCanvas.Weight'.Semibold
                 Width: =186
                 Wrap: =true
-                X: =20
-                Y: =112
+                X: =8
+                Y: =47
                 ZIndex: =2
 
             ContainerPais_EM_27 As groupContainer.manualLayoutContainer:
@@ -2450,8 +2451,8 @@ Ordenes_listas_Pago As screen:
                 RadiusTopLeft: =10
                 RadiusTopRight: =10
                 Width: =186
-                X: =20
-                Y: =144
+                X: =8
+                Y: =79
                 ZIndex: =3
 
                 drp_MetodoPago_OLP_1 As dropdown:
@@ -2504,8 +2505,8 @@ Ordenes_listas_Pago As screen:
                 Weight: ='TextCanvas.Weight'.Semibold
                 Width: =186
                 Wrap: =true
-                X: =20
-                Y: =188
+                X: =211
+                Y: =48
                 ZIndex: =4
 
             ContainerPais_EM_29 As groupContainer.manualLayoutContainer:
@@ -2518,8 +2519,8 @@ Ordenes_listas_Pago As screen:
                 RadiusTopLeft: =10
                 RadiusTopRight: =10
                 Width: =186
-                X: =20
-                Y: =218
+                X: =211
+                Y: =78
                 ZIndex: =5
 
                 drp_EstadoPago_OLP_1 As dropdown:
@@ -2570,7 +2571,7 @@ Ordenes_listas_Pago As screen:
                 HoverBorderColor: =RGBA(40, 134, 222, 1)
                 HoverColor: =RGBA(255, 255, 255, 1)
                 HoverFill: =RGBA(15, 84, 140, 1)
-                OnSelect: |-
+                OnSelect: |
                     =UpdateContext({isProcesando: true});
                     If(
                         CountRows(colPOTtoProcess) = 0,
@@ -2578,6 +2579,18 @@ Ordenes_listas_Pago As screen:
                             {
                                 MostrarAviso: true,
                                 mensajeNotificacion: "Selecciona al menos un POT"
+                            }
+                        ),
+                        CountRows(
+                            Filter(
+                                colPOTtoProcess,
+                                IsBlank(Trim(Num_Referencia))
+                            )
+                        ) > 0,
+                        UpdateContext(
+                            {
+                                MostrarAviso: true,
+                                mensajeNotificacion: "Debe ingresar la referencia para TODOS los POTs antes de continuar."
                             }
                         ),
                         IsBlank(txt_montopagar_OPL.Text) || Value(txt_montopagar_OPL.Text) <= 0,
@@ -2620,7 +2633,7 @@ Ordenes_listas_Pago As screen:
                                 Fecha_UltimoPago: Today(),
                                 'Estado (crfb9_estado)': drp_EstadoPago_OLP_1.Selected.Value,
                                 Metodo_Pago: drp_MetodoPago_OLP_1.SelectedText.Metodo,
-                                Num_Transferencia: txt_NumTransferencia_OLP_1.Text
+                                NUM_ID: txt_NumTransferencia_OLP_2.Text
                             }
                         );
                         ForAll(
@@ -2632,7 +2645,11 @@ Ordenes_listas_Pago As screen:
                                     nombreproveedor: ThisRecord.Nombre_Proveedor,
                                     totalPo: Value(txt_totalPOT_OLP.Text),
                                     totalCancelado: Value(lbl_montoCancelado_OLP.Text),
-                                    montoPago: Value(ThisRecord.MontoAPagar)
+                                    montoPago: Value(ThisRecord.MontoAPagar),
+                                    numRef: Coalesce(
+                                        ThisRecord.Num_Referencia,
+                                        txt_NumTransferencia_OLP_1.Text
+                                    )
                                 },
                                 If(
                                     drp_EstadoPago_OLP_1.SelectedText.Value = "Parcial",
@@ -2645,7 +2662,8 @@ Ordenes_listas_Pago As screen:
                                             'Estado (crfb9_estado)': drp_EstadoPago_OLP_1.Selected.Value,
                                             Num_Vend: codigoproveedor,
                                             Provedor: nombreproveedor,
-                                            Num_Transferencia: txt_NumTransferencia_OLP_2.Text
+                                            Num_Transferencia: numRef,
+                                            NUM_ID: txt_NumTransferencia_OLP_2.Text
                                         }
                                     ),
                                     Collect(
@@ -2657,18 +2675,18 @@ Ordenes_listas_Pago As screen:
                                             'Estado (crfb9_estado)': drp_EstadoPago_OLP_1.Selected.Value,
                                             Num_Vend: codigoproveedor,
                                             Provedor: nombreproveedor,
-                                            Num_Transferencia: txt_NumTransferencia_OLP_2.Text
+                                            Num_Transferencia: numRef,
+                                            NUM_ID: txt_NumTransferencia_OLP_2.Text
                                         }
                                     )
                                 )
                             )
                         );
                         Refresh(RegistroPagos);
-                        
                         If(
                             Sum(
                                 gl_Contenedores_RC_4.AllItems,
-                                txt_Total_Pagar_OLP.Text 
+                                txt_Total_Pagar_OLP.Text
                             ) - Value(lbl_montoCancelado_OLP.Text) = 0,
                             Patch(
                                 Solicitud_Compras,
@@ -2679,8 +2697,6 @@ Ordenes_listas_Pago As screen:
                                 {estado: "Cancelado"}
                             )
                         );
-                    
-                    
                         /*If(
                          Value(gl_ListaContenedores_LE_2.Selected.txt_TotalPagar_OLP.Text) - Value( gl_ListaContenedores_LE_2.Selected.txt_Cantidad_EM_58.Text) = 0  ;
                             Patch(
@@ -2692,15 +2708,11 @@ Ordenes_listas_Pago As screen:
                                 {estado: "Cancelado"}
                             )
                         );;*/
-                        
-                        Reset(drp_MetodoPago_OLP_1);
+                    Reset(drp_MetodoPago_OLP_1);
                         Reset(drp_EstadoPago_OLP_1);
                         Reset(txt_montopagar_OPL);
-                        Reset(txt_NumTransferencia_OLP_1);
-                    
                         Clear(colSelectedPOTs);
                         Clear(colPOTtoProcess);
-                        
                         UpdateContext({AbrirConfirmar: false});
                         UpdateContext({isProcesando: false});
                         UpdateContext(
@@ -2714,12 +2726,17 @@ Ordenes_listas_Pago As screen:
                     Refresh(po);
                     Refresh(RegistroPagos);
                     Refresh(Solicitud_Compras);
-                    UpdateContext({ varReloadPOTs: Now(), varReloadContenedores: Now() });
+                    UpdateContext(
+                        {
+                            varReloadPOTs: Now(),
+                            varReloadContenedores: Now()
+                        }
+                    );
                 Size: =15
                 Text: ="Pagar"
                 Width: =113
-                X: =515
-                Y: =211
+                X: =278
+                Y: =213
                 ZIndex: =6
 
             btn_Guardar_EC_15 As button:
@@ -2740,83 +2757,15 @@ Ordenes_listas_Pago As screen:
                     =UpdateContext({AbrirConfirmar: false, Disable: false});
                         Reset(drp_MetodoPago_OLP_1);
                         Reset(drp_EstadoPago_OLP_1);
-                        Reset(txt_NumTransferencia_OLP_1);
                 PressedBorderColor: =RGBA(215, 58, 60, 1)
                 PressedColor: =RGBA(215, 58, 60, 1)
                 PressedFill: =RGBA(255, 255, 255, 1)
                 Size: =15
                 Text: ="Cancelar"
                 Width: =110
-                X: =638
-                Y: =211
+                X: =408
+                Y: =213
                 ZIndex: =7
-
-            TextCanvas1_41 As Texto:
-                Align: ='TextCanvas.Align'.Center
-                AutoHeight: =false
-                BorderStyle: =""
-                ContentLanguage: =""
-                DisplayMode: =DisplayMode.Edit
-                Font: =Font.Arial
-                FontItalic: =false
-                FontStrikethrough: =false
-                FontUnderline: =false
-                Height: =30
-                Size: =21
-                TabIndex: =0
-                Text: ="Nº Referencia"
-                Tooltip: =""
-                VerticalAlign: =""
-                Visible: =true
-                Weight: ='TextCanvas.Weight'.Semibold
-                Width: =155
-                Wrap: =true
-                X: =13
-                Y: =62
-                ZIndex: =8
-
-            txt_NumTransferencia_OLP_1 As text:
-                Align: =Align.Center
-                BorderColor: =RGBA(13, 50, 61, 1)
-                BorderThickness: =3
-                Clear: =true
-                Color: =RGBA(0, 0, 0, 1)
-                Default: =
-                DisabledBorderColor: =RGBA(180, 214, 250, 1)
-                DisabledColor: =RGBA(166, 166, 166, 1)
-                DisabledFill: =RGBA(255, 255, 255, 1)
-                DisplayMode: |-
-                    =If(
-                        drp_MetodoPago_OLP_1.SelectedText.Value = "Transferencia" || drp_MetodoPago_OLP_1.SelectedText.Value = "Cheque" || drp_MetodoPago_OLP_1.SelectedText.Value = "Tarjeta" , 
-                        DisplayMode.Edit, 
-                        DisplayMode.Disabled
-                    )
-                FocusedBorderThickness: =4
-                Font: =App.Theme.Font
-                Height: =34
-                HintText: |-
-                    ="#"
-                HoverBorderColor: =RGBA(180, 214, 250, 1)
-                HoverColor: =RGBA(0, 0, 0, 1)
-                HoverFill: =RGBA(227, 240, 252, 1)
-                OnChange: =
-                OnSelect: |
-                    =
-                PaddingBottom: =0
-                PaddingLeft: =0
-                PaddingRight: =0
-                PaddingTop: =0
-                PressedColor: =RGBA(0, 0, 0, 1)
-                PressedFill: =RGBA(255, 255, 255, 1)
-                RadiusBottomLeft: =10
-                RadiusBottomRight: =10
-                RadiusTopLeft: =10
-                RadiusTopRight: =10
-                Size: =15
-                Width: =453
-                X: =168
-                Y: =62
-                ZIndex: =9
 
             ContainerGaleria_EM_23 As groupContainer.manualLayoutContainer:
                 BorderThickness: =2
@@ -2826,8 +2775,8 @@ Ordenes_listas_Pago As screen:
                 RadiusBottomRight: =4
                 RadiusTopLeft: =4
                 RadiusTopRight: =4
-                Width: =331
-                X: =781
+                Width: =581
+                X: =529
                 Y: =43
                 ZIndex: =10
 
@@ -2875,7 +2824,7 @@ Ordenes_listas_Pago As screen:
                     LoadingSpinner: =LoadingSpinner.Data
                     TemplatePadding: =0
                     TemplateSize: =35
-                    Width: =331
+                    Width: =581
                     Y: =30
                     ZIndex: =2
 
@@ -2962,6 +2911,54 @@ Ordenes_listas_Pago As screen:
                         X: =139
                         ZIndex: =3
 
+                    txt_NumTransferencia_OLP_1 As text:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(40, 134, 222, 1)
+                        BorderThickness: =0.5
+                        Clear: =true
+                        Color: =RGBA(0, 0, 0, 1)
+                        Default: =ThisItem.Num_Referencia
+                        DisabledBorderColor: =RGBA(180, 214, 250, 1)
+                        DisabledColor: =RGBA(166, 166, 166, 1)
+                        DisabledFill: =RGBA(255, 255, 255, 1)
+                        DisplayMode: |-
+                            =If(
+                                drp_MetodoPago_OLP_1.SelectedText.Value = "Transferencia" || drp_MetodoPago_OLP_1.SelectedText.Value = "Cheque" || drp_MetodoPago_OLP_1.SelectedText.Value = "Tarjeta" , 
+                                DisplayMode.Edit, 
+                                DisplayMode.Disabled
+                            )
+                        FocusedBorderThickness: =4
+                        Font: =App.Theme.Font
+                        Height: =34
+                        HintText: |-
+                            ="#"
+                        HoverBorderColor: =RGBA(180, 214, 250, 1)
+                        HoverColor: =RGBA(0, 0, 0, 1)
+                        HoverFill: =RGBA(227, 240, 252, 1)
+                        OnChange: |-
+                            =UpdateIf(
+                              colPOTtoProcess,
+                              POT = ThisItem.POT,
+                              { Num_Referencia: Self.Text }
+                            )
+                        OnSelect: |
+                            =
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        PressedColor: =RGBA(0, 0, 0, 1)
+                        PressedFill: =RGBA(255, 255, 255, 1)
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Size: =15
+                        Width: =249
+                        X: =332
+                        Y: =1
+                        ZIndex: =4
+
                 lbl_PNDato_EM_265 As Texto:
                     Align: ='TextCanvas.Align'.Center
                     AutoHeight: =false
@@ -3026,6 +3023,38 @@ Ordenes_listas_Pago As screen:
                     Y: =0
                     ZIndex: =4
 
+                lbl_PNDato_EM_282 As Texto:
+                    Align: ='TextCanvas.Align'.Center
+                    AutoHeight: =false
+                    BorderColor: =RGBA(180, 214, 250, 1)
+                    BorderStyle: =BorderStyle.Solid
+                    BorderThickness: =0.5
+                    ContentLanguage: =""
+                    DisplayMode: =DisplayMode.Edit
+                    Fill: =RGBA(40, 134, 222, 1)
+                    Font: =""
+                    FontColor: =RGBA(255, 255, 255, 1)
+                    FontItalic: =false
+                    FontStrikethrough: =false
+                    FontUnderline: =false
+                    Height: =30
+                    PaddingBottom: =0
+                    PaddingLeft: =0
+                    PaddingRight: =0
+                    PaddingTop: =0
+                    Size: =20
+                    TabIndex: =0
+                    Text: ="Nº Referencia"
+                    Tooltip: =""
+                    VerticalAlign: =""
+                    Visible: =true
+                    Weight: ='TextCanvas.Weight'.Regular
+                    Width: =249
+                    Wrap: =true
+                    X: =332
+                    Y: =0
+                    ZIndex: =5
+
             TextCanvas1_56 As Texto:
                 Align: ='TextCanvas.Align'.Center
                 AutoHeight: =false
@@ -3044,10 +3073,10 @@ Ordenes_listas_Pago As screen:
                 VerticalAlign: =""
                 Visible: =true
                 Weight: ='TextCanvas.Weight'.Semibold
-                Width: =186
+                Width: =168
                 Wrap: =true
-                X: =224
-                Y: =117
+                X: =8
+                Y: =129
                 ZIndex: =11
 
             lbl_montoTotal_OLP As text:
@@ -3086,9 +3115,9 @@ Ordenes_listas_Pago As screen:
                 RadiusTopLeft: =10
                 RadiusTopRight: =10
                 Size: =15
-                Width: =186
-                X: =224
-                Y: =147
+                Width: =168
+                X: =8
+                Y: =153
                 ZIndex: =12
 
             TextCanvas1_57 As Texto:
@@ -3109,10 +3138,10 @@ Ordenes_listas_Pago As screen:
                 VerticalAlign: =""
                 Visible: =true
                 Weight: ='TextCanvas.Weight'.Semibold
-                Width: =186
+                Width: =173
                 Wrap: =true
-                X: =402
-                Y: =122
+                X: =176
+                Y: =129
                 ZIndex: =13
 
             lbl_montoCancelado_OLP As text:
@@ -3148,9 +3177,9 @@ Ordenes_listas_Pago As screen:
                 RadiusTopLeft: =10
                 RadiusTopRight: =10
                 Size: =15
-                Width: =186
-                X: =402
-                Y: =152
+                Width: =173
+                X: =176
+                Y: =153
                 ZIndex: =14
 
             lbl_Total_OLP_2 As Texto:
@@ -3171,10 +3200,10 @@ Ordenes_listas_Pago As screen:
                 VerticalAlign: =""
                 Visible: =true
                 Weight: ='TextCanvas.Weight'.Semibold
-                Width: =183
+                Width: =165
                 Wrap: =true
-                X: =588
-                Y: =121
+                X: =349
+                Y: =129
                 ZIndex: =15
 
             txt_totalPOT_OLP As text:
@@ -3192,7 +3221,7 @@ Ordenes_listas_Pago As screen:
                 DisplayMode: =DisplayMode.View
                 FocusedBorderThickness: =4
                 Font: =App.Theme.Font
-                Height: =30
+                Height: =33
                 HintText: ="Monto"
                 HoverBorderColor: =RGBA(180, 214, 250, 1)
                 HoverColor: =RGBA(0, 0, 0, 1)
@@ -3211,13 +3240,13 @@ Ordenes_listas_Pago As screen:
                 RadiusTopLeft: =10
                 RadiusTopRight: =10
                 Size: =15
-                Width: =183
-                X: =588
-                Y: =152
+                Width: =165
+                X: =349
+                Y: =150
                 ZIndex: =16
 
             TextCanvas1_58 As Texto:
-                Align: ='TextCanvas.Align'.Start
+                Align: ='TextCanvas.Align'.Center
                 AutoHeight: =false
                 BorderStyle: =""
                 ContentLanguage: =""
@@ -3231,13 +3260,13 @@ Ordenes_listas_Pago As screen:
                 TabIndex: =0
                 Text: ="Monto a pagar"
                 Tooltip: =""
-                VerticalAlign: =""
+                VerticalAlign: =VerticalAlign.Middle
                 Visible: =true
                 Weight: ='TextCanvas.Weight'.Semibold
-                Width: =155
+                Width: =248
                 Wrap: =true
-                X: =245
-                Y: =188
+                X: =10
+                Y: =191
                 ZIndex: =17
 
             txt_montopagar_OPL As text:
@@ -3254,7 +3283,7 @@ Ordenes_listas_Pago As screen:
                 FocusedBorderThickness: =4
                 Font: =App.Theme.Font
                 Format: =TextFormat.Number
-                Height: =38
+                Height: =37
                 HintText: ="Monto"
                 HoverBorderColor: =RGBA(180, 214, 250, 1)
                 HoverColor: =RGBA(0, 0, 0, 1)
@@ -3276,9 +3305,9 @@ Ordenes_listas_Pago As screen:
                 RadiusTopLeft: =10
                 RadiusTopRight: =10
                 Size: =15
-                Width: =239
-                X: =245
-                Y: =220
+                Width: =246
+                X: =10
+                Y: =222
                 ZIndex: =18
 
             txt_NumTransferencia_OLP_2 As text:
@@ -3287,13 +3316,14 @@ Ordenes_listas_Pago As screen:
                 BorderThickness: =3
                 Clear: =true
                 Color: =RGBA(0, 0, 0, 1)
-                Default: =First(Sort(RegistroPagos, Value(ID), SortOrder.Descending)).ID +1
+                Default: =First( Sort( RegistroPagos, Value(NUM_ID), SortOrder.Descending ) ).NUM_ID + 1
                 DisabledBorderColor: =RGBA(180, 214, 250, 1)
                 DisabledColor: =RGBA(166, 166, 166, 1)
                 DisabledFill: =RGBA(255, 255, 255, 1)
                 DisplayMode: =DisplayMode.Disabled
                 FocusedBorderThickness: =4
                 Font: =App.Theme.Font
+                Format: =TextFormat.Number
                 Height: =34
                 HoverBorderColor: =RGBA(180, 214, 250, 1)
                 HoverColor: =RGBA(0, 0, 0, 1)
@@ -3313,8 +3343,8 @@ Ordenes_listas_Pago As screen:
                 RadiusTopRight: =10
                 Size: =15
                 Width: =99
-                X: =675
-                Y: =62
+                X: =414
+                Y: =77
                 ZIndex: =19
 
             lbl_Total_OLP_3 As Texto:
@@ -3327,7 +3357,7 @@ Ordenes_listas_Pago As screen:
                 FontItalic: =false
                 FontStrikethrough: =false
                 FontUnderline: =false
-                Height: =34
+                Height: =30
                 Size: =21
                 TabIndex: =0
                 Text: ="ID"
@@ -3337,8 +3367,8 @@ Ordenes_listas_Pago As screen:
                 Weight: ='TextCanvas.Weight'.Semibold
                 Width: =30
                 Wrap: =true
-                X: =640
-                Y: =62
+                X: =448
+                Y: =48
                 ZIndex: =20
 
     cnt_Comentario_EM_2 As groupContainer.manualLayoutContainer:
