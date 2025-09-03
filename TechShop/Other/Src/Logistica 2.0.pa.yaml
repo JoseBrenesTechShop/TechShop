@@ -1524,11 +1524,14 @@ Screens:
                         Height: =35
                         Icon: =Icon.Add
                         OnSelect: |-
-                          =UpdateContext(
-                              {
-                                 Materiales: true
-                              }
-                          );
+                          =UpdateContext({
+                              Materiales: true,   
+                              reset: true,        
+                              rellenar: false   
+                          });
+
+                          UpdateContext({ reset: false });
+                          UpdateContext({ Cantidad: Blank(), Observacion: Blank() })
                         Width: =45
                         X: =841
             - lbl_PNDato_EM_292:
@@ -1685,15 +1688,6 @@ Screens:
                   Width: =403
                   X: =886
                   Y: =42
-            - Capa1_13:
-                Control: GroupContainer@1.3.0
-                Variant: ManualLayout
-                Properties:
-                  BorderColor: =RGBA(0, 0, 0, 0)
-                  Fill: =RGBA(0, 0, 0, 0.12)
-                  Height: =572
-                  Visible: =Materiales
-                  Width: =1289
       - Container76:
           Control: GroupContainer@1.3.0
           Variant: ManualLayout
@@ -1706,7 +1700,7 @@ Screens:
             RadiusTopLeft: =10
             RadiusTopRight: =10
             Visible: =Materiales
-            Width: =884
+            Width: =1289
             X: =39
             Y: =169
           Children:
@@ -1727,7 +1721,7 @@ Screens:
                   Size: =20
                   Text: ="Materiales Disponibles - " & glr_Pots.Selected.POT
                   Weight: ='TextCanvas.Weight'.Semibold
-                  Width: =884
+                  Width: =1289
             - btn_Guardar_EC_21:
                 Control: Classic/Button@2.2.0
                 Properties:
@@ -1741,14 +1735,14 @@ Screens:
                   HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
                   HoverColor: =RGBA(255, 255, 255, 1)
                   HoverFill: =
-                  OnSelect: "=\nIf(\n    CountRows(\n        Filter(\n            glr_Pots_1.AllItems,\n            !IsBlank(Trim(CantidadMats.Text)) && \n            IsMatch(CantidadMats.Text, \"^\\d+(\\.\\d+)?$\") && \n            Value(CantidadMats.Text) > 0\n        )\n    ) = 0,\n    UpdateContext(\n        {\n            MostrarAviso: true,\n            mensajeNotificacion: \"Digite una cantidad primero.\"\n        }\n    ),\n    \n    With(\n        {\n            invalidItem: \n                First(\n                    Filter(\n                        glr_Pots_1.AllItems,\n                        !IsBlank(Trim(CantidadMats.Text)) &&\n                        IsMatch(CantidadMats.Text, \"^\\d+(\\.\\d+)?$\") &&\n                        Value(CantidadMats.Text) > Value(txtCantidadDisponible.Text)\n                    )\n                )\n        },\n        ClearCollect(\n            tempTableCurrent,\n            ForAll(\n                Filter(\n                    glr_Pots_1.AllItems,\n                    !IsBlank(Trim(CantidadMats.Text)) &&\n                    IsMatch(CantidadMats.Text, \"^\\d+(\\.\\d+)?$\") &&\n                    Value(CantidadMats.Text) > 0 &&\n                    Value(CantidadMats.Text) <= Value(txtCantidadDisponible.Text)\n                ),\n                {\n                    Item: ThisRecord.item,\n                    Description: ThisRecord.description,\n                    QtyOrdered: ThisRecord.qty_ordered,\n                    Cantidad: Value(CantidadMats.Text),\n                    POT: ThisRecord.po_num\n                }\n            )\n        );\n        \n        Collect(PotsSeleccionadas, tempTableCurrent);\n        \n        If(\n            !IsBlank(invalidItem),\n            UpdateContext(\n                {\n                    MostrarAviso: true,\n                    mensajeNotificacion: \"El material \" & invalidItem.item & \" tiene una cantidad mayor a la disponible.\"\n                }\n            ),\n            UpdateContext(\n                {\n                    MostrarAviso: true,\n                    mensajeNotificacion: \"Materiales agregados correctamente.\",\n                    Materiales: false\n                }\n            )\n        )\n    )\n)\n"
+                  OnSelect: "=\nIf(\n    CountRows(\n        Filter(\n            glr_Pots_1.AllItems,\n            !IsBlank(Trim(CantidadMats.Text)) &&\n            IsMatch(CantidadMats.Text,\"^\\-?\\d+(\\.\\d+)?$\") &&\n            Value(CantidadMats.Text) < 0\n        )\n    ) > 0,\n    UpdateContext(\n        {\n            MostrarAviso: true,\n            mensajeNotificacion: \"Se digito cantidades negativas, no se puede guardar.\"\n        }\n    ),\n\n    UpdateContext(\n        {\n            hayObservacionFaltante: CountRows(\n                Filter(\n                    glr_Pots_1.AllItems,\n                    Value(CantidadMats.Text) = 0 && IsBlank(Trim(txtObservacion.Text))\n                )\n            ) > 0\n        }\n    ),\n\n    If(\n        hayObservacionFaltante,\n        UpdateContext(\n            {\n                MostrarAviso: true,\n                mensajeNotificacion: \"Debe escribir una observación para los materiales con cantidad 0.\"\n            }\n        ),\n\n        ClearCollect(\n            tempTableCurrent,\n            ForAll(\n                glr_Pots_1.AllItems,\n                {\n                    Item: ThisRecord.item,\n                    Description: ThisRecord.description,\n                    QtyOrdered: ThisRecord.qty_ordered,\n                    Cantidad: Value(CantidadMats.Text),\n                    POT: ThisRecord.po_num,\n                    Observacion: txtObservacion.Text\n                }\n            )\n        );\n        Collect(\n            PotsSeleccionadas,\n            tempTableCurrent\n        );\n        \n        UpdateContext(\n            {\n                MostrarAviso: true,\n                mensajeNotificacion: \"Materiales agregados correctamente.\",\n                Materiales: false,\n                reset: true\n            }\n        );\n        UpdateContext({reset: false})\n    )\n)\n"
                   PressedBorderColor: =Self.Fill
                   PressedColor: =Self.Fill
                   PressedFill: =Self.Color
-                  Text: ="AgregarMateriales"
+                  Text: ="Agregar Materiales"
                   Width: =198
-                  X: =679
-                  Y: =485
+                  X: =749
+                  Y: =492
             - btn_Guardar_EC_22:
                 Control: Classic/Button@2.2.0
                 Properties:
@@ -1763,14 +1757,20 @@ Screens:
                   HoverColor: =RGBA(255, 255, 255, 1)
                   HoverFill: =
                   OnSelect: |
-                    =UpdateContext({Materiales: false});
+                    =UpdateContext({
+                        Materiales: false,  
+                        reset: true,       
+                        rellenar: false
+                    });
+                    UpdateContext({ reset: false });
+                    UpdateContext({ reset: !reset, Cantidad: Blank(), Observacion: Blank() })
                   PressedBorderColor: =Self.Fill
                   PressedColor: =Self.Fill
                   PressedFill: =Self.Color
                   Text: ="Volver"
                   Width: =128
-                  X: =544
-                  Y: =485
+                  X: =389
+                  Y: =492
             - glr_Pots_1:
                 Control: Gallery@2.15.0
                 Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
@@ -1784,7 +1784,7 @@ Screens:
                                         po_num = glr_Pots.Selected.POT
                                     )
                   TemplateSize: =35
-                  Width: =884
+                  Width: =1289
                   Y: =60
                 Children:
                   - txt_Cantidad_EM_155:
@@ -1842,7 +1842,16 @@ Screens:
                         BorderColor: =RGBA(180, 214, 250, 1)
                         BorderThickness: =3
                         Clear: =true
-                        Default: =
+                        Default: |-
+                          =If(
+                              reset, 
+                              0,                              
+                              If(
+                                  rellenar, 
+                                  Value(txtCantidadDisponible.Text),   
+                                  Cantidad                            
+                              )
+                          )
                         DisabledBorderColor: =RGBA(180, 214, 250, 1)
                         DisabledFill: =RGBA(255, 255, 255, 1)
                         DisplayMode: |
@@ -1890,6 +1899,39 @@ Screens:
                         RadiusTopRight: =0
                         Size: =14
                         Width: =199
+                  - txtObservacion:
+                      Control: Classic/TextInput@2.3.2
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(180, 214, 250, 1)
+                        BorderThickness: =3
+                        Clear: =true
+                        Default: |+
+                          =If(reset,"", Observacion)
+                        DisabledBorderColor: =RGBA(180, 214, 250, 1)
+                        DisabledFill: =RGBA(255, 255, 255, 1)
+                        DisplayMode: |
+                          =
+                        Height: =35
+                        HintText: ="-"
+                        HoverBorderColor: =RGBA(180, 214, 250, 1)
+                        HoverFill: =RGBA(227, 240, 252, 1)
+                        OnChange: =
+                        OnSelect: |
+                          =
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        PressedColor: =RGBA(0, 0, 0, 1)
+                        PressedFill: =RGBA(255, 255, 255, 1)
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Size: =14
+                        Width: =405
+                        X: =884
             - lbl_PNDato_EM_293:
                 Control: Text@0.0.51
                 Properties:
@@ -1970,24 +2012,48 @@ Screens:
                   Width: =119
                   X: =765
                   Y: =30
-            - Label33:
-                Control: Label@2.5.1
+            - lbl_PNDato_EM_302:
+                Control: Text@0.0.51
                 Properties:
-                  FontWeight: =FontWeight.Bold
-                  Height: =50
-                  Text: |-
-                    ="Nota: Las cantidades de los materiales en 0 no se guardaran."
-                  Width: =505
-                  X: =39
-                  Y: =481
-            - Icon17:
-                Control: Classic/Icon@2.5.0
+                  Align: ='TextCanvas.Align'.Center
+                  BorderColor: =RGBA(180, 214, 250, 1)
+                  BorderStyle: =BorderStyle.Solid
+                  BorderThickness: =0.5
+                  Fill: =RGBA(40, 134, 222, 1)
+                  FontColor: =RGBA(255, 255, 255, 1)
+                  Height: =30
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  Size: =20
+                  Text: ="Observacion"
+                  Weight: ='TextCanvas.Weight'.Regular
+                  Width: =405
+                  X: =884
+                  Y: =30
+            - btn_Guardar_EC_23:
+                Control: Classic/Button@2.2.0
                 Properties:
-                  Color: =RGBA(255, 191, 0, 1)
-                  Height: =50
-                  Icon: =Icon.Warning
-                  Width: =39
-                  Y: =481
+                  BorderColor: =RGBA(40, 134, 222, 1)
+                  Color: =RGBA(255, 255, 255, 1)
+                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                  DisplayMode: =
+                  Fill: =RGBA(40, 134, 222, 1)
+                  Font: =Font.'Open Sans'
+                  Height: =33
+                  HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =
+                  OnSelect: |-
+                    =UpdateContext({ rellenar: !rellenar })
+                  PressedBorderColor: =Self.Fill
+                  PressedColor: =Self.Fill
+                  PressedFill: =Self.Color
+                  Text: ="Rellenar Cantidades"
+                  Width: =219
+                  X: =523
+                  Y: =492
       - cnt_Comentario_EM_12:
           Control: GroupContainer@1.3.0
           Variant: ManualLayout
