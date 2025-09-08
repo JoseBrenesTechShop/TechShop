@@ -1337,8 +1337,9 @@
             Height: =47
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =
-            OnSelect: |-
-                =UpdateContext({AbrirPots:true, seleccion:true})
+            OnSelect: |+
+                =UpdateContext({AbrirPots:true, seleccion:true});
+                
             Size: =15
             Text: ="Continuar"
             Width: =161
@@ -1371,6 +1372,7 @@
                 Reset(txt_refTech_LO_1);
                 Reset(drp_MetodoTransporte_LO_1);
                 Reset(drp_TipoEnvio_LO_1);
+                Reset(Ref)
             Size: =15
             Text: ="Cancelar"
             Width: =163
@@ -1816,7 +1818,8 @@
                             Fecha_Miami: dt_FechaMiami_LO_1.SelectedDate,
                             Ref_Miami: txt_refMiamo_LO_1.Text,
                             Fecha_Tech: dt_FechaTech_LO_1.SelectedDate,
-                            Ref_Tech: txt_refTech_LO_1.Text
+                            Ref_Tech: txt_refTech_LO_1.Text,
+                            'Estado (crfb9_estado)': ""
                         }
                     );
                     UpdateContext(
@@ -1923,12 +1926,7 @@
             DelayItemLoading: =true
             Fill: =RGBA(255, 255, 255, 1)
             Height: =500
-            Items: |-
-                =Filter(
-                    Compras_Pots,
-                    'Estado (crfb9_estado)' = "Colocado" &&
-                    !(Text(POT) in glr_pots_Seleccionadas.AllItems.Value )
-                )
+            Items: =Filter( Compras_Pots, 'Estado (crfb9_estado)' = "Colocado" && !(Text(POT) in glr_pots_Seleccionadas.AllItems.Value ) )
             Layout: =Layout.Vertical
             LoadingSpinner: =LoadingSpinner.Data
             TemplatePadding: =0
@@ -2038,9 +2036,31 @@
                         reset: true,        
                         rellenar: false   
                     });
-                    
                     UpdateContext({ reset: false });
-                    UpdateContext({ Cantidad: Blank(), Observacion: Blank() })
+                    UpdateContext({ Cantidad: Blank(), Observacion: Blank() });
+                    ClearCollect(
+                        colCompras,
+                        Logistica_Compras
+                    );
+                    
+                    ClearCollect(
+                        colGaleria,
+                        AddColumns(
+                            Filter(preqitem, po_num = glr_Pots.Selected.POT),
+                            CantidadDisponible,
+                            qty_ordered - Sum(
+                                Filter(colCompras, POT = po_num && Materiales = item),
+                                Cantidad
+                            ),
+                            Material, item,
+                            Descripcion, description
+                        )
+                    );
+                    
+                    ClearCollect(
+                        colGaleriaDisponibles,
+                        Filter(colGaleria, CantidadDisponible > 0)
+                    )
                 Width: =45
                 X: =841
                 ZIndex: =4
@@ -2257,10 +2277,11 @@
                 Height: =35
                 Icon: =Icon.Edit
                 OnSelect: |
-                    =RemoveIf(
-                        PotsSeleccionadas,
-                        POT = ThisItem.Value   
-                    )
+                    =UpdateContext({
+                        Editar: true,
+                        reset: false,
+                        rellenar: false
+                    })
                 Width: =45
                 X: =313
                 ZIndex: =3
@@ -2356,6 +2377,17 @@
             HoverFill: =
             OnSelect: |-
                 =If(
+                   CountRows(
+                        Filter(
+                            glr_Pots_1.AllItems,
+                            IsBlank(Trim(CantidadMats.Text))
+                        )
+                    ) > 0,
+                    UpdateContext({
+                        MostrarAviso: true,
+                        mensajeNotificacion: "Hay cantidades en blanco. No se puede guardar."
+                    }),
+                
                     CountRows(
                         Filter(
                             glr_Pots_1.AllItems,
@@ -2447,7 +2479,7 @@
             Size: =15
             Text: ="Agregar Materiales"
             Width: =198
-            X: =749
+            X: =702
             Y: =492
             ZIndex: =2
 
@@ -2473,7 +2505,7 @@
             Size: =15
             Text: ="Volver"
             Width: =128
-            X: =389
+            X: =435
             Y: =492
             ZIndex: =3
 
@@ -2483,11 +2515,8 @@
             BorderThickness: =0.5
             DelayItemLoading: =true
             Height: =421
-            Items: |-
-                =                Filter(
-                                    preqitem,
-                                    po_num = glr_Pots.Selected.POT
-                                )
+            Items: |
+                =colGaleriaDisponibles
             Layout: =Layout.Vertical
             LoadingSpinner: =LoadingSpinner.Data
             TemplatePadding: =0
@@ -2501,7 +2530,7 @@
                 BorderColor: =RGBA(40, 134, 222, 1)
                 BorderThickness: =0.5
                 Color: =
-                Default: =ThisItem.description
+                Default: =ThisItem.Descripcion
                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                 DisabledColor: =
                 DisabledFill: =
@@ -2528,7 +2557,7 @@
                 BorderColor: =RGBA(40, 134, 222, 1)
                 BorderThickness: =0.5
                 Color: =
-                Default: =ThisItem.qty_ordered
+                Default: =ThisItem.CantidadDisponible 
                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                 DisabledColor: =
                 DisabledFill: =
@@ -2600,7 +2629,7 @@
                 BorderColor: =RGBA(40, 134, 222, 1)
                 BorderThickness: =0.5
                 Color: =
-                Default: =ThisItem.item
+                Default: =ThisItem.Material
                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                 DisabledColor: =
                 DisabledFill: =
@@ -2830,13 +2859,554 @@
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =
             OnSelect: |-
+                =UpdateContext({ 
+                
+                    rellenar: !rellenar })
+            Size: =15
+            Text: ="Rellenar"
+            Width: =128
+            X: =569
+            Y: =492
+            ZIndex: =11
+
+    Container76_1 As groupContainer.manualLayoutContainer:
+        DropShadow: =DropShadow.ExtraBold
+        Fill: =RGBA(255, 255, 255, 1)
+        Height: =531
+        RadiusBottomLeft: =10
+        RadiusBottomRight: =10
+        RadiusTopLeft: =10
+        RadiusTopRight: =10
+        Visible: =Editar
+        Width: =1289
+        X: =39
+        Y: =169
+        ZIndex: =6
+
+        lbl_PNDato_EM_291 As Texto:
+            Align: ='TextCanvas.Align'.Center
+            AutoHeight: =false
+            BorderColor: =RGBA(180, 214, 250, 1)
+            BorderStyle: =BorderStyle.Solid
+            BorderThickness: =0.5
+            ContentLanguage: =""
+            DisplayMode: =DisplayMode.Edit
+            Fill: =RGBA(40, 134, 222, 0.72)
+            Font: =""
+            FontColor: =RGBA(255, 255, 255, 1)
+            FontItalic: =false
+            FontStrikethrough: =false
+            FontUnderline: =false
+            Height: =30
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =20
+            TabIndex: =0
+            Text: ="Editar Materiales - " & glr_pots_Seleccionadas.Selected.Value
+            Tooltip: =""
+            VerticalAlign: =""
+            Visible: =true
+            Weight: ='TextCanvas.Weight'.Semibold
+            Width: =1289
+            Wrap: =true
+            X: =0
+            Y: =0
+            ZIndex: =1
+
+        btn_Guardar_EC_24 As button:
+            BorderColor: =RGBA(40, 134, 222, 1)
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            DisplayMode: =
+            Fill: =RGBA(40, 134, 222, 1)
+            FontWeight: =FontWeight.Semibold
+            Height: =33
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =
+            OnSelect: |
+                =If(
+                
+                     CountRows(
+                        Filter(
+                            glr_Pots_2.AllItems,
+                            IsBlank(Trim(CantidadMats_1.Text))
+                        )
+                    ) > 0,
+                    UpdateContext({
+                        MostrarAviso: true,
+                        mensajeNotificacion: "Hay cantidades en blanco. No se puede guardar."
+                    }),
+                
+                    CountRows(
+                        Filter(
+                            glr_Pots_2.AllItems,
+                            IsMatch(CantidadMats_1.Text,"^\-?\d+(\.\d+)?$") &&
+                            Value(CantidadMats_1.Text) < 0
+                        )
+                    ) > 0,
+                    UpdateContext({
+                        MostrarAviso: true,
+                        mensajeNotificacion: "Se digitó una cantidad negativa. No se puede guardar."
+                    }),
+                
+                    CountRows(
+                        Filter(
+                            glr_Pots_2.AllItems,
+                            IsMatch(CantidadMats_1.Text,"^\-?\d+(\.\d+)?$") &&
+                            Value(CantidadMats_1.Text) > Value(txtCantidadDisponible_1.Text)
+                        )
+                    ) > 0,
+                    UpdateContext({
+                        MostrarAviso: true,
+                        mensajeNotificacion: "Alguna cantidad supera la cantidad disponible. Revise y corrija."
+                    }),
+                
+                    CountRows(
+                        Filter(
+                            glr_Pots_2.AllItems,
+                            IsMatch(CantidadMats_1.Text,"^\-?\d+(\.\d+)?$") &&
+                            Value(CantidadMats_1.Text) < Value(txtCantidadDisponible_1.Text) &&
+                            IsBlank(Trim(txtObservacion_1.Text))
+                        )
+                    ) > 0,
+                    UpdateContext({
+                        MostrarAviso: true,
+                        mensajeNotificacion: "Faltan observaciones para materiales con cantidad menor a la disponible."
+                    }),
+                
+                    CountRows(
+                        Filter(
+                            glr_Pots_2.AllItems,
+                            IsMatch(CantidadMats_1.Text,"^\-?\d+(\.\d+)?$") &&
+                            Value(CantidadMats_1.Text) <> 0
+                        )
+                    ) = 0,
+                    UpdateContext({
+                        MostrarAviso: true,
+                        mensajeNotificacion: "Todas las cantidades están en 0. No hay materiales para guardar."
+                    }),
+                
+                    ForAll(
+                        glr_Pots_2.AllItems,
+                        Patch(
+                            PotsSeleccionadas,
+                            LookUp(
+                                PotsSeleccionadas,
+                                POT = ThisRecord.POT && Item = ThisRecord.Item
+                            ),
+                            {
+                                Cantidad: Value(CantidadMats_1.Text),
+                                Observacion: txtObservacion_1.Text
+                            }
+                        )
+                    );
+                
+                    UpdateContext({
+                        MostrarAviso: true,
+                        mensajeNotificacion: "Materiales editados correctamente.",
+                        reset: true,
+                        Editar: false
+                    });
+                    UpdateContext({reset: false})
+                )
+            Size: =15
+            Text: ="Editar Material"
+            Width: =172
+            X: =749
+            Y: =492
+            ZIndex: =2
+
+        btn_Guardar_EC_25 As button:
+            BorderColor: =RGBA(215, 58, 60, 1)
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            DisplayMode: =
+            Fill: =RGBA(255, 0, 0, 1)
+            FontWeight: =FontWeight.Semibold
+            Height: =33
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =
+            OnSelect: |
+                =UpdateContext({
+                    Editar: false,  
+                    reset: true,       
+                    rellenar: false
+                });
+                UpdateContext({ reset: false });
+                UpdateContext({ reset: !reset, Cantidad: Blank(), Observacion: Blank() })
+            Size: =15
+            Text: ="Volver"
+            Width: =128
+            X: =389
+            Y: =492
+            ZIndex: =3
+
+        "glr_Pots_2 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
+            '#CopilotOverlayLabel': ="Filtrada"
+            BorderColor: =RGBA(9, 33, 98, 1)
+            BorderThickness: =0.5
+            DelayItemLoading: =true
+            Height: =421
+            Items: |-
+                =                Filter(PotsSeleccionadas,
+                                    POT = glr_pots_Seleccionadas.Selected.Value
+                                )
+            Layout: =Layout.Vertical
+            LoadingSpinner: =LoadingSpinner.Data
+            TemplatePadding: =0
+            TemplateSize: =35
+            Width: =1289
+            Y: =60
+            ZIndex: =4
+
+            txt_descripcion_1 As text:
+                Align: =Align.Center
+                BorderColor: =RGBA(40, 134, 222, 1)
+                BorderThickness: =0.5
+                Color: =
+                Default: =ThisItem.Description
+                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                DisabledColor: =
+                DisabledFill: =
+                DisplayMode: =DisplayMode.Disabled
+                FocusedBorderThickness: =4
+                Font: =App.Theme.Font
+                FontWeight: =FontWeight.Semibold
+                Height: =35
+                HintText: =""
+                HoverBorderColor: =RGBA(40, 134, 222, 1)
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =RGBA(255, 255, 255, 1)
+                PaddingLeft: =5
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Width: =372
+                X: =199
+                ZIndex: =1
+
+            txtCantidadDisponible_1 As text:
+                Align: =Align.Center
+                BorderColor: =RGBA(40, 134, 222, 1)
+                BorderThickness: =0.5
+                Color: =
+                Default: =ThisItem.QtyOrdered
+                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                DisabledColor: =
+                DisabledFill: =
+                DisplayMode: =DisplayMode.Disabled
+                FocusedBorderThickness: =4
+                Font: =App.Theme.Font
+                FontWeight: =FontWeight.Semibold
+                Height: =35
+                HintText: =""
+                HoverBorderColor: =RGBA(40, 134, 222, 1)
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =RGBA(255, 255, 255, 1)
+                PaddingLeft: =5
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Width: =194
+                X: =571
+                ZIndex: =2
+
+            CantidadMats_1 As text:
+                Align: =Align.Center
+                BorderColor: =RGBA(180, 214, 250, 1)
+                BorderThickness: =3
+                Clear: =true
+                Color: =RGBA(0, 0, 0, 1)
+                Default: |
+                    =If(
+                        reset,
+                        0,
+                        If(
+                            rellenar,
+                            Value(txtCantidadDisponible_1.Text),
+                            Value(ThisItem.Cantidad)
+                        )
+                    )
+                DisabledBorderColor: =RGBA(180, 214, 250, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                DisabledFill: =RGBA(255, 255, 255, 1)
+                DisplayMode: |
+                    =
+                FocusedBorderThickness: =4
+                Font: =App.Theme.Font
+                Height: =35
+                HoverBorderColor: =RGBA(180, 214, 250, 1)
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =RGBA(227, 240, 252, 1)
+                OnChange: =
+                OnSelect: |
+                    =
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                PressedColor: =RGBA(0, 0, 0, 1)
+                PressedFill: =RGBA(255, 255, 255, 1)
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Width: =119
+                X: =765
+                ZIndex: =3
+
+            txt_material_1 As text:
+                Align: =Align.Center
+                BorderColor: =RGBA(40, 134, 222, 1)
+                BorderThickness: =0.5
+                Color: =
+                Default: =ThisItem.Item
+                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                DisabledColor: =
+                DisabledFill: =
+                DisplayMode: =DisplayMode.Disabled
+                FocusedBorderThickness: =4
+                Font: =App.Theme.Font
+                FontWeight: =FontWeight.Semibold
+                Height: =35
+                HintText: =""
+                HoverBorderColor: =RGBA(40, 134, 222, 1)
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =RGBA(255, 255, 255, 1)
+                PaddingLeft: =5
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Width: =199
+                ZIndex: =4
+
+            txtObservacion_1 As text:
+                Align: =Align.Center
+                BorderColor: =RGBA(180, 214, 250, 1)
+                BorderThickness: =3
+                Clear: =true
+                Color: =RGBA(0, 0, 0, 1)
+                Default: |
+                    =If(
+                        reset,
+                        "",
+                        ThisItem.Observacion
+                    )
+                DisabledBorderColor: =RGBA(180, 214, 250, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                DisabledFill: =RGBA(255, 255, 255, 1)
+                DisplayMode: |
+                    =
+                FocusedBorderThickness: =4
+                Font: =App.Theme.Font
+                Height: =35
+                HintText: ="-"
+                HoverBorderColor: =RGBA(180, 214, 250, 1)
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =RGBA(227, 240, 252, 1)
+                OnChange: =
+                OnSelect: |
+                    =
+                PaddingBottom: =0
+                PaddingLeft: =0
+                PaddingRight: =0
+                PaddingTop: =0
+                PressedColor: =RGBA(0, 0, 0, 1)
+                PressedFill: =RGBA(255, 255, 255, 1)
+                RadiusBottomLeft: =0
+                RadiusBottomRight: =0
+                RadiusTopLeft: =0
+                RadiusTopRight: =0
+                Width: =405
+                X: =884
+                ZIndex: =5
+
+        lbl_PNDato_EM_294 As Texto:
+            Align: ='TextCanvas.Align'.Center
+            AutoHeight: =false
+            BorderColor: =RGBA(180, 214, 250, 1)
+            BorderStyle: =BorderStyle.Solid
+            BorderThickness: =0.5
+            ContentLanguage: =""
+            DisplayMode: =DisplayMode.Edit
+            Fill: =RGBA(40, 134, 222, 1)
+            Font: =""
+            FontColor: =RGBA(255, 255, 255, 1)
+            FontItalic: =false
+            FontStrikethrough: =false
+            FontUnderline: =false
+            Height: =30
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =20
+            TabIndex: =0
+            Text: ="Material"
+            Tooltip: =""
+            VerticalAlign: =VerticalAlign.Middle
+            Visible: =true
+            Weight: ='TextCanvas.Weight'.Regular
+            Width: =199
+            Wrap: =true
+            X: =0
+            Y: =30
+            ZIndex: =5
+
+        lbl_PNDato_EM_299 As Texto:
+            Align: ='TextCanvas.Align'.Center
+            AutoHeight: =false
+            BorderColor: =RGBA(180, 214, 250, 1)
+            BorderStyle: =BorderStyle.Solid
+            BorderThickness: =0.5
+            ContentLanguage: =""
+            DisplayMode: =DisplayMode.Edit
+            Fill: =RGBA(40, 134, 222, 1)
+            Font: =""
+            FontColor: =RGBA(255, 255, 255, 1)
+            FontItalic: =false
+            FontStrikethrough: =false
+            FontUnderline: =false
+            Height: =30
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =20
+            TabIndex: =0
+            Text: ="Descripcion"
+            Tooltip: =""
+            VerticalAlign: =""
+            Visible: =true
+            Weight: ='TextCanvas.Weight'.Regular
+            Width: =372
+            Wrap: =true
+            X: =199
+            Y: =30
+            ZIndex: =6
+
+        lbl_PNDato_EM_303 As Texto:
+            Align: ='TextCanvas.Align'.Center
+            AutoHeight: =false
+            BorderColor: =RGBA(180, 214, 250, 1)
+            BorderStyle: =BorderStyle.Solid
+            BorderThickness: =0.5
+            ContentLanguage: =""
+            DisplayMode: =DisplayMode.Edit
+            Fill: =RGBA(40, 134, 222, 1)
+            Font: =""
+            FontColor: =RGBA(255, 255, 255, 1)
+            FontItalic: =false
+            FontStrikethrough: =false
+            FontUnderline: =false
+            Height: =30
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =20
+            TabIndex: =0
+            Text: ="Cantidad disponible"
+            Tooltip: =""
+            VerticalAlign: =""
+            Visible: =true
+            Weight: ='TextCanvas.Weight'.Regular
+            Width: =194
+            Wrap: =true
+            X: =571
+            Y: =30
+            ZIndex: =7
+
+        lbl_PNDato_EM_304 As Texto:
+            Align: ='TextCanvas.Align'.Center
+            AutoHeight: =false
+            BorderColor: =RGBA(180, 214, 250, 1)
+            BorderStyle: =BorderStyle.Solid
+            BorderThickness: =0.5
+            ContentLanguage: =""
+            DisplayMode: =DisplayMode.Edit
+            Fill: =RGBA(40, 134, 222, 1)
+            Font: =""
+            FontColor: =RGBA(255, 255, 255, 1)
+            FontItalic: =false
+            FontStrikethrough: =false
+            FontUnderline: =false
+            Height: =30
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =20
+            TabIndex: =0
+            Text: ="Cantidad"
+            Tooltip: =""
+            VerticalAlign: =""
+            Visible: =true
+            Weight: ='TextCanvas.Weight'.Regular
+            Width: =119
+            Wrap: =true
+            X: =765
+            Y: =30
+            ZIndex: =8
+
+        lbl_PNDato_EM_305 As Texto:
+            Align: ='TextCanvas.Align'.Center
+            AutoHeight: =false
+            BorderColor: =RGBA(180, 214, 250, 1)
+            BorderStyle: =BorderStyle.Solid
+            BorderThickness: =0.5
+            ContentLanguage: =""
+            DisplayMode: =DisplayMode.Edit
+            Fill: =RGBA(40, 134, 222, 1)
+            Font: =""
+            FontColor: =RGBA(255, 255, 255, 1)
+            FontItalic: =false
+            FontStrikethrough: =false
+            FontUnderline: =false
+            Height: =30
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            Size: =20
+            TabIndex: =0
+            Text: ="Observacion"
+            Tooltip: =""
+            VerticalAlign: =""
+            Visible: =true
+            Weight: ='TextCanvas.Weight'.Regular
+            Width: =405
+            Wrap: =true
+            X: =884
+            Y: =30
+            ZIndex: =9
+
+        btn_Guardar_EC_26 As button:
+            BorderColor: =RGBA(40, 134, 222, 1)
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            DisplayMode: =
+            Fill: =RGBA(40, 134, 222, 1)
+            FontWeight: =FontWeight.Semibold
+            Height: =33
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =
+            OnSelect: |-
                 =UpdateContext({ rellenar: !rellenar })
             Size: =15
             Text: ="Rellenar Cantidades"
             Width: =219
             X: =523
             Y: =492
-            ZIndex: =11
+            ZIndex: =10
 
     cnt_Comentario_EM_12 As groupContainer.manualLayoutContainer:
         BorderColor: =RGBA(40, 134, 222, 1)
@@ -2852,7 +3422,7 @@
         Width: =740
         X: =313
         Y: =295
-        ZIndex: =6
+        ZIndex: =7
 
         txt_MensajeNoti_EM_25 As label:
             Align: =Align.Center
