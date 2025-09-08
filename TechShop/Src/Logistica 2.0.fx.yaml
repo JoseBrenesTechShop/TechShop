@@ -1665,19 +1665,19 @@
             FontItalic: =false
             FontStrikethrough: =false
             FontUnderline: =false
-            Height: =37
+            Height: =30
             Size: =19
             TabIndex: =0
             Text: |-
-                ="ID:  " & First( Sort( Logistica_Movimientos, Value(ID_Tracking), SortOrder.Descending ) ).ID_Tracking + 1
+                ="ID:"
             Tooltip: =""
             VerticalAlign: =VerticalAlign.Middle
             Visible: =true
             Weight: ='TextCanvas.Weight'.Semibold
-            Width: =121
+            Width: =29
             Wrap: =true
-            X: =634
-            Y: =52
+            X: =609
+            Y: =55
             ZIndex: =20
 
         Ref As text:
@@ -1714,9 +1714,45 @@
             RadiusTopRight: =10
             Size: =15
             Width: =323
-            X: =283
+            X: =277
             Y: =55
             ZIndex: =22
+
+        Ref_1 As text:
+            Align: =Align.Center
+            BorderColor: =RGBA(180, 214, 250, 1)
+            BorderThickness: =3
+            Clear: =true
+            Color: =RGBA(0, 0, 0, 1)
+            Default: =First( Sort( Logistica_Movimientos, Value(ID_Tracking), SortOrder.Descending ) ).ID_Tracking + 1
+            DisabledBorderColor: =RGBA(180, 214, 250, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(255, 255, 255, 1)
+            DisplayMode: =DisplayMode.Disabled
+            FocusedBorderThickness: =4
+            Font: =App.Theme.Font
+            Height: =30
+            HoverBorderColor: =RGBA(180, 214, 250, 1)
+            HoverColor: =RGBA(0, 0, 0, 1)
+            HoverFill: =RGBA(227, 240, 252, 1)
+            OnChange: =
+            OnSelect: |
+                =
+            PaddingBottom: =0
+            PaddingLeft: =0
+            PaddingRight: =0
+            PaddingTop: =0
+            PressedColor: =RGBA(0, 0, 0, 1)
+            PressedFill: =RGBA(255, 255, 255, 1)
+            RadiusBottomLeft: =10
+            RadiusBottomRight: =10
+            RadiusTopLeft: =10
+            RadiusTopRight: =10
+            Size: =15
+            Width: =93
+            X: =638
+            Y: =55
+            ZIndex: =23
 
     Container5_11 As groupContainer.manualLayoutContainer:
         BorderColor: =RGBA(40, 134, 222, 1)
@@ -1739,13 +1775,14 @@
             DisabledBorderColor: =RGBA(166, 166, 166, 1)
             DisabledColor: =RGBA(166, 166, 166, 1)
             DisabledFill: =RGBA(244, 244, 244, 1)
-            DisplayMode: =
+            DisplayMode: |
+                =If(loading, DisplayMode.Disabled, DisplayMode.Edit)
             Fill: =RGBA(40, 134, 222, 1)
             FontWeight: =FontWeight.Semibold
-            Height: =47
+            Height: =68
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =
-            OnSelect: |
+            OnSelect: |-
                 =If(
                     CountRows(PotsSeleccionadas) = 0,
                     UpdateContext(
@@ -1753,24 +1790,79 @@
                             MostrarAviso: true,
                             mensajeNotificacion: "No existe ninguna POT con materiales agregados."
                         }
-                    )
+                    ),
+                    Collect(
+                        Logistica_Compras,
+                        ForAll(
+                            PotsSeleccionadas,
+                            {
+                                POT: POT,
+                                Materiales: Item,
+                                Descripcion: Description,
+                                Cantidad: Text(Cantidad),
+                                Observacion: Observacion,
+                                ID_Tracking: Ref_1.Text,
+                                Tracking: Ref.Text
+                            }
+                        )
+                    );
+                    Collect(
+                        Logistica_Movimientos,
+                        {
+                            ID_Tracking: Ref_1.Text,
+                            Tracking: Ref.Text,
+                            Transporte: drp_MetodoTransporte_LO_1.Selected.Value,
+                            Tipo_Envio: drp_TipoEnvio_LO_1.Selected.Value,
+                            Fecha_Miami: dt_FechaMiami_LO_1.SelectedDate,
+                            Ref_Miami: txt_refMiamo_LO_1.Text,
+                            Fecha_Tech: dt_FechaTech_LO_1.SelectedDate,
+                            Ref_Tech: txt_refTech_LO_1.Text
+                        }
+                    );
+                    UpdateContext(
+                        {
+                            MostrarAviso: true,
+                            mensajeNotificacion: "Datos guardados correctamente.",
+                            Materiales: false,
+                            reset: true,
+                            AbrirPots: false,
+                            seleccion: false,
+                            AbrirCompletar: false,
+                            rellenar: false  
+                        }
+                    );
+                    UpdateContext({reset: false});
+                    Refresh(Compras_Pots);
+                    Reset(dt_FechaMiami_LO_1);
+                    Reset(txt_refMiamo_LO_1);
+                    Reset(dt_FechaTech_LO_1);
+                    Reset(txt_refTech_LO_1);
+                    Reset(drp_MetodoTransporte_LO_1);
+                    Reset(drp_TipoEnvio_LO_1);
+                     Clear(PotsSeleccionadas)
+                    
                 )
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
             Size: =15
-            Text: ="Continuar"
-            Width: =161
+            Text: ="Guardar"
+            Width: =191
             X: =1098
-            Y: =511
+            Y: =504
             ZIndex: =1
 
         btn_Guardar_EC_20 As button:
-            BorderColor: =RGBA(215, 58, 60, 1)
+            BorderColor: =RGBA(255, 0, 0, 1)
             DisabledBorderColor: =RGBA(166, 166, 166, 1)
             DisabledColor: =RGBA(166, 166, 166, 1)
             DisabledFill: =RGBA(244, 244, 244, 1)
-            DisplayMode: =
+            DisplayMode: |
+                =If(loading, DisplayMode.Disabled, DisplayMode.Edit)
             Fill: =RGBA(255, 0, 0, 1)
             FontWeight: =FontWeight.Semibold
-            Height: =47
+            Height: =68
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =
             OnSelect: |-
@@ -1780,11 +1872,15 @@
                         seleccion: false
                     }
                 );
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
             Size: =15
             Text: ="Cancelar"
-            Width: =163
-            X: =915
-            Y: =511
+            Width: =212
+            X: =886
+            Y: =504
             ZIndex: =2
 
         lbl_PNDato_EM_288 As Texto:
@@ -1828,8 +1924,11 @@
             Fill: =RGBA(255, 255, 255, 1)
             Height: =500
             Items: |-
-                =
-                Filter(Compras_Pots, 'Estado (crfb9_estado)' = "Colocado")
+                =Filter(
+                    Compras_Pots,
+                    'Estado (crfb9_estado)' = "Colocado" &&
+                    !(Text(POT) in glr_pots_Seleccionadas.AllItems.Value )
+                )
             Layout: =Layout.Vertical
             LoadingSpinner: =LoadingSpinner.Data
             TemplatePadding: =0
@@ -1838,7 +1937,7 @@
             Y: =72
             ZIndex: =5
 
-            txt_Cantidad_EM_149 As text:
+            txt_POT As text:
                 Align: =Align.Center
                 BorderColor: =RGBA(40, 134, 222, 1)
                 BorderThickness: =0.5
@@ -1927,6 +2026,8 @@
                 Color: =RGBA(255, 255, 255, 1)
                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                 DisabledColor: =RGBA(244, 244, 244, 1)
+                DisplayMode: |
+                    =If(loading, DisplayMode.Disabled, DisplayMode.Edit)
                 Fill: =RGBA(40, 134, 222, 1)
                 FocusedBorderThickness: =0
                 Height: =35
@@ -2113,7 +2214,7 @@
                 RadiusTopLeft: =0
                 RadiusTopRight: =0
                 Size: =17
-                Width: =358
+                Width: =313
                 ZIndex: =1
 
             Icon29_1 As icon:
@@ -2122,18 +2223,47 @@
                 Color: =RGBA(255, 255, 255, 1)
                 DisabledBorderColor: =RGBA(166, 166, 166, 1)
                 DisabledColor: =RGBA(244, 244, 244, 1)
+                DisplayMode: |-
+                    =If(
+                        IsEmpty(PotsSeleccionadas) || IsBlank(ThisItem.Value) || loading, 
+                        DisplayMode.Disabled, 
+                        DisplayMode.Edit
+                    )
                 Fill: =RGBA(40, 134, 222, 1)
                 FocusedBorderThickness: =0
                 Height: =35
                 Icon: =Icon.Trash
+                OnSelect: |-
+                    =UpdateContext({loading:true});
+                    RemoveIf(
+                        PotsSeleccionadas,
+                        POT = ThisItem.Value   
+                    );
+                    Reset(glr_Pots);
+                    Refresh(Compras_Pots); 
+                    UpdateContext({loading:false});
+                Width: =45
+                X: =358
+                ZIndex: =2
+
+            Icon29_2 As icon:
+                BorderColor: =RGBA(180, 214, 250, 1)
+                BorderThickness: =0.5
+                Color: =RGBA(255, 255, 255, 1)
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                DisabledColor: =RGBA(244, 244, 244, 1)
+                Fill: =RGBA(40, 134, 222, 1)
+                FocusedBorderThickness: =0
+                Height: =35
+                Icon: =Icon.Edit
                 OnSelect: |
                     =RemoveIf(
                         PotsSeleccionadas,
                         POT = ThisItem.Value   
                     )
                 Width: =45
-                X: =358
-                ZIndex: =2
+                X: =313
+                ZIndex: =3
 
         lbl_PNDato_EM_289 As Texto:
             Align: ='TextCanvas.Align'.Center
@@ -2224,73 +2354,95 @@
             Height: =33
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =
-            OnSelect: |
-                =
-                If(
+            OnSelect: |-
+                =If(
                     CountRows(
                         Filter(
                             glr_Pots_1.AllItems,
-                            !IsBlank(Trim(CantidadMats.Text)) &&
-                            IsMatch(CantidadMats.Text,"^\-?\d+(\.\d+)?$") &&
-                            Value(CantidadMats.Text) < 0
+                            IsMatch(
+                                CantidadMats.Text,
+                                "^\-?\d+(\.\d+)?$"
+                            ) && Value(CantidadMats.Text) < 0
                         )
                     ) > 0,
                     UpdateContext(
                         {
                             MostrarAviso: true,
-                            mensajeNotificacion: "Se digito cantidades negativas, no se puede guardar."
+                            mensajeNotificacion: "Se digitó una cantidad negativa. No se puede guardar."
                         }
                     ),
-                
+                    CountRows(
+                        Filter(
+                            glr_Pots_1.AllItems,
+                            IsMatch(
+                                CantidadMats.Text,
+                                "^\-?\d+(\.\d+)?$"
+                            ) && Value(CantidadMats.Text) > Value(txtCantidadDisponible.Text)
+                        )
+                    ) > 0,
                     UpdateContext(
                         {
-                            hayObservacionFaltante: CountRows(
-                                Filter(
-                                    glr_Pots_1.AllItems,
-                                    Value(CantidadMats.Text) = 0 && IsBlank(Trim(txtObservacion.Text))
-                                )
-                            ) > 0
+                            MostrarAviso: true,
+                            mensajeNotificacion: "Alguna cantidad supera la cantidad disponible. Revise y corrija."
                         }
                     ),
-                
-                    If(
-                        hayObservacionFaltante,
-                        UpdateContext(
+                    CountRows(
+                        Filter(
+                            glr_Pots_1.AllItems,
+                            IsMatch(
+                                CantidadMats.Text,
+                                "^\-?\d+(\.\d+)?$"
+                            ) && Value(CantidadMats.Text) < Value(txtCantidadDisponible.Text) && IsBlank(Trim(txtObservacion.Text))
+                        )
+                    ) > 0,
+                    UpdateContext(
+                        {
+                            MostrarAviso: true,
+                            mensajeNotificacion: "Faltan observaciones para materiales con cantidad menor a la disponible."
+                        }
+                    ),
+                    CountRows(
+                        Filter(
+                            glr_Pots_1.AllItems,
+                            IsMatch(
+                                CantidadMats.Text,
+                                "^\-?\d+(\.\d+)?$"
+                            ) && Value(CantidadMats.Text) <> 0
+                        )
+                    ) = 0,
+                    UpdateContext(
+                        {
+                            MostrarAviso: true,
+                            mensajeNotificacion: "Todas las cantidades están en 0. No hay materiales para agregar."
+                        }
+                    ),
+                    ClearCollect(
+                        tempTableCurrent,
+                        ForAll(
+                            glr_Pots_1.AllItems,
                             {
-                                MostrarAviso: true,
-                                mensajeNotificacion: "Debe escribir una observación para los materiales con cantidad 0."
+                                Item: ThisRecord.item,
+                                Description: ThisRecord.description,
+                                QtyOrdered: ThisRecord.qty_ordered,
+                                Cantidad: Value(CantidadMats.Text),
+                                POT: ThisRecord.po_num,
+                                Observacion: txtObservacion.Text
                             }
-                        ),
-                
-                        ClearCollect(
-                            tempTableCurrent,
-                            ForAll(
-                                glr_Pots_1.AllItems,
-                                {
-                                    Item: ThisRecord.item,
-                                    Description: ThisRecord.description,
-                                    QtyOrdered: ThisRecord.qty_ordered,
-                                    Cantidad: Value(CantidadMats.Text),
-                                    POT: ThisRecord.po_num,
-                                    Observacion: txtObservacion.Text
-                                }
-                            )
-                        );
-                        Collect(
-                            PotsSeleccionadas,
-                            tempTableCurrent
-                        );
-                        
-                        UpdateContext(
-                            {
-                                MostrarAviso: true,
-                                mensajeNotificacion: "Materiales agregados correctamente.",
-                                Materiales: false,
-                                reset: true
-                            }
-                        );
-                        UpdateContext({reset: false})
-                    )
+                        )
+                    );
+                    Collect(
+                        PotsSeleccionadas,
+                        tempTableCurrent
+                    );
+                    UpdateContext(
+                        {
+                            MostrarAviso: true,
+                            mensajeNotificacion: "Materiales agregados correctamente.",
+                            Materiales: false,
+                            reset: true
+                        }
+                    );
+                    UpdateContext({reset: false})
                 )
             Size: =15
             Text: ="Agregar Materiales"
@@ -2344,7 +2496,7 @@
             Y: =60
             ZIndex: =4
 
-            txt_Cantidad_EM_155 As text:
+            txt_descripcion As text:
                 Align: =Align.Center
                 BorderColor: =RGBA(40, 134, 222, 1)
                 BorderThickness: =0.5
@@ -2443,7 +2595,7 @@
                 X: =765
                 ZIndex: =3
 
-            txt_Cantidad_EM_153 As text:
+            txt_material As text:
                 Align: =Align.Center
                 BorderColor: =RGBA(40, 134, 222, 1)
                 BorderThickness: =0.5
