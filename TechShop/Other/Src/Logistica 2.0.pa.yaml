@@ -1082,9 +1082,13 @@ Screens:
                   HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
                   HoverColor: =RGBA(255, 255, 255, 1)
                   HoverFill: =
-                  OnSelect: |+
-                    =UpdateContext({AbrirPots:true, seleccion:true});
-
+                  OnSelect: |
+                    =UpdateContext(
+                        {
+                            AbrirPots: true,
+                            seleccion: true
+                        }
+                    );
                   PressedBorderColor: =Self.Fill
                   PressedColor: =Self.Fill
                   PressedFill: =Self.Color
@@ -1314,8 +1318,6 @@ Screens:
                   Default: =
                   DisabledBorderColor: =RGBA(180, 214, 250, 1)
                   DisabledFill: =RGBA(255, 255, 255, 1)
-                  DisplayMode: |
-                    =
                   Height: =30
                   HintText: ="REF"
                   HoverBorderColor: =RGBA(180, 214, 250, 1)
@@ -1400,7 +1402,76 @@ Screens:
                   HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
                   HoverColor: =RGBA(255, 255, 255, 1)
                   HoverFill: =
-                  OnSelect: "=If(\n    CountRows(PotsSeleccionadas) = 0,\n    UpdateContext(\n        {\n            MostrarAviso: true,\n            mensajeNotificacion: \"No existe ninguna POT con materiales agregados.\"\n        }\n    ),\n    Collect(\n        Logistica_Compras,\n        ForAll(\n            PotsSeleccionadas,\n            {\n                POT: POT,\n                Materiales: Item,\n                Descripcion: Description,\n                Cantidad: Text(Cantidad),\n                Observacion: Observacion,\n                ID_Tracking: Ref_1.Text,\n                Tracking: Ref.Text\n            }\n        )\n    );\n    Collect(\n        Logistica_Movimientos,\n        {\n            ID_Tracking: Ref_1.Text,\n            Tracking: Ref.Text,\n            Transporte: drp_MetodoTransporte_LO_1.Selected.Value,\n            Tipo_Envio: drp_TipoEnvio_LO_1.Selected.Value,\n            Fecha_Miami: dt_FechaMiami_LO_1.SelectedDate,\n            Ref_Miami: txt_refMiamo_LO_1.Text,\n            Fecha_Tech: dt_FechaTech_LO_1.SelectedDate,\n            Ref_Tech: txt_refTech_LO_1.Text,\n            'Estado (crfb9_estado)': \"\"\n        }\n    );\n    UpdateContext(\n        {\n            MostrarAviso: true,\n            mensajeNotificacion: \"Datos guardados correctamente.\",\n            Materiales: false,\n            reset: true,\n            AbrirPots: false,\n            seleccion: false,\n            AbrirCompletar: false,\n            rellenar: false  \n        }\n    );\n    UpdateContext({reset: false});\n    Refresh(Compras_Pots);\n    Reset(dt_FechaMiami_LO_1);\n    Reset(txt_refMiamo_LO_1);\n    Reset(dt_FechaTech_LO_1);\n    Reset(txt_refTech_LO_1);\n    Reset(drp_MetodoTransporte_LO_1);\n    Reset(drp_TipoEnvio_LO_1);\n     Clear(PotsSeleccionadas)\n    \n)"
+                  OnSelect: |-
+                    =If(
+                        CountRows(PotsSeleccionadas) = 0,
+                        UpdateContext(
+                            {
+                                MostrarAviso: true,
+                                mensajeNotificacion: "No existe ninguna POT con materiales agregados."
+                            }
+                        ),
+                        Collect(
+                            Logistica_Compras,
+                            ForAll(
+                                PotsSeleccionadas,
+                                {
+                                    POT: POT,
+                                    Materiales: Item,
+                                    Descripcion: Description,
+                                    Cantidad: Text(Cantidad),
+                                    Observacion: Observacion,
+                                    ID_Tracking: Ref_1.Text,
+                                    Tracking: Ref.Text
+                                }
+                            )
+                        );
+                        Collect(
+                            Logistica_Movimientos,
+                            {
+                                ID_Tracking: Ref_1.Text,
+                                Tracking: Ref.Text,
+                                Transporte: drp_MetodoTransporte_LO_1.Selected.Value,
+                                Tipo_Envio: drp_TipoEnvio_LO_1.Selected.Value,
+                                Fecha_Miami: dt_FechaMiami_LO_1.SelectedDate,
+                                Ref_Miami: txt_refMiamo_LO_1.Text,
+                                Fecha_Tech: dt_FechaTech_LO_1.SelectedDate,
+                                Ref_Tech: txt_refTech_LO_1.Text,
+                                'Estado (crfb9_estado)': ""
+                            }
+                        );
+                    ForAll(
+                        colEstadoPOT,
+                        UpdateIf(
+                            Compras_Pots,
+                            POT = ThisRecord.POT ,
+                            { 'Estado (crfb9_estado)': EstadoP }
+                        )
+                    );
+                        UpdateContext(
+                            {
+                                MostrarAviso: true,
+                                mensajeNotificacion: "Datos guardados correctamente.",
+                                Materiales: false,
+                                reset: true,
+                                AbrirPots: false,
+                                seleccion: false,
+                                AbrirCompletar: false,
+                                rellenar: false
+                            }
+                        );
+                        UpdateContext({reset: false});
+                        Refresh(Compras_Pots);
+                        Reset(dt_FechaMiami_LO_1);
+                        Reset(txt_refMiamo_LO_1);
+                        Reset(dt_FechaTech_LO_1);
+                        Reset(txt_refTech_LO_1);
+                        Reset(drp_MetodoTransporte_LO_1);
+                        Reset(drp_TipoEnvio_LO_1);
+                        Reset(Ref);
+                        Clear(PotsSeleccionadas);
+                        Clear(colEstadoPOT)
+                    )
                   PressedBorderColor: =Self.Fill
                   PressedColor: =Self.Fill
                   PressedFill: =Self.Color
@@ -1459,7 +1530,7 @@ Screens:
                   PaddingRight: =0
                   PaddingTop: =0
                   Size: =25
-                  Text: "=\"REF:  \" & Ref.Text & \"    |    \"& idRef.Text "
+                  Text: "=\"REF:  \" & Ref.Text & \"    |    \"& \"ID:  \" &  Ref_1.Text "
                   Weight: ='TextCanvas.Weight'.Semibold
                   Width: =1289
             - glr_Pots:
@@ -1470,7 +1541,12 @@ Screens:
                   BorderThickness: =0.5
                   Fill: =RGBA(255, 255, 255, 1)
                   Height: =500
-                  Items: =Filter( Compras_Pots, 'Estado (crfb9_estado)' = "Colocado" && !(Text(POT) in glr_pots_Seleccionadas.AllItems.Value ) )
+                  Items: |-
+                    =Filter(
+                        Compras_Pots,
+                        'Estado (crfb9_estado)' = "Colocado" &&
+                        !(Text(POT) in glr_pots_Seleccionadas.AllItems.Value)
+                    )
                   TemplateSize: =35
                   Width: =886
                   Y: =72
@@ -1730,6 +1806,10 @@ Screens:
                               PotsSeleccionadas,
                               POT = ThisItem.Value   
                           );
+                          RemoveIf(
+                              colEstadoPOT,
+                              POT = ThisItem.Value
+                          );
                           Reset(glr_Pots);
                           Refresh(Compras_Pots); 
                           UpdateContext({loading:false});
@@ -1822,17 +1902,51 @@ Screens:
                   HoverFill: =
                   OnSelect: |-
                     =If(
-                       CountRows(
+                        CountRows(
+                            Filter(
+                                glr_Pots_1.AllItems,
+                                po_num = glr_Pots_1.Selected.po_num && !(IsMatch(
+                                    CantidadMats.Text,
+                                    "^\-?\d+(\.\d+)?$"
+                                ) && Value(CantidadMats.Text) = Value(txtCantidadDisponible.Text))
+                            )
+                        ) = 0,
+                        If(
+                            CountRows(
+                                Filter(
+                                    colEstadoPOT,
+                                    POT = glr_Pots_1.Selected.po_num
+                                )
+                            ) = 0,
+                            Collect(
+                                colEstadoPOT,
+                                {
+                                    POT: glr_Pots_1.Selected.po_num,
+                                    EstadoP: "Tramitado"
+                                }
+                            ),
+                            UpdateIf(
+                                colEstadoPOT,
+                                POT = glr_Pots_1.Selected.po_num,
+                                {EstadoP: "Tramitado"}
+                            )
+                        )
+                    );
+
+
+                    If(
+                        CountRows(
                             Filter(
                                 glr_Pots_1.AllItems,
                                 IsBlank(Trim(CantidadMats.Text))
                             )
                         ) > 0,
-                        UpdateContext({
-                            MostrarAviso: true,
-                            mensajeNotificacion: "Hay cantidades en blanco. No se puede guardar."
-                        }),
-
+                        UpdateContext(
+                            {
+                                MostrarAviso: true,
+                                mensajeNotificacion: "Hay cantidades en blanco. No se puede guardar."
+                            }
+                        ),
                         CountRows(
                             Filter(
                                 glr_Pots_1.AllItems,

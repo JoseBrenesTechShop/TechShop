@@ -1337,9 +1337,13 @@
             Height: =47
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =
-            OnSelect: |+
-                =UpdateContext({AbrirPots:true, seleccion:true});
-                
+            OnSelect: |
+                =UpdateContext(
+                    {
+                        AbrirPots: true,
+                        seleccion: true
+                    }
+                );
             Size: =15
             Text: ="Continuar"
             Width: =161
@@ -1692,8 +1696,6 @@
             DisabledBorderColor: =RGBA(180, 214, 250, 1)
             DisabledColor: =RGBA(166, 166, 166, 1)
             DisabledFill: =RGBA(255, 255, 255, 1)
-            DisplayMode: |
-                =
             FocusedBorderThickness: =4
             Font: =App.Theme.Font
             Height: =30
@@ -1822,6 +1824,14 @@
                             'Estado (crfb9_estado)': ""
                         }
                     );
+                ForAll(
+                    colEstadoPOT,
+                    UpdateIf(
+                        Compras_Pots,
+                        POT = ThisRecord.POT ,
+                        { 'Estado (crfb9_estado)': EstadoP }
+                    )
+                );
                     UpdateContext(
                         {
                             MostrarAviso: true,
@@ -1831,7 +1841,7 @@
                             AbrirPots: false,
                             seleccion: false,
                             AbrirCompletar: false,
-                            rellenar: false  
+                            rellenar: false
                         }
                     );
                     UpdateContext({reset: false});
@@ -1842,8 +1852,9 @@
                     Reset(txt_refTech_LO_1);
                     Reset(drp_MetodoTransporte_LO_1);
                     Reset(drp_TipoEnvio_LO_1);
-                     Clear(PotsSeleccionadas)
-                    
+                    Reset(Ref);
+                    Clear(PotsSeleccionadas);
+                    Clear(colEstadoPOT)
                 )
             RadiusBottomLeft: =0
             RadiusBottomRight: =0
@@ -1908,7 +1919,7 @@
             Size: =25
             TabIndex: =0
             Text: |-
-                ="REF:  " & Ref.Text & "    |    "& idRef.Text 
+                ="REF:  " & Ref.Text & "    |    "& "ID:  " &  Ref_1.Text 
             Tooltip: =""
             VerticalAlign: =""
             Visible: =true
@@ -1926,7 +1937,12 @@
             DelayItemLoading: =true
             Fill: =RGBA(255, 255, 255, 1)
             Height: =500
-            Items: =Filter( Compras_Pots, 'Estado (crfb9_estado)' = "Colocado" && !(Text(POT) in glr_pots_Seleccionadas.AllItems.Value ) )
+            Items: |-
+                =Filter(
+                    Compras_Pots,
+                    'Estado (crfb9_estado)' = "Colocado" &&
+                    !(Text(POT) in glr_pots_Seleccionadas.AllItems.Value)
+                )
             Layout: =Layout.Vertical
             LoadingSpinner: =LoadingSpinner.Data
             TemplatePadding: =0
@@ -2259,6 +2275,10 @@
                         PotsSeleccionadas,
                         POT = ThisItem.Value   
                     );
+                    RemoveIf(
+                        colEstadoPOT,
+                        POT = ThisItem.Value
+                    );
                     Reset(glr_Pots);
                     Refresh(Compras_Pots); 
                     UpdateContext({loading:false});
@@ -2377,17 +2397,51 @@
             HoverFill: =
             OnSelect: |-
                 =If(
-                   CountRows(
+                    CountRows(
+                        Filter(
+                            glr_Pots_1.AllItems,
+                            po_num = glr_Pots_1.Selected.po_num && !(IsMatch(
+                                CantidadMats.Text,
+                                "^\-?\d+(\.\d+)?$"
+                            ) && Value(CantidadMats.Text) = Value(txtCantidadDisponible.Text))
+                        )
+                    ) = 0,
+                    If(
+                        CountRows(
+                            Filter(
+                                colEstadoPOT,
+                                POT = glr_Pots_1.Selected.po_num
+                            )
+                        ) = 0,
+                        Collect(
+                            colEstadoPOT,
+                            {
+                                POT: glr_Pots_1.Selected.po_num,
+                                EstadoP: "Tramitado"
+                            }
+                        ),
+                        UpdateIf(
+                            colEstadoPOT,
+                            POT = glr_Pots_1.Selected.po_num,
+                            {EstadoP: "Tramitado"}
+                        )
+                    )
+                );
+                
+                
+                If(
+                    CountRows(
                         Filter(
                             glr_Pots_1.AllItems,
                             IsBlank(Trim(CantidadMats.Text))
                         )
                     ) > 0,
-                    UpdateContext({
-                        MostrarAviso: true,
-                        mensajeNotificacion: "Hay cantidades en blanco. No se puede guardar."
-                    }),
-                
+                    UpdateContext(
+                        {
+                            MostrarAviso: true,
+                            mensajeNotificacion: "Hay cantidades en blanco. No se puede guardar."
+                        }
+                    ),
                     CountRows(
                         Filter(
                             glr_Pots_1.AllItems,
