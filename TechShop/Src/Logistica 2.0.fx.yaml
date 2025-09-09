@@ -1412,7 +1412,9 @@
                 Reset(txt_refTech_LO_1);
                 Reset(drp_MetodoTransporte_LO_1);
                 Reset(drp_TipoEnvio_LO_1);
-                Reset(Ref)
+                Reset(Ref);
+                    Clear(PotsSeleccionadas);
+                    Clear(colEstadoPOT)
             Size: =15
             Text: ="Cancelar"
             Width: =163
@@ -3023,129 +3025,64 @@
             HoverFill: =
             OnSelect: |
                 =If(
-                    CountRows(
-                        Filter(
-                            glr_Pots_1.AllItems,
-                            po_num = glr_Pots_1.Selected.po_num && !(IsMatch(
-                                CantidadMats.Text,
-                                "^\-?\d+(\.\d+)?$"
-                            ) && Value(CantidadMats.Text) = Value(txtCantidadDisponible.Text))
-                        )
-                    ) = 0,
-                    If(
-                        CountRows(
-                            Filter(
-                                colEstadoPOT,
-                                EPOT = glr_Pots_1.Selected.po_num
-                            )
-                        ) = 0,
-                        Collect(
-                            colEstadoPOT,
+                    CountRows(Filter(glr_Pots_2.AllItems, IsBlank(Trim(CantidadMats_1.Text)))) > 0,
+                    UpdateContext({MostrarAviso: true, mensajeNotificacion: "Hay cantidades en blanco. No se puede guardar."}),
+                
+                    CountRows(Filter(glr_Pots_2.AllItems, IsMatch(CantidadMats_1.Text,"^\-?\d+(\.\d+)?$") && Value(CantidadMats_1.Text) < 0)) > 0,
+                    UpdateContext({MostrarAviso: true, mensajeNotificacion: "Se digitó una cantidad negativa. No se puede guardar."}),
+                
+                    CountRows(Filter(glr_Pots_2.AllItems, IsMatch(CantidadMats_1.Text,"^\-?\d+(\.\d+)?$") && Value(CantidadMats_1.Text) > Value(txtCantidadDisponible_1.Text))) > 0,
+                    UpdateContext({MostrarAviso: true, mensajeNotificacion: "Alguna cantidad supera la cantidad disponible. Revise y corrija."}),
+                
+                    CountRows(Filter(glr_Pots_2.AllItems, IsMatch(CantidadMats_1.Text,"^\-?\d+(\.\d+)?$") && Value(CantidadMats_1.Text) < Value(txtCantidadDisponible_1.Text) && IsBlank(Trim(txtObservacion_1.Text)))) > 0,
+                    UpdateContext({MostrarAviso: true, mensajeNotificacion: "Faltan observaciones para materiales con cantidad menor a la disponible."}),
+                
+                    CountRows(Filter(glr_Pots_2.AllItems, IsMatch(CantidadMats_1.Text,"^\-?\d+(\.\d+)?$") && Value(CantidadMats_1.Text) <> 0)) = 0,
+                    UpdateContext({MostrarAviso: true, mensajeNotificacion: "Todas las cantidades están en 0. No hay materiales para guardar."}),
+                
+                    ClearCollect(
+                        tempEdits,
+                        ForAll(
+                            glr_Pots_2.AllItems,
                             {
-                                EPOT: glr_Pots_1.Selected.po_num,
-                                EstadoP: "Tramitado"
-                            }
-                        ),
-                        UpdateIf(
-                            colEstadoPOT,
-                            EPOT = glr_Pots_1.Selected.po_num,
-                            {EstadoP: "Tramitado"}
-                        )
-                    )
-                );
-                
-                
-                
-                
-                If(
-                
-                     CountRows(
-                        Filter(
-                            glr_Pots_2.AllItems,
-                            IsBlank(Trim(CantidadMats_1.Text))
-                        )
-                    ) > 0,
-                    UpdateContext({
-                        MostrarAviso: true,
-                        mensajeNotificacion: "Hay cantidades en blanco. No se puede guardar."
-                    }),
-                
-                    CountRows(
-                        Filter(
-                            glr_Pots_2.AllItems,
-                            IsMatch(CantidadMats_1.Text,"^\-?\d+(\.\d+)?$") &&
-                            Value(CantidadMats_1.Text) < 0
-                        )
-                    ) > 0,
-                    UpdateContext({
-                        MostrarAviso: true,
-                        mensajeNotificacion: "Se digitó una cantidad negativa. No se puede guardar."
-                    }),
-                
-                    CountRows(
-                        Filter(
-                            glr_Pots_2.AllItems,
-                            IsMatch(CantidadMats_1.Text,"^\-?\d+(\.\d+)?$") &&
-                            Value(CantidadMats_1.Text) > Value(txtCantidadDisponible_1.Text)
-                        )
-                    ) > 0,
-                    UpdateContext({
-                        MostrarAviso: true,
-                        mensajeNotificacion: "Alguna cantidad supera la cantidad disponible. Revise y corrija."
-                    }),
-                
-                    CountRows(
-                        Filter(
-                            glr_Pots_2.AllItems,
-                            IsMatch(CantidadMats_1.Text,"^\-?\d+(\.\d+)?$") &&
-                            Value(CantidadMats_1.Text) < Value(txtCantidadDisponible_1.Text) &&
-                            IsBlank(Trim(txtObservacion_1.Text))
-                        )
-                    ) > 0,
-                    UpdateContext({
-                        MostrarAviso: true,
-                        mensajeNotificacion: "Faltan observaciones para materiales con cantidad menor a la disponible."
-                    }),
-                
-                    CountRows(
-                        Filter(
-                            glr_Pots_2.AllItems,
-                            IsMatch(CantidadMats_1.Text,"^\-?\d+(\.\d+)?$") &&
-                            Value(CantidadMats_1.Text) <> 0
-                        )
-                    ) = 0,
-                    UpdateContext({
-                        MostrarAviso: true,
-                        mensajeNotificacion: "Todas las cantidades están en 0. No hay materiales para guardar."
-                    }),
-                
-                    ForAll(
-                        glr_Pots_2.AllItems,
-                        Patch(
-                            PotsSeleccionadas,
-                            LookUp(
-                                PotsSeleccionadas,
-                                POT = ThisRecord.POT && Item = ThisRecord.Item
-                            ),
-                            {
-                                Cantidad: Value(CantidadMats_1.Text),
-                                Observacion: txtObservacion_1.Text
+                                POT: ThisRecord.POT,
+                                Item: ThisRecord.Item,
+                                NuevaCantidad: If(IsMatch(CantidadMats_1.Text,"^\-?\d+(\.\d+)?$"), Value(CantidadMats_1.Text), 0),
+                                NuevaObs: txtObservacion_1.Text,
+                                Disponible: If(IsMatch(txtCantidadDisponible_1.Text,"^\-?\d+(\.\d+)?$"), Value(txtCantidadDisponible_1.Text), 0)
                             }
                         )
                     );
                 
-                    UpdateContext({
-                        MostrarAviso: true,
-                        mensajeNotificacion: "Materiales editados correctamente.",
-                        reset: true,
-                        Editar: false
-                    });
-                    UpdateContext({reset: false})
+                    ForAll(
+                        tempEdits,
+                        Patch(
+                            PotsSeleccionadas,
+                            LookUp(PotsSeleccionadas, POT = ThisRecord.POT && Item = ThisRecord.Item),
+                            { Cantidad: ThisRecord.NuevaCantidad, Observacion: ThisRecord.NuevaObs }
+                        )
+                    );
+                
+                    ForAll(
+                        Distinct(tempEdits, POT),
+                        If(
+                            CountRows(Filter(tempEdits, POT = Value && NuevaCantidad <> Disponible)) = 0,
+                            If(
+                                CountRows(Filter(colEstadoPOT, EPOT = Value)) = 0,
+                                Collect(colEstadoPOT, { EPOT: Value, EstadoP: "Tramitado" }),
+                                UpdateIf(colEstadoPOT, EPOT = Value, { EstadoP: "Tramitado" })
+                            ),
+                            RemoveIf(colEstadoPOT, EPOT = Value)
+                        )
+                    );
+                
+                    UpdateContext({ MostrarAviso: true, mensajeNotificacion: "Materiales editados correctamente.", reset: true, Editar: false }),
+                    UpdateContext({ reset: false })
                 )
             Size: =15
             Text: ="Editar Material"
             Width: =172
-            X: =749
+            X: =718
             Y: =492
             ZIndex: =2
 
@@ -3171,7 +3108,7 @@
             Size: =15
             Text: ="Volver"
             Width: =128
-            X: =389
+            X: =448
             Y: =492
             ZIndex: =3
 
@@ -3542,9 +3479,9 @@
             OnSelect: |-
                 =UpdateContext({ rellenar: !rellenar })
             Size: =15
-            Text: ="Rellenar Cantidades"
-            Width: =219
-            X: =523
+            Text: ="Rellenar"
+            Width: =128
+            X: =582
             Y: =492
             ZIndex: =10
 
