@@ -182,7 +182,7 @@ Screens:
                                     Width: =1352
                                     Y: =50
                                   Children:
-                                    - gl_PuestoCompras_LO_2:
+                                    - gl_PotsEdicion:
                                         Control: Gallery@2.15.0
                                         Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
                                         Properties:
@@ -283,7 +283,29 @@ Screens:
                                                 HoverFill: =RGBA(255, 255, 255, 255)
                                                 Icon: =Icon.Edit
                                                 OnSelect: |-
-                                                  =UpdateContext({AbrirPots: true});
+                                                  =ClearCollect(
+                                                  Edicion,
+                                                      ForAll(
+                                                          Filter(
+                                                              Logistica_Compras,
+                                                              POT = gl_PotsEdicion.Selected.Value &&
+                                                              ID_Tracking = gl_PuestoCompras_LO_1.Selected.ID_Tracking &&
+                                                              Tracking = gl_PuestoCompras_LO_1.Selected.Tracking &&
+                                                              Value(Cantidad) <> 0
+                                                          ),
+                                                          {
+                                                              ID: ThisRecord.ID,
+                                                              Materiales: ThisRecord.Materiales,
+                                                              CantidadEditada: ThisRecord.Cantidad,
+                                                              ObservacionEditada: ThisRecord.Observacion,
+                                                              Tracking: ThisRecord.Tracking,
+                                                              ID_Tracking: ThisRecord.ID_Tracking,
+                                                              POT: ThisRecord.POT,
+                                                              Descripcion: ThisRecord.Descripcion
+                                                          }
+                                                      )
+                                                  );
+                                                  UpdateContext({AbrirPots:true})
                                                 PaddingBottom: =2
                                                 PaddingLeft: =2
                                                 PaddingRight: =2
@@ -693,7 +715,25 @@ Screens:
                                     Size: =16
                                     Text: ="Editar Fechas "
                                     Width: =198
-                                    X: =1137
+                                    X: =985
+                                    Y: =9
+                              - Button17_19:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    BorderColor: =RGBA(0, 0, 0, 1)
+                                    BorderThickness: =3
+                                    Fill: =RGBA(15, 84, 140, 1)
+                                    Height: =32
+                                    HoverBorderColor: =RGBA(12, 59, 94, 1)
+                                    HoverFill: =RGBA(12, 59, 94, 1)
+                                    OnSelect: =UpdateContext({Abrir:true})
+                                    PressedBorderColor: =RGBA(15, 84, 140, 1)
+                                    PressedColor: =RGBA(15, 84, 140, 1)
+                                    PressedFill: =RGBA(180, 214, 250, 1)
+                                    Size: =16
+                                    Text: ="Agregar POT"
+                                    Width: =140
+                                    X: =1197
                                     Y: =8
       - Capa1_13:
           Control: GroupContainer@1.3.0
@@ -1194,79 +1234,22 @@ Screens:
                   HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
                   HoverColor: =RGBA(255, 255, 255, 1)
                   HoverFill: =
-                  OnSelect: |-
-                    =If(
-                        CountRows(PotsSeleccionadas) = 0,
-                        UpdateContext(
-                            {
-                                MostrarAviso: true,
-                                mensajeNotificacion: "No existe ninguna POT con materiales agregados."
-                            }
-                        ),
-                        Collect(
+                  OnSelect: |+
+                    =ForAll(
+                        Edicion,
+                        UpdateIf(
                             Logistica_Compras,
-                            ForAll(
-                                PotsSeleccionadas,
-                                {
-                                    POT: POT,
-                                    Materiales: Item,
-                                    Descripcion: Description,
-                                    Cantidad: Text(Cantidad),
-                                    Observacion: Observacion,
-                                    ID_Tracking: Ref_1.Text,
-                                    Tracking: Ref.Text
-                                }
-                            )
-                        );
-                        Collect(
-                            Logistica_Movimientos,
+                            POT = gl_PotsEdicion.Selected.Value && 
+                            ID_Tracking = gl_PuestoCompras_LO_1.Selected.ID_Tracking && 
+                            Tracking = gl_PuestoCompras_LO_1.Selected.Tracking &&
+                            Materiales = ThisRecord.Materiales,
                             {
-                                ID_Tracking: Ref_1.Text,
-                                Tracking: Ref.Text,
-                                Transporte: drp_MetodoTransporte_LO_1.Selected.Value,
-                                Tipo_Envio: drp_TipoEnvio_LO_1.Selected.Value,
-                                Fecha_Miami: dt_FechaMiami_LO_1.SelectedDate,
-                                Ref_Miami: txt_refMiamo_LO_1.Text,
-                                Fecha_Tech: dt_FechaTech_LO_1.SelectedDate,
-                                Ref_Tech: txt_refTech_LO_1.Text,
-                                'Estado (crfb9_estado)': ""
+                                Cantidad: CantidadEditada,
+                                Observacion: ObservacionEditada
                             }
-                        );
-                    ForAll(
-                        colEstadoPOT,
-                        If(
-                            !IsBlank(LookUp(PotsSeleccionadas, POT = EPOT) ),
-                            UpdateIf(
-                                Compras_Pots,
-                                POT = EPOT,
-                                { 'Estado (crfb9_estado)': EstadoP }
-                            )
                         )
                     );
-                        UpdateContext(
-                            {
-                                MostrarAviso: true,
-                                mensajeNotificacion: "Datos guardados correctamente.",
-                                Materiales: false,
-                                reset: true,
-                                AbrirPots: false,
-                                seleccion: false,
-                                AbrirCompletar: false,
-                                rellenar: false
-                            }
-                        );
-                        UpdateContext({reset: false});
-                        Refresh(Compras_Pots);
-                        Reset(dt_FechaMiami_LO_1);
-                        Reset(txt_refMiamo_LO_1);
-                        Reset(dt_FechaTech_LO_1);
-                        Reset(txt_refTech_LO_1);
-                        Reset(drp_MetodoTransporte_LO_1);
-                        Reset(drp_TipoEnvio_LO_1);
-                        Reset(Ref);
-                        Clear(PotsSeleccionadas);
-                        Clear(colEstadoPOT)
-                    )
+                    Notify("Materiales actualizados correctamente", NotificationType.Success)
                   PressedBorderColor: =Self.Fill
                   PressedColor: =Self.Fill
                   PressedFill: =Self.Color
@@ -1325,7 +1308,7 @@ Screens:
                   PaddingTop: =0
                   Size: =25
                   Text: |-
-                    ="POT: " & gl_PuestoCompras_LO_2.Selected.Value
+                    ="POT: " & gl_PotsEdicion.Selected.Value
                   Weight: ='TextCanvas.Weight'.Semibold
                   Width: =1289
             - glr_Pots_3:
@@ -1336,14 +1319,7 @@ Screens:
                   BorderThickness: =0.5
                   Fill: =RGBA(255, 255, 255, 1)
                   Height: =432
-                  Items: |-
-                    =Filter(
-                        Logistica_Compras,
-                        POT = gl_PuestoCompras_LO_2.Selected.Value &&
-                        ID_Tracking = gl_PuestoCompras_LO_1.Selected.ID_Tracking &&
-                        Tracking = gl_PuestoCompras_LO_1.Selected.Tracking && 
-                        Value(Cantidad) <> 0
-                    )
+                  Items: =Edicion
                   TemplateSize: =35
                   Width: =1289
                   Y: =72
@@ -1462,7 +1438,7 @@ Screens:
                         BorderColor: =RGBA(180, 214, 250, 1)
                         BorderThickness: =3
                         Clear: =true
-                        Default: =ThisItem.Cantidad
+                        Default: =ThisItem.CantidadEditada
                         DisabledBorderColor: =RGBA(180, 214, 250, 1)
                         DisabledFill: =RGBA(255, 255, 255, 1)
                         DisplayMode: |
@@ -1472,7 +1448,12 @@ Screens:
                         HintText: ="0"
                         HoverBorderColor: =RGBA(180, 214, 250, 1)
                         HoverFill: =RGBA(227, 240, 252, 1)
-                        OnChange: =
+                        OnChange: |-
+                          =UpdateIf(
+                              Edicion,
+                              ID = ThisItem.ID && POT = ThisItem.POT,
+                              { CantidadEditada: If(IsBlank(Self.Text), 0, Value(Self.Text)) }
+                          )
                         OnSelect: |
                           =
                         PaddingBottom: =0
@@ -1496,7 +1477,7 @@ Screens:
                         BorderThickness: =3
                         Clear: =true
                         Default: |
-                          =ThisItem.Observacion
+                          =ThisItem.ObservacionEditada
                         DisabledBorderColor: =RGBA(180, 214, 250, 1)
                         DisabledFill: =RGBA(255, 255, 255, 1)
                         DisplayMode: |
@@ -1505,7 +1486,12 @@ Screens:
                         HintText: ="-"
                         HoverBorderColor: =RGBA(180, 214, 250, 1)
                         HoverFill: =RGBA(227, 240, 252, 1)
-                        OnChange: =
+                        OnChange: |-
+                          =UpdateIf(
+                              Edicion,
+                              ID = ThisItem.ID && POT = ThisItem.POT,
+                              { ObservacionEditada: Trim(Self.Text) }
+                          )
                         OnSelect: |
                           =
                         PaddingBottom: =0
@@ -1749,8 +1735,8 @@ Screens:
                   FontColor: =RGBA(255, 255, 255, 1)
                   Height: =123
                   Size: =22
-                  Text: |+
-                    ="¿Seguro que querés borrar la " & gl_PuestoCompras_LO_2.Selected.Value & "? Una vez borrada no se podrá recuperar en el tracking correspondiente."
+                  Text: |
+                    ="¿Seguro que querés borrar la " & gl_PotsEdicion.Selected.Value & "? Una vez borrada no se podrá recuperar en el tracking correspondiente."
                   VerticalAlign: =VerticalAlign.Middle
                   Weight: ='TextCanvas.Weight'.Semibold
                   Width: =496
