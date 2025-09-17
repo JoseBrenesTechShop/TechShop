@@ -337,14 +337,14 @@ EdicionTracking As screen:
                                                 Value(Cantidad) <> 0
                                             ),
                                             {
-                                                ID: ThisRecord.ID,
-                                                Materiales: ThisRecord.Materiales,
+                                                IDEdicion: ThisRecord.ID,
+                                                MaterialesEdicion: ThisRecord.Materiales,
                                                 CantidadEditada: ThisRecord.Cantidad,
                                                 ObservacionEditada: ThisRecord.Observacion,
-                                                Tracking: ThisRecord.Tracking,
-                                                ID_Tracking: ThisRecord.ID_Tracking,
-                                                POT: ThisRecord.POT,
-                                                Descripcion: ThisRecord.Descripcion
+                                                TrackingEdicion: ThisRecord.Tracking,
+                                                ID_TrackingEdicion: ThisRecord.ID_Tracking,
+                                                POTEdicion: ThisRecord.POT,
+                                                DescripcionEdicion: ThisRecord.Descripcion
                                             }
                                         )
                                     );
@@ -1613,22 +1613,31 @@ EdicionTracking As screen:
             Height: =68
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =
-            OnSelect: |
+            OnSelect: |-
                 =ForAll(
                     Edicion,
-                    UpdateIf(
-                        Logistica_Compras,
-                        POT = gl_PotsEdicion.Selected.Value && 
-                        ID_Tracking = gl_PuestoCompras_LO_1.Selected.ID_Tracking && 
-                        Tracking = gl_PuestoCompras_LO_1.Selected.Tracking &&
-                        Materiales = ThisRecord.Materiales,
+                    With(
                         {
-                            Cantidad: CantidadEditada,
-                            Observacion: ObservacionEditada
-                        }
+                            MaterialesEdit: ThisRecord.MaterialesEdicion,
+                            CantidadEdit: ThisRecord.CantidadEditada,
+                            ObservacionEdit: ThisRecord.ObservacionEditada
+                        },
+                        Patch(
+                            Logistica_Compras,
+                            LookUp(
+                                Logistica_Compras,
+                                POT = gl_PotsEdicion.Selected.Value && 
+                                ID_Tracking = gl_PuestoCompras_LO_1.Selected.ID_Tracking && 
+                                Tracking = gl_PuestoCompras_LO_1.Selected.Tracking && 
+                                Materiales = MaterialesEdit
+                            ),
+                            {
+                                Cantidad: Value(CantidadEdit),
+                                Observacion: ObservacionEdit
+                            }
+                        )
                     )
-                );
-                Notify("Materiales actualizados correctamente", NotificationType.Success)
+                )
             RadiusBottomLeft: =0
             RadiusBottomRight: =0
             RadiusTopLeft: =0
@@ -1723,7 +1732,7 @@ EdicionTracking As screen:
                 BorderColor: =RGBA(40, 134, 222, 1)
                 BorderThickness: =0.5
                 Color: =
-                Default: =ThisItem.Materiales
+                Default: =ThisItem.MaterialesEdicion
                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                 DisabledColor: =
                 DisabledFill: =
@@ -1750,7 +1759,7 @@ EdicionTracking As screen:
                 BorderColor: =RGBA(40, 134, 222, 1)
                 BorderThickness: =0.5
                 Color: =
-                Default: =ThisItem.Descripcion
+                Default: =ThisItem.DescripcionEdicion
                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                 DisabledColor: =
                 DisabledFill: =
@@ -1858,11 +1867,11 @@ EdicionTracking As screen:
                 HoverColor: =RGBA(0, 0, 0, 1)
                 HoverFill: =RGBA(227, 240, 252, 1)
                 OnChange: |-
-                    =UpdateIf(
-                        Edicion,
-                        ID = ThisItem.ID && POT = ThisItem.POT,
-                        { CantidadEditada: If(IsBlank(Self.Text), 0, Value(Self.Text)) }
-                    )
+                    =    Patch(
+                            Edicion,
+                            LookUp(Edicion, IDEdicion = ThisItem.IDEdicion),
+                            { CantidadEditada: Self.Text }
+                        )
                 OnSelect: |
                     =
                 PaddingBottom: =0
@@ -1900,10 +1909,10 @@ EdicionTracking As screen:
                 HoverColor: =RGBA(0, 0, 0, 1)
                 HoverFill: =RGBA(227, 240, 252, 1)
                 OnChange: |-
-                    =UpdateIf(
+                    =Patch(
                         Edicion,
-                        ID = ThisItem.ID && POT = ThisItem.POT,
-                        { ObservacionEditada: Trim(Self.Text) }
+                        LookUp(Edicion, IDEdicion = ThisItem.IDEdicion),
+                        { ObservacionEditada: Self.Text }
                     )
                 OnSelect: |
                     =
