@@ -284,14 +284,11 @@ Screens:
                                                 Icon: =Icon.Edit
                                                 OnSelect: |-
                                                   =ClearCollect(
-                                                  Edicion,
+                                                      Edicion,
                                                       ForAll(
                                                           Filter(
                                                               Logistica_Compras,
-                                                              POT = gl_PotsEdicion.Selected.Value &&
-                                                              ID_Tracking = gl_PuestoCompras_LO_1.Selected.ID_Tracking &&
-                                                              Tracking = gl_PuestoCompras_LO_1.Selected.Tracking &&
-                                                              Value(Cantidad) <> 0
+                                                              POT = gl_PotsEdicion.Selected.Value && ID_Tracking = gl_PuestoCompras_LO_1.Selected.ID_Tracking && Tracking = gl_PuestoCompras_LO_1.Selected.Tracking && Value(Cantidad) <> 0
                                                           ),
                                                           {
                                                               IDEdicion: ThisRecord.ID,
@@ -301,11 +298,27 @@ Screens:
                                                               TrackingEdicion: ThisRecord.Tracking,
                                                               ID_TrackingEdicion: ThisRecord.ID_Tracking,
                                                               POTEdicion: ThisRecord.POT,
-                                                              DescripcionEdicion: ThisRecord.Descripcion
+                                                              DescripcionEdicion: ThisRecord.Descripcion,
+                                                              bodega: Sum(
+                                                                  Filter(
+                                                                      preqitem,
+                                                                      po_num = POT && item = Materiales
+                                                                  ),
+                                                                  If(
+                                                                      IsBlank(qty_ordered),
+                                                                      0,
+                                                                      Value(qty_ordered)
+                                                                  )
+                                                              ),
+                                                              usado: If(
+                                                                  IsBlank(Cantidad),
+                                                                  0,
+                                                                  Value(Cantidad)
+                                                              )
                                                           }
                                                       )
                                                   );
-                                                  UpdateContext({AbrirPots:true})
+                                                  UpdateContext({AbrirPots: true})
                                                 PaddingBottom: =2
                                                 PaddingLeft: =2
                                                 PaddingRight: =2
@@ -1263,7 +1276,85 @@ Screens:
                   HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
                   HoverColor: =RGBA(255, 255, 255, 1)
                   HoverFill: =
-                  OnSelect: "=\nClearCollect(\n    colEdicionCheck,\n    AddColumns(\n        Edicion,\n        NumericCant, If(IsBlank(CantidadEditada), Blank(), Value(CantidadEditada)),\n        bodegaCalc,\n            Sum(\n                Filter(preqitem, po_num = ThisRecord.POT && item = ThisRecord.MaterialesEditada),\n                If(IsBlank(qty_ordered), 0, Value(qty_ordered))\n            ),\n        usadoCalc,\n            Sum(\n                Filter(Logistica_Compras, POT = ThisRecord.POT && Materiales = ThisRecord.MaterialesEditada),\n                If(IsBlank(Cantidad), 0, Value(Cantidad))\n            ),\n        Disponible,\n            Max(Coalesce(bodegaCalc, 0) - Coalesce(usadoCalc, 0), 0)\n    )\n);\n\nClearCollect(\n    colEdicionErrores,\n    Filter(\n        colEdicionCheck,\n        IsBlank(NumericCant) ||\n        NumericCant < 0 ||\n        NumericCant > Disponible\n    )\n);\n\nIf(\n    CountRows(colEdicionErrores) > 0,\n    UpdateContext({\n        MostrarAviso: true,\n        mensajeNotificacion:\n            If(\n                IsBlank(First(colEdicionErrores).NumericCant),\n                \"Alguna cantidad no es numérica o está en blanco.\",\n                If(\n                    First(colEdicionErrores).NumericCant < 0,\n                    \"Alguna cantidad es negativa. Verifica los valores.\",\n                    \"Alguna cantidad supera la disponible. Revisa las cantidades.\"\n                )\n            )\n    }),\n    ForAll(\n        colEdicionCheck,\n        With(\n            {\n                MaterialesEdit: ThisRecord.MaterialesEditada,\n                CantidadEditNum: NumericCant,\n                ObservacionEditTxt: ObservacionEditada,\n                PotActual: POT\n            },\n            Patch(\n                Logistica_Compras,\n                LookUp(\n                    Logistica_Compras,\n                    POT = PotActual &&\n                    ID_Tracking = gl_PuestoCompras_LO_1.Selected.ID_Tracking &&\n                    Tracking = gl_PuestoCompras_LO_1.Selected.Tracking &&\n                    Materiales = MaterialesEdit\n                ),\n                {\n                    Cantidad: Text(CantidadEditNum),\n                    Observacion: ObservacionEditTxt\n                }\n            )\n        )\n    );\n    \n    UpdateContext({\n        MostrarAviso: true,\n        mensajeNotificacion: \"Ediciones guardadas correctamente.\"\n    });\n    Clear(colEdicionCheck);\n    Clear(colEdicionErrores)\n)\n"
+                  OnSelect: |-
+                    =If(
+                        CountRows(
+                            Filter(
+                                glr_Pots_3.AllItems,
+                                !IsMatch(
+                                    CantidadMats_2.Text,
+                                    "^\-?\d+(\.\d+)?$"
+                                ) || Value(CantidadMats_2.Text) < 0
+                            )
+                        ) > 0,
+                        UpdateContext(
+                            {
+                                MostrarAviso: true,
+                                mensajeNotificacion: "Hay cantidades inválidas o negativas. Revisa los valores."
+                            }
+                        ),
+                        If(
+                            CountIf(
+                                ClearCollect(
+                                    Validacion_Tracking,
+                                    ForAll(
+                                        glr_Pots_3.AllItems,
+                                        If(
+                                            Value(CantidadEditada) = usado,
+                                            false,
+                                            Value(CantidadEditada) > usado,
+                                            With(
+                                                {Valor: Value(CantidadEditada) - usado},
+                                                If(
+                                                    Valor > (bodega - usado),
+                                                    true,
+                                                    false
+                                                )
+                                            ),
+                                            Value(CantidadEditada) < usado,
+                                            false,
+                                            true
+                                        )
+                                    )
+                                ), Value = true
+                            ) > 0,
+                            UpdateContext(
+                                {
+                                    MostrarAviso: true,
+                                    mensajeNotificacion: "Alguna cantidad supera la disponible. Revisa las filas."
+                                }
+                            ),
+                            ForAll(
+                                glr_Pots_3.AllItems,
+                                With(
+                                    {
+                                        MaterialesEdit: ThisRecord.MaterialesEdicion,
+                                        CantidadEdit: ThisRecord.CantidadMats_2.Text,
+                                        ObservacionEdit: ThisRecord.txtObservacion_2.Text
+                                    },
+                                    Patch(
+                                        Logistica_Compras,
+                                        LookUp(
+                                            Logistica_Compras,
+                                            POT = gl_PotsEdicion.Selected.Value && ID_Tracking = gl_PuestoCompras_LO_1.Selected.ID_Tracking && Tracking = gl_PuestoCompras_LO_1.Selected.Tracking && Materiales = MaterialesEdit
+                                        ),
+                                        {
+                                            Cantidad: Value(CantidadEdit),
+                                            Observacion: ObservacionEdit
+                                        }
+                                    )
+                                )
+                            );
+                            Refresh(Logistica_Compras);
+                            UpdateContext(
+                                {
+                                    MostrarAviso: true,
+                                    mensajeNotificacion: "Materiales editados correctamente."
+                                }
+                            ),
+                            UpdateContext({AbrirPots: false})
+                        )
+                    )
                   PressedBorderColor: =Self.Fill
                   PressedColor: =Self.Fill
                   PressedFill: =Self.Color
@@ -1338,7 +1429,7 @@ Screens:
                   Width: =1289
                   Y: =72
                 Children:
-                  - txt_POT_1:
+                  - txt_Material:
                       Control: Classic/TextInput@2.3.2
                       Properties:
                         Align: =Align.Center
@@ -1361,7 +1452,7 @@ Screens:
                         RadiusTopRight: =0
                         Size: =17
                         Width: =158
-                  - txt_Cantidad_EM_153:
+                  - txt_DescripcionTracking:
                       Control: Classic/TextInput@2.3.2
                       Properties:
                         Align: =Align.Center
@@ -1392,43 +1483,7 @@ Screens:
                         BorderColor: =RGBA(40, 134, 222, 1)
                         BorderThickness: =0.5
                         Color: =
-                        Default: |-
-                          =With(
-                              {
-                                  bodega: Sum(
-                                      Filter(
-                                          preqitem,
-                                          po_num = ThisItem.POTEdicion && item = ThisItem.MaterialesEdicion
-                                      ),
-                                      If(
-                                          IsBlank(qty_ordered),
-                                          0,
-                                          Value(qty_ordered)
-                                      )
-                                  ),
-                                  usado: Sum(
-                                      Filter(
-                                          Logistica_Compras,
-                                          POT = ThisItem.POTEdicion && Materiales = ThisItem.MaterialesEdicion
-                                      ),
-                                      If(
-                                          IsBlank(Cantidad),
-                                          0,
-                                          Value(Cantidad)
-                                      )
-                                  )
-                              },
-                              Max(
-                                  Coalesce(
-                                      bodega,
-                                      0
-                                  ) - Coalesce(
-                                      usado,
-                                      0
-                                  ),
-                                  0
-                              )
-                          )
+                        Default: =ThisItem.bodega - ThisItem.usado
                         DisabledBorderColor: =RGBA(40, 134, 222, 1)
                         DisabledColor: =
                         DisabledFill: =
