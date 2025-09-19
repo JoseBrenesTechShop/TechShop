@@ -225,7 +225,8 @@ EdicionTracking As screen:
                                 =Distinct(
                                     Filter(
                                         Logistica_Compras,
-                                        ID_Tracking = gl_PuestoCompras_LO_1.Selected.ID_Tracking && Tracking = gl_PuestoCompras_LO_1.Selected.Tracking
+                                        ID_Tracking = gl_PuestoCompras_LO_1.Selected.ID_Tracking && Tracking = gl_PuestoCompras_LO_1.Selected.Tracking &&
+                                        (IsBlank(txt_Pot_LO_2.Text) || txt_Pot_LO_2.Text in POT)
                                     ),
                                     POT
                                 )
@@ -331,7 +332,7 @@ EdicionTracking As screen:
                                         ForAll(
                                             Filter(
                                                 Logistica_Compras,
-                                                POT = gl_PotsEdicion.Selected.Value && ID_Tracking = gl_PuestoCompras_LO_1.Selected.ID_Tracking && Tracking = gl_PuestoCompras_LO_1.Selected.Tracking && Value(Cantidad) <> 0
+                                                POT = gl_PotsEdicion.Selected.Value && ID_Tracking = gl_PuestoCompras_LO_1.Selected.ID_Tracking && Tracking = gl_PuestoCompras_LO_1.Selected.Tracking 
                                             ),
                                             {
                                                 IDEdicion: ThisRecord.ID,
@@ -919,7 +920,7 @@ EdicionTracking As screen:
                         Size: =16
                         Text: ="Editar Fechas "
                         Width: =198
-                        X: =985
+                        X: =992
                         Y: =9
                         ZIndex: =8
 
@@ -1672,6 +1673,56 @@ EdicionTracking As screen:
                             mensajeNotificacion: "Hay cantidades inválidas o negativas. Revisa los valores."
                         }
                     ),
+                    CountRows(
+                        Filter(
+                            glr_Pots_3.AllItems,
+                            IsBlank(Trim(CantidadMats_2.Text))
+                        )
+                    ) > 0,
+                    UpdateContext(
+                        {
+                            MostrarAviso: true,
+                            mensajeNotificacion: "Hay cantidades en blanco. No se puede guardar."
+                        }
+                    ),
+                    CountRows(
+                        Filter(
+                            glr_Pots_3.AllItems,
+                            IsMatch(
+                                CantidadMats_2.Text,
+                                "^\-?\d+(\.\d+)?$"
+                            ) && ( If(
+                                IsBlank(CantidadMats_2.Text),
+                                0,
+                                Value(CantidadMats_2.Text)
+                            ) ) < (bodega - usado) || ( If(
+                                IsBlank(CantidadMats_2.Text),
+                                0,
+                                Value(CantidadMats_2.Text)
+                            ) ) < usado && IsBlank(Trim(txtObservacion_2.Text))
+                        )
+                    ) > 0,
+                    UpdateContext(
+                        {
+                            MostrarAviso: true,
+                            mensajeNotificacion: "Faltan observaciones para materiales cuya cantidad se reduce. Revisa las filas."
+                        }
+                    ),
+                    CountRows(
+                        Filter(
+                            glr_Pots_3.AllItems,
+                            IsMatch(
+                                CantidadMats_2.Text,
+                                "^\-?\d+(\.\d+)?$"
+                            ) && Value(CantidadMats_2.Text) <> 0
+                        )
+                    ) = 0,
+                    UpdateContext(
+                        {
+                            MostrarAviso: true,
+                            mensajeNotificacion: "Todas las cantidades están en 0. No hay materiales para agregar."
+                        }
+                    ),
                     If(
                         CountIf(
                             ClearCollect(
@@ -1695,7 +1746,8 @@ EdicionTracking As screen:
                                         true
                                     )
                                 )
-                            ), Value = true
+                            ),
+                            Value = true
                         ) > 0,
                         UpdateContext(
                             {
@@ -1722,6 +1774,41 @@ EdicionTracking As screen:
                                         Observacion: ObservacionEdit
                                     }
                                 )
+                            )
+                        );
+                        ClearCollect(
+                            Validacion_Estado,
+                            ForAll(
+                                glr_Pots_3.AllItems,
+                                {
+                                    Disponible: (bodega - If(
+                                        IsBlank(CantidadMats_2.Text),
+                                        usado,
+                                        Value(CantidadMats_2.Text)
+                                    ))
+                                }
+                            )
+                        );
+                        If(
+                            CountIf(
+                                Validacion_Estado,
+                                Disponible > 0
+                            ) > 0,
+                            Patch(
+                                Compras_Pots,
+                                LookUp(
+                                    Compras_Pots,
+                                    POT = gl_PotsEdicion.Selected.Value
+                                ),
+                                {'Estado (crfb9_estado)': "Colocado"}
+                            ),
+                            Patch(
+                                Compras_Pots,
+                                LookUp(
+                                    Compras_Pots,
+                                    POT = gl_PotsEdicion.Selected.Value
+                                ),
+                                {'Estado (crfb9_estado)': "Tramitado"}
                             )
                         );
                         Refresh(Logistica_Compras);
