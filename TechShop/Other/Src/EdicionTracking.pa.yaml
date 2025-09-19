@@ -122,16 +122,18 @@ Screens:
                           =UpdateContext(
                               {
                                   AbrirCompletar: false,
-                                  seleccion: false
+                                  seleccion: false,
+                                  AbrirPots: false,
+                                  Borrar: false,
+                                  loading: false,
+                                  PotEliminar: Blank()
                               }
                           );
                           Refresh(Compras_Pots);
-                          Reset(dt_FechaMiami_LO_1);
-                          Reset(txt_refMiamo_LO_1);
-                          Reset(dt_FechaTech_LO_1);
-                          Reset(txt_refTech_LO_1);
-                          Reset(drp_MetodoTransporte_LO_1);
-                          Reset(drp_TipoEnvio_LO_1);
+                          Reset(dt_FechaMiami_LO_2);
+                          Reset(txt_refMiamo_LO_2);
+                          Reset(dt_FechaTech_LO_2);
+                          Reset(txt_refTech_LO_2);
                           Reset(txt_Pot_LO_2);
                           Back()
                         PaddingBottom: =5
@@ -284,7 +286,9 @@ Screens:
                                                 HoverFill: =RGBA(255, 255, 255, 255)
                                                 Icon: =Icon.Edit
                                                 OnSelect: |-
-                                                  =ClearCollect(
+                                                  =UpdateContext({loading:true});
+
+                                                  ClearCollect(
                                                       Edicion,
                                                       ForAll(
                                                           Filter(
@@ -319,7 +323,7 @@ Screens:
                                                           }
                                                       )
                                                   );
-                                                  UpdateContext({AbrirPots: true})
+                                                  UpdateContext({AbrirPots: true, Borrar: true, loading: false})
                                                 PaddingBottom: =2
                                                 PaddingLeft: =2
                                                 PaddingRight: =2
@@ -722,7 +726,8 @@ Screens:
                                     Height: =32
                                     HoverBorderColor: =RGBA(12, 59, 94, 1)
                                     HoverFill: =RGBA(12, 59, 94, 1)
-                                    OnSelect: =UpdateContext({Abrir:true})
+                                    OnSelect: |-
+                                      =UpdateContext({Abrir:true, Borrar: true})
                                     PressedBorderColor: =RGBA(15, 84, 140, 1)
                                     PressedColor: =RGBA(15, 84, 140, 1)
                                     PressedFill: =RGBA(180, 214, 250, 1)
@@ -740,7 +745,8 @@ Screens:
                                     Height: =32
                                     HoverBorderColor: =RGBA(12, 59, 94, 1)
                                     HoverFill: =RGBA(12, 59, 94, 1)
-                                    OnSelect: =UpdateContext({AgregarPot:true})
+                                    OnSelect: |-
+                                      =UpdateContext({AgregarPot:true, Borrar: true})
                                     PressedBorderColor: =RGBA(15, 84, 140, 1)
                                     PressedColor: =RGBA(15, 84, 140, 1)
                                     PressedFill: =RGBA(180, 214, 250, 1)
@@ -760,6 +766,115 @@ Screens:
             Width: =1342
             X: =12
             Y: =97
+      - BorrarPotTraking:
+          Control: GroupContainer@1.3.0
+          Variant: ManualLayout
+          Properties:
+            BorderColor: =RGBA(184, 0, 0, 1)
+            BorderThickness: =3
+            DropShadow: =DropShadow.ExtraBold
+            Fill: =RGBA(215, 58, 60, 0.58)
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Visible: =Borrar
+            X: =433
+            Y: =295
+          Children:
+            - btn_Guardar_EC_29:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =RGBA(40, 134, 222, 1)
+                  Color: =RGBA(255, 255, 255, 1)
+                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                  DisplayMode: =
+                  Fill: =RGBA(40, 134, 222, 1)
+                  Font: =Font.'Open Sans'
+                  Height: =47
+                  HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =
+                  OnSelect: |
+                    =UpdateContext({
+                        registros:
+                        CountRows(
+                            Filter(
+                                Logistica_Compras,
+                                POT = PotEliminar &&
+                                !(ID_Tracking = gl_PuestoCompras_LO_1.Selected.ID_Tracking && Tracking = gl_PuestoCompras_LO_1.Selected.Tracking)
+                            )
+                        )
+                    });
+
+                    RemoveIf(
+                        Logistica_Compras,
+                        ID_Tracking = gl_PuestoCompras_LO_1.Selected.ID_Tracking &&
+                        Tracking = gl_PuestoCompras_LO_1.Selected.Tracking &&
+                        POT = PotEliminar
+                    );
+
+                    Refresh(Logistica_Compras);
+
+                    If(
+                        registros = 0,
+                        UpdateIf(
+                            Compras_Pots,
+                            POT = PotEliminar,
+                            { 'Estado (crfb9_estado)': "Colocado" }
+                        )
+                    );
+
+                    UpdateContext({ Borrar: false, PotEliminar: Blank(), ctxOtrosRegistros: Blank() })
+                  PressedBorderColor: =Self.Fill
+                  PressedColor: =Self.Fill
+                  PressedFill: =Self.Color
+                  Text: ="Eliminar"
+                  Width: =161
+                  X: =255
+                  Y: =134
+            - btn_Guardar_EC_30:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =RGBA(215, 58, 60, 1)
+                  Color: =RGBA(255, 255, 255, 1)
+                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                  DisplayMode: =
+                  Fill: =RGBA(255, 0, 0, 1)
+                  Font: =Font.'Open Sans'
+                  Height: =47
+                  HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =
+                  OnSelect: |-
+                    =UpdateContext(
+                        {
+                            Borrar: false,
+                            PotEliminar: Blank()
+                        }
+                    )
+                  PressedBorderColor: =Self.Fill
+                  PressedColor: =Self.Fill
+                  PressedFill: =Self.Color
+                  Text: ="Cancelar"
+                  Width: =163
+                  X: =80
+                  Y: =134
+            - TextCanvas1_73:
+                Control: Text@0.0.51
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  Font: =Font.Arial
+                  FontColor: =RGBA(255, 255, 255, 1)
+                  Height: =123
+                  Size: =22
+                  Text: |
+                    ="¿Seguro que querés borrar la " & gl_PotsEdicion.Selected.Value & "? Una vez borrada no se podrá recuperar en el tracking correspondiente."
+                  VerticalAlign: =VerticalAlign.Middle
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =496
+                  X: =4
+                  Y: =4
       - Container5_13:
           Control: GroupContainer@1.3.0
           Variant: ManualLayout
@@ -858,7 +973,8 @@ Screens:
                             {
                                 MostrarAviso: true,
                                 mensajeNotificacion: "Se edito exitosamente",
-                                Abrir: false
+                                Abrir: false,
+                                Borrar: false
                             }
                         )
                     )
@@ -885,7 +1001,8 @@ Screens:
                   OnSelect: |-
                     =UpdateContext(
                         {
-                            Abrir: false
+                            Abrir: false,
+                            Borrar: false
                         }
                     );
                     Refresh(Compras_Pots);
@@ -893,7 +1010,6 @@ Screens:
                     Reset(txt_refMiamo_LO_2);
                     Reset(dt_FechaTech_LO_2);
                     Reset(txt_refTech_LO_2);
-                    Reset(Ref_2);
                         Clear(PotsSeleccionadas);
                         Clear(colEstadoPOT)
                   PressedBorderColor: =Self.Fill
@@ -1269,8 +1385,9 @@ Screens:
                   BorderColor: =RGBA(40, 134, 222, 1)
                   Color: =RGBA(255, 255, 255, 1)
                   DisabledBorderColor: =RGBA(166, 166, 166, 1)
-                  DisplayMode: |
-                    =
+                  DisplayMode: |+
+                    =If(loading, DisplayMode.Disabled, DisplayMode.Edit)
+
                   Fill: =RGBA(40, 134, 222, 1)
                   Font: =Font.'Open Sans'
                   Height: =68
@@ -1439,7 +1556,7 @@ Screens:
                                     mensajeNotificacion: "Materiales editados correctamente."
                                 }
                             ),
-                            UpdateContext({AbrirPots: false})
+                            UpdateContext({AbrirPots: false, Borrar: false})
                         )
                     )
                   PressedBorderColor: =Self.Fill
@@ -1461,6 +1578,7 @@ Screens:
                   DisabledBorderColor: =RGBA(166, 166, 166, 1)
                   DisplayMode: |
                     =
+                    If(loading, DisplayMode.Disabled, DisplayMode.Edit)
                   Fill: =RGBA(255, 0, 0, 1)
                   Font: =Font.'Open Sans'
                   Height: =68
@@ -1470,7 +1588,8 @@ Screens:
                   OnSelect: |-
                     =UpdateContext(
                         {
-                            AbrirPots: false
+                            AbrirPots: false,
+                            Borrar: false
                         }
                     );
                   PressedBorderColor: =Self.Fill
@@ -1509,6 +1628,8 @@ Screens:
                 Properties:
                   BorderColor: =RGBA(9, 33, 98, 1)
                   BorderThickness: =0.5
+                  DisplayMode: |+
+                    =If(loading, DisplayMode.Disabled, DisplayMode.Edit)
                   Fill: =RGBA(255, 255, 255, 1)
                   Height: =432
                   Items: =Edicion
@@ -1763,115 +1884,6 @@ Screens:
                   Width: =391
                   X: =898
                   Y: =42
-      - BorrarPotTraking:
-          Control: GroupContainer@1.3.0
-          Variant: ManualLayout
-          Properties:
-            BorderColor: =RGBA(184, 0, 0, 1)
-            BorderThickness: =3
-            DropShadow: =DropShadow.ExtraBold
-            Fill: =RGBA(215, 58, 60, 0.58)
-            RadiusBottomLeft: =15
-            RadiusBottomRight: =15
-            RadiusTopLeft: =15
-            RadiusTopRight: =15
-            Visible: =Borrar
-            X: =433
-            Y: =295
-          Children:
-            - btn_Guardar_EC_29:
-                Control: Classic/Button@2.2.0
-                Properties:
-                  BorderColor: =RGBA(40, 134, 222, 1)
-                  Color: =RGBA(255, 255, 255, 1)
-                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
-                  DisplayMode: =
-                  Fill: =RGBA(40, 134, 222, 1)
-                  Font: =Font.'Open Sans'
-                  Height: =47
-                  HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
-                  HoverColor: =RGBA(255, 255, 255, 1)
-                  HoverFill: =
-                  OnSelect: |
-                    =UpdateContext({
-                        registros:
-                        CountRows(
-                            Filter(
-                                Logistica_Compras,
-                                POT = PotEliminar &&
-                                !(ID_Tracking = gl_PuestoCompras_LO_1.Selected.ID_Tracking && Tracking = gl_PuestoCompras_LO_1.Selected.Tracking)
-                            )
-                        )
-                    });
-
-                    RemoveIf(
-                        Logistica_Compras,
-                        ID_Tracking = gl_PuestoCompras_LO_1.Selected.ID_Tracking &&
-                        Tracking = gl_PuestoCompras_LO_1.Selected.Tracking &&
-                        POT = PotEliminar
-                    );
-
-                    Refresh(Logistica_Compras);
-
-                    If(
-                        registros = 0,
-                        UpdateIf(
-                            Compras_Pots,
-                            POT = PotEliminar,
-                            { 'Estado (crfb9_estado)': "Colocado" }
-                        )
-                    );
-
-                    UpdateContext({ Borrar: false, PotEliminar: Blank(), ctxOtrosRegistros: Blank() })
-                  PressedBorderColor: =Self.Fill
-                  PressedColor: =Self.Fill
-                  PressedFill: =Self.Color
-                  Text: ="Eliminar"
-                  Width: =161
-                  X: =255
-                  Y: =134
-            - btn_Guardar_EC_30:
-                Control: Classic/Button@2.2.0
-                Properties:
-                  BorderColor: =RGBA(215, 58, 60, 1)
-                  Color: =RGBA(255, 255, 255, 1)
-                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
-                  DisplayMode: =
-                  Fill: =RGBA(255, 0, 0, 1)
-                  Font: =Font.'Open Sans'
-                  Height: =47
-                  HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
-                  HoverColor: =RGBA(255, 255, 255, 1)
-                  HoverFill: =
-                  OnSelect: |-
-                    =UpdateContext(
-                        {
-                            Borrar: false,
-                            PotEliminar: Blank()
-                        }
-                    )
-                  PressedBorderColor: =Self.Fill
-                  PressedColor: =Self.Fill
-                  PressedFill: =Self.Color
-                  Text: ="Cancelar"
-                  Width: =163
-                  X: =80
-                  Y: =134
-            - TextCanvas1_73:
-                Control: Text@0.0.51
-                Properties:
-                  Align: ='TextCanvas.Align'.Center
-                  Font: =Font.Arial
-                  FontColor: =RGBA(255, 255, 255, 1)
-                  Height: =123
-                  Size: =22
-                  Text: |
-                    ="¿Seguro que querés borrar la " & gl_PotsEdicion.Selected.Value & "? Una vez borrada no se podrá recuperar en el tracking correspondiente."
-                  VerticalAlign: =VerticalAlign.Middle
-                  Weight: ='TextCanvas.Weight'.Semibold
-                  Width: =496
-                  X: =4
-                  Y: =4
       - Container5_16:
           Control: GroupContainer@1.3.0
           Variant: ManualLayout
@@ -1886,7 +1898,7 @@ Screens:
             RadiusTopRight: =15
             Visible: =AgregarPot
             Width: =1289
-            X: =59
+            X: =38
             Y: =148
           Children:
             - btn_GuardarSeleccioandos_2:
@@ -1957,7 +1969,8 @@ Screens:
                                 AgregarPot: false,
                                 seleccion: false,
                                 AbrirCompletar: false,
-                                rellenar: false
+                                rellenar: false,
+                                Borrar: false
                             });
                             UpdateContext({ reset: false });
                             Refresh(Compras_Pots);
@@ -1993,7 +2006,8 @@ Screens:
                   OnSelect: |-
                     =UpdateContext(
                         {
-                            AgregarPot: false
+                            AgregarPot: false,
+                            Borrar: false
                         }
                     );
                   PressedBorderColor: =Self.Fill
@@ -2361,7 +2375,7 @@ Screens:
             RadiusTopRight: =10
             Visible: =Materiales
             Width: =1289
-            X: =59
+            X: =38
             Y: =189
           Children:
             - lbl_PNDato_EM_331:
