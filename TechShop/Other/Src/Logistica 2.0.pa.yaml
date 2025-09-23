@@ -904,39 +904,7 @@ Screens:
                   HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
                   HoverColor: =RGBA(255, 255, 255, 1)
                   HoverFill: =
-                  OnSelect: |-
-                    =If(
-                        IsBlank(drp_TipoEnvio_LO_1.Selected.Value),
-                        UpdateContext(
-                            {
-                                MostrarAviso: true,
-                                mensajeNotificacion: "Seleccione el Tipo de envío."
-                            }
-                        ),
-                        If(
-                            drp_TipoEnvio_LO_1.Selected.Value = "Directo",
-                            If(
-                                IsBlank(Ref.Text) || IsBlank(txt_refTech_LO_1.Text) || IsBlank(drp_MetodoTransporte_LO_1.Selected.Value) || IsBlank(dt_FechaTech_LO_1.SelectedDate),
-                                UpdateContext(
-                                    {
-                                        MostrarAviso: true,
-                                        mensajeNotificacion: "Complete los campos obligatorios para envío Directo."
-                                    }
-                                ),
-                                UpdateContext({AbrirPots: true})
-                            ),
-                            If(
-                                IsBlank(Ref.Text) || IsBlank(txt_refMiamo_LO_1.Text) || IsBlank(txt_refTech_LO_1.Text) || IsBlank(drp_MetodoTransporte_LO_1.Selected.Value) || IsBlank(drp_TipoEnvio_LO_1.Selected.Value) || IsBlank(dt_FechaMiami_LO_1.SelectedDate) || IsBlank(dt_FechaTech_LO_1.SelectedDate),
-                                UpdateContext(
-                                    {
-                                        MostrarAviso: true,
-                                        mensajeNotificacion: "Complete todos los campos obligatorios antes de continuar."
-                                    }
-                                ),
-                                UpdateContext({AbrirPots: true})
-                            )
-                        )
-                    )
+                  OnSelect: "=If(\n    IsBlank(drp_TipoEnvio_LO_1.Selected.Value),\n    UpdateContext({MostrarAviso: true, mensajeNotificacion: \"Seleccione el Tipo de envío.\"}),\n    \n    If(\n        IsBlank(Ref.Text),\n        UpdateContext({MostrarAviso: true, mensajeNotificacion: \"Ingrese la referencia del tracking.\"}),\n        \n        If(\n            drp_TipoEnvio_LO_1.Selected.Value = \"Directo\",\n            \n            If(\n                IsBlank(drp_MetodoTransporte_LO_1.Selected.Value)\n                || ( !IsBlank(dt_FechaTech_LO_1.SelectedDate) && IsBlank(txt_refTech_LO_1.Text) )\n                || ( !IsBlank(dt_FechaMiami_LO_1.SelectedDate) && IsBlank(txt_refMiamo_LO_1.Text) ),\n                \n                UpdateContext({MostrarAviso: true, mensajeNotificacion: \"Complete los campos obligatorios para envío Directo.\"}),\n                \n                If(\n                    !IsBlank(dt_FechaTech_LO_1.SelectedDate) && !IsBlank(dt_FechaMiami_LO_1.SelectedDate) && dt_FechaTech_LO_1.SelectedDate < dt_FechaMiami_LO_1.SelectedDate,\n                    UpdateContext({MostrarAviso: true, mensajeNotificacion: \"La fecha de Techshop no puede ser anterior a la de Miami.\"}),\n                    UpdateContext({AbrirPots: true})\n                )\n            ),\n            \n            If(\n                IsBlank(drp_MetodoTransporte_LO_1.Selected.Value)\n                || ( !IsBlank(dt_FechaMiami_LO_1.SelectedDate) && IsBlank(txt_refMiamo_LO_1.Text) )\n                || ( !IsBlank(dt_FechaTech_LO_1.SelectedDate) && IsBlank(txt_refTech_LO_1.Text) ),\n                \n                UpdateContext({MostrarAviso: true, mensajeNotificacion: \"Complete todos los campos obligatorios antes de continuar.\"}),\n                \n                If(\n                    !IsBlank(dt_FechaTech_LO_1.SelectedDate) && !IsBlank(dt_FechaMiami_LO_1.SelectedDate) && dt_FechaTech_LO_1.SelectedDate < dt_FechaMiami_LO_1.SelectedDate,\n                    UpdateContext({MostrarAviso: true, mensajeNotificacion: \"La fecha de Techshop no puede ser anterior a la de Miami.\"}),\n                    UpdateContext({AbrirPots: true})\n                )\n            )\n        )\n    )\n)\n"
                   PressedBorderColor: =Self.Fill
                   PressedColor: =Self.Fill
                   PressedFill: =Self.Color
@@ -1272,7 +1240,8 @@ Screens:
                                     Cantidad: Text(Cantidad),
                                     Observacion: Observacion,
                                     ID_Tracking: Ref_1.Text,
-                                    Tracking: Ref.Text
+                                    Tracking: Ref.Text,
+                                    Usuario: varEmpleado.Nombre
                                 }
                             )
                         );
@@ -1287,7 +1256,8 @@ Screens:
                                 Ref_Miami: txt_refMiamo_LO_1.Text,
                                 Fecha_Tech: dt_FechaTech_LO_1.SelectedDate,
                                 Ref_Tech: txt_refTech_LO_1.Text,
-                                'Estado (crfb9_estado)': ""
+                                'Estado (crfb9_estado)': "",
+                                Usuario: varEmpleado.Nombre
                             }
                         );
                     ForAll(

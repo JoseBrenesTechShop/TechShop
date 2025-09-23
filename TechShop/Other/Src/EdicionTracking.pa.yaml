@@ -910,30 +910,6 @@ Screens:
                   Text: ="Editar Fechas"
                   Weight: ='TextCanvas.Weight'.Semibold
                   Width: =755
-            - TextCanvas1_66:
-                Control: Text@0.0.51
-                Properties:
-                  Align: ='TextCanvas.Align'.Start
-                  Font: =Font.Arial
-                  Height: =30
-                  Size: =21
-                  Text: ="Metodo de Transporte"
-                  Weight: ='TextCanvas.Weight'.Semibold
-                  Width: =251
-                  X: =32
-                  Y: =98
-            - TextCanvas1_67:
-                Control: Text@0.0.51
-                Properties:
-                  Align: ='TextCanvas.Align'.Start
-                  Font: =Font.Arial
-                  Height: =30
-                  Size: =21
-                  Text: ="Tipo de envio"
-                  Weight: ='TextCanvas.Weight'.Semibold
-                  Width: =186
-                  X: =32
-                  Y: =174
             - btn_Guardar_EC_19:
                 Control: Classic/Button@2.2.0
                 Properties:
@@ -949,33 +925,64 @@ Screens:
                   HoverFill: =
                   OnSelect: |-
                     =If(
-                        IsBlank(dt_FechaMiami_LO_2.SelectedDate) || IsBlank(dt_FechaTech_LO_2.SelectedDate) || IsBlank(Trim(txt_refMiamo_LO_2.Text)) || IsBlank(Trim(txt_refTech_LO_2.Text)),
+                        IsBlank(drp_TipoEnvio_LO_2.Selected.Value),
                         UpdateContext(
                             {
                                 MostrarAviso: true,
-                                mensajeNotificacion: "Debes ingresar las fechas y referencias antes de editar."
+                                mensajeNotificacion: "Seleccione el Tipo de envío."
                             }
                         ),
-                        Patch(
-                            Logistica_Movimientos,
-                            LookUp(
-                                Logistica_Movimientos,
-                                ID_Tracking = gl_PuestoCompras_LO_1.Selected.ID_Tracking && Tracking = gl_PuestoCompras_LO_1.Selected.Tracking
+                        If(
+                            IsBlank(drp_MetodoTransporte_LO_2.Selected.Value),
+                            UpdateContext(
+                                {
+                                    MostrarAviso: true,
+                                    mensajeNotificacion: "Seleccione el Método de transporte."
+                                }
                             ),
-                            {
-                                Fecha_Miami: dt_FechaMiami_LO_2.SelectedDate,
-                                Fecha_Tech: dt_FechaTech_LO_2.SelectedDate,
-                                Ref_Miami: txt_refMiamo_LO_2.Text,
-                                Ref_Tech: txt_refTech_LO_2.Text
-                            }
-                        );
-                        UpdateContext(
-                            {
-                                MostrarAviso: true,
-                                mensajeNotificacion: "Se edito exitosamente",
-                                Abrir: false,
-                                Borrar: false
-                            }
+                            If(
+                                (!IsBlank(dt_FechaTech_LO_2.SelectedDate) && IsBlank(Trim(txt_refTech_LO_2.Text))) || (!IsBlank(dt_FechaMiami_LO_2.SelectedDate) && IsBlank(Trim(txt_refMiamo_LO_2.Text))),
+                                UpdateContext(
+                                    {
+                                        MostrarAviso: true,
+                                        mensajeNotificacion: "Si ingresó una fecha, la referencia correspondiente es obligatoria."
+                                    }
+                                ),
+                                If(
+                                    !IsBlank(dt_FechaTech_LO_2.SelectedDate) && !IsBlank(dt_FechaMiami_LO_2.SelectedDate) && dt_FechaTech_LO_2.SelectedDate < dt_FechaMiami_LO_2.SelectedDate,
+                                    UpdateContext(
+                                        {
+                                            MostrarAviso: true,
+                                            mensajeNotificacion: "La fecha de Techshop no puede ser anterior a la de Miami."
+                                        }
+                                    ),
+                                    Patch(
+                                        Logistica_Movimientos,
+                                        LookUp(
+                                            Logistica_Movimientos,
+                                            ID_Tracking = gl_PuestoCompras_LO_1.Selected.ID_Tracking && Tracking = gl_PuestoCompras_LO_1.Selected.Tracking
+                                        ),
+                                        {
+                                            Fecha_Miami: dt_FechaMiami_LO_2.SelectedDate,
+                                            Fecha_Tech: dt_FechaTech_LO_2.SelectedDate,
+                                            Ref_Miami: Trim(txt_refMiamo_LO_2.Text),
+                                            Ref_Tech: Trim(txt_refTech_LO_2.Text),
+                                            Usuario_Edit: varEmpleado.Nombre,
+                                            Tipo_Envio: drp_TipoEnvio_LO_2.Selected.Value,
+                                            Transporte: drp_MetodoTransporte_LO_2.Selected.Value
+                                        }
+                                    );
+                                    UpdateContext(
+                                        {
+                                            MostrarAviso: true,
+                                            mensajeNotificacion: "Se editó exitosamente",
+                                            Abrir: false,
+                                            Borrar: false,
+                                            varClearRefMiamo: false
+                                        }
+                                    )
+                                )
+                            )
                         )
                     )
                   PressedBorderColor: =Self.Fill
@@ -1005,11 +1012,14 @@ Screens:
                             Borrar: false
                         }
                     );
+                    UpdateContext({ varClearRefMiamo: false, varClearRefTech: false });
                     Refresh(Compras_Pots);
                     Reset(dt_FechaMiami_LO_2);
                     Reset(txt_refMiamo_LO_2);
                     Reset(dt_FechaTech_LO_2);
                     Reset(txt_refTech_LO_2);
+                    Reset(drp_TipoEnvio_LO_2);
+                    Reset(drp_MetodoTransporte_LO_2);
                         Clear(PotsSeleccionadas);
                         Clear(colEstadoPOT)
                   PressedBorderColor: =Self.Fill
@@ -1039,17 +1049,19 @@ Screens:
                   BorderThickness: =3
                   Clear: =true
                   Default: |-
-                    =LookUp(
-                      Logistica_Movimientos,
-                      ID_Tracking = gl_PuestoCompras_LO_1.Selected.ID_Tracking &&
-                      Tracking = gl_PuestoCompras_LO_1.Selected.Tracking,
-                      Ref_Miami
+                    =If(varClearRefMiamo, "", 
+                       LookUp(
+                         Logistica_Movimientos,
+                         ID_Tracking = gl_PuestoCompras_LO_1.Selected.ID_Tracking &&
+                         Tracking = gl_PuestoCompras_LO_1.Selected.Tracking,
+                         Ref_Miami
+                       )
                     )
                   DisabledBorderColor: =RGBA(180, 214, 250, 1)
                   DisabledFill: =RGBA(255, 255, 255, 1)
                   DisplayMode: |-
                     =If(
-                        tipoEnvioEditar.Text = "Via Miami",
+                        drp_TipoEnvio_LO_2.Selected.Value = "Via Miami",
                         DisplayMode.Edit,
                         DisplayMode.Disabled
                     )
@@ -1083,18 +1095,21 @@ Screens:
                   BorderThickness: =2
                   DisplayMode: |-
                     =If(
-                        tipoEnvioEditar.Text = "Via Miami",
+                        drp_TipoEnvio_LO_2.Selected.Value = "Via Miami",
                         DisplayMode.Edit,
                         DisplayMode.Disabled
                     )
                   Fill: =RGBA(255, 255, 255, 1)
                   Height: =34
                   SelectedDate: |-
-                    =LookUp(
-                      Logistica_Movimientos,
-                      ID_Tracking = gl_PuestoCompras_LO_1.Selected.ID_Tracking &&
-                      Tracking = gl_PuestoCompras_LO_1.Selected.Tracking,
-                      Fecha_Miami
+                    =If(
+                        varClearRefMiamo,
+                        "",
+                        LookUp(
+                            Logistica_Movimientos,
+                            ID_Tracking = gl_PuestoCompras_LO_1.Selected.ID_Tracking && Tracking = gl_PuestoCompras_LO_1.Selected.Tracking,
+                            Fecha_Miami
+                        )
                     )
                   StartDate: =Today()
                   Width: =460
@@ -1286,82 +1301,141 @@ Screens:
                   Width: =93
                   X: =638
                   Y: =55
-            - Ref_4:
-                Control: Classic/TextInput@2.3.2
+            - TextCanvas1_82:
+                Control: Text@0.0.51
                 Properties:
-                  Align: =Align.Center
-                  BorderColor: =RGBA(180, 214, 250, 1)
+                  Align: ='TextCanvas.Align'.Start
+                  Font: =Font.Arial
+                  Height: =30
+                  Size: =21
+                  Text: ="Metodo de Transporte"
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =251
+                  X: =32
+                  Y: =106
+            - ContainerPais_EM_36:
+                Control: GroupContainer@1.3.0
+                Variant: ManualLayout
+                Properties:
+                  BorderColor: =RGBA(40, 134, 222, 1)
                   BorderThickness: =3
-                  Clear: =true
-                  Default: |-
-                    =LookUp(
-                      Logistica_Movimientos,
-                      ID_Tracking = gl_PuestoCompras_LO_1.Selected.ID_Tracking &&
-                      Tracking = gl_PuestoCompras_LO_1.Selected.Tracking,
-                      Transporte
-                    )
-                  DisabledBorderColor: =RGBA(180, 214, 250, 1)
-                  DisabledFill: =RGBA(255, 255, 255, 1)
-                  DisplayMode: =DisplayMode.Disabled
+                  DropShadow: =DropShadow.None
+                  Fill: =RGBA(255, 255, 255, 1)
                   Height: =34
-                  HintText: ="REF"
-                  HoverBorderColor: =RGBA(180, 214, 250, 1)
-                  HoverFill: =RGBA(227, 240, 252, 1)
-                  OnChange: =
-                  OnSelect: |
-                    =
-                  PaddingBottom: =0
-                  PaddingLeft: =0
-                  PaddingRight: =0
-                  PaddingTop: =0
-                  PressedColor: =RGBA(0, 0, 0, 1)
-                  PressedFill: =RGBA(255, 255, 255, 1)
                   RadiusBottomLeft: =10
                   RadiusBottomRight: =10
                   RadiusTopLeft: =10
                   RadiusTopRight: =10
-                  Size: =15
-                  Width: =197
-                  X: =32
-                  Y: =128
-            - tipoEnvioEditar:
-                Control: Classic/TextInput@2.3.2
+                  Width: =186
+                  X: =43
+                  Y: =136
+                Children:
+                  - drp_MetodoTransporte_LO_2:
+                      Control: Classic/DropDown@2.3.1
+                      Properties:
+                        AllowEmptySelection: =true
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderThickness: =3
+                        ChevronBackground: =RGBA(0, 0, 0, 0)
+                        ChevronDisabledBackground: =RGBA(255, 255, 255, 1)
+                        ChevronDisabledFill: =RGBA(120, 120, 120, 1)
+                        ChevronFill: =RGBA(0, 0, 0, 1)
+                        ChevronHoverBackground: =RGBA(15, 108, 189, 1)
+                        ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                        Default: |-
+                          =LookUp(
+                            Logistica_Movimientos,
+                            ID_Tracking = gl_PuestoCompras_LO_1.Selected.ID_Tracking &&
+                            Tracking = gl_PuestoCompras_LO_1.Selected.Tracking,
+                            Transporte
+                          )
+                        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                        DisabledFill: =RGBA(255, 255, 255, 1)
+                        DisplayMode: |
+                          =
+                        Font: =Font.'Open Sans'
+                        Height: =34
+                        HoverBorderColor: =RGBA(180, 214, 250, 1)
+                        HoverFill: =RGBA(180, 214, 250, 1)
+                        Items: =["Aereo","Maritimo", "Terrestre"]
+                        Items.Value: =Value
+                        PressedColor: =RGBA(255, 255, 255, 1)
+                        PressedFill: =RGBA(15, 108, 189, 1)
+                        SelectionColor: =RGBA(255, 255, 255, 1)
+                        SelectionFill: =RGBA(15, 108, 189, 1)
+                        Size: =15
+                        Tooltip: ="Seleccione el metodo"
+                        Width: =186
+            - TextCanvas1_83:
+                Control: Text@0.0.51
                 Properties:
-                  Align: =Align.Center
-                  BorderColor: =RGBA(180, 214, 250, 1)
+                  Align: ='TextCanvas.Align'.Start
+                  Font: =Font.Arial
+                  Height: =30
+                  Size: =21
+                  Text: ="Tipo de envio"
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =186
+                  X: =32
+                  Y: =182
+            - ContainerPais_EM_37:
+                Control: GroupContainer@1.3.0
+                Variant: ManualLayout
+                Properties:
+                  BorderColor: =RGBA(40, 134, 222, 1)
                   BorderThickness: =3
-                  Clear: =true
-                  Default: |-
-                    =LookUp(
-                      Logistica_Movimientos,
-                      ID_Tracking = gl_PuestoCompras_LO_1.Selected.ID_Tracking &&
-                      Tracking = gl_PuestoCompras_LO_1.Selected.Tracking,
-                      Tipo_Envio
-                    )
-                  DisabledBorderColor: =RGBA(180, 214, 250, 1)
-                  DisabledFill: =RGBA(255, 255, 255, 1)
-                  DisplayMode: =DisplayMode.Disabled
-                  Height: =32
-                  HintText: ="REF"
-                  HoverBorderColor: =RGBA(180, 214, 250, 1)
-                  HoverFill: =RGBA(227, 240, 252, 1)
-                  OnChange: =
-                  OnSelect: |
-                    =
-                  PaddingBottom: =0
-                  PaddingLeft: =0
-                  PaddingRight: =0
-                  PaddingTop: =0
-                  PressedColor: =RGBA(0, 0, 0, 1)
-                  PressedFill: =RGBA(255, 255, 255, 1)
+                  DropShadow: =DropShadow.None
+                  Fill: =RGBA(255, 255, 255, 1)
+                  Height: =34
                   RadiusBottomLeft: =10
                   RadiusBottomRight: =10
                   RadiusTopLeft: =10
                   RadiusTopRight: =10
-                  Size: =15
-                  Width: =197
-                  X: =32
-                  Y: =206
+                  Width: =186
+                  X: =43
+                  Y: =210
+                Children:
+                  - drp_TipoEnvio_LO_2:
+                      Control: Classic/DropDown@2.3.1
+                      Properties:
+                        AllowEmptySelection: =true
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderThickness: =3
+                        ChevronBackground: =RGBA(0, 0, 0, 0)
+                        ChevronDisabledBackground: =RGBA(255, 255, 255, 1)
+                        ChevronDisabledFill: =RGBA(120, 120, 120, 1)
+                        ChevronFill: =RGBA(0, 0, 0, 1)
+                        ChevronHoverBackground: =RGBA(15, 108, 189, 1)
+                        ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                        Default: |-
+                          =LookUp(
+                            Logistica_Movimientos,
+                            ID_Tracking = gl_PuestoCompras_LO_1.Selected.ID_Tracking &&
+                            Tracking = gl_PuestoCompras_LO_1.Selected.Tracking,
+                            Tipo_Envio
+                          )
+                        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                        DisabledFill: =RGBA(255, 255, 255, 1)
+                        DisplayMode: |
+                          =
+                        Font: =Font.'Open Sans'
+                        Height: =34
+                        HoverBorderColor: =RGBA(180, 214, 250, 1)
+                        HoverFill: =RGBA(180, 214, 250, 1)
+                        Items: =["Via Miami", "Directo"]
+                        Items.Value: =Value
+                        OnChange: |-
+                          =UpdateContext({ varClearRefMiamo: true, varClearRefTech: true });
+
+                          Reset(dt_FechaMiami_LO_2);
+                          Reset(txt_refMiamo_LO_2)
+                        PressedColor: =RGBA(255, 255, 255, 1)
+                        PressedFill: =RGBA(15, 108, 189, 1)
+                        SelectionColor: =RGBA(255, 255, 255, 1)
+                        SelectionFill: =RGBA(15, 108, 189, 1)
+                        Size: =15
+                        Tooltip: ="Seleccione el metodo"
+                        Width: =186
       - Container5_12:
           Control: GroupContainer@1.3.0
           Variant: ManualLayout
@@ -1630,7 +1704,7 @@ Screens:
                 Properties:
                   BorderColor: =RGBA(9, 33, 98, 1)
                   BorderThickness: =0.5
-                  DisplayMode: |+
+                  DisplayMode: |
                     =If(loading, DisplayMode.Disabled, DisplayMode.Edit)
                   Fill: =RGBA(255, 255, 255, 1)
                   Height: =432
