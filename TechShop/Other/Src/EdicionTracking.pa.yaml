@@ -1468,173 +1468,7 @@ Screens:
                   HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
                   HoverColor: =RGBA(255, 255, 255, 1)
                   HoverFill: =
-                  OnSelect: |-
-                    =If(
-                        CountRows(
-                            Filter(
-                                glr_Pots_3.AllItems,
-                                !IsMatch(
-                                    CantidadMats_2.Text,
-                                    "^\-?\d+(\.\d+)?$"
-                                ) || Value(CantidadMats_2.Text) < 0
-                            )
-                        ) > 0,
-                        UpdateContext(
-                            {
-                                MostrarAviso: true,
-                                mensajeNotificacion: "Hay cantidades inválidas o negativas. Revisa los valores."
-                            }
-                        ),
-                        CountRows(
-                            Filter(
-                                glr_Pots_3.AllItems,
-                                IsBlank(Trim(CantidadMats_2.Text))
-                            )
-                        ) > 0,
-                        UpdateContext(
-                            {
-                                MostrarAviso: true,
-                                mensajeNotificacion: "Hay cantidades en blanco. No se puede guardar."
-                            }
-                        ),
-                       //Revisar Validacion
-                        /*
-                        CountRows(
-                            Filter(
-                                glr_Pots_3.AllItems;
-                                IsMatch(
-                                    CantidadMats_2.Text;
-                                    "^\-?\d+(\.\d+)?$"
-                                ) && ( If(
-                                    IsBlank(CantidadMats_2.Text);
-                                    0;
-                                    Value(CantidadMats_2.Text)
-                                ) ) < (bodega - usado) || ( If(
-                                    IsBlank(CantidadMats_2.Text);
-                                    0;
-                                    Value(CantidadMats_2.Text)
-                                ) ) < usado && IsBlank(Trim(txtObservacion_2.Text))
-                            )
-                        ) > 0;
-                        UpdateContext(
-                            {
-                                MostrarAviso: true;
-                                mensajeNotificacion: "Faltan observaciones para materiales cuya cantidad se reduce. Revisa las filas."
-                            }
-                        );*/
-                        CountRows(
-                            Filter(
-                                glr_Pots_3.AllItems,
-                                IsMatch(
-                                    CantidadMats_2.Text,
-                                    "^\-?\d+(\.\d+)?$"
-                                ) && Value(CantidadMats_2.Text) <> 0
-                            )
-                        ) = 0,
-                        UpdateContext(
-                            {
-                                MostrarAviso: true,
-                                mensajeNotificacion: "Todas las cantidades están en 0. No hay materiales para agregar."
-                            }
-                        ),
-                        If(
-                            CountIf(
-                                ClearCollect(
-                                    Validacion_Tracking,
-                                    ForAll(
-                                        glr_Pots_3.AllItems,
-                                        If(
-                                            Value(CantidadEditada) = usado,
-                                            false,
-                                            Value(CantidadEditada) > usado,
-                                            With(
-                                                {Valor: Value(CantidadEditada) - usado},
-                                                If(
-                                                    Valor > (bodega - usado),
-                                                    true,
-                                                    false
-                                                )
-                                            ),
-                                            Value(CantidadEditada) < usado,
-                                            false,
-                                            true
-                                        )
-                                    )
-                                ),
-                                Value = true
-                            ) > 0,
-                            UpdateContext(
-                                {
-                                    MostrarAviso: true,
-                                    mensajeNotificacion: "Alguna cantidad supera la disponible. Revisa las filas."
-                                }
-                            ),
-                            ForAll(
-                                glr_Pots_3.AllItems,
-                                With(
-                                    {
-                                        MaterialesEdit: ThisRecord.MaterialesEdicion,
-                                        CantidadEdit: ThisRecord.CantidadMats_2.Text,
-                                        ObservacionEdit: ThisRecord.txtObservacion_2.Text
-                                    },
-                                    Patch(
-                                        Logistica_Compras,
-                                        LookUp(
-                                            Logistica_Compras,
-                                            POT = gl_PotsEdicion.Selected.Value && ID_Tracking = gl_PuestoCompras_LO_1.Selected.ID_Tracking && Tracking = gl_PuestoCompras_LO_1.Selected.Tracking && Materiales = MaterialesEdit
-                                        ),
-                                        {
-                                            Cantidad: Value(CantidadEdit),
-                                            Observacion: ObservacionEdit
-                                        }
-                                    )
-                                )
-                            );
-                            ClearCollect(
-                                Validacion_Estado,
-                                ForAll(
-                                    glr_Pots_3.AllItems,
-                                    {
-                                        Disponible: (bodega - If(
-                                            IsBlank(CantidadMats_2.Text),
-                                            usado,
-                                            Value(CantidadMats_2.Text)
-                                        ))
-                                    }
-                                )
-                            );
-                            If(
-                                CountIf(
-                                    Validacion_Estado,
-                                    Disponible > 0
-                                ) > 0,
-                                Patch(
-                                    Compras_Pots,
-                                    LookUp(
-                                        Compras_Pots,
-                                        POT = gl_PotsEdicion.Selected.Value
-                                    ),
-                                    {'Estado (crfb9_estado)': "Colocado"}
-                                ),
-                                Patch(
-                                    Compras_Pots,
-                                    LookUp(
-                                        Compras_Pots,
-                                        POT = gl_PotsEdicion.Selected.Value
-                                    ),
-                                    {'Estado (crfb9_estado)': "Tramitado"}
-                                )
-                            );
-                            Refresh(Logistica_Compras);
-                            UpdateContext(
-                                {
-                                    MostrarAviso: true,
-                                    mensajeNotificacion: "Materiales editados correctamente."
-                                }
-                            ),
-                            UpdateContext({AbrirPots: false, Borrar: false})
-                        )
-                    )
+                  OnSelect: "=If(\n    CountRows(\n        Filter(\n            glr_Pots_3.AllItems,\n            !IsMatch(\n                CantidadMats_2.Text,\n                \"^\\-?\\d+(\\.\\d+)?$\"\n            ) || Value(CantidadMats_2.Text) < 0\n        )\n    ) > 0,\n    UpdateContext(\n        {\n            MostrarAviso: true,\n            mensajeNotificacion: \"Hay cantidades inválidas o negativas. Revisa los valores.\"\n        }\n    ),\n    CountRows(\n        Filter(\n            glr_Pots_3.AllItems,\n            IsBlank(Trim(CantidadMats_2.Text))\n        )\n    ) > 0,\n    UpdateContext(\n        {\n            MostrarAviso: true,\n            mensajeNotificacion: \"Hay cantidades en blanco. No se puede guardar.\"\n        }\n    ),\n\n CountRows(\n        Filter(\n            glr_Pots_3.AllItems,\n            IsMatch(ThisRecord.CantidadMats_2.Text, \"^\\-?\\d+(\\.\\d+)?$\")\n            && ( If(IsBlank(ThisRecord.CantidadMats_2.Text), 0, Value(ThisRecord.CantidadMats_2.Text)) ) < ThisRecord.usado\n            && IsBlank(Trim(ThisRecord.txtObservacion_2.Text))\n        )\n    ) > 0,\n    UpdateContext({MostrarAviso: true, mensajeNotificacion: \"Faltan observaciones para materiales cuya cantidad se reduce. Revisa las filas.\"}),\n    \n    CountRows(\n        Filter(\n            glr_Pots_3.AllItems,\n            IsMatch(\n                CantidadMats_2.Text,\n                \"^\\-?\\d+(\\.\\d+)?$\"\n            ) && Value(CantidadMats_2.Text) <> 0\n        )\n    ) = 0,\n    UpdateContext(\n        {\n            MostrarAviso: true,\n            mensajeNotificacion: \"Todas las cantidades están en 0. No hay materiales para agregar.\"\n        }\n    ),\n    If(\n        CountIf(\n            ClearCollect(\n                Validacion_Tracking,\n                ForAll(\n                    glr_Pots_3.AllItems,\n                    If(\n                        Value(CantidadEditada) = usado,\n                        false,\n                        Value(CantidadEditada) > usado,\n                        With(\n                            {Valor: Value(CantidadEditada) - usado},\n                            If(\n                                Valor > (bodega - usado),\n                                true,\n                                false\n                            )\n                        ),\n                        Value(CantidadEditada) < usado,\n                        false,\n                        true\n                    )\n                )\n            ),\n            Value = true\n        ) > 0,\n        UpdateContext(\n            {\n                MostrarAviso: true,\n                mensajeNotificacion: \"Alguna cantidad supera la disponible. Revisa las filas.\"\n            }\n        ),\n        ForAll(\n            glr_Pots_3.AllItems,\n            With(\n                {\n                    MaterialesEdit: ThisRecord.MaterialesEdicion,\n                    CantidadEdit: ThisRecord.CantidadMats_2.Text,\n                    ObservacionEdit: ThisRecord.txtObservacion_2.Text\n                },\n                Patch(\n                    Logistica_Compras,\n                    LookUp(\n                        Logistica_Compras,\n                        POT = gl_PotsEdicion.Selected.Value && ID_Tracking = gl_PuestoCompras_LO_1.Selected.ID_Tracking && Tracking = gl_PuestoCompras_LO_1.Selected.Tracking && Materiales = MaterialesEdit\n                    ),\n                    {\n                        Cantidad: Value(CantidadEdit),\n                        Observacion: ObservacionEdit,\n                        Usuario_Edit:varEmpleado.Nombre\n                    }\n                )\n            )\n        );\n        ClearCollect(\n            Validacion_Estado,\n            ForAll(\n                glr_Pots_3.AllItems,\n                {\n                    Disponible: (bodega - If(\n                        IsBlank(CantidadMats_2.Text),\n                        usado,\n                        Value(CantidadMats_2.Text)\n                    ))\n                }\n            )\n        );\n        If(\n            CountIf(\n                Validacion_Estado,\n                Disponible > 0\n            ) > 0,\n            Patch(\n                Compras_Pots,\n                LookUp(\n                    Compras_Pots,\n                    POT = gl_PotsEdicion.Selected.Value\n                ),\n                {'Estado (crfb9_estado)': \"Colocado\"}\n            ),\n            Patch(\n                Compras_Pots,\n                LookUp(\n                    Compras_Pots,\n                    POT = gl_PotsEdicion.Selected.Value\n                ),\n                {'Estado (crfb9_estado)': \"Tramitado\"}\n            )\n        );\n        Refresh(Logistica_Compras);\n        UpdateContext(\n            {\n                MostrarAviso: true,\n                mensajeNotificacion: \"Materiales editados correctamente.\"\n            }\n        ),\n        UpdateContext({AbrirPots: false, Borrar: false})\n    )\n)"
                   PressedBorderColor: =Self.Fill
                   PressedColor: =Self.Fill
                   PressedFill: =Self.Color
@@ -2008,22 +1842,63 @@ Screens:
                                 mensajeNotificacion: "Selecciona primero la POT/Tracking en la galería antes de guardar."
                             }),
 
-                            Collect(
-                                Logistica_Compras,
-                                ForAll(
-                                    PotsSeleccionadas,
+                            ForAll(
+                                PotsSeleccionadas,
+                                With(
                                     {
-                                        POT: POT,
-                                        Materiales: Item,
-                                        Descripcion: Description,
-                                        Cantidad: Text(Cantidad),
-                                        Observacion: Observacion,
-                                        ID_Tracking: gl_PuestoCompras_LO_1.Selected.ID_Tracking,
-                                        Tracking: gl_PuestoCompras_LO_1.Selected.Tracking
-                                    }
+                                        POTEd: ThisRecord.POT,
+                                        MaterialEd: ThisRecord.Item,
+                                        DescEd: ThisRecord.Description,
+                                        CantEdTxt: ThisRecord.Cantidad,
+                                        CantEdNum: If(IsBlank(ThisRecord.Cantidad), 0, Value(ThisRecord.Cantidad)),
+                                        ObsEd: ThisRecord.Observacion,
+                                        idTrackSel: gl_PuestoCompras_LO_1.Selected.ID_Tracking,
+                                        trackSel: gl_PuestoCompras_LO_1.Selected.Tracking
+                                    },
+
+                                    With(
+                                        { targetRec: LookUp(Logistica_Compras,
+                                                            POT = POTEd &&
+                                                            Materiales = MaterialEd &&
+                                                            ID_Tracking = idTrackSel &&
+                                                            Tracking = trackSel) },
+                                        If(
+                                            IsBlank(targetRec),
+                                            Patch(
+                                                Logistica_Compras,
+                                                Defaults(Logistica_Compras),
+                                                {
+                                                    POT: POTEd,
+                                                    Materiales: MaterialEd,
+                                                    Descripcion: DescEd,
+                                                    Cantidad: CantEdNum,
+                                                    Observacion: ObsEd,
+                                                    ID_Tracking: idTrackSel,
+                                                    Tracking: trackSel,
+                                                    Usuario_Edit: varEmpleado.Nombre
+                                                }
+                                            ),
+                                            Patch(
+                                                Logistica_Compras,
+                                                targetRec,
+                                                {
+                                                    Cantidad: If(
+                                                        IsBlank(targetRec.Cantidad),
+                                                        CantEdNum,
+                                                        Value(targetRec.Cantidad) + CantEdNum
+                                                    ),
+                                                    Observacion: If(
+                                                        !IsBlank(Trim(ObsEd)),
+                                                        Trim(ObsEd),
+                                                        targetRec.Observacion
+                                                    ),
+                                                    Usuario_Edit: varEmpleado.Nombre
+                                                }
+                                            )
+                                        )
+                                    )
                                 )
                             );
-
                             ForAll(
                                 colEstadoPOT,
                                 If(

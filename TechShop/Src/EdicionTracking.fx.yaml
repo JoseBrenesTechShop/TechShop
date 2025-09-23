@@ -1861,31 +1861,17 @@ EdicionTracking As screen:
                             mensajeNotificacion: "Hay cantidades en blanco. No se puede guardar."
                         }
                     ),
-                   //Revisar Validacion
-                    /*
-                    CountRows(
+                
+                 CountRows(
                         Filter(
-                            glr_Pots_3.AllItems;
-                            IsMatch(
-                                CantidadMats_2.Text;
-                                "^\-?\d+(\.\d+)?$"
-                            ) && ( If(
-                                IsBlank(CantidadMats_2.Text);
-                                0;
-                                Value(CantidadMats_2.Text)
-                            ) ) < (bodega - usado) || ( If(
-                                IsBlank(CantidadMats_2.Text);
-                                0;
-                                Value(CantidadMats_2.Text)
-                            ) ) < usado && IsBlank(Trim(txtObservacion_2.Text))
+                            glr_Pots_3.AllItems,
+                            IsMatch(ThisRecord.CantidadMats_2.Text, "^\-?\d+(\.\d+)?$")
+                            && ( If(IsBlank(ThisRecord.CantidadMats_2.Text), 0, Value(ThisRecord.CantidadMats_2.Text)) ) < ThisRecord.usado
+                            && IsBlank(Trim(ThisRecord.txtObservacion_2.Text))
                         )
-                    ) > 0;
-                    UpdateContext(
-                        {
-                            MostrarAviso: true;
-                            mensajeNotificacion: "Faltan observaciones para materiales cuya cantidad se reduce. Revisa las filas."
-                        }
-                    );*/
+                    ) > 0,
+                    UpdateContext({MostrarAviso: true, mensajeNotificacion: "Faltan observaciones para materiales cuya cantidad se reduce. Revisa las filas."}),
+                    
                     CountRows(
                         Filter(
                             glr_Pots_3.AllItems,
@@ -1949,7 +1935,8 @@ EdicionTracking As screen:
                                     ),
                                     {
                                         Cantidad: Value(CantidadEdit),
-                                        Observacion: ObservacionEdit
+                                        Observacion: ObservacionEdit,
+                                        Usuario_Edit:varEmpleado.Nombre
                                     }
                                 )
                             )
@@ -2464,22 +2451,63 @@ EdicionTracking As screen:
                             mensajeNotificacion: "Selecciona primero la POT/Tracking en la galería antes de guardar."
                         }),
                 
-                        Collect(
-                            Logistica_Compras,
-                            ForAll(
-                                PotsSeleccionadas,
+                        ForAll(
+                            PotsSeleccionadas,
+                            With(
                                 {
-                                    POT: POT,
-                                    Materiales: Item,
-                                    Descripcion: Description,
-                                    Cantidad: Text(Cantidad),
-                                    Observacion: Observacion,
-                                    ID_Tracking: gl_PuestoCompras_LO_1.Selected.ID_Tracking,
-                                    Tracking: gl_PuestoCompras_LO_1.Selected.Tracking
-                                }
+                                    POTEd: ThisRecord.POT,
+                                    MaterialEd: ThisRecord.Item,
+                                    DescEd: ThisRecord.Description,
+                                    CantEdTxt: ThisRecord.Cantidad,
+                                    CantEdNum: If(IsBlank(ThisRecord.Cantidad), 0, Value(ThisRecord.Cantidad)),
+                                    ObsEd: ThisRecord.Observacion,
+                                    idTrackSel: gl_PuestoCompras_LO_1.Selected.ID_Tracking,
+                                    trackSel: gl_PuestoCompras_LO_1.Selected.Tracking
+                                },
+                
+                                With(
+                                    { targetRec: LookUp(Logistica_Compras,
+                                                        POT = POTEd &&
+                                                        Materiales = MaterialEd &&
+                                                        ID_Tracking = idTrackSel &&
+                                                        Tracking = trackSel) },
+                                    If(
+                                        IsBlank(targetRec),
+                                        Patch(
+                                            Logistica_Compras,
+                                            Defaults(Logistica_Compras),
+                                            {
+                                                POT: POTEd,
+                                                Materiales: MaterialEd,
+                                                Descripcion: DescEd,
+                                                Cantidad: CantEdNum,
+                                                Observacion: ObsEd,
+                                                ID_Tracking: idTrackSel,
+                                                Tracking: trackSel,
+                                                Usuario_Edit: varEmpleado.Nombre
+                                            }
+                                        ),
+                                        Patch(
+                                            Logistica_Compras,
+                                            targetRec,
+                                            {
+                                                Cantidad: If(
+                                                    IsBlank(targetRec.Cantidad),
+                                                    CantEdNum,
+                                                    Value(targetRec.Cantidad) + CantEdNum
+                                                ),
+                                                Observacion: If(
+                                                    !IsBlank(Trim(ObsEd)),
+                                                    Trim(ObsEd),
+                                                    targetRec.Observacion
+                                                ),
+                                                Usuario_Edit: varEmpleado.Nombre
+                                            }
+                                        )
+                                    )
+                                )
                             )
                         );
-                
                         ForAll(
                             colEstadoPOT,
                             If(
