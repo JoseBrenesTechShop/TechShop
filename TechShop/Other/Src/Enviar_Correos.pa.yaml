@@ -121,22 +121,7 @@ Screens:
                         HoverColor: =RGBA(255, 255, 255, 1)
                         HoverFill: =RGBA(0, 134, 208, 1)
                         Icon: =Icon.Home
-                        OnSelect: |-
-                          =UpdateContext(
-                              {
-                                  AbrirCompletar: false,
-                                  seleccion: false
-                              }
-                          );
-                          Refresh(Compras_Pots);
-                          Reset(dt_FechaMiami_LO_1);
-                          Reset(txt_refMiamo_LO_1);
-                          Reset(dt_FechaTech_LO_1);
-                          Reset(txt_refTech_LO_1);
-                          Reset(drp_MetodoTransporte_LO_1);
-                          Reset(drp_TipoEnvio_LO_1);
-                          Reset(txt_Pot_LO_2);
-                          Back()
+                        OnSelect: =Back()
                         PaddingBottom: =5
                         PaddingLeft: =5
                         PaddingRight: =5
@@ -246,37 +231,48 @@ Screens:
                                     HoverBorderColor: =RGBA(12, 59, 94, 1)
                                     HoverFill: =RGBA(12, 59, 94, 1)
                                     OnSelect: |-
-                                      =Office365Outlook.SendEmailV2(
-                                          Concat(
-                                              Filter(
-                                                  Empleados,
-                                                  Departamento in SelectedDepartamentos.Descripcion
+                                      =If(
+                                          !IsBlank(txt_Asunto.Text) && !IsBlank(txt_Cuerpo.Text) && (CountRows(SelectedDepartamentos) > 0 || !IsBlank(txt_Correo.Text)),
+                                          Office365Outlook.SendEmailV2(
+                                              Concat(
+                                                  Filter(
+                                                      Empleados,
+                                                      Departamento in SelectedDepartamentos.Descripcion
+                                                  ),
+                                                  Correo,
+                                                  ";"
+                                              ) & If(
+                                                  !IsBlank(txt_Correo.Text),
+                                                  ";" & txt_Correo.Text,
+                                                  ""
                                               ),
-                                              Correo,
-                                              ";"
-                                          )
-                                          & If(
-                                              !IsBlank(txt_Correo.Text),
-                                              ";" & txt_Correo.Text,
-                                              ""
-                                          ),
-                                          txt_Asunto.Text,
-                                          txt_Cuerpo.Text,
-                                          {
-                                              Attachments:
-                                                  AddColumns(
-                                                      RenameColumns(Adjuntos.Attachments, Value, ContentBytes),
+                                              txt_Asunto.Text,
+                                              txt_Cuerpo.Text,
+                                              {
+                                                  Attachments: AddColumns(
+                                                      RenameColumns(
+                                                          Adjuntos.Attachments,
+                                                          Value,
+                                                          ContentBytes
+                                                      ),
                                                       odata,
                                                       ""
                                                   )
-                                          }
-                                      );
-
-                                      Clear(SelectedDepartamentos);        
-                                      Reset(txt_Asunto);                    
-                                      Reset(txt_Cuerpo);                   
-                                      Reset(txt_Correo);                
-                                      Reset(Adjuntos)
+                                              }
+                                          );
+                                          // --- Limpiar todo después ---
+                                      Clear(SelectedDepartamentos);
+                                          Reset(txt_Asunto);
+                                          Reset(txt_Cuerpo);
+                                          Reset(txt_Correo);
+                                          Reset(Adjuntos),
+                                          UpdateContext(
+                                              {
+                                                  MostrarAviso: true,
+                                                  mensajeNotificacion: "Debe completar asunto, cuerpo y seleccionar al menos un departamento o agregar un correo externo."
+                                              }
+                                          )
+                                      )
                                     PressedBorderColor: =RGBA(15, 84, 140, 1)
                                     PressedColor: =RGBA(15, 84, 140, 1)
                                     PressedFill: =RGBA(180, 214, 250, 1)
@@ -284,7 +280,7 @@ Screens:
                                     Text: ="Enivar correo"
                                     Width: =146
                                     X: =15
-                                    Y: =5
+                                    Y: =7
                               - lbl_Adjuntar Archivos:
                                   Control: Text@0.0.51
                                   Properties:
@@ -525,24 +521,24 @@ Screens:
                                     Width: =111
                                     X: =15
                                     Y: =64
-                              - btn_EnviarCorreo_1:
-                                  Control: Classic/Button@2.2.0
+                              - Icon17:
+                                  Control: Classic/Icon@2.5.0
                                   Properties:
-                                    BorderColor: =RGBA(0, 0, 0, 1)
-                                    BorderThickness: =3
-                                    Fill: =RGBA(15, 84, 140, 1)
-                                    Height: =35
-                                    HoverBorderColor: =RGBA(12, 59, 94, 1)
-                                    HoverFill: =RGBA(12, 59, 94, 1)
+                                    Height: =27
+                                    Icon: =Icon.Reset
                                     OnSelect: =Clear(SelectedDepartamentos)
-                                    PressedBorderColor: =RGBA(15, 84, 140, 1)
-                                    PressedColor: =RGBA(15, 84, 140, 1)
-                                    PressedFill: =RGBA(180, 214, 250, 1)
-                                    Size: =16
-                                    Text: ="Limpiar"
-                                    Width: =115
-                                    X: =175
-                                    Y: =5
+                                    Width: =47
+                                    X: =1294
+                                    Y: =64
+                              - Icon17_1:
+                                  Control: Classic/Icon@2.5.0
+                                  Properties:
+                                    Height: =27
+                                    Icon: =Icon.Reset
+                                    OnSelect: =Reset(Adjuntos)
+                                    Width: =47
+                                    X: =956
+                                    Y: =64
       - Capa1_15:
           Control: GroupContainer@1.3.0
           Variant: ManualLayout

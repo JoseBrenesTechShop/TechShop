@@ -139,22 +139,7 @@ Enviar_Correos As screen:
                 HoverColor: =RGBA(255, 255, 255, 1)
                 HoverFill: =RGBA(0, 134, 208, 1)
                 Icon: =Icon.Home
-                OnSelect: |-
-                    =UpdateContext(
-                        {
-                            AbrirCompletar: false,
-                            seleccion: false
-                        }
-                    );
-                    Refresh(Compras_Pots);
-                    Reset(dt_FechaMiami_LO_1);
-                    Reset(txt_refMiamo_LO_1);
-                    Reset(dt_FechaTech_LO_1);
-                    Reset(txt_refTech_LO_1);
-                    Reset(drp_MetodoTransporte_LO_1);
-                    Reset(drp_TipoEnvio_LO_1);
-                    Reset(txt_Pot_LO_2);
-                    Back()
+                OnSelect: =Back()
                 PaddingBottom: =5
                 PaddingLeft: =5
                 PaddingRight: =5
@@ -313,37 +298,48 @@ Enviar_Correos As screen:
                         HoverColor: =App.Theme.Colors.PrimaryForeground
                         HoverFill: =RGBA(12, 59, 94, 1)
                         OnSelect: |-
-                            =Office365Outlook.SendEmailV2(
-                                Concat(
-                                    Filter(
-                                        Empleados,
-                                        Departamento in SelectedDepartamentos.Descripcion
+                            =If(
+                                !IsBlank(txt_Asunto.Text) && !IsBlank(txt_Cuerpo.Text) && (CountRows(SelectedDepartamentos) > 0 || !IsBlank(txt_Correo.Text)),
+                                Office365Outlook.SendEmailV2(
+                                    Concat(
+                                        Filter(
+                                            Empleados,
+                                            Departamento in SelectedDepartamentos.Descripcion
+                                        ),
+                                        Correo,
+                                        ";"
+                                    ) & If(
+                                        !IsBlank(txt_Correo.Text),
+                                        ";" & txt_Correo.Text,
+                                        ""
                                     ),
-                                    Correo,
-                                    ";"
-                                )
-                                & If(
-                                    !IsBlank(txt_Correo.Text),
-                                    ";" & txt_Correo.Text,
-                                    ""
-                                ),
-                                txt_Asunto.Text,
-                                txt_Cuerpo.Text,
-                                {
-                                    Attachments:
-                                        AddColumns(
-                                            RenameColumns(Adjuntos.Attachments, Value, ContentBytes),
+                                    txt_Asunto.Text,
+                                    txt_Cuerpo.Text,
+                                    {
+                                        Attachments: AddColumns(
+                                            RenameColumns(
+                                                Adjuntos.Attachments,
+                                                Value,
+                                                ContentBytes
+                                            ),
                                             odata,
                                             ""
                                         )
-                                }
-                            );
-                            
-                            Clear(SelectedDepartamentos);        
-                            Reset(txt_Asunto);                    
-                            Reset(txt_Cuerpo);                   
-                            Reset(txt_Correo);                
-                            Reset(Adjuntos)
+                                    }
+                                );
+                                // --- Limpiar todo después ---
+                            Clear(SelectedDepartamentos);
+                                Reset(txt_Asunto);
+                                Reset(txt_Cuerpo);
+                                Reset(txt_Correo);
+                                Reset(Adjuntos),
+                                UpdateContext(
+                                    {
+                                        MostrarAviso: true,
+                                        mensajeNotificacion: "Debe completar asunto, cuerpo y seleccionar al menos un departamento o agregar un correo externo."
+                                    }
+                                )
+                            )
                         PressedBorderColor: =RGBA(15, 84, 140, 1)
                         PressedColor: =RGBA(15, 84, 140, 1)
                         PressedFill: =RGBA(180, 214, 250, 1)
@@ -351,7 +347,7 @@ Enviar_Correos As screen:
                         Text: ="Enivar correo"
                         Width: =146
                         X: =15
-                        Y: =5
+                        Y: =7
                         ZIndex: =53
 
                     "'lbl_Adjuntar Archivos' As Texto":
@@ -671,30 +667,31 @@ Enviar_Correos As screen:
                         Y: =64
                         ZIndex: =62
 
-                    btn_EnviarCorreo_1 As button:
-                        BorderColor: =RGBA(0, 0, 0, 1)
-                        BorderThickness: =3
-                        Color: =App.Theme.Colors.PrimaryForeground
-                        DisabledBorderColor: =RGBA(244, 244, 244, 1)
-                        DisabledColor: =RGBA(166, 166, 166, 1)
-                        DisabledFill: =RGBA(244, 244, 244, 1)
-                        Fill: =RGBA(15, 84, 140, 1)
-                        Font: =App.Theme.Font
-                        FontWeight: =FontWeight.Semibold
-                        Height: =35
-                        HoverBorderColor: =RGBA(12, 59, 94, 1)
-                        HoverColor: =App.Theme.Colors.PrimaryForeground
-                        HoverFill: =RGBA(12, 59, 94, 1)
+                    Icon17 As icon.Reset:
+                        BorderColor: =App.Theme.Colors.Darker40
+                        Color: =App.Theme.Colors.Darker30
+                        DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                        DisabledColor: =RGBA(244, 244, 244, 1)
+                        Height: =27
+                        Icon: =Icon.Reset
                         OnSelect: =Clear(SelectedDepartamentos)
-                        PressedBorderColor: =RGBA(15, 84, 140, 1)
-                        PressedColor: =RGBA(15, 84, 140, 1)
-                        PressedFill: =RGBA(180, 214, 250, 1)
-                        Size: =16
-                        Text: ="Limpiar"
-                        Width: =115
-                        X: =175
-                        Y: =5
-                        ZIndex: =63
+                        Width: =47
+                        X: =1294
+                        Y: =64
+                        ZIndex: =64
+
+                    Icon17_1 As icon:
+                        BorderColor: =App.Theme.Colors.Darker40
+                        Color: =App.Theme.Colors.Darker30
+                        DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                        DisabledColor: =RGBA(244, 244, 244, 1)
+                        Height: =27
+                        Icon: =Icon.Reset
+                        OnSelect: =Reset(Adjuntos)
+                        Width: =47
+                        X: =956
+                        Y: =64
+                        ZIndex: =65
 
     Capa1_15 As groupContainer.manualLayoutContainer:
         BorderColor: =RGBA(0, 0, 0, 0)
