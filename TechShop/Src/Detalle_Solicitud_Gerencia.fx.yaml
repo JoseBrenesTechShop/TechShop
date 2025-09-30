@@ -165,9 +165,11 @@ Detalle_Solicitud_Gerencia As screen:
                 Icon: =Icon.BackArrow
                 LayoutMaxHeight: =
                 LayoutMaxWidth: =
-                OnSelect: |-
+                OnSelect: |
                     =Reset(glr_Solicitudes_SG);
                     UpdateContext({startimer: false});
+                    UpdateContext({showContainer: false});
+                    Reset(txt_Motivo_DNCG);
                     Refresh(preqitem);
                     Back();
                 PaddingBottom: =5
@@ -242,19 +244,23 @@ Detalle_Solicitud_Gerencia As screen:
                             DisabledBorderColor: =RGBA(244, 244, 244, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             DisabledFill: =RGBA(244, 244, 244, 1)
-                            DisplayMode: |
+                            DisplayMode: |-
                                 =/*If(CountIf(CheckList_DSG; true) = CountIf(glr_Detalles_DSG.AllItems; true) && CountIf(glr_Detalles_DSG.AllItems; true) > 0 && IsBlank(
                                         LookUp(
                                             Solicitud_Compras;
                                             soli_num = txt_Num_Soli_DSG.Text
                                         )
                                     ); DisplayMode.Edit; DisplayMode.Disabled)*/
-                                    If(Timer4.Value = 5000 && IsBlank(
+                                If(
+                                    Timer4.Value = 5000 && IsBlank(
                                         LookUp(
                                             Solicitud_Compras,
                                             soli_num = txt_Num_Soli_DSG.Text
                                         )
-                                    ), DisplayMode.Edit, DisplayMode.Disabled)
+                                    ) && !showContainer,
+                                    DisplayMode.Edit,
+                                    DisplayMode.Disabled
+                                )
                             Fill: =RGBA(15, 108, 189, 1)
                             Font: =App.Theme.Font
                             FontWeight: =FontWeight.Semibold
@@ -580,56 +586,39 @@ Detalle_Solicitud_Gerencia As screen:
                             ZIndex: =21
 
                         Button10_11 As button:
-                            BorderColor: =App.Theme.Colors.Primary
+                            BorderColor: =RGBA(215, 58, 60, 1)
                             Color: =App.Theme.Colors.PrimaryForeground
                             DisabledBorderColor: =RGBA(244, 244, 244, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             DisabledFill: =RGBA(244, 244, 244, 1)
-                            DisplayMode: |
+                            DisplayMode: |-
                                 =/*If(CountIf(CheckList_DSG; true) = CountIf(glr_Detalles_DSG.AllItems; true) && CountIf(glr_Detalles_DSG.AllItems; true) > 0 && IsBlank(
                                         LookUp(
                                             Solicitud_Compras;
                                             soli_num = txt_Num_Soli_DSG.Text
                                         )
                                     ); DisplayMode.Edit; DisplayMode.Disabled)*/
-                                    If(Timer4.Value = 5000 && IsBlank(
+                                If(
+                                    Timer4.Value = 5000 && IsBlank(
                                         LookUp(
                                             Solicitud_Compras,
                                             soli_num = txt_Num_Soli_DSG.Text
                                         )
-                                    ), DisplayMode.Edit, DisplayMode.Disabled)
+                                    ) && !showContainer,
+                                    DisplayMode.Edit,
+                                    DisplayMode.Disabled
+                                )
                             Fill: =RGBA(215, 58, 60, 1)
                             Font: =App.Theme.Font
                             FontWeight: =FontWeight.Semibold
                             Height: =35
-                            HoverBorderColor: =RGBA(15, 84, 140, 1)
+                            HoverBorderColor: =RGBA(132, 40, 38, 1)
                             HoverColor: =App.Theme.Colors.PrimaryForeground
-                            HoverFill: =RGBA(15, 84, 140, 1)
+                            HoverFill: =RGBA(132, 40, 38, 1)
                             OnSelect: |-
-                                =If(
-                                    IsBlank(
-                                        LookUp(
-                                            Solicitud_Compras,
-                                            soli_num = txt_Num_Soli_DSG.Text
-                                        )
-                                    ),
-                                    Collect(
-                                        Solicitud_Compras,
-                                        {
-                                            soli_num: Upper(txt_Num_Soli_DSG.Text),
-                                            fecha: DateValue(txt_Fecha_DSG.Text),
-                                            solicitante: txt_Solicitante_DSG.Text,
-                                            user: txt_User_DSG.Text,
-                                            total: Value(txt_Total_DSG.Text),
-                                            estado: "Gerencia"
-                                        }
-                                    );
-                                    Back(),
-                                    Reset(txt_Num_Soli_DSG),
-                                    Clear(CheckList_DSG)
-                                )
-                            PressedBorderColor: =RGBA(15, 108, 189, 1)
-                            PressedColor: =RGBA(15, 108, 189, 1)
+                                =UpdateContext({showContainer: true})
+                            PressedBorderColor: =RGBA(215, 58, 60, 1)
+                            PressedColor: =RGBA(215, 58, 60, 1)
                             PressedFill: =RGBA(255, 255, 255, 1)
                             Size: =15
                             Text: ="Rechazar"
@@ -1153,24 +1142,24 @@ Detalle_Solicitud_Gerencia As screen:
                     ContainerPN_EM_12 As groupContainer.manualLayoutContainer:
                         BorderColor: =RGBA(15, 84, 140, 1)
                         BorderThickness: =2
-                        DropShadow: =DropShadow.Semilight
+                        DropShadow: =DropShadow.ExtraBold
                         Fill: =RGBA(180, 214, 250, 1)
-                        Height: =462
-                        RadiusBottomLeft: =4
-                        RadiusBottomRight: =4
-                        RadiusTopLeft: =4
-                        RadiusTopRight: =4
+                        Height: =231
+                        RadiusBottomLeft: =10
+                        RadiusBottomRight: =10
+                        RadiusTopLeft: =10
+                        RadiusTopRight: =10
                         Visible: =showContainer
                         Width: =451
-                        X: =275
-                        Y: =90
+                        X: =450
+                        Y: =156
                         ZIndex: =44
 
                         lbl_BarraSeleccion_EM_12 As text:
                             Align: =Align.Center
                             BorderThickness: =2
                             Color: =RGBA(255, 255, 255, 1)
-                            Default: ="Seleccione el P/N"
+                            Default: ="¿Desea rechazar esta solicitud?"
                             DisabledBorderColor: =RGBA(166, 166, 166, 1)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             DisabledFill: =RGBA(244, 244, 244, 1)
@@ -1192,37 +1181,21 @@ Detalle_Solicitud_Gerencia As screen:
                             RadiusTopRight: =0
                             Size: =18
                             Width: =453
-                            ZIndex: =45
-
-                        icn_eliminarFiltro_EM_6 As icon.ChevronRight:
-                            AccessibleLabel: =Self.Tooltip
-                            Height: =49
-                            Icon: =Icon.CancelBadge
-                            OnSelect: =Reset(txt_Filtro_EM_12)
-                            PaddingBottom: =16
-                            PaddingLeft: =16
-                            PaddingRight: =16
-                            PaddingTop: =16
-                            Tooltip: ="Ver los detalles del elemento"
-                            Width: =68
-                            X: =369
-                            Y: =41
-                            ZIndex: =46
+                            ZIndex: =1
 
                         lbl_Filtro_EM_12 As Texto:
                             Align: ='TextCanvas.Align'.Center
                             DisplayMode: =DisplayMode.Edit
-                            Height: =42
-                            Size: =25
-                            Text: ="Filtro"
+                            Height: =25
+                            Size: =18
+                            Text: ="Motivo"
                             Weight: ='TextCanvas.Weight'.Bold
-                            Width: =101
-                            X: =7
-                            Y: =45
-                            ZIndex: =47
+                            Width: =451
+                            X: =0
+                            Y: =33
+                            ZIndex: =2
 
-                        txt_Filtro_EM_12 As text:
-                            Align: =Align.Center
+                        txt_Motivo_DNCG As text:
                             BorderColor: =App.Theme.Colors.Darker40
                             BorderThickness: =2
                             Color: =RGBA(0, 0, 0, 1)
@@ -1232,107 +1205,115 @@ Detalle_Solicitud_Gerencia As screen:
                             DisabledFill: =RGBA(244, 244, 244, 1)
                             FocusedBorderThickness: =4
                             Font: =App.Theme.Font
-                            Height: =38
+                            Height: =100
+                            HintText: ="Motivo del Rechazo"
                             HoverBorderColor: =App.Theme.Colors.Darker40
                             HoverColor: =RGBA(0, 0, 0, 1)
                             HoverFill: =App.Theme.Colors.Lighter70
+                            MaxLength: =300
+                            Mode: =TextMode.MultiLine
                             OnSelect: =
-                            PaddingLeft: =5
-                            RadiusBottomLeft: =15
-                            RadiusBottomRight: =15
-                            RadiusTopLeft: =15
-                            RadiusTopRight: =15
-                            Size: =15
-                            Width: =270
-                            X: =113
-                            Y: =49
-                            ZIndex: =48
+                            PaddingRight: =12
+                            RadiusBottomLeft: =8
+                            RadiusBottomRight: =8
+                            RadiusTopLeft: =8
+                            RadiusTopRight: =8
+                            Size: =12
+                            Width: =411
+                            X: =20
+                            Y: =58
+                            ZIndex: =3
 
-                        "gl_SeleccionPN_EM_12 As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
-                            BorderThickness: =2
-                            DelayItemLoading: =true
-                            Height: =365
-                            Items: |-
+                        icn_eliminarFiltro_EM_6 As icon.ChevronRight:
+                            AccessibleLabel: =Self.Tooltip
+                            Height: =49
+                            Icon: =Icon.CancelBadge
+                            OnSelect: =Reset(txt_Motivo_DNCG)
+                            PaddingBottom: =16
+                            PaddingLeft: =16
+                            PaddingRight: =16
+                            PaddingTop: =16
+                            Tooltip: ="Ver los detalles del elemento"
+                            Width: =55
+                            X: =396
+                            Y: =21
+                            ZIndex: =4
+
+                        Button10_13 As button:
+                            BorderColor: =RGBA(215, 58, 60, 1)
+                            Color: =App.Theme.Colors.PrimaryForeground
+                            DisabledBorderColor: =RGBA(244, 244, 244, 1)
+                            DisabledColor: =RGBA(166, 166, 166, 1)
+                            DisabledFill: =RGBA(244, 244, 244, 1)
+                            Fill: =RGBA(215, 58, 60, 1)
+                            Font: =App.Theme.Font
+                            FontWeight: =FontWeight.Semibold
+                            HoverBorderColor: =RGBA(132, 40, 38, 1)
+                            HoverColor: =App.Theme.Colors.PrimaryForeground
+                            HoverFill: =RGBA(132, 40, 38, 1)
+                            OnSelect: |-
                                 =If(
-                                    IsBlank(txt_Filtro_EM_12.Text), 
-                                    item,
-                                    Search(item, txt_Filtro_EM_12.Text, item)
+                                    IsBlank(
+                                        LookUp(
+                                            Solicitud_Compras,
+                                            soli_num = txt_Num_Soli_DSG.Text
+                                        )
+                                    ) && IsBlank(
+                                        LookUp(
+                                            Compras_NoMarcadas,
+                                            NSolicitud = txt_Num_Soli_DSG.Text
+                                        )
+                                    ) && !IsBlank(txt_Motivo_DNCG.Text),
+                                    Collect(
+                                        Compras_NoMarcadas,
+                                        {
+                                            NSolicitud: Upper(txt_Num_Soli_DSG.Text),
+                                            Enviado: 0,
+                                            Tipo_Envio: varEmpleado.Codigo,
+                                            Motivo: txt_Motivo_DNCG.Text
+                                        }
+                                    );
+                                    Back();
+                                    Reset(txt_Num_Soli_DSG);
+                                    UpdateContext({showContainer: false});
+                                    Reset(txt_Motivo_DNCG),
+                                    Notify(
+                                        "Debe indicar el motivo del rechazo",
+                                        NotificationType.Error
+                                    )
                                 )
-                            Layout: =Layout.Vertical
-                            LoadingSpinner: =LoadingSpinner.Data
-                            TemplatePadding: =0
-                            TemplateSize: =63
-                            Transition: =Transition.Pop
-                            Width: =453
-                            Y: =97
-                            ZIndex: =49
+                            PressedBorderColor: =RGBA(215, 58, 60, 1)
+                            PressedColor: =RGBA(215, 58, 60, 1)
+                            PressedFill: =RGBA(255, 255, 255, 1)
+                            Size: =15
+                            Text: ="Continuar"
+                            Width: =110
+                            X: =254
+                            Y: =175
+                            ZIndex: =5
 
-                            icn_AgregarPN_EM_12 As icon.ChevronRight:
-                                AccessibleLabel: =Self.Tooltip
-                                Height: =52
-                                Icon: =Icon.Add
-                                OnSelect: |-
-                                    =UpdateContext({
-                                        showContainer: false, 
-                                        txt_Destino: ThisItem.item
-                                    });
-                                PaddingBottom: =16
-                                PaddingLeft: =16
-                                PaddingRight: =16
-                                PaddingTop: =16
-                                Tooltip: ="Ver los detalles del elemento"
-                                Width: =55
-                                X: =377
-                                Y: =5
-                                ZIndex: =50
-
-                            lbl_SeleccionPN_EM_11 As Texto:
-                                Align: ='TextCanvas.Align'.Center
-                                DisplayMode: =DisplayMode.Edit
-                                Height: =42
-                                Size: =25
-                                Text: ="P/N"
-                                Weight: ='TextCanvas.Weight'.Bold
-                                Width: =80
-                                X: =14
-                                Y: =10
-                                ZIndex: =51
-
-                            txt_SeleccionPN_EM_12 As text:
-                                Align: =Align.Center
-                                BorderColor: =App.Theme.Colors.Darker40
-                                BorderThickness: =2
-                                Color: =RGBA(0, 0, 0, 1)
-                                Default: =ThisItem.item
-                                DisabledBorderColor: =RGBA(166, 166, 166, 1)
-                                DisabledColor: =RGBA(166, 166, 166, 1)
-                                DisabledFill: =RGBA(244, 244, 244, 1)
-                                DisplayMode: =DisplayMode.View
-                                FocusedBorderThickness: =4
-                                Font: =App.Theme.Font
-                                Height: =38
-                                HoverBorderColor: =App.Theme.Colors.Darker40
-                                HoverColor: =RGBA(0, 0, 0, 1)
-                                HoverFill: =App.Theme.Colors.Lighter70
-                                OnSelect: |-
-                                    =UpdateContext({showContainer: !showContainer})
-                                PaddingLeft: =5
-                                RadiusBottomLeft: =15
-                                RadiusBottomRight: =15
-                                RadiusTopLeft: =15
-                                RadiusTopRight: =15
-                                Size: =15
-                                Width: =287
-                                X: =90
-                                Y: =12
-                                ZIndex: =52
-
-                            SeparatorPN_EM_12 As rectangle:
-                                BorderColor: =RGBA(0, 18, 107, 1)
-                                Fill: =RGBA(255, 255, 255, 1)
-                                Height: =8
-                                OnSelect: =Select(Parent)
-                                Width: =Parent.TemplateWidth
-                                Y: =56
-                                ZIndex: =53
+                        Button10_14 As button:
+                            BorderColor: =RGBA(52, 152, 47, 1)
+                            Color: =App.Theme.Colors.PrimaryForeground
+                            DisabledBorderColor: =RGBA(244, 244, 244, 1)
+                            DisabledColor: =RGBA(166, 166, 166, 1)
+                            DisabledFill: =RGBA(244, 244, 244, 1)
+                            Fill: =RGBA(52, 152, 47, 1)
+                            Font: =App.Theme.Font
+                            FontWeight: =FontWeight.Bold
+                            HoverBorderColor: =RGBA(21, 68, 18, 1)
+                            HoverColor: =App.Theme.Colors.PrimaryForeground
+                            HoverFill: =RGBA(21, 68, 18, 1)
+                            OnSelect: |-
+                                =UpdateContext({showContainer: false});
+                                Reset(txt_Motivo_DNCG)
+                            PressedBorderColor: =RGBA(52, 152, 47, 1)
+                            PressedColor: =RGBA(52, 152, 47, 1)
+                            PressedFill: =RGBA(255, 255, 255, 1)
+                            Size: =15
+                            Text: ="Cancelar"
+                            Width: =110
+                            X: =87
+                            Y: =175
+                            ZIndex: =6
 
