@@ -940,6 +940,7 @@ Screens:
                     Reset(drp_MetodoTransporte_LO_1);
                     Reset(drp_TipoEnvio_LO_1);
                     Reset(Ref);
+                    Reset(txt_refMiamo_LO_4);
                         Clear(PotsSeleccionadas);
                         Clear(colEstadoPOT)
                   PressedBorderColor: =Self.Fill
@@ -1339,6 +1340,7 @@ Screens:
                         Reset(drp_MetodoTransporte_LO_1);
                         Reset(drp_TipoEnvio_LO_1);
                         Reset(Ref);
+                        Reset(txt_refMiamo_LO_4);
                         Clear(PotsSeleccionadas);
                         Clear(colEstadoPOT)
                     )
@@ -1411,11 +1413,11 @@ Screens:
                   Fill: =RGBA(255, 255, 255, 1)
                   Height: =500
                   Items: |-
-                    =Filter(
+                    =Distinct(Filter(
                         Compras_Pots,
                         'Estado (crfb9_estado)' = "Colocado" &&
                         !(Text(POT) in glr_pots_Seleccionadas.AllItems.Value)
-                    )
+                    ),POT)
                   TemplateSize: =35
                   Width: =886
                   Y: =72
@@ -1427,7 +1429,7 @@ Screens:
                         BorderColor: =RGBA(40, 134, 222, 1)
                         BorderThickness: =0.5
                         Color: =
-                        Default: =ThisItem.POT
+                        Default: =ThisItem.Value
                         DisabledBorderColor: =RGBA(40, 134, 222, 1)
                         DisabledColor: =
                         DisabledFill: =
@@ -1450,7 +1452,7 @@ Screens:
                         BorderColor: =RGBA(40, 134, 222, 1)
                         BorderThickness: =0.5
                         Color: =
-                        Default: =ThisItem.Num_Vend
+                        Default: =LookUp(Compras_Pots, POT = ThisItem.Value,Num_Vend)
                         DisabledBorderColor: =RGBA(40, 134, 222, 1)
                         DisabledColor: =
                         DisabledFill: =
@@ -1474,7 +1476,7 @@ Screens:
                         BorderColor: =RGBA(40, 134, 222, 1)
                         BorderThickness: =0.5
                         Color: =
-                        Default: =ThisItem.Provedor
+                        Default: =LookUp(Compras_Pots, POT = ThisItem.Value,Provedor)
                         DisabledBorderColor: =RGBA(40, 134, 222, 1)
                         DisabledColor: =
                         DisabledFill: =
@@ -1520,7 +1522,7 @@ Screens:
                           ClearCollect(
                               colGaleria,
                               AddColumns(
-                                  Filter(preqitem, po_num = glr_Pots.Selected.POT),
+                                  Filter(preqitem, po_num = glr_Pots.Selected.Value),
                                   CantidadDisponible,
                                   qty_ordered - Sum(
                                       Filter(colCompras, POT = po_num && Materiales = item),
@@ -1756,7 +1758,7 @@ Screens:
                   PaddingRight: =0
                   PaddingTop: =0
                   Size: =20
-                  Text: ="Materiales Disponibles - " & glr_Pots.Selected.POT
+                  Text: ="Materiales Disponibles - " & glr_Pots.Selected.Value
                   Weight: ='TextCanvas.Weight'.Semibold
                   Width: =1289
             - btn_Guardar_EC_21:
