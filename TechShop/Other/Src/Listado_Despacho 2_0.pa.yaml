@@ -125,9 +125,6 @@ Screens:
                           =UpdateContext({
                               AbrirCont: false,
                               AbrirLisDespacho: false,
-                              ListadoSeleccionado: Blank(),
-                              UltimoListado: Blank(),
-                              NuevoListado: Blank(),
                               TieneFaltantes: false
                           });
                           Clear(DespachoCollection);
@@ -251,7 +248,7 @@ Screens:
                                     DisabledFill: =RGBA(255, 255, 255, 1)
                                     DisplayMode: =
                                     Height: =30
-                                    HintText: ="Tracking"
+                                    HintText: ="REF - Nº Tracking"
                                     HoverBorderColor: =RGBA(180, 214, 250, 1)
                                     HoverFill: =RGBA(227, 240, 252, 1)
                                     OnChange: =
@@ -440,7 +437,7 @@ Screens:
                                           Size: =16
                                           Text: ="Listado Despacho"
                                           Weight: ='TextCanvas.Weight'.Semibold
-                                          Width: =257
+                                          Width: =141
                                           X: =1095
                                     - gl_LogisticaDespacho_LD_1:
                                         Control: Gallery@2.15.0
@@ -570,13 +567,73 @@ Screens:
                                                 HoverFill: =RGBA(255, 255, 255, 255)
                                                 Icon: =Icon.Items
                                                 OnSelect: |
+                                                  =
+                                                  ClearCollect(
+                                                    colTemp,
+                                                    Filter(
+                                                      Logistica_Compras,
+                                                      Tracking = ThisItem.Tracking && ID_Tracking = ThisItem.ID_Tracking
+                                                    )
+                                                  );
+
+                                                  ClearCollect(
+                                                    colMaterialesTrackingTemp,
+                                                    AddColumns(
+                                                      Distinct(colTemp, Materiales),
+                                                      Cantidades,
+                                                      Sum(
+                                                        Filter(colTemp, Materiales = Value),
+                                                        If( IsBlank( Value(Cantidad) ), 0, Value(Cantidad) )
+                                                      )
+                                                    )
+                                                  );
+                                                  ClearCollect(
+                                                    colMaterialesTracking,
+                                                    AddColumns(
+                                                      colMaterialesTrackingTemp,
+                                                      Descripcion,
+                                                      Coalesce(
+                                                        LookUp(colTemp, Materiales = Value, Descripcion),
+                                                        LookUp(colTemp, Materiales = Value, Descripcion)
+                                                      ),
+                                                      CantidadFaltante,
+                                                      Max(0, Cantidades - If( IsBlank( Value(txt_cantidaRecibida_LD_1.Text) ), 0, Value(txt_cantidaRecibida_LD_1.Text) ))
+                                                    )
+                                                  );
+
+                                                  UpdateContext({AbrirCont: true})
+                                                PaddingBottom: =2
+                                                PaddingLeft: =2
+                                                PaddingRight: =2
+                                                PaddingTop: =2
+                                                Width: =141
+                                                X: =1095
+                                          - icn_Eliminar_EM_28:
+                                              Control: Classic/Icon@2.5.0
+                                              Properties:
+                                                BorderColor: =RGBA(40, 134, 222, 1)
+                                                BorderThickness: =0.5
+                                                Color: =
+                                                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                                                DisabledColor: =
+                                                DisabledFill: =
+                                                DisplayMode: |
+                                                  =
+                                                Fill: =Color.White
+                                                FocusedBorderThickness: =20
+                                                Height: =30
+                                                HoverBorderColor: =RGBA(40, 134, 222, 1)
+                                                HoverColor: =
+                                                HoverFill: =RGBA(255, 255, 255, 255)
+                                                Icon: =Icon.View
+                                                OnSelect: |
                                                   =UpdateContext({AbrirCont: true})
                                                 PaddingBottom: =2
                                                 PaddingLeft: =2
                                                 PaddingRight: =2
                                                 PaddingTop: =2
-                                                Width: =257
-                                                X: =1095
+                                                Width: =116
+                                                X: =1236
                                     - lbl_PNDato_EM_345:
                                         Control: Text@0.0.51
                                         Properties:
@@ -594,6 +651,24 @@ Screens:
                                           Text: ="ID"
                                           Weight: ='TextCanvas.Weight'.Semibold
                                           Width: =111
+                                    - lbl_PNDato_EM_368:
+                                        Control: Text@0.0.51
+                                        Properties:
+                                          Align: ='TextCanvas.Align'.Center
+                                          BorderColor: =RGBA(40, 134, 222, 1)
+                                          BorderStyle: =BorderStyle.Solid
+                                          BorderThickness: =0.5
+                                          Fill: =RGBA(180, 214, 250, 1)
+                                          Height: =25
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =16
+                                          Text: ="Visualizar"
+                                          Weight: ='TextCanvas.Weight'.Semibold
+                                          Width: =116
+                                          X: =1236
                               - ContainerPN_EM_16:
                                   Control: GroupContainer@1.3.0
                                   Variant: ManualLayout
@@ -934,7 +1009,7 @@ Screens:
                   BorderThickness: =1
                   Height: =466
                   Items: |
-                    =Logistica_Compras
+                    =colMaterialesTracking
                   ShowScrollbar: =false
                   TemplateSize: =30
                   Width: =1352
@@ -946,7 +1021,7 @@ Screens:
                         Align: =Align.Center
                         BorderColor: =RGBA(40, 134, 222, 1)
                         BorderThickness: =0.5
-                        Default: =ThisItem.Materiales
+                        Default: =ThisItem.Value
                         DisabledBorderColor: =RGBA(40, 134, 222, 1)
                         DisabledColor: =
                         DisabledFill: =
@@ -991,7 +1066,7 @@ Screens:
                         Align: =Align.Center
                         BorderColor: =RGBA(40, 134, 222, 1)
                         BorderThickness: =0.5
-                        Default: =ThisItem.Cantidad
+                        Default: =ThisItem.Cantidades
                         DisabledBorderColor: =RGBA(40, 134, 222, 1)
                         DisabledColor: =
                         DisabledFill: =
@@ -1041,7 +1116,7 @@ Screens:
                         Align: =Align.Center
                         BorderColor: =RGBA(40, 134, 222, 1)
                         BorderThickness: =0.5
-                        Default: =
+                        Default: =ThisItem.CantidadFaltante
                         DisabledBorderColor: =RGBA(40, 134, 222, 1)
                         DisabledColor: =
                         DisabledFill: =
@@ -1108,13 +1183,8 @@ Screens:
                     =UpdateContext({
                         AbrirCont: false,
                         AbrirLisDespacho: false,
-                        ListadoSeleccionado: Blank(),
-                        UltimoListado: Blank(),
-                        NuevoListado: Blank(),
                         TieneFaltantes: false
                     });
-                    Clear(DespachoCollection);
-                    Refresh(LogisticDespachos)
                   PressedBorderColor: =Self.Fill
                   PressedColor: =Self.Fill
                   PressedFill: =Self.Color

@@ -156,9 +156,6 @@
                     =UpdateContext({
                         AbrirCont: false,
                         AbrirLisDespacho: false,
-                        ListadoSeleccionado: Blank(),
-                        UltimoListado: Blank(),
-                        NuevoListado: Blank(),
                         TieneFaltantes: false
                     });
                     Clear(DespachoCollection);
@@ -305,7 +302,7 @@
                         FocusedBorderThickness: =4
                         Font: =App.Theme.Font
                         Height: =30
-                        HintText: ="Tracking"
+                        HintText: ="REF - Nº Tracking"
                         HoverBorderColor: =RGBA(180, 214, 250, 1)
                         HoverColor: =RGBA(0, 0, 0, 1)
                         HoverFill: =RGBA(227, 240, 252, 1)
@@ -505,7 +502,7 @@
                             Size: =16
                             Text: ="Listado Despacho"
                             Weight: ='TextCanvas.Weight'.Semibold
-                            Width: =257
+                            Width: =141
                             X: =1095
                             Y: =0
                             ZIndex: =29
@@ -655,14 +652,74 @@
                                 HoverFill: =RGBA(255, 255, 255, 255)
                                 Icon: =Icon.Items
                                 OnSelect: |
+                                    =
+                                    ClearCollect(
+                                      colTemp,
+                                      Filter(
+                                        Logistica_Compras,
+                                        Tracking = ThisItem.Tracking && ID_Tracking = ThisItem.ID_Tracking
+                                      )
+                                    );
+                                    
+                                    ClearCollect(
+                                      colMaterialesTrackingTemp,
+                                      AddColumns(
+                                        Distinct(colTemp, Materiales),
+                                        Cantidades,
+                                        Sum(
+                                          Filter(colTemp, Materiales = Value),
+                                          If( IsBlank( Value(Cantidad) ), 0, Value(Cantidad) )
+                                        )
+                                      )
+                                    );
+                                    ClearCollect(
+                                      colMaterialesTracking,
+                                      AddColumns(
+                                        colMaterialesTrackingTemp,
+                                        Descripcion,
+                                        Coalesce(
+                                          LookUp(colTemp, Materiales = Value, Descripcion),
+                                          LookUp(colTemp, Materiales = Value, Descripcion)
+                                        ),
+                                        CantidadFaltante,
+                                        Max(0, Cantidades - If( IsBlank( Value(txt_cantidaRecibida_LD_1.Text) ), 0, Value(txt_cantidaRecibida_LD_1.Text) ))
+                                      )
+                                    );
+                                    
+                                    UpdateContext({AbrirCont: true})
+                                PaddingBottom: =2
+                                PaddingLeft: =2
+                                PaddingRight: =2
+                                PaddingTop: =2
+                                Width: =141
+                                X: =1095
+                                ZIndex: =36
+
+                            icn_Eliminar_EM_28 As icon:
+                                BorderColor: =RGBA(40, 134, 222, 1)
+                                BorderThickness: =0.5
+                                Color: =
+                                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                                DisabledColor: =
+                                DisabledFill: =
+                                DisplayMode: |
+                                    =
+                                Fill: =Color.White
+                                FocusedBorderThickness: =20
+                                Height: =30
+                                HoverBorderColor: =RGBA(40, 134, 222, 1)
+                                HoverColor: =
+                                HoverFill: =RGBA(255, 255, 255, 255)
+                                Icon: =Icon.View
+                                OnSelect: |
                                     =UpdateContext({AbrirCont: true})
                                 PaddingBottom: =2
                                 PaddingLeft: =2
                                 PaddingRight: =2
                                 PaddingTop: =2
-                                Width: =257
-                                X: =1095
-                                ZIndex: =36
+                                Width: =116
+                                X: =1236
+                                ZIndex: =37
 
                         lbl_PNDato_EM_345 As Texto:
                             Align: ='TextCanvas.Align'.Center
@@ -694,6 +751,37 @@
                             X: =0
                             Y: =0
                             ZIndex: =59
+
+                        lbl_PNDato_EM_368 As Texto:
+                            Align: ='TextCanvas.Align'.Center
+                            AutoHeight: =false
+                            BorderColor: =RGBA(40, 134, 222, 1)
+                            BorderStyle: =BorderStyle.Solid
+                            BorderThickness: =0.5
+                            ContentLanguage: =""
+                            DisplayMode: =DisplayMode.Edit
+                            Fill: =RGBA(180, 214, 250, 1)
+                            Font: =""
+                            FontItalic: =false
+                            FontStrikethrough: =false
+                            FontUnderline: =false
+                            Height: =25
+                            PaddingBottom: =0
+                            PaddingLeft: =0
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            Size: =16
+                            TabIndex: =0
+                            Text: ="Visualizar"
+                            Tooltip: =""
+                            VerticalAlign: =""
+                            Visible: =true
+                            Weight: ='TextCanvas.Weight'.Semibold
+                            Width: =116
+                            Wrap: =true
+                            X: =1236
+                            Y: =0
+                            ZIndex: =60
 
                     ContainerPN_EM_16 As groupContainer.manualLayoutContainer:
                         BorderColor: =RGBA(15, 84, 140, 1)
@@ -1068,7 +1156,7 @@
             DelayItemLoading: =true
             Height: =466
             Items: |
-                =Logistica_Compras
+                =colMaterialesTracking
             Layout: =Layout.Vertical
             LoadingSpinner: =LoadingSpinner.Data
             ShowScrollbar: =false
@@ -1083,7 +1171,7 @@
                 BorderColor: =RGBA(40, 134, 222, 1)
                 BorderThickness: =0.5
                 Color: =RGBA(0, 0, 0, 1)
-                Default: =ThisItem.Materiales
+                Default: =ThisItem.Value
                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                 DisabledColor: =
                 DisabledFill: =
@@ -1136,7 +1224,7 @@
                 BorderColor: =RGBA(40, 134, 222, 1)
                 BorderThickness: =0.5
                 Color: =RGBA(0, 0, 0, 1)
-                Default: =ThisItem.Cantidad
+                Default: =ThisItem.Cantidades
                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                 DisabledColor: =
                 DisabledFill: =
@@ -1194,7 +1282,7 @@
                 BorderColor: =RGBA(40, 134, 222, 1)
                 BorderThickness: =0.5
                 Color: =RGBA(0, 0, 0, 1)
-                Default: =
+                Default: =ThisItem.CantidadFaltante
                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                 DisabledColor: =
                 DisabledFill: =
@@ -1273,13 +1361,8 @@
                 =UpdateContext({
                     AbrirCont: false,
                     AbrirLisDespacho: false,
-                    ListadoSeleccionado: Blank(),
-                    UltimoListado: Blank(),
-                    NuevoListado: Blank(),
                     TieneFaltantes: false
                 });
-                Clear(DespachoCollection);
-                Refresh(LogisticDespachos)
             Size: =15
             Text: ="Volver"
             Width: =225
