@@ -566,41 +566,70 @@ Screens:
                                                 HoverColor: =
                                                 HoverFill: =RGBA(255, 255, 255, 255)
                                                 Icon: =Icon.Items
-                                                OnSelect: |
-                                                  =
-                                                  ClearCollect(
-                                                    colTemp,
-                                                    Filter(
-                                                      Logistica_Compras,
-                                                      Tracking = ThisItem.Tracking && ID_Tracking = ThisItem.ID_Tracking
-                                                    )
-                                                  );
-
-                                                  ClearCollect(
-                                                    colMaterialesTrackingTemp,
-                                                    AddColumns(
-                                                      Distinct(colTemp, Materiales),
-                                                      Cantidades,
-                                                      Sum(
-                                                        Filter(colTemp, Materiales = Value),
-                                                        If( IsBlank( Value(Cantidad) ), 0, Value(Cantidad) )
+                                                OnSelect: |-
+                                                  =ClearCollect(
+                                                      colTemp,
+                                                      Filter(
+                                                          Logistica_Compras,
+                                                          Tracking = ThisItem.Tracking && ID_Tracking = ThisItem.ID_Tracking
                                                       )
-                                                    )
                                                   );
                                                   ClearCollect(
-                                                    colMaterialesTracking,
-                                                    AddColumns(
                                                       colMaterialesTrackingTemp,
-                                                      Descripcion,
-                                                      Coalesce(
-                                                        LookUp(colTemp, Materiales = Value, Descripcion),
-                                                        LookUp(colTemp, Materiales = Value, Descripcion)
-                                                      ),
-                                                      CantidadFaltante,
-                                                      Max(0, Cantidades - If( IsBlank( Value(txt_cantidaRecibida_LD_1.Text) ), 0, Value(txt_cantidaRecibida_LD_1.Text) ))
-                                                    )
+                                                      AddColumns(
+                                                          Distinct(
+                                                              colTemp,
+                                                              Materiales
+                                                          ),
+                                                          Cantidades,
+                                                          Sum(
+                                                              Filter(
+                                                                  colTemp,
+                                                                  Materiales = Value
+                                                              ),
+                                                              If(
+                                                                  IsBlank(Value(Cantidad)),
+                                                                  0,
+                                                                  Value(Cantidad)
+                                                              )
+                                                          )
+                                                      )
                                                   );
-
+                                                  ClearCollect(
+                                                      colMaterialesTracking,
+                                                      AddColumns(
+                                                          colMaterialesTrackingTemp,
+                                                          Descripcion,
+                                                          Coalesce(
+                                                              LookUp(
+                                                                  colTemp,
+                                                                  Materiales = Value,
+                                                                  Descripcion
+                                                              ),
+                                                              ""
+                                                          ),
+                                                          POT,
+                                                          LookUp(
+                                                              colTemp,
+                                                              Materiales = Value,
+                                                              POT
+                                                          ),
+                                                          CantidadRecibida, 0,
+                                                          CantidadFaltante,
+                                                          Max(
+                                                              0,
+                                                              Cantidades - If(
+                                                                  IsBlank(Value(txt_cantidaRecibida_LD_1.Text)),
+                                                                  0,
+                                                                  Value(txt_cantidaRecibida_LD_1.Text)
+                                                              )
+                                                          )
+                                                      )
+                                                  );
+                                                  Set(
+                                                    SelectedTracking,
+                                                    { Tracking: ThisItem.Tracking, ID_Tracking: ThisItem.ID_Tracking }
+                                                  );
                                                   UpdateContext({AbrirCont: true})
                                                 PaddingBottom: =2
                                                 PaddingLeft: =2
@@ -627,7 +656,11 @@ Screens:
                                                 HoverFill: =RGBA(255, 255, 255, 255)
                                                 Icon: =Icon.View
                                                 OnSelect: |
-                                                  =UpdateContext({AbrirCont: true})
+                                                  =Set(
+                                                    SelectedTracking,
+                                                    { Tracking: ThisItem.Tracking, ID_Tracking: ThisItem.ID_Tracking }
+                                                  );
+                                                  Navigate(VistaTracking, ScreenTransition.Fade)
                                                 PaddingBottom: =2
                                                 PaddingLeft: =2
                                                 PaddingRight: =2
@@ -876,32 +909,6 @@ Screens:
                   Text: ="Detalle del Despacho"
                   Weight: ='TextCanvas.Weight'.Semibold
                   Width: =1352
-            - icn_Eliminar_EM_26:
-                Control: Classic/Icon@2.5.0
-                Properties:
-                  BorderColor: =RGBA(40, 134, 222, 1)
-                  Color: =RGBA(255, 191, 0, 1)
-                  DisabledBorderColor: =RGBA(40, 134, 222, 1)
-                  DisabledColor: =
-                  DisabledFill: =
-                  DisplayMode: =DisplayMode.View
-                  FocusedBorderThickness: =20
-                  Height: =27
-                  HoverBorderColor: =RGBA(40, 134, 222, 1)
-                  HoverColor: =
-                  HoverFill: =RGBA(255, 255, 255, 255)
-                  Icon: =Icon.Warning
-                  OnSelect: |-
-                    =Reset(txt_Pot_LD_1);
-                    Reset(dt_fecha_LD_1);
-                    Reset(drp_Tipo_LD_1)
-                  PaddingBottom: =2
-                  PaddingLeft: =2
-                  PaddingRight: =2
-                  PaddingTop: =2
-                  Width: =36
-                  X: =974
-                  Y: =8
             - lbl_PNDato_EM_348:
                 Control: Text@0.0.51
                 Properties:
@@ -1089,7 +1096,12 @@ Screens:
                         Align: =Align.Center
                         BorderColor: =RGBA(40, 134, 222, 1)
                         BorderThickness: =0.5
-                        Default: =
+                        Default: |-
+                          =If(
+                            IsBlank(ThisItem.CantidadRecibida),
+                            "",
+                            Text(ThisItem.CantidadRecibida)
+                          )
                         DisabledBorderColor: =RGBA(40, 134, 222, 1)
                         DisabledColor: =
                         DisabledFill: =
@@ -1100,7 +1112,17 @@ Screens:
                         HintText: ="Digite la cantidad"
                         HoverBorderColor: =RGBA(40, 134, 222, 1)
                         HoverFill: =RGBA(255, 255, 255, 1)
-                        OnChange: =
+                        OnChange: |+
+                          =
+                            Patch(
+                              colMaterialesTracking,
+                              ThisItem,
+                              {
+                                CantidadRecibida: Value(Self.Text),
+                                CantidadFaltante: Max(0, ThisItem.Cantidades - Value(Self.Text))
+                              }
+                            )
+
                         OnSelect: =
                         PaddingLeft: =5
                         RadiusBottomLeft: =0
@@ -1133,28 +1155,6 @@ Screens:
                         Size: =15
                         Width: =194
                         X: =1158
-            - icn_Separador2_EM_27:
-                Control: Classic/Icon@2.5.0
-                Properties:
-                  Color: =RGBA(174, 208, 221, 1)
-                  DisplayMode: =DisplayMode.View
-                  FocusedBorderThickness: =1
-                  Height: =60
-                  Icon: =Icon.VerticalLine
-                  Width: =3
-                  X: =558
-                  Y: =546
-            - icn_Separador2_EM_28:
-                Control: Classic/Icon@2.5.0
-                Properties:
-                  Color: =RGBA(174, 208, 221, 1)
-                  DisplayMode: =DisplayMode.View
-                  FocusedBorderThickness: =1
-                  Height: =60
-                  Icon: =Icon.VerticalLine
-                  Width: =3
-                  X: =312
-                  Y: =547
             - icn_Separador2_EM_29:
                 Control: Classic/Icon@2.5.0
                 Properties:
@@ -1164,8 +1164,8 @@ Screens:
                   Height: =60
                   Icon: =Icon.VerticalLine
                   Width: =3
-                  X: =804
-                  Y: =547
+                  X: =675
+                  Y: =552
             - btn_Guardar_EC_42:
                 Control: Classic/Button@2.2.0
                 Properties:
@@ -1190,29 +1190,8 @@ Screens:
                   PressedFill: =Self.Color
                   Text: ="Volver"
                   Width: =225
-                  X: =571
-                  Y: =552
-            - btn_Guardar_EC_43:
-                Control: Classic/Button@2.2.0
-                Properties:
-                  BorderColor: =RGBA(166, 215, 153, 1)
-                  Color: =RGBA(255, 255, 255, 1)
-                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
-                  DisplayMode: =
-                  Fill: =RGBA(166, 215, 153, 1)
-                  Font: =Font.'Open Sans'
-                  Height: =47
-                  HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
-                  HoverColor: =RGBA(255, 255, 255, 1)
-                  HoverFill: =
-                  OnSelect: =Refresh(LogisticDespachos)
-                  PressedBorderColor: =Self.Fill
-                  PressedColor: =Self.Fill
-                  PressedFill: =Self.Color
-                  Text: ="Refrescar tabla"
-                  Width: =225
-                  X: =324
-                  Y: =554
+                  X: =442
+                  Y: =557
             - btn_Guardar_EC_44:
                 Control: Classic/Button@2.2.0
                 Properties:
@@ -1226,14 +1205,114 @@ Screens:
                   HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
                   HoverColor: =RGBA(255, 255, 255, 1)
                   HoverFill: =
-                  OnSelect: =
+                  OnSelect: |+
+                    =If(
+                        CountRows(
+                            Filter(
+                                colMaterialesTracking,
+                                IsBlank(CantidadRecibida) || !IsNumeric(CantidadRecibida)
+                            )
+                        ) > 0,
+                        UpdateContext(
+                            {
+                                MostrarAviso: true,
+                                mensajeNotificacion: "Por favor ingrese cantidades válidas para todos los registros."
+                            }
+                        ),
+
+                        CountRows(
+                            Filter(
+                                colMaterialesTracking,
+                                CantidadRecibida > Cantidades
+                            )
+                        ) > 0,
+                        UpdateContext(
+                            {
+                                MostrarAviso: true,
+                                mensajeNotificacion: "La cantidad recibida no puede ser mayor que la cantidad."
+                            }
+                        ),
+
+                        CountRows(
+                            Filter(
+                                colMaterialesTracking,
+                                CantidadRecibida < 0
+                            )
+                        ) > 0,
+                        UpdateContext(
+                            {
+                                MostrarAviso: true,
+                                mensajeNotificacion: "La cantidad recibida no puede ser negativa."
+                            }
+                        ),
+
+                        CountRows(
+                            Filter(
+                                colMaterialesTracking,
+                                IsBlank(CantidadRecibida)
+                            )
+                        ) > 0,
+                        UpdateContext(
+                            {
+                                MostrarAviso: true,
+                                mensajeNotificacion: "Debe completar todas las cantidades recibidas."
+                            }
+                        ),
+
+                        ForAll(
+                            colMaterialesTracking,
+                            Patch(
+                                LogisticDespachos,
+                                Defaults(LogisticDespachos),
+                                {
+                                    POT: ThisRecord.POT,
+                                    Fecha: Today(),
+                                    'Estado (crfb9_estado)': "",
+                                    descripcion: ThisRecord.Descripcion,
+                                    Cantidad: ThisRecord.Cantidades,
+                                    'Cantidad Recibida': Coalesce(ThisRecord.CantidadRecibida, 0),
+                                    'Cantidad Faltante': ThisRecord.CantidadFaltante
+                                }
+                            )
+                        );
+
+                        UpdateContext(
+                            {
+                                MostrarAviso: true,
+                                mensajeNotificacion: "Datos guardados correctamente",
+                                AbrirCont: false,
+                                AbrirLisDespacho: false
+                            }
+                        );
+
+                        Clear(DespachoCollection);
+                        Refresh(LogisticDespachos)
+                    )
+
+                    /*
+                        If(
+                            CountIf(
+                                glr_Listado_LD_1.AllItems;
+                                Value(ThisRecord.txt_cantidadFaltante_LD_1.Text) > 0
+                            ) = 0;
+                            Patch(
+                                Compras_Pots;
+                                LookUp(
+                                    Compras_Pots;
+                                    POT =  && Requisicion = 
+                                );
+                                {'Estado (crfb9_estado)': "Despachado"}
+                            )
+                        );;
+                    */
+
                   PressedBorderColor: =Self.Fill
                   PressedColor: =Self.Fill
                   PressedFill: =Self.Color
                   Text: ="Guardar"
                   Width: =225
-                  X: =814
-                  Y: =554
+                  X: =685
+                  Y: =559
       - cnt_Comentario_EM_16:
           Control: GroupContainer@1.3.0
           Variant: ManualLayout
