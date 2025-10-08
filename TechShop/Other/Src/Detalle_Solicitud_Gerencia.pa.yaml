@@ -944,7 +944,7 @@ Screens:
                                                 Size: =12
                                                 Width: =292
                                                 X: =1020
-                              - ContainerPN_EM_12:
+                              - ContainerNext_DSG:
                                   Control: GroupContainer@1.3.0
                                   Variant: ManualLayout
                                   Properties:
@@ -1276,10 +1276,18 @@ Screens:
                                                 HoverFill: =RGBA(21, 68, 18, 1)
                                                 OnSelect: |
                                                   =If(
-                                                      IsBlank(txt_Motivo_DSG.Text) && CountIf(datos_DSG, !aprovado) > 0,
-                                                      Notify(
-                                                          "Debe indicar el motivo del rechazo",
-                                                          NotificationType.Error
+                                                      IsBlank(txt_Motivo_DSG.Text) && CountIf(
+                                                          datos_DSG,
+                                                          !aprovado
+                                                      ) > 0,
+                                                      UpdateContext(
+                                                          {
+                                                              Aviso: {
+                                                                  Ver: true,
+                                                                  Tipo: 0,
+                                                                  Texto: "Debe indicar el motivo del rechazo de los items"
+                                                              }
+                                                          }
                                                       ),
                                                       IsBlank(
                                                           LookUp(
@@ -1292,10 +1300,11 @@ Screens:
                                                               NSolicitud = txt_Num_Soli_DSG.Text
                                                           )
                                                       ),
+                                                      UpdateContext({Guardando: true});
                                                       ForAll(
                                                           Filter(
-                                                              glr_Detalles_DSG.AllItems,
-                                                              Checkbox3_2.Value = false
+                                                              datos_DSG,
+                                                              !aprovado
                                                           ),
                                                           Collect(
                                                               Compras_NoMarcadas,
@@ -1311,8 +1320,8 @@ Screens:
                                                       RemoveIf(
                                                           Compras_NoMarcadas,
                                                           NSolicitud = txt_Num_Soli_DSG.Text && NFilaSolicitud in Filter(
-                                                              glr_Detalles_DSG.AllItems,
-                                                              Checkbox3_2.Value = true
+                                                              datos_DSG,
+                                                              aprovado
                                                           ).req_line && Enviado = 1 && Tipo_Envio = varEmpleado.Codigo
                                                       );
                                                       Collect(
@@ -1322,14 +1331,46 @@ Screens:
                                                               fecha: DateValue(txt_Fecha_DSG.Text),
                                                               solicitante: txt_Solicitante_DSG.Text,
                                                               user: txt_User_DSG.Text,
-                                                              total: Value(txt_Total_DSG.Text),
+                                                              total: Value(
+                                                                  Sum(
+                                                                      Filter(
+                                                                          datos_DSG,
+                                                                          aprovado
+                                                                      ),
+                                                                      subtotal
+                                                                  )
+                                                              ),
                                                               estado: "Gerencia"
                                                           }
                                                       );
-                                                      Back();
+                                                      ForAll(
+                                                          Filter(
+                                                              datos_DSG,
+                                                              aprovado
+                                                          ),
+                                                          Collect(
+                                                              Detalle_Solicitud_Compras,
+                                                              {
+                                                                  soli_num: Upper(txt_Num_Soli_DSG.Text),
+                                                                  descripcion: ThisRecord.description,
+                                                                  linea: ThisRecord.req_line
+                                                              }
+                                                          )
+                                                      );
                                                       Reset(txt_Num_Soli_DSG);
                                                       UpdateContext({showContainer: false});
-                                                      Reset(txt_Motivo_DSG)
+                                                      Reset(txt_Motivo_DSG);
+                                                      UpdateContext({Guardando: false});
+                                                      Back(),
+                                                      UpdateContext(
+                                                          {
+                                                              Aviso: {
+                                                                  Ver: true,
+                                                                  Tipo: 0,
+                                                                  Texto: "La solicitud seleccionada ya fue enviada"
+                                                              }
+                                                          }
+                                                      )
                                                   );
                                                 PressedBorderColor: =RGBA(52, 152, 47, 1)
                                                 PressedColor: =RGBA(52, 152, 47, 1)
@@ -1374,7 +1415,7 @@ Screens:
             RadiusBottomRight: =12
             RadiusTopLeft: =12
             RadiusTopRight: =12
-            Visible: =Guardando || Aviso.Ver
+            Visible: '=Guardando || Aviso.Ver '
             Width: =1366
           Children:
             - Icon3_90:
@@ -1399,8 +1440,8 @@ Screens:
                   PaddingTop: =5
                   Visible: =Aviso.Ver && !Guardando
                   Width: =150
-                  X: =1350 / 2 - 75
-                  Y: =90
+                  X: =600
+                  Y: =217
             - Container70_4:
                 Control: GroupContainer@1.3.0
                 Variant: ManualLayout
@@ -1415,7 +1456,7 @@ Screens:
                   RadiusTopRight: =10
                   Visible: =Aviso.Ver && !Guardando
                   X: =425
-                  Y: =250
+                  Y: =377
                 Children:
                   - TextInput15_4:
                       Control: Classic/TextInput@2.3.2

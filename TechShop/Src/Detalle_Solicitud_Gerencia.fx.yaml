@@ -1108,7 +1108,7 @@ Detalle_Solicitud_Gerencia As screen:
                                 X: =1020
                                 ZIndex: =43
 
-                    ContainerPN_EM_12 As groupContainer.manualLayoutContainer:
+                    ContainerNext_DSG As groupContainer.manualLayoutContainer:
                         BorderColor: =RGBA(15, 84, 140, 1)
                         BorderThickness: =2
                         DropShadow: =DropShadow.ExtraBold
@@ -1566,10 +1566,18 @@ Detalle_Solicitud_Gerencia As screen:
                                 HoverFill: =RGBA(21, 68, 18, 1)
                                 OnSelect: |
                                     =If(
-                                        IsBlank(txt_Motivo_DSG.Text) && CountIf(datos_DSG, !aprovado) > 0,
-                                        Notify(
-                                            "Debe indicar el motivo del rechazo",
-                                            NotificationType.Error
+                                        IsBlank(txt_Motivo_DSG.Text) && CountIf(
+                                            datos_DSG,
+                                            !aprovado
+                                        ) > 0,
+                                        UpdateContext(
+                                            {
+                                                Aviso: {
+                                                    Ver: true,
+                                                    Tipo: 0,
+                                                    Texto: "Debe indicar el motivo del rechazo de los items"
+                                                }
+                                            }
                                         ),
                                         IsBlank(
                                             LookUp(
@@ -1582,10 +1590,11 @@ Detalle_Solicitud_Gerencia As screen:
                                                 NSolicitud = txt_Num_Soli_DSG.Text
                                             )
                                         ),
+                                        UpdateContext({Guardando: true});
                                         ForAll(
                                             Filter(
-                                                glr_Detalles_DSG.AllItems,
-                                                Checkbox3_2.Value = false
+                                                datos_DSG,
+                                                !aprovado
                                             ),
                                             Collect(
                                                 Compras_NoMarcadas,
@@ -1601,8 +1610,8 @@ Detalle_Solicitud_Gerencia As screen:
                                         RemoveIf(
                                             Compras_NoMarcadas,
                                             NSolicitud = txt_Num_Soli_DSG.Text && NFilaSolicitud in Filter(
-                                                glr_Detalles_DSG.AllItems,
-                                                Checkbox3_2.Value = true
+                                                datos_DSG,
+                                                aprovado
                                             ).req_line && Enviado = 1 && Tipo_Envio = varEmpleado.Codigo
                                         );
                                         Collect(
@@ -1612,14 +1621,46 @@ Detalle_Solicitud_Gerencia As screen:
                                                 fecha: DateValue(txt_Fecha_DSG.Text),
                                                 solicitante: txt_Solicitante_DSG.Text,
                                                 user: txt_User_DSG.Text,
-                                                total: Value(txt_Total_DSG.Text),
+                                                total: Value(
+                                                    Sum(
+                                                        Filter(
+                                                            datos_DSG,
+                                                            aprovado
+                                                        ),
+                                                        subtotal
+                                                    )
+                                                ),
                                                 estado: "Gerencia"
                                             }
                                         );
-                                        Back();
+                                        ForAll(
+                                            Filter(
+                                                datos_DSG,
+                                                aprovado
+                                            ),
+                                            Collect(
+                                                Detalle_Solicitud_Compras,
+                                                {
+                                                    soli_num: Upper(txt_Num_Soli_DSG.Text),
+                                                    descripcion: ThisRecord.description,
+                                                    linea: ThisRecord.req_line
+                                                }
+                                            )
+                                        );
                                         Reset(txt_Num_Soli_DSG);
                                         UpdateContext({showContainer: false});
-                                        Reset(txt_Motivo_DSG)
+                                        Reset(txt_Motivo_DSG);
+                                        UpdateContext({Guardando: false});
+                                        Back(),
+                                        UpdateContext(
+                                            {
+                                                Aviso: {
+                                                    Ver: true,
+                                                    Tipo: 0,
+                                                    Texto: "La solicitud seleccionada ya fue enviada"
+                                                }
+                                            }
+                                        )
                                     );
                                 PressedBorderColor: =RGBA(52, 152, 47, 1)
                                 PressedColor: =RGBA(52, 152, 47, 1)
@@ -1670,7 +1711,7 @@ Detalle_Solicitud_Gerencia As screen:
         RadiusBottomRight: =12
         RadiusTopLeft: =12
         RadiusTopRight: =12
-        Visible: =Guardando || Aviso.Ver
+        Visible: =Guardando || Aviso.Ver 
         Width: =1366
         ZIndex: =2
 
@@ -1696,8 +1737,8 @@ Detalle_Solicitud_Gerencia As screen:
             PaddingTop: =5
             Visible: =Aviso.Ver && !Guardando
             Width: =150
-            X: =1350 / 2 - 75
-            Y: =90
+            X: =600
+            Y: =217
             ZIndex: =1
 
         Container70_4 As groupContainer.manualLayoutContainer:
@@ -1712,7 +1753,7 @@ Detalle_Solicitud_Gerencia As screen:
             RadiusTopRight: =10
             Visible: =Aviso.Ver && !Guardando
             X: =425
-            Y: =250
+            Y: =377
             ZIndex: =2
 
             TextInput15_4 As text:
