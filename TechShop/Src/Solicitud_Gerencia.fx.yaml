@@ -9,84 +9,153 @@ Solicitud_Gerencia As screen:
         ClearCollect(
             datos_SG,
             Sort(
-                Filter(
-                    Distinct(
-                        Filter(
-                            preqitem,
-                            stat = "R"
+                AddColumns(
+                    Filter(
+                        Distinct(
+                            Filter(
+                                preqitem,
+                                stat = "R"
+                            ),
+                            req_num
                         ),
-                        req_num
+                        Not(Value in Solicitud_Compras.soli_num) && Not(
+                            Value in Filter(
+                                Compras_NoMarcadas,
+                                Enviado < 1 && Tipo_Envio = varEmpleado.Codigo
+                            ).NSolicitud
+                        ),
+                        Switch(
+                            varEmpleado.Codigo,
+                            "1",
+                            true,
+                            "2692",
+                            StartsWith(
+                                Value,
+                                "PRD"
+                            ) && LookUp(
+                                preq,
+                                req_num = Value,
+                                requester
+                            ) <> "raraya",
+                            "15",
+                            StartsWith(
+                                Value,
+                                "MTO"
+                            ) && LookUp(
+                                preq,
+                                req_num = Value,
+                                requester
+                            ) <> "rpereira",
+                            "2618",
+                            StartsWith(
+                                Value,
+                                "QAL"
+                            ) && LookUp(
+                                preq,
+                                req_num = Value,
+                                requester
+                            ) <> "icespedes",
+                            "1124",
+                            (StartsWith(
+                                Value,
+                                "TLR"
+                            ) || StartsWith(
+                                Value,
+                                "ADM"
+                            ) || StartsWith(
+                                Value,
+                                "OFC"
+                            )) && LookUp(
+                                preq,
+                                req_num = Value,
+                                requester
+                            ) <> "marias",
+                            "1133",
+                            StartsWith(
+                                Value,
+                                "SOL"
+                            ) && LookUp(
+                                preq,
+                                req_num = Value,
+                                requester
+                            ) <> "vguerrero",
+                            "2648",
+                            (StartsWith(
+                                Value,
+                                "TIC"
+                            ) ) && LookUp(
+                                preq,
+                                req_num = Value,
+                                requester
+                            ) <> "jbrenes"
+                        )
                     ),
-                    Not(Value in Solicitud_Compras.soli_num) && Not(
-                        Value in Filter(
-                            Compras_NoMarcadas,
-                            Enviado < 1 && Tipo_Envio = varEmpleado.Codigo
-                        ).NSolicitud
+                    fecha,
+                    With(
+                        {},
+                        LookUp(
+                            preq,
+                            req_num = Value,
+                            req_date
+                        )
                     ),
-                    Switch(
-                        varEmpleado.Codigo,
-                        "1",
-                        true,
-                        "2692",
-                        StartsWith(
-                            Value,
-                            "PRD"
-                        ) && LookUp(
-                            preq,
-                            req_num = Value,
-                            requester
-                        ) <> "raraya",
-                        "15",
-                        StartsWith(
-                            Value,
-                            "MTO"
-                        ) && LookUp(
-                            preq,
-                            req_num = Value,
-                            requester
-                        ) <> "rpereira",
-                        "2618",
-                        StartsWith(
-                            Value,
-                            "QAL"
-                        ) && LookUp(
-                            preq,
-                            req_num = Value,
-                            requester
-                        ) <> "icespedes",
-                        "1124",
-                        (StartsWith(
-                            Value,
-                            "TLR"
-                        ) || StartsWith(
-                            Value,
-                            "ADM"
-                        ) || StartsWith(
-                            Value,
-                            "OFC"
-                        )) && LookUp(
-                            preq,
-                            req_num = Value,
-                            requester
-                        ) <> "marias",
-                        "1133",
-                        StartsWith(
-                            Value,
-                            "SOL"
-                        ) && LookUp(
-                            preq,
-                            req_num = Value,
-                            requester
-                        ) <> "vguerrero",
-                        "2648",
-                        (StartsWith(
-                            Value,
-                            "TIC"
-                        ) ) && LookUp(
-                            preq,
-                            req_num = Value,
-                            requester
-                        ) <> "jbrenes"
+                    total,
+                    With(
+                        {},
+                        Text(
+                            Sum(
+                                Filter(
+                                    preqitem,
+                                    req_num = Value
+                                ),
+                                qty_ordered * unit_mat_cost
+                            ),
+                            "###,###,##0.00"
+                        )
+                    ),
+                    solicitante,
+                    With(
+                        {},
+                        If(
+                            !IsBlank(
+                                LookUp(
+                                    preq,
+                                    req_num = Value,
+                                    requester
+                                )
+                            ),
+                            With(
+                                {
+                                    email: LookUp(
+                                        preq,
+                                        req_num = Value,
+                                        requester
+                                    ),
+                                    name: First(
+                                        Filter(
+                                            Empleados,
+                                            Left(
+                                                Correo,
+                                                Find(
+                                                    "@",
+                                                    Correo
+                                                ) - 1
+                                            ) = LookUp(
+                                                preq,
+                                                req_num = Value,
+                                                requester
+                                            )
+                                        )
+                                    ).Nombre
+                                },
+                                If(
+                                    IsBlank(name),
+                                    email,
+                                    name
+                                )
+                            ),
+                            "Sin correo"
+                        )
                     )
                 ),
                 Value,
@@ -676,7 +745,7 @@ Solicitud_Gerencia As screen:
                                 BorderColor: =RGBA(40, 134, 222, 1)
                                 BorderThickness: =0.5
                                 Color: =RGBA(0, 0, 0, 1)
-                                Default: =Text(LookUp(preq, req_num = ThisItem.Value, req_date), "dd/mm/yyyy")
+                                Default: =Text(ThisItem.fecha, "dd/mm/yyyy")
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
                                 DisabledFill: =
@@ -704,7 +773,7 @@ Solicitud_Gerencia As screen:
                                 BorderThickness: =0.5
                                 Color: =RGBA(0, 0, 0, 1)
                                 Default: |-
-                                    =Text(Sum(Filter(preqitem, req_num = ThisItem.Value), qty_ordered * unit_mat_cost), "###,###,##0.00")
+                                    =Text(ThisItem.total, "###,###,##0.00")
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
                                 DisabledFill: =
@@ -731,47 +800,7 @@ Solicitud_Gerencia As screen:
                                 BorderColor: =RGBA(40, 134, 222, 1)
                                 BorderThickness: =0.5
                                 Color: =RGBA(0, 0, 0, 1)
-                                Default: |-
-                                    =If(
-                                        !IsBlank(
-                                            LookUp(
-                                                preq,
-                                                req_num = ThisItem.Value,
-                                                requester
-                                            )
-                                        ),
-                                        With(
-                                            {
-                                                email: LookUp(
-                                                    preq,
-                                                    req_num = ThisItem.Value,
-                                                    requester
-                                                ),
-                                                name: First(
-                                                    Filter(
-                                                        Empleados,
-                                                        Left(
-                                                            Correo,
-                                                            Find(
-                                                                "@",
-                                                                Correo
-                                                            ) - 1
-                                                        ) = LookUp(
-                                                            preq,
-                                                            req_num = ThisItem.Value,
-                                                            requester
-                                                        )
-                                                    )
-                                                ).Nombre
-                                            },
-                                            If(
-                                                IsBlank(name),
-                                                email,
-                                                name
-                                            )
-                                        ),
-                                        "Sin correo"
-                                    )
+                                Default: =ThisItem.solicitante
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
                                 DisabledFill: =
