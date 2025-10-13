@@ -608,11 +608,18 @@ Screens:
                                                               ),
                                                               ""
                                                           ),
-                                                          POT,
-                                                          LookUp(
-                                                              colTemp,
-                                                              Materiales = Value,
-                                                              POT
+                                                   POT,
+                                                          With(
+                                                              { potsStr:
+                                                                  Concat(
+                                                                      Distinct(
+                                                                          Filter(colTemp, Materiales = Value),
+                                                                          POT
+                                                                      ),
+                                                                      Value & ","
+                                                                  )
+                                                              },
+                                                              If(Len(potsStr) > 0, Left(potsStr, Len(potsStr) - 1), "")
                                                           ),
                                                           CantidadRecibida, 0,
                                                           CantidadFaltante,
@@ -1205,7 +1212,7 @@ Screens:
                   HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
                   HoverColor: =RGBA(255, 255, 255, 1)
                   HoverFill: =
-                  OnSelect: |+
+                  OnSelect: |
                     =If(
                         CountRows(
                             Filter(
@@ -1213,12 +1220,7 @@ Screens:
                                 IsBlank(CantidadRecibida) || !IsNumeric(CantidadRecibida)
                             )
                         ) > 0,
-                        UpdateContext(
-                            {
-                                MostrarAviso: true,
-                                mensajeNotificacion: "Por favor ingrese cantidades válidas para todos los registros."
-                            }
-                        ),
+                        UpdateContext({ MostrarAviso: true, mensajeNotificacion: "Por favor ingrese cantidades válidas para todos los registros." }),
 
                         CountRows(
                             Filter(
@@ -1226,12 +1228,7 @@ Screens:
                                 CantidadRecibida > Cantidades
                             )
                         ) > 0,
-                        UpdateContext(
-                            {
-                                MostrarAviso: true,
-                                mensajeNotificacion: "La cantidad recibida no puede ser mayor que la cantidad."
-                            }
-                        ),
+                        UpdateContext({ MostrarAviso: true, mensajeNotificacion: "La cantidad recibida no puede ser mayor que la cantidad." }),
 
                         CountRows(
                             Filter(
@@ -1239,12 +1236,15 @@ Screens:
                                 CantidadRecibida < 0
                             )
                         ) > 0,
-                        UpdateContext(
-                            {
-                                MostrarAviso: true,
-                                mensajeNotificacion: "La cantidad recibida no puede ser negativa."
-                            }
-                        ),
+                        UpdateContext({ MostrarAviso: true, mensajeNotificacion: "La cantidad recibida no puede ser negativa." }),
+
+                        CountRows(
+                            Filter(
+                                colMaterialesTracking,
+                                !IsBlank(CantidadRecibida) && IsNumeric(CantidadRecibida) && Value(CantidadRecibida) = 0
+                            )
+                        ) > 0,
+                        UpdateContext({ MostrarAviso: true, mensajeNotificacion: "La cantidad recibida no puede ser 0." }),
 
                         CountRows(
                             Filter(
@@ -1252,12 +1252,7 @@ Screens:
                                 IsBlank(CantidadRecibida)
                             )
                         ) > 0,
-                        UpdateContext(
-                            {
-                                MostrarAviso: true,
-                                mensajeNotificacion: "Debe completar todas las cantidades recibidas."
-                            }
-                        ),
+                        UpdateContext({ MostrarAviso: true, mensajeNotificacion: "Debe completar todas las cantidades recibidas." }),
 
                         ForAll(
                             colMaterialesTracking,
@@ -1285,27 +1280,49 @@ Screens:
                             }
                         );
 
+                        Clear(colPotsExpanded);
+
+                        ForAll(
+                            colMaterialesTracking,
+                            Collect(
+                                colPotsExpanded,
+                                ForAll(
+                                    Split(POT, ","),
+                                    {
+                                        POT: Trim(Value),
+                                        CantidadFaltante: If(IsBlank(CantidadFaltante), 0, Value(Text(CantidadFaltante)))
+                                    }
+                                )
+                            )
+                        );
+
+                        ClearCollect(
+                            colPotsSums,
+                            AddColumns(
+                                GroupBy(colPotsExpanded, POT, Registros),
+                                TotalFaltante,
+                                Sum(Registros, CantidadFaltante)
+                            )
+                        );
+
+                        ForAll(
+                            Filter(colPotsSums, TotalFaltante = 0),
+                            With(
+                                { thePOT: POT },
+                                If(
+                                    !IsBlank(thePOT),
+                                    Patch(
+                                        Compras_Pots,
+                                        LookUp(Compras_Pots, POT = thePOT),
+                                        { 'Estado (crfb9_estado)': "Despachado" }
+                                    )
+                                )
+                            )
+                        );
+
                         Clear(DespachoCollection);
                         Refresh(LogisticDespachos)
                     )
-
-                    /*
-                        If(
-                            CountIf(
-                                glr_Listado_LD_1.AllItems;
-                                Value(ThisRecord.txt_cantidadFaltante_LD_1.Text) > 0
-                            ) = 0;
-                            Patch(
-                                Compras_Pots;
-                                LookUp(
-                                    Compras_Pots;
-                                    POT =  && Requisicion = 
-                                );
-                                {'Estado (crfb9_estado)': "Despachado"}
-                            )
-                        );;
-                    */
-
                   PressedBorderColor: =Self.Fill
                   PressedColor: =Self.Fill
                   PressedFill: =Self.Color
