@@ -13,11 +13,38 @@ Screens:
       ImagePosition: =ImagePosition.Fill
       OnHidden: |-
         =
-        UpdateContext({edit: {view: false, item: Blank()}, Aviso: false, mensajeNotificacion: "", Rechazo: false, reset: false});
+        //UpdateContext({edit: {view: false; item: Blank()}; Aviso: false; mensajeNotificacion: ""; Rechazo: false; reset: false});;
         Clear(compras);
         Reset(txt_Num_Soli_DAC);
         Reset(txt_Comentario_DAC);
-      OnVisible: "=UpdateContext(\n    {\n        Nsoli: Text(\n            First(\n                Split(\n                    glr_Solicitud_AC.Selected.soli_num,\n                    \"-\"\n                )\n            ).Value\n        )\n    }\n);\nClear(compras);\nIf(\n    \"-\" in glr_Solicitud_AC.Selected.soli_num && IsEmpty(\n        Filter(\n            Detalle_Solicitud_Compras,\n            soli_num = glr_Solicitud_AC.Selected.soli_num\n        )\n    ),\n    \n    ForAll(\n        With(\n            {\n                Nfila: Filter(\n                    Compras_NoMarcadas,\n                    NSolicitud = Nsoli && Enviado = 1\n                ).NFilaSolicitud\n            },\n            Filter(\n                Filter(\n                    preqitem,\n                    req_num = Nsoli\n                ),\n                req_line in Nfila\n            )\n        ),\n        Collect(\n            compras,\n            {\n                req_line: ThisRecord.req_line,\n                item: ThisRecord.item,\n                descripcion: ThisRecord.description,\n                medida: ThisRecord.u_m,\n                cantidad: ThisRecord.qty_ordered,\n                precio: ThisRecord.unit_mat_cost,\n                num_vendedor: ThisRecord.vend_num,\n                aprobado: true,\n                comentario: \"\"\n            }\n        )\n    ),\n    \"-\" in glr_Solicitud_AC.Selected.soli_num,\n    ForAll(\n        With(\n            {\n                Nfila: Filter(\n                    Detalle_Solicitud_Compras,\n                    soli_num = glr_Solicitud_AC.Selected.soli_num\n                ).linea\n            },\n            Filter(\n                Filter(\n                    preqitem,\n                    req_num = Nsoli\n                ),\n                req_line in Nfila\n            )\n        ),\n        Collect(\n            compras,\n            {\n                req_line: ThisRecord.req_line,\n                item: ThisRecord.item,\n                descripcion: ThisRecord.description,\n                medida: ThisRecord.u_m,\n                cantidad: ThisRecord.qty_ordered,\n                precio: ThisRecord.unit_mat_cost,\n                num_vendedor: ThisRecord.vend_num,\n                aprobado: true,\n                comentario: \"\"\n            }\n        )\n    ),\n    With(\n        {\n            NoMarcadas: Filter(\n                Compras_NoMarcadas,\n                NSolicitud = Nsoli\n            )\n        },\n        ForAll(\n            Filter(\n                Filter(\n                    preqitem,\n                    req_num = Nsoli\n                ),\n                Not(req_line in NoMarcadas.NFilaSolicitud)\n            ),\n            Collect(\n                compras,\n                {\n                    req_line: ThisRecord.req_line,\n                    item: ThisRecord.item,\n                    descripcion: ThisRecord.description,\n                    medida: ThisRecord.u_m,\n                    cantidad: ThisRecord.qty_ordered,\n                    precio: ThisRecord.unit_mat_cost,\n                    num_vendedor: ThisRecord.vend_num,\n                    aprobado: true,\n                    comentario: \"\"\n                }\n            )\n        )\n    )\n)"
+      OnVisible: |-
+        =UpdateContext(
+            {
+                Guardando: true,
+                Nsoli: First(
+                    Split(
+                        glr_Solicitud_AC.Selected.soli_num,
+                        "-"
+                    )
+                ).Value
+            }
+        );
+        ClearCollect(
+            datos_DAC,
+            Sort(
+                AddColumns(
+                    Filter(
+                        Detalle_Solicitud_Compras,
+                        soli_num = glr_Solicitud_AC.Selected.soli_num
+                    ),
+                    aprobado,
+                    false,
+                ),
+                linea,
+                SortOrder.Ascending
+            )
+        ); 
+        UpdateContext({Guardando: false});
     Children:
       - ScreenContainer_EM_5:
           Control: GroupContainer@1.3.0
@@ -130,7 +157,7 @@ Screens:
                         Icon: =Icon.BackArrow
                         OnSelect: |-
                           =Back();
-                          UpdateContext({edit: {view: false, item: Blank()}, Aviso: false, mensajeNotificacion: "", Rechazo: false, reset: false});
+                          UpdateContext({edit: {view: false, item: Blank()}, mensajeNotificacion: "", Rechazo: false, reset: false});
                           Clear(compras);
                           Reset(txt_Num_Soli_DAC);
                           Reset(txt_Comentario_DAC);
@@ -798,7 +825,7 @@ Screens:
                                         Properties:
                                           BorderColor: =RGBA(0, 18, 107, 1)
                                           Height: =547
-                                          Items: =compras
+                                          Items: =datos_DAC
                                           ShowScrollbar: =false
                                           TemplateSize: =30
                                           Width: =1352
@@ -811,30 +838,17 @@ Screens:
                                                 BorderThickness: =1
                                                 CheckboxSize: =30
                                                 CheckmarkFill: =RGBA(52, 152, 47, 1)
-                                                Default: |-
-                                                  =With(
-                                                      {
-                                                          dato: LookUp(
-                                                              Detalle_Solicitud_Compras,
-                                                              soli_num = txt_Num_Soli_DAC.Text && linea = ThisItem.req_line
-                                                          )
-                                                      },
-                                                      If(
-                                                          IsBlank(dato),
-                                                          ThisItem.aprobado,
-                                                          dato.aprobado
-                                                      )
-                                                  )
+                                                Default: =ThisItem.aprobado
                                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                                 DisabledColor: =RGBA(40, 134, 222, 1)
-                                                DisabledFill: =If(ThisItem.req_line = edit.item.req_line , RGBA(206, 242, 196, 1), Self.Value ,RGBA(255, 255, 255, 1), RGBA(255, 208, 201, 1))
-                                                Fill: =If(ThisItem.req_line = edit.item.req_line , RGBA(206, 242, 196, 1), Self.Value ,RGBA(255, 255, 255, 1), RGBA(255, 208, 201, 1))
+                                                DisabledFill: =If(ThisItem.linea = edit.item.linea , RGBA(206, 242, 196, 1), Self.Value ,RGBA(255, 255, 255, 1), RGBA(255, 208, 201, 1))
+                                                Fill: =If(ThisItem.linea = edit.item.linea , RGBA(206, 242, 196, 1), Self.Value ,RGBA(255, 255, 255, 1), RGBA(255, 208, 201, 1))
                                                 Height: =30
                                                 OnCheck: |-
-                                                  =Patch(compras, ThisItem, {aprobado: true})
+                                                  =Patch(datos_DAC, ThisItem, {aprobado: true})
                                                 OnSelect: =Select(Parent)
                                                 OnUncheck: |-
-                                                  =Patch(compras, ThisItem, {aprobado: false})
+                                                  =Patch(datos_DAC, ThisItem, {aprobado: false})
                                                 PaddingBottom: =3
                                                 PaddingLeft: =5
                                                 Size: =10
@@ -847,10 +861,10 @@ Screens:
                                                 Align: =Align.Center
                                                 BorderColor: =RGBA(40, 134, 222, 1)
                                                 BorderThickness: =0.5
-                                                Default: =ThisItem.req_line
+                                                Default: =ThisItem.linea
                                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                                 DisabledColor: =
-                                                DisabledFill: =If(ThisItem.req_line = edit.item.req_line , RGBA(52, 152, 47, 1), chk_Aprobar_DAC.Value, RGBA(180, 214, 250, 1), RGBA(215, 58, 60, 1))
+                                                DisabledFill: =If(ThisItem.linea = edit.item.linea , RGBA(52, 152, 47, 1), ThisItem.aprobado, RGBA(180, 214, 250, 1), RGBA(215, 58, 60, 1))
                                                 DisplayMode: =DisplayMode.Disabled
                                                 FontWeight: =FontWeight.Semibold
                                                 Height: =30
@@ -872,7 +886,7 @@ Screens:
                                                 Default: =ThisItem.item
                                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                                 DisabledColor: =
-                                                DisabledFill: =If(ThisItem.req_line = edit.item.req_line , RGBA(206, 242, 196, 1), chk_Aprobar_DAC.Value ,RGBA(255, 255, 255, 1), RGBA(255, 208, 201, 1))
+                                                DisabledFill: =If(ThisItem.linea = edit.item.linea , RGBA(206, 242, 196, 1), ThisItem.aprobado ,RGBA(255, 255, 255, 1), RGBA(255, 208, 201, 1))
                                                 DisplayMode: =DisplayMode.Disabled
                                                 FontWeight: =FontWeight.Semibold
                                                 Height: =30
@@ -895,7 +909,7 @@ Screens:
                                                 Default: =ThisItem.descripcion
                                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                                 DisabledColor: =
-                                                DisabledFill: =If(ThisItem.req_line = edit.item.req_line , RGBA(206, 242, 196, 1), chk_Aprobar_DAC.Value ,RGBA(255, 255, 255, 1), RGBA(255, 208, 201, 1))
+                                                DisabledFill: =If(ThisItem.linea = edit.item.linea , RGBA(206, 242, 196, 1), ThisItem.aprobado ,RGBA(255, 255, 255, 1), RGBA(255, 208, 201, 1))
                                                 DisplayMode: =DisplayMode.Disabled
                                                 FontWeight: =FontWeight.Semibold
                                                 Height: =30
@@ -918,7 +932,7 @@ Screens:
                                                 Default: =ThisItem.medida
                                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                                 DisabledColor: =
-                                                DisabledFill: =If(ThisItem.req_line = edit.item.req_line , RGBA(206, 242, 196, 1), chk_Aprobar_DAC.Value ,RGBA(255, 255, 255, 1), RGBA(255, 208, 201, 1))
+                                                DisabledFill: =If(ThisItem.linea = edit.item.linea , RGBA(206, 242, 196, 1), ThisItem.aprobado ,RGBA(255, 255, 255, 1), RGBA(255, 208, 201, 1))
                                                 DisplayMode: =DisplayMode.Disabled
                                                 FontWeight: =FontWeight.Semibold
                                                 Height: =30
@@ -941,7 +955,7 @@ Screens:
                                                 Default: =ThisItem.cantidad
                                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                                 DisabledColor: =
-                                                DisabledFill: =If(ThisItem.req_line = edit.item.req_line , RGBA(206, 242, 196, 1), chk_Aprobar_DAC.Value ,RGBA(255, 255, 255, 1), RGBA(255, 208, 201, 1))
+                                                DisabledFill: =If(ThisItem.linea = edit.item.linea , RGBA(206, 242, 196, 1), ThisItem.aprobado ,RGBA(255, 255, 255, 1), RGBA(255, 208, 201, 1))
                                                 DisplayMode: =DisplayMode.Disabled
                                                 FontWeight: =FontWeight.Semibold
                                                 Height: =30
@@ -964,7 +978,7 @@ Screens:
                                                 Default: =Text(ThisItem.precio, "###,###,##0.00")
                                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                                 DisabledColor: =
-                                                DisabledFill: =If(ThisItem.req_line = edit.item.req_line , RGBA(206, 242, 196, 1), chk_Aprobar_DAC.Value ,RGBA(255, 255, 255, 1), RGBA(255, 208, 201, 1))
+                                                DisabledFill: =If(ThisItem.linea = edit.item.linea , RGBA(206, 242, 196, 1), ThisItem.aprobado ,RGBA(255, 255, 255, 1), RGBA(255, 208, 201, 1))
                                                 DisplayMode: =DisplayMode.Disabled
                                                 FontWeight: =FontWeight.Semibold
                                                 Height: =30
@@ -987,7 +1001,7 @@ Screens:
                                                 Default: =Text(ThisItem.precio * ThisItem.cantidad, "###,###,##0.00")
                                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                                 DisabledColor: =
-                                                DisabledFill: =If(ThisItem.req_line = edit.item.req_line , RGBA(206, 242, 196, 1), chk_Aprobar_DAC.Value ,RGBA(255, 255, 255, 1), RGBA(255, 208, 201, 1))
+                                                DisabledFill: =If(ThisItem.linea = edit.item.linea , RGBA(206, 242, 196, 1), ThisItem.aprobado ,RGBA(255, 255, 255, 1), RGBA(255, 208, 201, 1))
                                                 DisplayMode: =DisplayMode.Disabled
                                                 FontWeight: =FontWeight.Semibold
                                                 Height: =30
@@ -1007,10 +1021,10 @@ Screens:
                                                 Align: =Align.Center
                                                 BorderColor: =RGBA(40, 134, 222, 1)
                                                 BorderThickness: =0.5
-                                                Default: =ThisItem.num_vendedor
+                                                Default: =ThisItem.num_vend
                                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                                 DisabledColor: =
-                                                DisabledFill: =If(ThisItem.req_line = edit.item.req_line , RGBA(206, 242, 196, 1), chk_Aprobar_DAC.Value ,RGBA(255, 255, 255, 1), RGBA(255, 208, 201, 1))
+                                                DisabledFill: =If(ThisItem.linea = edit.item.linea , RGBA(206, 242, 196, 1), ThisItem.aprobado ,RGBA(255, 255, 255, 1), RGBA(255, 208, 201, 1))
                                                 DisplayMode: =DisplayMode.Disabled
                                                 FontWeight: =FontWeight.Semibold
                                                 Height: =30
@@ -1030,10 +1044,10 @@ Screens:
                                                 Align: =Align.Center
                                                 BorderColor: =RGBA(40, 134, 222, 1)
                                                 BorderThickness: =0.5
-                                                Default: =LookUp(vendaddr, vend_num = ThisItem.num_vendedor, name)
+                                                Default: =ThisItem.provedor
                                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                                 DisabledColor: =
-                                                DisabledFill: =If(ThisItem.req_line = edit.item.req_line , RGBA(206, 242, 196, 1), chk_Aprobar_DAC.Value ,RGBA(255, 255, 255, 1), RGBA(255, 208, 201, 1))
+                                                DisabledFill: =If(ThisItem.linea = edit.item.linea , RGBA(206, 242, 196, 1), ThisItem.aprobado ,RGBA(255, 255, 255, 1), RGBA(255, 208, 201, 1))
                                                 DisplayMode: =DisplayMode.Disabled
                                                 FontWeight: =FontWeight.Semibold
                                                 Height: =30
@@ -1056,20 +1070,9 @@ Screens:
                                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                                 DisabledColor: =RGBA(122, 138, 143, 1)
                                                 DisplayMode: |-
-                                                  =With(
-                                                      {
-                                                          dato: LookUp(
-                                                              Detalle_Solicitud_Compras,
-                                                              soli_num = txt_Num_Soli_DAC.Text && linea = ThisItem.req_line
-                                                          )
-                                                      },
-                                                      If(
-                                                          IsBlank(dato) && glr_Solicitud_AC.Selected.estado = "Listo",
-                                                          DisplayMode.Edit,
-                                                          DisplayMode.Disabled
-                                                      )
-                                                  )
-                                                Fill: =If(ThisItem.req_line = edit.item.req_line , RGBA(206, 242, 196, 1), chk_Aprobar_DAC.Value, RGBA(255, 255, 255, 1), RGBA(255, 208, 201, 1))
+                                                  =
+                                                          DisplayMode.Edit
+                                                Fill: =If(ThisItem.linea = edit.item.linea , RGBA(206, 242, 196, 1), ThisItem.aprobado, RGBA(255, 255, 255, 1), RGBA(255, 208, 201, 1))
                                                 FocusedBorderThickness: =20
                                                 Height: =30
                                                 HoverBorderColor: =RGBA(52, 152, 47, 1)
@@ -1147,10 +1150,8 @@ Screens:
           Properties:
             Fill: =RGBA(122, 138, 143, 0.2)
             Height: =663
-            OnSelect: |-
-              =
-              UpdateContext({edit: {view: false, item: Blank()}, Aviso: false, mensajeNotificacion: "", Rechazo: false});
-            Visible: =edit.view || Aviso || Rechazo
+            OnSelect: =
+            Visible: =edit.view || Rechazo
             Width: =1352
             X: =8
             Y: =97
@@ -1207,14 +1208,13 @@ Screens:
                         Value(txt_edit_Cantidad_DAC.Text) < 0 || IsBlank(txt_edit_Cantidad_DAC.Text),
                         UpdateContext(
                             {
-                                Aviso: true,
-                                mensajeNotificacion: "La cantidad debe ser un numero positivo"
+                                Aviso: {Ver: true, Tipo: 0, Texto: "Debe indicar una cantidad validad"}
                             }
                         );
                         Reset(txt_edit_Cantidad_DAC);
                         Reset(txt_Edit_Comentario_DAC),
                         Patch(
-                            compras,
+                            datos_DAC,
                             edit.item,
                             {cantidad: Value(txt_edit_Cantidad_DAC.Text), comentario: txt_Edit_Comentario_DAC.Text}
                         );
@@ -1241,7 +1241,7 @@ Screens:
                   Align: =Align.Center
                   BorderStyle: =BorderStyle.None
                   BorderThickness: =0
-                  Default: =edit.item.req_line
+                  Default: =edit.item.linea
                   DisabledBorderColor: =RGBA(40, 134, 222, 1)
                   DisabledColor: =RGBA(0, 0, 0, 1)
                   DisabledFill: =RGBA(230, 242, 255, 1)
@@ -1542,63 +1542,6 @@ Screens:
                   Width: =477
                   X: =16
                   Y: =145
-      - cnt_Aviso_DAC:
-          Control: GroupContainer@1.3.0
-          Variant: ManualLayout
-          Properties:
-            BorderColor: =RGBA(255, 191, 0, 1)
-            BorderThickness: =5
-            DropShadow: =DropShadow.ExtraBold
-            Fill: =RGBA(255, 255, 255, 1)
-            Height: =210
-            RadiusBottomLeft: =20
-            RadiusBottomRight: =20
-            RadiusTopLeft: =20
-            RadiusTopRight: =20
-            Visible: =Aviso
-            Width: =648
-            X: =359
-            Y: =279
-          Children:
-            - txt_MensajeNoti_EM_5:
-                Control: Label@2.5.1
-                Properties:
-                  Align: =Align.Center
-                  Font: =Font.Arial
-                  Height: =129
-                  Size: =20
-                  Text: =mensajeNotificacion
-                  Width: =619
-                  X: =18
-                  Y: =11
-            - btn_Aceptar_EM_6:
-                Control: Classic/Button@2.2.0
-                Properties:
-                  BorderColor: =RGBA(255, 191, 0, 1)
-                  Color: =RGBA(255, 255, 255, 1)
-                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
-                  Fill: =RGBA(255, 191, 0, 1)
-                  Font: =Font.'Open Sans'
-                  FontWeight: =FontWeight.Bold
-                  Height: =50
-                  HoverBorderColor: =RGBA(255, 191, 0, 1)
-                  HoverColor: =RGBA(255, 255, 255, 1)
-                  HoverFill: =RGBA(84, 63, 0, 1)
-                  OnSelect: |-
-                    =UpdateContext(
-                        {
-                            Aviso: false,
-                            mensajeNotificacion: ""
-                        }
-                    );
-                    SetFocus(txt_edit_Cantidad_DAC)
-                  PressedBorderColor: =RGBA(255, 191, 0, 1)
-                  PressedColor: =Self.Fill
-                  PressedFill: =Self.Color
-                  Text: ="Aceptar"
-                  Width: =180
-                  X: =235
-                  Y: =150
       - cnt_Rechazo_DAC:
           Control: GroupContainer@1.3.0
           Variant: ManualLayout
@@ -1680,8 +1623,7 @@ Screens:
                                 view: false,
                                 item: Blank()
                             },
-                            Aviso: false,
-                            mensajeNotificacion: "",
+                            Aviso: {Ver: false},
                             Rechazo: false
                         }
                     );
@@ -1717,3 +1659,121 @@ Screens:
                   Width: =150
                   X: =37
                   Y: =129
+      - cnt_Avisos_BC_6:
+          Control: GroupContainer@1.3.0
+          Variant: ManualLayout
+          Properties:
+            Fill: =RGBA(0, 0, 0, 0.15)
+            Height: =768
+            RadiusBottomLeft: =12
+            RadiusBottomRight: =12
+            RadiusTopLeft: =12
+            RadiusTopRight: =12
+            Visible: '=Guardando || Aviso.Ver '
+            Width: =1366
+          Children:
+            - Icon3_94:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  BorderColor: =RGBA(12, 59, 94, 1)
+                  BorderStyle: =BorderStyle.None
+                  BorderThickness: =2
+                  Color: =If(Aviso.Tipo = 0, RGBA(255, 0, 0, 1), Aviso.Tipo = 1, RGBA(255, 191, 0, 1), RGBA(54, 176, 75, 1))
+                  DisplayMode: =DisplayMode.View
+                  FocusedBorderThickness: =20
+                  Height: =150
+                  HoverBorderColor: =App.Theme.Colors.Darker10
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =App.Theme.Colors.Darker10
+                  Icon: =If(Aviso.Tipo = 0, Icon.Error, Aviso.Tipo = 1, Icon.Warning, Icon.CheckBadge)
+                  OnSelect: |
+                    =Navigate(MenuAdministrativo);
+                  PaddingBottom: =5
+                  PaddingLeft: =5
+                  PaddingRight: =5
+                  PaddingTop: =5
+                  Visible: =Aviso.Ver && !Guardando
+                  Width: =150
+                  X: =600
+                  Y: =217
+            - Container70_8:
+                Control: GroupContainer@1.3.0
+                Variant: ManualLayout
+                Properties:
+                  BorderColor: =If(Aviso.Tipo = 0, RGBA(255, 0, 0, 1), Aviso.Tipo = 1, RGBA(255, 191, 0, 1), RGBA(54, 176, 75, 1))
+                  BorderThickness: =4
+                  Fill: =RGBA(255, 255, 255, 1)
+                  Height: =112
+                  RadiusBottomLeft: =10
+                  RadiusBottomRight: =10
+                  RadiusTopLeft: =10
+                  RadiusTopRight: =10
+                  Visible: =Aviso.Ver && !Guardando
+                  X: =425
+                  Y: =377
+                Children:
+                  - TextInput15_8:
+                      Control: Classic/TextInput@2.3.2
+                      Properties:
+                        Align: =Align.Center
+                        Default: =Aviso.Texto
+                        DisplayMode: =DisplayMode.View
+                        Height: =100
+                        Mode: =TextMode.MultiLine
+                        PaddingBottom: =12
+                        PaddingRight: =12
+                        PaddingTop: =12
+                        Size: =16
+                        Width: =500
+                  - Rectangle43_16:
+                      Control: Rectangle@2.3.0
+                      Properties:
+                        Fill: =RGBA(235, 235, 235, 1)
+                        Height: =12
+                        Width: =500
+                        Y: =100
+                  - Rectangle43_17:
+                      Control: Rectangle@2.3.0
+                      Properties:
+                        Fill: =If(Aviso.Tipo = 0, RGBA(255, 0, 0, 1), Aviso.Tipo = 1, RGBA(255, 191, 0, 1), RGBA(54, 176, 75, 1))
+                        Height: =12
+                        Width: =(tmp_Aviso_BC_8.Value / 3200) * 500
+                        Y: =100
+            - tmp_Aviso_BC_8:
+                Control: Timer@2.1.0
+                Properties:
+                  Duration: =3500
+                  OnTimerEnd: |-
+                    =UpdateContext({Aviso: {Ver: false, Tipo: 3, Texto: ""}, Guardando: false}); Reset(Self)
+                  Start: =Aviso.Ver
+                  Visible: =false
+            - cnt_spinner_4:
+                Control: GroupContainer@1.3.0
+                Variant: ManualLayout
+                Properties:
+                  Fill: =RGBA(255, 255, 255, 1)
+                  Height: =125
+                  RadiusBottomLeft: =10
+                  RadiusBottomRight: =10
+                  RadiusTopLeft: =10
+                  RadiusTopRight: =10
+                  Visible: =Guardando && !Aviso.Ver
+                  Width: =468
+                  X: =441
+                  Y: =301
+                Children:
+                  - Spinner1_8:
+                      Control: Spinner@1.4.6
+                      Properties:
+                        Appearance: ='Spinner.Appearance'.Primary
+                        BasePaletteColor: =RGBA(5, 102, 178, 1)
+                        FontColor: =RGBA(40, 134, 222, 1)
+                        FontSize: =20
+                        FontWeight: =FontWeight.Bold
+                        Height: =125
+                        Label: ="Cargando..."
+                        LabelPosition: ='Spinner.LabelPosition'.Below
+                        SpinnerColor: =RGBA(15, 108, 189, 1)
+                        SpinnerSize: ='Spinner.SpinnerSize'.Huge
+                        TrackColor: =RGBA(180, 214, 250, 1)
+                        Width: =468
