@@ -1604,76 +1604,89 @@ Detalle_Solicitud_Compra As screen:
                                                     Texto: "Debe indicar el motivo del rechazo de los items"
                                                 }
                                             }
-                                        ),
+                                        ), 
                                         IsBlank(
                                             LookUp(
-                                                Solicitud_Compras,
-                                                soli_num = txt_Num_Soli_DSG.Text
-                                            )
-                                        ) && IsBlank(
-                                            LookUp(
                                                 Compras_NoMarcadas,
-                                                NSolicitud = txt_Num_Soli_DSG.Text
+                                                NSolicitud = txt_Num_Soli_DSC.Text && Enviado = 0 && Tipo_Envio = "Compras"
                                             )
                                         ),
                                         UpdateContext({Guardando: true});
                                         ForAll(
                                             Filter(
-                                                datos_DSG,
-                                                !aprovado
+                                                datos_DSC,
+                                                !aprobado
                                             ),
                                             Collect(
                                                 Compras_NoMarcadas,
                                                 {
-                                                    NSolicitud: Upper(txt_Num_Soli_DSG.Text),
-                                                    NFilaSolicitud: ThisRecord.req_line,
+                                                    NSolicitud: Upper(txt_Num_Soli_DSC.Text),
+                                                    NFilaSolicitud: ThisRecord.crfb9_linea,
                                                     Enviado: 0,
-                                                    Tipo_Envio: varEmpleado.Codigo,
+                                                    Tipo_Envio: "Compras",
                                                     Motivo: txt_Motivo_DSC.Text
                                                 }
                                             )
                                         );
                                         RemoveIf(
                                             Compras_NoMarcadas,
-                                            NSolicitud = txt_Num_Soli_DSG.Text && NFilaSolicitud in Filter(
+                                            NSolicitud = txt_Num_Soli_DSC.Text && NFilaSolicitud in Filter(
                                                 datos_DSG,
                                                 aprovado
-                                            ).req_line && Enviado = 1 && Tipo_Envio = varEmpleado.Codigo
+                                            ).req_line && Enviado = 1 && Tipo_Envio = "Compras"
                                         );
-                                        Collect(
+                                        Patch(
                                             Solicitud_Compras,
+                                            glr_Solicitudes_SC.Selected,
                                             {
-                                                soli_num: Upper(txt_Num_Soli_DSG.Text),
-                                                fecha: DateValue(txt_Fecha_DSG.Text),
-                                                solicitante: txt_Solicitante_DSG.Text,
-                                                user: txt_User_DSG.Text,
+                                                user: txt_User_DSC.Text,
                                                 total: Value(
                                                     Sum(
                                                         Filter(
-                                                            datos_DSG,
-                                                            aprovado
+                                                            datos_DSC,
+                                                            aprobado
                                                         ),
                                                         subtotal
                                                     )
                                                 ),
-                                                estado: "Gerencia"
+                                                estado: "Listo"
                                             }
                                         );
                                         ForAll(
-                                            Filter(
-                                                datos_DSG,
-                                                aprovado
-                                            ),
-                                            Collect(
-                                                Detalle_Solicitud_Compras,
-                                                {
-                                                    soli_num: Upper(txt_Num_Soli_DSG.Text),
-                                                    descripcion: ThisRecord.description,
-                                                    linea: ThisRecord.req_line
-                                                }
+                                            datos_DSC,
+                                            If(
+                                                ThisRecord.aprobado,
+                                                Patch(
+                                                    Detalle_Solicitud_Compras,
+                                                    With(
+                                                        {line: ThisRecord.crfb9_linea},
+                                                        LookUp(
+                                                            Detalle_Solicitud_Compras,
+                                                            soli_num = Upper(txt_Num_Soli_DSC.Text) && linea = line
+                                                        )
+                                                    ),
+                                                    {
+                                                        medida: ThisRecord.medida,
+                                                        cantidad: ThisRecord.cantidad,
+                                                        precio: ThisRecord.precio,
+                                                        subtotal: ThisRecord.subtotal,
+                                                        num_vend: ThisRecord.vendNum,
+                                                        provedor: ThisRecord.vendName
+                                                    }
+                                                ),
+                                                Remove(
+                                                    Detalle_Solicitud_Compras,
+                                                    With(
+                                                        {line: ThisRecord.crfb9_linea},
+                                                        LookUp(
+                                                            Detalle_Solicitud_Compras,
+                                                            soli_num = Upper(txt_Num_Soli_DSC.Text) && linea = line
+                                                        )
+                                                    )
+                                                )
                                             )
                                         );
-                                        Reset(txt_Num_Soli_DSG);
+                                        Reset(txt_Num_Soli_DSC);
                                         UpdateContext({showContainer: false});
                                         Reset(txt_Motivo_DSC);
                                         UpdateContext({Guardando: false});
@@ -1683,7 +1696,7 @@ Detalle_Solicitud_Compra As screen:
                                                 Aviso: {
                                                     Ver: true,
                                                     Tipo: 0,
-                                                    Texto: "La solicitud seleccionada ya fue enviada"
+                                                    Texto: "La solicitud seleccionada no puede ser procesada"
                                                 }
                                             }
                                         )
