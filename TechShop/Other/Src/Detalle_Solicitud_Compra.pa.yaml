@@ -229,7 +229,8 @@ Screens:
                           UpdateContext(
                               {
                                   showContainer: false,
-                                  Soli: Blank()
+                                  Soli: Blank(),
+                                  Rechazo: false
                               }
                           );
                           Refresh(preqitem);
@@ -426,7 +427,7 @@ Screens:
                                                               Solicitud_Compras,
                                                               soli_num = txt_Num_Soli_DSC.Text && estado <> "Gerencia"
                                                           )
-                                                      ),
+                                                      ) && !Rechazo,
                                                       DisplayMode.Edit,
                                                       DisplayMode.Disabled
                                                   )
@@ -821,17 +822,12 @@ Screens:
                                     - Button10:
                                         Control: Classic/Button@2.2.0
                                         Properties:
-                                          DisplayMode: |-
-                                            =If(CountIf(datos_DSC, aprobado) > 0 && IsBlank(
-                                                    LookUp(
-                                                        Solicitud_Compras,
-                                                        soli_num = txt_Num_Soli_DSC.Text && estado <> "Gerencia"
-                                                    )
-                                                ), DisplayMode.Edit, DisplayMode.Disabled)
-                                          Fill: =RGBA(15, 108, 189, 1)
-                                          Height: =35
-                                          HoverBorderColor: =RGBA(15, 84, 140, 1)
-                                          HoverFill: =RGBA(15, 84, 140, 1)
+                                          BorderColor: =RGBA(52, 152, 47, 1)
+                                          DisplayMode: =If(CountIf(datos_DSC, aprobado) > 0 && !Rechazo, DisplayMode.Edit, DisplayMode.Disabled)
+                                          Fill: =RGBA(52, 152, 47, 1)
+                                          Height: =33
+                                          HoverBorderColor: =RGBA(52, 152, 47, 1)
+                                          HoverFill: =RGBA(21, 68, 18, 1)
                                           OnSelect: |-
                                             =
                                             /*If(
@@ -869,31 +865,14 @@ Screens:
                                                 Clear(CheckList_DSC)
                                             )*/
                                             UpdateContext({showContainer: true})
-                                          PressedBorderColor: =RGBA(15, 108, 189, 1)
-                                          PressedColor: =RGBA(15, 108, 189, 1)
+                                          PressedBorderColor: =RGBA(52, 152, 47, 1)
+                                          PressedColor: =RGBA(52, 152, 47, 1)
                                           PressedFill: =RGBA(255, 255, 255, 1)
-                                          Text: ="Enviar"
-                                          Width: =88
-                                          X: =1251
-                                          Y: =7
-                                    - lbl_ValorDato_EM_11:
-                                        Control: Text@0.0.51
-                                        Properties:
-                                          Align: ='TextCanvas.Align'.End
-                                          FontColor: =RGBA(255, 255, 255, 1)
-                                          Height: =30
-                                          PaddingBottom: =0
-                                          PaddingLeft: =0
-                                          PaddingRight: =0
-                                          PaddingTop: =0
-                                          Size: =20
                                           Text: |-
                                             ="Aprovados: " & CountIf(datos_DSC, aprobado) & "/" & glr_Detalles_DSC.AllItemsCount
-                                          VerticalAlign: =VerticalAlign.Middle
-                                          Weight: ='TextCanvas.Weight'.Bold
-                                          Width: =174
-                                          X: =1069
-                                          Y: =10
+                                          Width: =176
+                                          X: =1163
+                                          Y: =7
                                     - txt_Solicitante_DSC:
                                         Control: Classic/TextInput@2.3.2
                                         Properties:
@@ -990,6 +969,59 @@ Screens:
                                           Width: =60
                                           X: =820
                                           Y: =10
+                                    - Button10_1:
+                                        Control: Classic/Button@2.2.0
+                                        Properties:
+                                          BorderColor: =RGBA(215, 58, 60, 1)
+                                          DisplayMode: =If(!Rechazo && CountIf(datos_DSC, aprobado) = 0, DisplayMode.Edit, DisplayMode.Disabled)
+                                          Fill: =RGBA(215, 58, 60, 1)
+                                          Height: =33
+                                          HoverBorderColor: =RGBA(215, 58, 60, 1)
+                                          HoverFill: =RGBA(132, 40, 38, 1)
+                                          OnSelect: |-
+                                            =
+                                            /*If(
+                                                IsBlank(
+                                                    LookUp(
+                                                        Solicitud_Compras;
+                                                        soli_num = txt_Num_Soli_DSC.Text && estado <> "Gerencia"
+                                                    )
+                                                );
+                                                ForAll(
+                                                    Filter(
+                                                        glr_Detalles_DSC.AllItems;
+                                                        !Checkbox3.Value
+                                                    );
+                                                    Collect(
+                                                        Compras_NoMarcadas;
+                                                        {
+                                                            NSolicitud: Upper(txt_Num_Soli_DSC.Text);
+                                                            NFilaSolicitud: ThisRecord.crfb9_linea;
+                                                            Enviado: 0
+                                                        }
+                                                    )
+                                                );;
+                                                Patch(
+                                                    Solicitud_Compras;
+                                                    glr_Solicitudes_SC.Selected;
+                                                    {
+                                                        user: txt_User_DSC.Text;
+                                                        total: Value(txt_Total_DSC.Text);
+                                                        estado: "Listo"
+                                                    }
+                                                );;
+                                                Back();
+                                                Reset(txt_Num_Soli_DSC);
+                                                Clear(CheckList_DSC)
+                                            )*/
+                                            UpdateContext({Rechazo: true})
+                                          PressedBorderColor: =RGBA(215, 58, 60, 1)
+                                          PressedColor: =RGBA(215, 58, 60, 1)
+                                          PressedFill: =RGBA(255, 255, 255, 1)
+                                          Text: ="Devolver"
+                                          Width: =122
+                                          X: =1015
+                                          Y: =7
                               - ContainerNext_DSC:
                                   Control: GroupContainer@1.3.0
                                   Variant: ManualLayout
@@ -1462,6 +1494,194 @@ Screens:
                                                 Width: =56
                                                 X: =864
                                                 Y: =514
+      - cnt_Rechazo_DAC_4:
+          Control: GroupContainer@1.3.0
+          Variant: ManualLayout
+          Properties:
+            BorderColor: =RGBA(215, 58, 60, 1)
+            BorderThickness: =5
+            DropShadow: =DropShadow.ExtraBold
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =190
+            RadiusBottomLeft: =20
+            RadiusBottomRight: =20
+            RadiusTopLeft: =20
+            RadiusTopRight: =20
+            Visible: =Rechazo
+            Width: =400
+            X: =483
+            Y: =289
+          Children:
+            - txt_MensajeNoti_EM_30:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Font: =Font.Arial
+                  Height: =129
+                  Size: =18
+                  Text: ="¿Desea devolver esta solicitud a Gerencia?"
+                  Width: =400
+            - btn_Aceptar_EM_35:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =RGBA(52, 152, 47, 1)
+                  Color: =RGBA(255, 255, 255, 1)
+                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                  Fill: =RGBA(52, 152, 47, 1)
+                  Font: =Font.'Open Sans'
+                  FontWeight: =FontWeight.Normal
+                  HoverBorderColor: =RGBA(52, 152, 47, 1)
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =RGBA(21, 68, 18, 1)
+                  OnSelect: |
+                    =UpdateContext({Guardando: true});
+                    With(
+                        {
+                            idGerente: If(
+                                StartsWith(
+                                    Soli,
+                                    "PRD"
+                                ) && LookUp(
+                                    preq,
+                                    req_num = Soli,
+                                    requester
+                                ) <> "raraya",
+                                "16",
+                                StartsWith(
+                                    Soli,
+                                    "MTO"
+                                ) && LookUp(
+                                    preq,
+                                    req_num = Soli,
+                                    requester
+                                ) <> "rpereira",
+                                "15",
+                                StartsWith(
+                                    Soli,
+                                    "QAL"
+                                ) && LookUp(
+                                    preq,
+                                    req_num = Soli,
+                                    requester
+                                ) <> "icespedes",
+                                "2618",
+                                (StartsWith(
+                                    Soli,
+                                    "TLR"
+                                ) || StartsWith(
+                                    Soli,
+                                    "ADM"
+                                ) || StartsWith(
+                                    Soli,
+                                    "OFC"
+                                )) && LookUp(
+                                    preq,
+                                    req_num = Soli,
+                                    requester
+                                ) <> "marias",
+                                "1124",
+                                StartsWith(
+                                    Soli,
+                                    "SOL"
+                                ) && LookUp(
+                                    preq,
+                                    req_num = Soli,
+                                    requester
+                                ) <> "vguerrero",
+                                "1133",
+                                (StartsWith(
+                                    Soli,
+                                    "TIC"
+                                ) ) && LookUp(
+                                    preq,
+                                    req_num = Soli,
+                                    requester
+                                ) <> "jbrenes",
+                                "2648",
+                                "1"
+                            )
+                        },
+                        If(
+                            idGerente = "1",
+                            Remove(
+                                Solicitud_Compras,
+                                glr_Solicitudes_SC.Selected
+                            ),
+                            Patch(
+                                Solicitud_Compras,
+                                glr_Solicitudes_SC.Selected,
+                                {estado: "Devuelto"}
+                            );
+                            ForAll(
+                                Filter(
+                                    datos_DSC,
+                                    !aprobado
+                                ),
+                                Collect(
+                                    Compras_NoMarcadas,
+                                    {
+                                        NSolicitud: Upper(Soli),
+                                        NFilaSolicitud: ThisRecord.crfb9_linea,
+                                        NItem: ThisRecord.crfb9_item,
+                                        Descripcion: ThisRecord.crfb9_descripcion,
+                                        Enviado: 0,
+                                        Tipo_Envio: idGerente,
+                                        Motivo: txt_Motivo_DSC.Text
+                                    }
+                                )
+                            );
+                            RemoveIf(
+                                Compras_NoMarcadas,
+                                NSolicitud = Soli && NFilaSolicitud in Filter(
+                                    datos_DSC,
+                                    aprobado
+                                ).crfb9_linea && Enviado = 1 && Tipo_Envio = idGerente
+                            )
+                        )
+                    );
+                    UpdateContext(
+                        {
+                            edit: {
+                                view: false,
+                                item: Blank()
+                            },
+                            Aviso: {Ver: false},
+                            Rechazo: false
+                        }
+                    );
+                    Clear(datos_DAC);
+                    Reset(txt_Num_Soli_DAC);
+                    Reset(drp_Estado_AC);
+                    UpdateContext({Guardando: false});
+                    Back();
+                  PressedBorderColor: =RGBA(52, 152, 47, 1)
+                  PressedColor: =Self.Fill
+                  PressedFill: =Self.Color
+                  Text: ="Aceptar"
+                  Width: =150
+                  X: =212
+                  Y: =129
+            - btn_Aceptar_EM_36:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =RGBA(215, 58, 60, 1)
+                  Color: =RGBA(255, 255, 255, 1)
+                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                  Fill: =RGBA(215, 58, 60, 1)
+                  Font: =Font.'Open Sans'
+                  FontWeight: =FontWeight.Bold
+                  HoverBorderColor: =RGBA(215, 58, 60, 1)
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =RGBA(132, 40, 38, 1)
+                  OnSelect: |-
+                    =UpdateContext({Rechazo: false})
+                  PressedBorderColor: =RGBA(215, 58, 60, 1)
+                  PressedColor: =Self.Fill
+                  PressedFill: =Self.Color
+                  Text: ="Cancelar"
+                  Width: =150
+                  X: =37
+                  Y: =129
       - cnt_Avisos_BC_5:
           Control: GroupContainer@1.3.0
           Variant: ManualLayout
