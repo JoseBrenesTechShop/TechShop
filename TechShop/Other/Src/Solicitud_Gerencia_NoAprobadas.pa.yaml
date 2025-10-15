@@ -7,12 +7,96 @@
 # For more information, visit https://go.microsoft.com/fwlink/?linkid=2292623
 # ************************************************************************************************
 Screens:
-  Solicitud_Compra_NoAprobadasGerencia:
+  Solicitud_Gerencia_NoAprobadas:
     Properties:
       BackgroundImage: ='abstracto geométrico blanco y gris'
       ImagePosition: =ImagePosition.Fill
+      OnVisible: |
+        =UpdateContext({Guardando: true});
+        ClearCollect(
+            datos_SGN,
+            AddColumns(
+                Distinct(
+                    Filter(
+                        Compras_NoMarcadas,
+                        Enviado = 0,
+                        Tipo_Envio = varEmpleado.Codigo
+                    ),
+                    NSolicitud
+                ),
+                fecha,
+                With(
+                    {},
+                    LookUp(
+                        preq,
+                        req_num = Value,
+                        req_date
+                    )
+                ),
+                total,
+                Sum(
+                    Filter(
+                        Filter(
+                            preqitem,
+                            req_num = Value
+                        ),
+                        req_line in Filter(
+                            Compras_NoMarcadas,
+                            Enviado = 0,
+                            Tipo_Envio = varEmpleado.Codigo
+                        ).NFilaSolicitud
+                    ),
+                    qty_ordered * unit_mat_cost
+                ),
+                solicitante,
+                With(
+                    {},
+                    If(
+                        !IsBlank(
+                            LookUp(
+                                preq,
+                                req_num = Value,
+                                requester
+                            )
+                        ),
+                        With(
+                            {
+                                email: LookUp(
+                                    preq,
+                                    req_num = Value,
+                                    requester
+                                ),
+                                name: First(
+                                    Filter(
+                                        Empleados,
+                                        Left(
+                                            Correo,
+                                            Find(
+                                                "@",
+                                                Correo
+                                            ) - 1
+                                        ) = LookUp(
+                                            preq,
+                                            req_num = Value,
+                                            requester
+                                        )
+                                    )
+                                ).Nombre
+                            },
+                            If(
+                                IsBlank(name),
+                                email,
+                                name
+                            )
+                        ),
+                        "Sin correo"
+                    )
+                )
+            )
+        );
+        UpdateContext({Guardando: false});
     Children:
-      - ScreenContainer_EM_24:
+      - ScreenContainer_EM_28:
           Control: GroupContainer@1.3.0
           Variant: AutoLayout
           Properties:
@@ -26,7 +110,7 @@ Screens:
             PaddingTop: =5
             Width: =Parent.Width
           Children:
-            - HeaderContainer_EM_24:
+            - HeaderContainer_EM_28:
                 Control: GroupContainer@1.3.0
                 Variant: AutoLayout
                 Properties:
@@ -39,7 +123,7 @@ Screens:
                   RadiusTopLeft: =8
                   RadiusTopRight: =8
                 Children:
-                  - icn_Usuario_EM_24:
+                  - icn_Usuario_EM_28:
                       Control: Classic/Icon@2.5.0
                       Properties:
                         AlignInContainer: =AlignInContainer.Center
@@ -52,7 +136,7 @@ Screens:
                         PaddingRight: =2
                         PaddingTop: =2
                         Width: =75
-                  - txt_EmpleadoUso_EM_15:
+                  - txt_EmpleadoUso_EM_17:
                       Control: Classic/TextInput@2.3.2
                       Properties:
                         Align: =Align.Center
@@ -71,7 +155,7 @@ Screens:
                         RadiusTopRight: =20
                         Size: =18
                         Width: =400
-                  - icn_Separador2_EM_30:
+                  - icn_Separador2_EM_34:
                       Control: Classic/Icon@2.5.0
                       Properties:
                         AlignInContainer: =AlignInContainer.Center
@@ -82,7 +166,7 @@ Screens:
                         Width: =30
                         X: =820
                         Y: =22
-                  - Listado de solicitud de compra_4:
+                  - Listado de solicitud de compra_6:
                       Control: Label@2.5.1
                       Properties:
                         Align: =Align.Center
@@ -94,7 +178,7 @@ Screens:
                         Size: =25
                         Text: ="Listado de compras no aprobadas"
                         Width: =740
-                  - icn_Separador_EM_24:
+                  - icn_Separador_EM_28:
                       Control: Classic/Icon@2.5.0
                       Properties:
                         AlignInContainer: =AlignInContainer.Center
@@ -105,7 +189,7 @@ Screens:
                         Width: =30
                         X: =820
                         Y: =22
-                  - icn_Home_EM_43:
+                  - icn_Home_EM_47:
                       Control: Classic/Icon@2.5.0
                       Properties:
                         AlignInContainer: =AlignInContainer.Center
@@ -120,19 +204,19 @@ Screens:
                         HoverBorderColor: =RGBA(0, 134, 208, 1)
                         HoverColor: =RGBA(255, 255, 255, 1)
                         HoverFill: =RGBA(0, 134, 208, 1)
-                        Icon: =Icon.Home
+                        Icon: =Icon.BackArrow
                         OnSelect: |
-                          =Back();
-                          Reset(txt_Num_Soli_SC_2);
-                          Reset(drp_Ano_SC_2);
-                          Reset(glr_Solicitudes_SCNM_1);
-                          Refresh(preqitem)
+                          =Reset(txt_Num_Soli_SC_4);
+                          Reset(drp_Ano_SC_4);
+                          Reset(glr_Solicitudes_SGN);
+                          Clear(datos_SGN);
+                          Back();
                         PaddingBottom: =5
                         PaddingLeft: =5
                         PaddingRight: =5
                         PaddingTop: =5
                         Width: =65
-            - BottomContainer_EM_24:
+            - BottomContainer_EM_28:
                 Control: GroupContainer@1.3.0
                 Variant: AutoLayout
                 Properties:
@@ -146,7 +230,7 @@ Screens:
                   PaddingRight: =2
                   PaddingTop: =2
                 Children:
-                  - MainContainer_EM_24:
+                  - MainContainer_EM_28:
                       Control: GroupContainer@1.3.0
                       Variant: AutoLayout
                       Properties:
@@ -159,13 +243,13 @@ Screens:
                         RadiusTopLeft: =10
                         RadiusTopRight: =10
                       Children:
-                        - Container_EM_24:
+                        - Container_EM_28:
                             Control: GroupContainer@1.3.0
                             Variant: ManualLayout
                             Properties:
                               Fill: =RGBA(204, 231, 246, 0.7)
                             Children:
-                              - lbl_BarraVista_EM_23:
+                              - lbl_BarraVista_EM_25:
                                   Control: Classic/TextInput@2.3.2
                                   Properties:
                                     Align: =Align.Center
@@ -182,7 +266,7 @@ Screens:
                                     HoverBorderColor: =RGBA(204, 231, 246, 1)
                                     HoverFill: =RGBA(204, 231, 246, 1)
                                     OnChange: =
-                                    OnSelect: =Reset(lbl_BarraVista_EM_23)
+                                    OnSelect: =Reset(lbl_BarraVista_EM_25)
                                     PaddingLeft: =150
                                     RadiusBottomLeft: =0
                                     RadiusBottomRight: =0
@@ -190,7 +274,7 @@ Screens:
                                     RadiusTopRight: =0
                                     Size: =18
                                     Width: =1352
-                              - lbl_ValorDato_EM_78:
+                              - lbl_ValorDato_EM_97:
                                   Control: Text@0.0.51
                                   Properties:
                                     Align: ='TextCanvas.Align'.Center
@@ -206,7 +290,7 @@ Screens:
                                     Width: =110
                                     X: =10
                                     Y: =10
-                              - txt_Num_Soli_SC_2:
+                              - txt_Num_Soli_SC_4:
                                   Control: Classic/TextInput@2.3.2
                                   Properties:
                                     Align: =Align.Center
@@ -236,7 +320,7 @@ Screens:
                                     Width: =180
                                     X: =120
                                     Y: =10
-                              - lbl_ValorDato_EM_84:
+                              - lbl_ValorDato_EM_98:
                                   Control: Text@0.0.51
                                   Properties:
                                     Align: ='TextCanvas.Align'.Center
@@ -248,7 +332,7 @@ Screens:
                                     Width: =60
                                     X: =310
                                     Y: =10
-                              - ContainerPais_EM_32:
+                              - ContainerPais_EM_38:
                                   Control: GroupContainer@1.3.0
                                   Variant: ManualLayout
                                   Properties:
@@ -265,7 +349,7 @@ Screens:
                                     X: =370
                                     Y: =10
                                   Children:
-                                    - drp_Ano_SC_2:
+                                    - drp_Ano_SC_4:
                                         Control: Classic/DropDown@2.3.1
                                         Properties:
                                           BorderColor: =RGBA(0, 0, 0, 0)
@@ -298,7 +382,7 @@ Screens:
                                           Size: =15
                                           Tooltip: ="Seleccione el año"
                                           Width: =100
-                              - ContainerGaleria_EM_30:
+                              - ContainerGaleria_EM_34:
                                   Control: GroupContainer@1.3.0
                                   Variant: ManualLayout
                                   Properties:
@@ -308,7 +392,7 @@ Screens:
                                     Width: =1352
                                     Y: =50
                                   Children:
-                                    - lbl_PNDato_EM_353:
+                                    - lbl_PNDato_EM_386:
                                         Control: Text@0.0.51
                                         Properties:
                                           Align: ='TextCanvas.Align'.Center
@@ -326,7 +410,7 @@ Screens:
                                           VerticalAlign: =VerticalAlign.Middle
                                           Weight: ='TextCanvas.Weight'.Regular
                                           Width: =242
-                                    - lbl_PNDato_EM_354:
+                                    - lbl_PNDato_EM_387:
                                         Control: Text@0.0.51
                                         Properties:
                                           Align: ='TextCanvas.Align'.Center
@@ -345,7 +429,7 @@ Screens:
                                           Weight: ='TextCanvas.Weight'.Regular
                                           Width: =210
                                           X: =242
-                                    - lbl_PNDato_EM_355:
+                                    - lbl_PNDato_EM_388:
                                         Control: Text@0.0.51
                                         Properties:
                                           Align: ='TextCanvas.Align'.Center
@@ -364,7 +448,7 @@ Screens:
                                           Weight: ='TextCanvas.Weight'.Regular
                                           Width: =170
                                           X: =452
-                                    - lbl_PNDato_EM_356:
+                                    - lbl_PNDato_EM_389:
                                         Control: Text@0.0.51
                                         Properties:
                                           Align: ='TextCanvas.Align'.Center
@@ -383,7 +467,7 @@ Screens:
                                           Weight: ='TextCanvas.Weight'.Regular
                                           Width: =430
                                           X: =622
-                                    - lbl_PNDato_EM_357:
+                                    - lbl_PNDato_EM_390:
                                         Control: Text@0.0.51
                                         Properties:
                                           Align: ='TextCanvas.Align'.Center
@@ -402,7 +486,7 @@ Screens:
                                           Weight: ='TextCanvas.Weight'.Regular
                                           Width: =190
                                           X: =1052
-                                    - lbl_PNDato_EM_358:
+                                    - lbl_PNDato_EM_391:
                                         Control: Text@0.0.51
                                         Properties:
                                           Align: ='TextCanvas.Align'.Center
@@ -421,7 +505,7 @@ Screens:
                                           Weight: ='TextCanvas.Weight'.Regular
                                           Width: =110
                                           X: =1242
-                                    - glr_Solicitudes_SCNM_1:
+                                    - glr_Solicitudes_SGN:
                                         Control: Gallery@2.15.0
                                         Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
                                         Properties:
@@ -429,50 +513,16 @@ Screens:
                                           Height: =587
                                           Items: |-
                                             =Sort(
-                                                Filter(
-                                                    Distinct(
-                                                        Filter(
-                                                            preqitem,
-                                                            stat = "R"
-                                                        ),
-                                                        req_num
-                                                    ),
-                                                    (IsBlank(txt_Num_Soli_SC_2.Text) || txt_Num_Soli_SC_2.Text in Value) && Value in Filter(Compras_NoMarcadas, Enviado < 1 && Tipo_Envio = varEmpleado.Codigo).NSolicitud
-                                                ),
+                                                datos_SGN,
                                                 Value,
                                                 SortOrder.Ascending
                                             )
-                                            //codigo original anterior
-                                            /*
-                                            Distinct(
-                                                Filter(
-                                                    preqitem;
-                                                    With(
-                                                        {num: ThisRecord.req_num};
-                                                        Year(
-                                                            LookUp(
-                                                                preq;
-                                                                req_num = num;
-                                                                req_date
-                                                            )
-                                                        ) = Value(drp_Ano_SC.SelectedText.Value) && DateValue(
-                                                            LookUp(
-                                                                preq;
-                                                                req_num = num;
-                                                                req_date
-                                                            )
-                                                        ) >= DateValue("15/02/2025")
-                                                    );
-                                                    !(req_num in Solicitud_Compras.soli_num)
-                                                );
-                                                req_num
-                                            )*/
                                           ShowScrollbar: =false
                                           TemplateSize: =30
                                           Width: =1352
                                           Y: =25
                                         Children:
-                                          - txt_PN_EM_12:
+                                          - txt_PN_EM_14:
                                               Control: Classic/TextInput@2.3.2
                                               Properties:
                                                 Align: =Align.Center
@@ -494,13 +544,13 @@ Screens:
                                                 RadiusTopRight: =0
                                                 Size: =15
                                                 Width: =242
-                                          - txt_Cantidad_EM_148:
+                                          - txt_Cantidad_EM_182:
                                               Control: Classic/TextInput@2.3.2
                                               Properties:
                                                 Align: =Align.Center
                                                 BorderColor: =RGBA(40, 134, 222, 1)
                                                 BorderThickness: =0.5
-                                                Default: =Text(LookUp(preq, req_num = ThisItem.Value, req_date), "dd/mm/yyyy")
+                                                Default: =Text(ThisItem.fecha, "dd/mm/yyyy")
                                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                                 DisabledColor: =
                                                 DisabledFill: =
@@ -517,13 +567,15 @@ Screens:
                                                 Size: =15
                                                 Width: =210
                                                 X: =242
-                                          - txt_Cantidad_EM_149:
+                                          - txt_Cantidad_EM_183:
                                               Control: Classic/TextInput@2.3.2
                                               Properties:
                                                 Align: =Align.Center
                                                 BorderColor: =RGBA(40, 134, 222, 1)
                                                 BorderThickness: =0.5
-                                                Default: =Text(Sum(Filter(preqitem, req_num = ThisItem.Value), qty_ordered * unit_mat_cost), "###,###,##0.00")
+                                                Default: |-
+                                                  =Text(ThisItem.total, "###,###,##0.00")
+                                                  //Text(Sum(Filter(preqitem; req_num = ThisItem.Value); qty_ordered * unit_mat_cost); "###,###,##0.00")
                                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                                 DisabledColor: =
                                                 DisabledFill: =
@@ -540,43 +592,13 @@ Screens:
                                                 Size: =15
                                                 Width: =170
                                                 X: =452
-                                          - txt_Cantidad_EM_153:
+                                          - txt_Cantidad_EM_184:
                                               Control: Classic/TextInput@2.3.2
                                               Properties:
                                                 Align: =Align.Center
                                                 BorderColor: =RGBA(40, 134, 222, 1)
                                                 BorderThickness: =0.5
-                                                Default: |-
-                                                  =With(
-                                                      {
-                                                          email: LookUp(
-                                                              preq,
-                                                              req_num = ThisItem.Value,
-                                                              requester
-                                                          ),
-                                                          name: First(
-                                                              Filter(
-                                                                  Empleados,
-                                                                  Left(
-                                                                      Correo,
-                                                                      Find(
-                                                                          "@",
-                                                                          Correo
-                                                                      ) - 1
-                                                                  ) = LookUp(
-                                                                      preq,
-                                                                      req_num = ThisItem.Value,
-                                                                      requester
-                                                                  )
-                                                              )
-                                                          ).Nombre
-                                                      },
-                                                      If(
-                                                          IsBlank(name),
-                                                          email,
-                                                          name
-                                                      )
-                                                  )
+                                                Default: =ThisItem.solicitante
                                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                                 DisabledColor: =
                                                 DisabledFill: =
@@ -593,7 +615,7 @@ Screens:
                                                 Size: =15
                                                 Width: =430
                                                 X: =622
-                                          - txt_Cantidad_EM_159:
+                                          - txt_Cantidad_EM_185:
                                               Control: Classic/TextInput@2.3.2
                                               Properties:
                                                 Align: =Align.Center
@@ -616,7 +638,7 @@ Screens:
                                                 Size: =15
                                                 Width: =190
                                                 X: =1052
-                                          - icn_Eliminar_EM_27:
+                                          - icn_Eliminar_EM_30:
                                               Control: Classic/Icon@2.5.0
                                               Properties:
                                                 BorderColor: =RGBA(40, 134, 222, 1)
@@ -634,10 +656,128 @@ Screens:
                                                 HoverColor: =RGBA(0, 0, 0, 1)
                                                 HoverFill: =RGBA(219, 255, 209, 1)
                                                 Icon: =Icon.DetailList
-                                                OnSelect: =Navigate(Detalle_Solicitud_Compra_NoAprobadasGerencia)
+                                                OnSelect: =Navigate(Detalle_Solicitud_Gerencia_NoAprobadas)
                                                 PaddingBottom: =2
                                                 PaddingLeft: =2
                                                 PaddingRight: =2
                                                 PaddingTop: =2
                                                 Width: =110
                                                 X: =1242
+      - cnt_Avisos_BC_8:
+          Control: GroupContainer@1.3.0
+          Variant: ManualLayout
+          Properties:
+            Fill: =RGBA(0, 0, 0, 0.15)
+            Height: =768
+            RadiusBottomLeft: =12
+            RadiusBottomRight: =12
+            RadiusTopLeft: =12
+            RadiusTopRight: =12
+            Visible: '=Guardando || Aviso.Ver '
+            Width: =1366
+          Children:
+            - Icon3_96:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  BorderColor: =RGBA(12, 59, 94, 1)
+                  BorderStyle: =BorderStyle.None
+                  BorderThickness: =2
+                  Color: =If(Aviso.Tipo = 0, RGBA(255, 0, 0, 1), Aviso.Tipo = 1, RGBA(255, 191, 0, 1), RGBA(54, 176, 75, 1))
+                  DisplayMode: =DisplayMode.View
+                  FocusedBorderThickness: =20
+                  Height: =150
+                  HoverBorderColor: =App.Theme.Colors.Darker10
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =App.Theme.Colors.Darker10
+                  Icon: =If(Aviso.Tipo = 0, Icon.Error, Aviso.Tipo = 1, Icon.Warning, Icon.CheckBadge)
+                  OnSelect: |
+                    =Navigate(MenuAdministrativo);
+                  PaddingBottom: =5
+                  PaddingLeft: =5
+                  PaddingRight: =5
+                  PaddingTop: =5
+                  Visible: =Aviso.Ver && !Guardando
+                  Width: =150
+                  X: =600
+                  Y: =217
+            - Container70_10:
+                Control: GroupContainer@1.3.0
+                Variant: ManualLayout
+                Properties:
+                  BorderColor: =If(Aviso.Tipo = 0, RGBA(255, 0, 0, 1), Aviso.Tipo = 1, RGBA(255, 191, 0, 1), RGBA(54, 176, 75, 1))
+                  BorderThickness: =4
+                  Fill: =RGBA(255, 255, 255, 1)
+                  Height: =112
+                  RadiusBottomLeft: =10
+                  RadiusBottomRight: =10
+                  RadiusTopLeft: =10
+                  RadiusTopRight: =10
+                  Visible: =Aviso.Ver && !Guardando
+                  X: =425
+                  Y: =377
+                Children:
+                  - TextInput15_10:
+                      Control: Classic/TextInput@2.3.2
+                      Properties:
+                        Align: =Align.Center
+                        Default: =Aviso.Texto
+                        DisplayMode: =DisplayMode.View
+                        Height: =100
+                        Mode: =TextMode.MultiLine
+                        PaddingBottom: =12
+                        PaddingRight: =12
+                        PaddingTop: =12
+                        Size: =16
+                        Width: =500
+                  - Rectangle43_20:
+                      Control: Rectangle@2.3.0
+                      Properties:
+                        Fill: =RGBA(235, 235, 235, 1)
+                        Height: =12
+                        Width: =500
+                        Y: =100
+                  - Rectangle43_21:
+                      Control: Rectangle@2.3.0
+                      Properties:
+                        Fill: =If(Aviso.Tipo = 0, RGBA(255, 0, 0, 1), Aviso.Tipo = 1, RGBA(255, 191, 0, 1), RGBA(54, 176, 75, 1))
+                        Height: =12
+                        Width: =(tmp_Aviso_BC_10.Value / 3200) * 500
+                        Y: =100
+            - tmp_Aviso_BC_10:
+                Control: Timer@2.1.0
+                Properties:
+                  Duration: =3500
+                  OnTimerEnd: |-
+                    =UpdateContext({Aviso: {Ver: false, Tipo: 3, Texto: ""}, Guardando: false}); Reset(Self)
+                  Start: =Aviso.Ver
+                  Visible: =false
+            - cnt_spinner_6:
+                Control: GroupContainer@1.3.0
+                Variant: ManualLayout
+                Properties:
+                  Fill: =RGBA(255, 255, 255, 1)
+                  Height: =125
+                  RadiusBottomLeft: =10
+                  RadiusBottomRight: =10
+                  RadiusTopLeft: =10
+                  RadiusTopRight: =10
+                  Visible: =Guardando && !Aviso.Ver
+                  Width: =468
+                  X: =441
+                  Y: =301
+                Children:
+                  - Spinner1_10:
+                      Control: Spinner@1.4.6
+                      Properties:
+                        Appearance: ='Spinner.Appearance'.Primary
+                        BasePaletteColor: =RGBA(5, 102, 178, 1)
+                        FontColor: =RGBA(40, 134, 222, 1)
+                        FontSize: =20
+                        FontWeight: =FontWeight.Bold
+                        Height: =125
+                        Label: ="Cargando..."
+                        LabelPosition: ='Spinner.LabelPosition'.Below
+                        SpinnerColor: =RGBA(15, 108, 189, 1)
+                        SpinnerSize: ='Spinner.SpinnerSize'.Huge
+                        TrackColor: =RGBA(180, 214, 250, 1)
+                        Width: =468
