@@ -1,9 +1,92 @@
-Solicitud_Compra_NoAprobadasGerencia As screen:
+Solicitud_Gerencia_NoAprobadas As screen:
     BackgroundImage: ='abstracto geométrico blanco y gris'
     Fill: =Color.White
     ImagePosition: =ImagePosition.Fill
     LoadingSpinnerColor: =App.Theme.Colors.Primary
-    OnVisible: =
+    OnVisible: |
+        =UpdateContext({Guardando: true});
+        ClearCollect(
+            datos_SGN,
+            AddColumns(
+                Distinct(
+                    Filter(
+                        Compras_NoMarcadas,
+                        Enviado = 0,
+                        Tipo_Envio = varEmpleado.Codigo
+                    ),
+                    NSolicitud
+                ),
+                fecha,
+                With(
+                    {},
+                    LookUp(
+                        preq,
+                        req_num = Value,
+                        req_date
+                    )
+                ),
+                total,
+                Sum(
+                    Filter(
+                        Filter(
+                            preqitem,
+                            req_num = Value
+                        ),
+                        req_line in Filter(
+                            Compras_NoMarcadas,
+                            Enviado = 0,
+                            Tipo_Envio = varEmpleado.Codigo
+                        ).NFilaSolicitud
+                    ),
+                    qty_ordered * unit_mat_cost
+                ),
+                solicitante,
+                With(
+                    {},
+                    If(
+                        !IsBlank(
+                            LookUp(
+                                preq,
+                                req_num = Value,
+                                requester
+                            )
+                        ),
+                        With(
+                            {
+                                email: LookUp(
+                                    preq,
+                                    req_num = Value,
+                                    requester
+                                ),
+                                name: First(
+                                    Filter(
+                                        Empleados,
+                                        Left(
+                                            Correo,
+                                            Find(
+                                                "@",
+                                                Correo
+                                            ) - 1
+                                        ) = LookUp(
+                                            preq,
+                                            req_num = Value,
+                                            requester
+                                        )
+                                    )
+                                ).Nombre
+                            },
+                            If(
+                                IsBlank(name),
+                                email,
+                                name
+                            )
+                        ),
+                        "Sin correo"
+                    )
+                )
+            )
+        );
+        UpdateContext({Guardando: false});
 
     ScreenContainer_EM_24 As groupContainer.verticalAutoLayoutContainer:
         DropShadow: =DropShadow.Light
@@ -154,11 +237,11 @@ Solicitud_Compra_NoAprobadasGerencia As screen:
                 LayoutMaxHeight: =
                 LayoutMaxWidth: =
                 OnSelect: |
-                    =Back();
-                    Reset(txt_Num_Soli_SC_2);
+                    =Reset(txt_Num_Soli_SC_2);
                     Reset(drp_Ano_SC_2);
                     Reset(glr_Solicitudes_SCNM_1);
-                    Refresh(preqitem)
+                    Clear(datos_SGN);
+                    Back();
                 PaddingBottom: =5
                 PaddingLeft: =5
                 PaddingRight: =5
@@ -498,44 +581,10 @@ Solicitud_Compra_NoAprobadasGerencia As screen:
                             Height: =587
                             Items: |-
                                 =Sort(
-                                    Filter(
-                                        Distinct(
-                                            Filter(
-                                                preqitem,
-                                                stat = "R"
-                                            ),
-                                            req_num
-                                        ),
-                                        (IsBlank(txt_Num_Soli_SC_2.Text) || txt_Num_Soli_SC_2.Text in Value) && Value in Filter(Compras_NoMarcadas, Enviado < 1 && Tipo_Envio = varEmpleado.Codigo).NSolicitud
-                                    ),
+                                    datos_SGN,
                                     Value,
                                     SortOrder.Ascending
                                 )
-                                //codigo original anterior
-                                /*
-                                Distinct(
-                                    Filter(
-                                        preqitem;
-                                        With(
-                                            {num: ThisRecord.req_num};
-                                            Year(
-                                                LookUp(
-                                                    preq;
-                                                    req_num = num;
-                                                    req_date
-                                                )
-                                            ) = Value(drp_Ano_SC.SelectedText.Value) && DateValue(
-                                                LookUp(
-                                                    preq;
-                                                    req_num = num;
-                                                    req_date
-                                                )
-                                            ) >= DateValue("15/02/2025")
-                                        );
-                                        !(req_num in Solicitud_Compras.soli_num)
-                                    );
-                                    req_num
-                                )*/
                             Layout: =Layout.Vertical
                             LoadingSpinner: =LoadingSpinner.Data
                             ShowScrollbar: =false
@@ -576,7 +625,7 @@ Solicitud_Compra_NoAprobadasGerencia As screen:
                                 BorderColor: =RGBA(40, 134, 222, 1)
                                 BorderThickness: =0.5
                                 Color: =RGBA(0, 0, 0, 1)
-                                Default: =Text(LookUp(preq, req_num = ThisItem.Value, req_date), "dd/mm/yyyy")
+                                Default: =Text(ThisItem.fecha, "dd/mm/yyyy")
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
                                 DisabledFill: =
@@ -604,7 +653,8 @@ Solicitud_Compra_NoAprobadasGerencia As screen:
                                 BorderThickness: =0.5
                                 Color: =RGBA(0, 0, 0, 1)
                                 Default: |-
-                                    =Text(Sum(Filter(preqitem, req_num = ThisItem.Value), qty_ordered * unit_mat_cost), "###,###,##0.00")
+                                    =Text(ThisItem.total, "###,###,##0.00")
+                                    //Text(Sum(Filter(preqitem; req_num = ThisItem.Value); qty_ordered * unit_mat_cost); "###,###,##0.00")
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
                                 DisabledFill: =
@@ -631,37 +681,7 @@ Solicitud_Compra_NoAprobadasGerencia As screen:
                                 BorderColor: =RGBA(40, 134, 222, 1)
                                 BorderThickness: =0.5
                                 Color: =RGBA(0, 0, 0, 1)
-                                Default: |-
-                                    =With(
-                                        {
-                                            email: LookUp(
-                                                preq,
-                                                req_num = ThisItem.Value,
-                                                requester
-                                            ),
-                                            name: First(
-                                                Filter(
-                                                    Empleados,
-                                                    Left(
-                                                        Correo,
-                                                        Find(
-                                                            "@",
-                                                            Correo
-                                                        ) - 1
-                                                    ) = LookUp(
-                                                        preq,
-                                                        req_num = ThisItem.Value,
-                                                        requester
-                                                    )
-                                                )
-                                            ).Nombre
-                                        },
-                                        If(
-                                            IsBlank(name),
-                                            email,
-                                            name
-                                        )
-                                    )
+                                Default: =ThisItem.solicitante
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
                                 DisabledFill: =
@@ -725,7 +745,7 @@ Solicitud_Compra_NoAprobadasGerencia As screen:
                                 HoverColor: =RGBA(0, 0, 0, 1)
                                 HoverFill: =RGBA(219, 255, 209, 1)
                                 Icon: =Icon.DetailList
-                                OnSelect: =Navigate(Detalle_Solicitud_Compra_NoAprobadasGerencia)
+                                OnSelect: =Navigate(Detalle_Solicitud_Gerencia_NoAprobadas)
                                 PaddingBottom: =2
                                 PaddingLeft: =2
                                 PaddingRight: =2
@@ -733,4 +753,161 @@ Solicitud_Compra_NoAprobadasGerencia As screen:
                                 Width: =110
                                 X: =1242
                                 ZIndex: =30
+
+    cnt_Avisos_BC_8 As groupContainer.manualLayoutContainer:
+        DropShadow: =DropShadow.Light
+        Fill: =RGBA(0, 0, 0, 0.15)
+        Height: =768
+        RadiusBottomLeft: =12
+        RadiusBottomRight: =12
+        RadiusTopLeft: =12
+        RadiusTopRight: =12
+        Visible: =Guardando || Aviso.Ver 
+        Width: =1366
+        ZIndex: =2
+
+        Icon3_96 As icon:
+            BorderColor: =RGBA(12, 59, 94, 1)
+            BorderStyle: =BorderStyle.None
+            BorderThickness: =2
+            Color: =If(Aviso.Tipo = 0, RGBA(255, 0, 0, 1), Aviso.Tipo = 1, RGBA(255, 191, 0, 1), RGBA(54, 176, 75, 1))
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            DisabledColor: =RGBA(244, 244, 244, 1)
+            DisplayMode: =DisplayMode.View
+            FocusedBorderThickness: =20
+            Height: =150
+            HoverBorderColor: =App.Theme.Colors.Darker10
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =App.Theme.Colors.Darker10
+            Icon: =If(Aviso.Tipo = 0, Icon.Error, Aviso.Tipo = 1, Icon.Warning, Icon.CheckBadge)
+            OnSelect: |
+                =Navigate(MenuAdministrativo);
+            PaddingBottom: =5
+            PaddingLeft: =5
+            PaddingRight: =5
+            PaddingTop: =5
+            Visible: =Aviso.Ver && !Guardando
+            Width: =150
+            X: =600
+            Y: =217
+            ZIndex: =1
+
+        Container70_10 As groupContainer.manualLayoutContainer:
+            BorderColor: =If(Aviso.Tipo = 0, RGBA(255, 0, 0, 1), Aviso.Tipo = 1, RGBA(255, 191, 0, 1), RGBA(54, 176, 75, 1))
+            BorderThickness: =4
+            DropShadow: =DropShadow.Light
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =112
+            RadiusBottomLeft: =10
+            RadiusBottomRight: =10
+            RadiusTopLeft: =10
+            RadiusTopRight: =10
+            Visible: =Aviso.Ver && !Guardando
+            X: =425
+            Y: =377
+            ZIndex: =2
+
+            TextInput15_10 As text:
+                Align: =Align.Center
+                BorderColor: =App.Theme.Colors.Darker40
+                BorderThickness: =2
+                Color: =RGBA(0, 0, 0, 1)
+                Default: =Aviso.Texto
+                DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                DisabledColor: =RGBA(166, 166, 166, 1)
+                DisabledFill: =RGBA(244, 244, 244, 1)
+                DisplayMode: =DisplayMode.View
+                FocusedBorderThickness: =4
+                Font: =App.Theme.Font
+                Height: =100
+                HintText: =""
+                HoverBorderColor: =App.Theme.Colors.Darker40
+                HoverColor: =RGBA(0, 0, 0, 1)
+                HoverFill: =App.Theme.Colors.Lighter70
+                Mode: =TextMode.MultiLine
+                PaddingBottom: =12
+                PaddingRight: =12
+                PaddingTop: =12
+                Size: =16
+                Width: =500
+                ZIndex: =1
+
+            Rectangle43_20 As rectangle:
+                BorderColor: =App.Theme.Colors.Darker40
+                Fill: =RGBA(235, 235, 235, 1)
+                Height: =12
+                Width: =500
+                Y: =100
+                ZIndex: =2
+
+            Rectangle43_21 As rectangle:
+                BorderColor: =App.Theme.Colors.Darker40
+                Fill: =If(Aviso.Tipo = 0, RGBA(255, 0, 0, 1), Aviso.Tipo = 1, RGBA(255, 191, 0, 1), RGBA(54, 176, 75, 1))
+                Height: =12
+                Width: =(tmp_Aviso_BC_10.Value / 3200) * 500
+                Y: =100
+                ZIndex: =3
+
+        tmp_Aviso_BC_10 As timer:
+            BorderColor: =App.Theme.Colors.Primary
+            Color: =App.Theme.Colors.PrimaryForeground
+            DisabledBorderColor: =RGBA(244, 244, 244, 1)
+            DisabledColor: =RGBA(166, 166, 166, 1)
+            DisabledFill: =RGBA(244, 244, 244, 1)
+            Duration: =3500
+            Fill: =App.Theme.Colors.Primary
+            Font: =App.Theme.Font
+            HoverBorderColor: =App.Theme.Colors.Darker10
+            HoverColor: =App.Theme.Colors.PrimaryForeground
+            HoverFill: =App.Theme.Colors.Darker10
+            OnTimerEnd: |-
+                =UpdateContext({Aviso: {Ver: false, Tipo: 3, Texto: ""}, Guardando: false}); Reset(Self)
+            PressedBorderColor: =App.Theme.Colors.Darker40
+            PressedColor: =Self.Color
+            PressedFill: =App.Theme.Colors.Darker40
+            Start: =Aviso.Ver
+            Visible: =false
+            ZIndex: =3
+
+        cnt_spinner_6 As groupContainer.manualLayoutContainer:
+            DropShadow: =DropShadow.Light
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =125
+            RadiusBottomLeft: =10
+            RadiusBottomRight: =10
+            RadiusTopLeft: =10
+            RadiusTopRight: =10
+            Visible: =Guardando && !Aviso.Ver
+            Width: =468
+            X: =441
+            Y: =301
+            ZIndex: =4
+
+            "Spinner1_10 As 'Indicador giratorio'":
+                AccessibleLabel: =""
+                Appearance: ='Spinner.Appearance'.Primary
+                BasePaletteColor: =RGBA(5, 102, 178, 1)
+                ContentLanguage: =""
+                DisplayMode: =DisplayMode.Edit
+                Font: =""
+                FontColor: =RGBA(40, 134, 222, 1)
+                FontItalic: =false
+                FontSize: =20
+                FontStrikethrough: =false
+                FontUnderline: =false
+                FontWeight: =FontWeight.Bold
+                Height: =125
+                Label: ="Cargando..."
+                LabelPosition: ='Spinner.LabelPosition'.Below
+                OnChange: =false
+                SpinnerColor: =RGBA(15, 108, 189, 1)
+                SpinnerSize: ='Spinner.SpinnerSize'.Huge
+                TabIndex: =0
+                Tooltip: =""
+                TrackColor: =RGBA(180, 214, 250, 1)
+                Visible: =true
+                Width: =468
+                X: =0
+                Y: =0
+                ZIndex: =1
 

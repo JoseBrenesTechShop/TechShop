@@ -7,22 +7,97 @@
 # For more information, visit https://go.microsoft.com/fwlink/?linkid=2292623
 # ************************************************************************************************
 Screens:
-  Detalle_Solicitud_Compra_NoAprobadasGerencia:
+  Detalle_Solicitud_Gerencia_NoAprobadas:
     Properties:
       BackgroundImage: ='abstracto geométrico blanco y gris'
       ImagePosition: =ImagePosition.Fill
       OnHidden: |-
         =Clear(CheckList_DSC);
-        Reset(txt_Solicitante_DSC_2);
-        Reset(txt_Num_Soli_DSC_2);
+        Reset(txt_Solicitante_DSGN);
+        Reset(txt_Num_Soli_DSGN);
         Reset(glr_Detalles_DSCNM_1);
         Reset(glr_Solicitudes_SC);
         Refresh(preqitem);
       OnVisible: |-
-        =Clear(CheckList_DSCNM);
-        Reset(txt_Solicitante_DSC_2);
-        Reset(txt_Num_Soli_DSC_2);
-        Reset(glr_Detalles_DSCNM_1);
+        =UpdateContext(
+            {
+                Guardando: true,
+                Soli: glr_Solicitudes_SCNM_1.Selected.Value
+            }
+        );
+        ClearCollect(
+            datos_DSGN,
+            AddColumns(
+                Filter(
+                    Compras_NoMarcadas,
+                    Enviado = 0,
+                    Tipo_Envio = varEmpleado.Codigo,
+                    NSolicitud = Soli
+                ),
+                medida,
+                With(
+                    {myItem: NItem},
+                    LookUp(
+                        preqitem,
+                        req_num = Soli && item = myItem
+                    ).u_m
+                ),
+                cantidad,
+                With(
+                    {myItem: NItem},
+                    LookUp(
+                        preqitem,
+                        req_num = Soli && item = myItem
+                    ).qty_ordered
+                ),
+                precio,
+                With(
+                    {myItem: NItem},
+                    LookUp(
+                        preqitem,
+                        req_num = Soli && item = myItem
+                    ).unit_mat_cost
+                ),
+                subtotal,
+                With(
+                    {myItem: NItem},
+                    LookUp(
+                        preqitem,
+                        req_num = Soli && item = myItem
+                    ).qty_ordered * LookUp(
+                        preqitem,
+                        req_num = Soli && item = myItem
+                    ).unit_mat_cost
+                ),
+                vendNum,
+                With(
+                    {myItem: NItem},
+                    LookUp(
+                        preqitem,
+                        req_num = Soli && item = myItem
+                    ).vend_num
+                ),
+                vendName,
+                With(
+                    {myItem: NItem},
+                    With(
+                        {
+                            Vname: LookUp(
+                                preqitem,
+                                req_num = Soli && item = myItem
+                            ).vend_num
+                        },
+                        LookUp(
+                            vendaddr,
+                            vend_num = Vname
+                        ).name
+                    )
+                ),
+                aprobado,
+                false
+            )
+        );
+        UpdateContext({Guardando: false})
     Children:
       - ScreenContainer_EM_25:
           Control: GroupContainer@1.3.0
@@ -136,6 +211,7 @@ Screens:
                         OnSelect: |-
                           =Reset(glr_Solicitudes_SC);
                           Refresh(preqitem);
+                          Clear(datos_DSGN);
                           Back();
                         PaddingBottom: =5
                         PaddingLeft: =5
@@ -187,42 +263,22 @@ Screens:
                                     - Button10_12:
                                         Control: Classic/Button@2.2.0
                                         Properties:
-                                          Fill: =RGBA(15, 108, 189, 1)
-                                          Height: =35
-                                          HoverBorderColor: =RGBA(15, 84, 140, 1)
-                                          HoverFill: =RGBA(15, 84, 140, 1)
+                                          BorderColor: =RGBA(52, 152, 47, 1)
+                                          DisplayMode: =If(CountIf(datos_DSGN, aprobado) > 0, DisplayMode.Edit, DisplayMode.Disabled)
+                                          Fill: =RGBA(52, 152, 47, 1)
+                                          Height: =33
+                                          HoverBorderColor: =RGBA(52, 152, 47, 1)
+                                          HoverFill: =RGBA(21, 68, 18, 1)
                                           OnSelect: |-
-                                            =If(
-                                                IsBlank(
-                                                    LookUp(
-                                                        Solicitud_Compras,
-                                                        soli_num = txt_Num_Soli_DSC_2.Text
-                                                    )
-                                                ),
-                                                Collect(
-                                                    Solicitud_Compras,
-                                                    {
-                                                        soli_num: Upper(txt_Num_Soli_DSC_2.Text),
-                                                        fecha: DateValue(txt_Fecha_DSC_2.Text),
-                                                        solicitante: txt_Solicitante_DSC_2.Text,
-                                                        user: varEmpleado.Nombre,
-                                                        total: Value(txt_Total_DSC_2.Text),
-                                                        estado: "Gerencia"
-                                                    }
-                                                );
-                                                RemoveIf(
-                                                    Compras_NoMarcadas,
-                                                    NSolicitud = txt_Num_Soli_DSC_2.Text
-                                                ),
-                                                Back(),
-                                                Reset(txt_Num_Soli_DSC_2)
-                                            )
-                                          PressedBorderColor: =RGBA(15, 108, 189, 1)
-                                          PressedColor: =RGBA(15, 108, 189, 1)
+                                            =UpdateContext({showContainer: true})
+                                          PaddingTop: =2
+                                          PressedBorderColor: =RGBA(52, 152, 47, 1)
+                                          PressedColor: =RGBA(52, 152, 47, 1)
                                           PressedFill: =RGBA(255, 255, 255, 1)
-                                          Text: ="Enviar"
-                                          Width: =88
-                                          X: =1251
+                                          Text: ="Aprobar " & CountIf(datos_DSGN, aprobado) & "/" & CountIf(datos_DSGN, true)
+                                          VerticalAlign: =VerticalAlign.Bottom
+                                          Width: =196
+                                          X: =1142
                                           Y: =7
                                     - lbl_ValorDato_EM_85:
                                         Control: Text@0.0.51
@@ -241,14 +297,14 @@ Screens:
                                           Width: =130
                                           X: =10
                                           Y: =10
-                                    - txt_Num_Soli_DSC_2:
+                                    - txt_Num_Soli_DSGN:
                                         Control: Classic/TextInput@2.3.2
                                         Properties:
                                           Align: =Align.Center
                                           BorderColor: =RGBA(180, 214, 250, 1)
                                           BorderThickness: =3
                                           Clear: =true
-                                          Default: =glr_Solicitudes_SCNM_1.Selected.Value
+                                          Default: =glr_Solicitudes_SCN.Selected.Value
                                           DisabledBorderColor: =RGBA(180, 214, 250, 1)
                                           DisabledFill: =RGBA(255, 255, 255, 1)
                                           Height: =30
@@ -287,14 +343,14 @@ Screens:
                                           Width: =60
                                           X: =305
                                           Y: =10
-                                    - txt_Fecha_DSC_2:
+                                    - txt_Fecha_DSGN:
                                         Control: Classic/TextInput@2.3.2
                                         Properties:
                                           Align: =Align.Center
                                           BorderColor: =RGBA(180, 214, 250, 1)
                                           BorderThickness: =3
                                           Clear: =true
-                                          Default: '=Text(LookUp(preq, req_num = txt_Num_Soli_DSC_2.Text, req_date), "dd/mm/yyyy") '
+                                          Default: '=Text(LookUp(preq, req_num = txt_Num_Soli_DSGN.Text, req_date), "dd/mm/yyyy") '
                                           DisabledBorderColor: =RGBA(180, 214, 250, 1)
                                           DisabledColor: =RGBA(0, 0, 0, 1)
                                           DisabledFill: =RGBA(255, 255, 255, 1)
@@ -335,7 +391,7 @@ Screens:
                                           Width: =110
                                           X: =484
                                           Y: =10
-                                    - txt_Solicitante_DSC_2:
+                                    - txt_Solicitante_DSGN:
                                         Control: Classic/TextInput@2.3.2
                                         Properties:
                                           Align: =Align.Center
@@ -347,7 +403,7 @@ Screens:
                                                 {
                                                     email: LookUp(
                                                         preq,
-                                                        req_num = txt_Num_Soli_DSC_2.Text,
+                                                        req_num = txt_Num_Soli_DSGN.Text,
                                                         requester
                                                     ),
                                                     name: First(
@@ -361,7 +417,7 @@ Screens:
                                                                 ) - 1
                                                             ) = LookUp(
                                                                 preq,
-                                                                req_num = txt_Num_Soli_DSC_2.Text,
+                                                                req_num = txt_Num_Soli_DSGN.Text,
                                                                 requester
                                                             )
                                                         )
@@ -420,7 +476,7 @@ Screens:
                                           BorderColor: =RGBA(180, 214, 250, 1)
                                           BorderThickness: =3
                                           Clear: =true
-                                          Default: =Text(Sum(Filter(preqitem, req_num = txt_Num_Soli_DSC_2.Text), qty_ordered * unit_mat_cost), "###,###,##0.00")
+                                          Default: =Text(Sum(datos_DSGN, subtotal), "###,###,##0.00")
                                           DisabledBorderColor: =RGBA(180, 214, 250, 1)
                                           DisabledColor: =RGBA(0, 0, 0, 1)
                                           DisabledFill: =RGBA(255, 255, 255, 1)
@@ -658,7 +714,7 @@ Screens:
                                           Size: =16
                                           Text: ="Provedor"
                                           Weight: ='TextCanvas.Weight'.Regular
-                                          Width: =332
+                                          Width: =292
                                           X: =1020
                                     - glr_Detalles_DSCNM_1:
                                         Control: Gallery@2.15.0
@@ -666,11 +722,7 @@ Screens:
                                         Properties:
                                           BorderColor: =RGBA(0, 18, 107, 1)
                                           Height: =547
-                                          Items: |-
-                                            =Filter(
-                                                preqitem,
-                                                req_num = txt_Num_Soli_DSC_2.Text
-                                            )
+                                          Items: =Sort(datos_DSGN, NFilaSolicitud, SortOrder.Ascending)
                                           TemplateSize: =30
                                           Width: =1352
                                           Y: =25
@@ -681,7 +733,7 @@ Screens:
                                                 Align: =Align.Center
                                                 BorderColor: =RGBA(40, 134, 222, 1)
                                                 BorderThickness: =0.5
-                                                Default: =ThisItem.req_line
+                                                Default: =ThisItem.NFilaSolicitud
                                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                                 DisabledColor: =
                                                 DisabledFill: =RGBA(180, 214, 250, 1)
@@ -703,7 +755,7 @@ Screens:
                                                 Align: =Align.Center
                                                 BorderColor: =RGBA(40, 134, 222, 1)
                                                 BorderThickness: =0.5
-                                                Default: =ThisItem.item
+                                                Default: =ThisItem.NItem
                                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                                 DisabledColor: =
                                                 DisabledFill: =
@@ -726,7 +778,7 @@ Screens:
                                                 Align: =Align.Center
                                                 BorderColor: =RGBA(40, 134, 222, 1)
                                                 BorderThickness: =0.5
-                                                Default: =ThisItem.description
+                                                Default: =ThisItem.Descripcion
                                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                                 DisabledColor: =
                                                 DisabledFill: =
@@ -748,7 +800,7 @@ Screens:
                                                 Align: =Align.Center
                                                 BorderColor: =RGBA(40, 134, 222, 1)
                                                 BorderThickness: =0.5
-                                                Default: =ThisItem.u_m
+                                                Default: =ThisItem.medida
                                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                                 DisabledColor: =
                                                 DisabledFill: =
@@ -771,7 +823,7 @@ Screens:
                                                 Align: =Align.Center
                                                 BorderColor: =RGBA(40, 134, 222, 1)
                                                 BorderThickness: =0.5
-                                                Default: =ThisItem.qty_ordered
+                                                Default: =ThisItem.cantidad
                                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                                 DisabledColor: =
                                                 DisabledFill: =
@@ -794,7 +846,7 @@ Screens:
                                                 Align: =Align.Center
                                                 BorderColor: =RGBA(40, 134, 222, 1)
                                                 BorderThickness: =0.5
-                                                Default: =Text(ThisItem.unit_mat_cost, "###,###,##0.00")
+                                                Default: =Text(ThisItem.precio, "###,###,##0.00")
                                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                                 DisabledColor: =
                                                 DisabledFill: =
@@ -817,7 +869,7 @@ Screens:
                                                 Align: =Align.Center
                                                 BorderColor: =RGBA(40, 134, 222, 1)
                                                 BorderThickness: =0.5
-                                                Default: =Text(ThisItem.unit_mat_cost * ThisItem.qty_ordered, "###,###,##0.00")
+                                                Default: =Text(ThisItem.subtotal, "###,###,##0.00")
                                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                                 DisabledColor: =
                                                 DisabledFill: =
@@ -840,7 +892,7 @@ Screens:
                                                 Align: =Align.Center
                                                 BorderColor: =RGBA(40, 134, 222, 1)
                                                 BorderThickness: =0.5
-                                                Default: =ThisItem.vend_num
+                                                Default: =ThisItem.vendNum
                                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                                 DisabledColor: =
                                                 DisabledFill: =
@@ -863,7 +915,7 @@ Screens:
                                                 Align: =Align.Center
                                                 BorderColor: =RGBA(40, 134, 222, 1)
                                                 BorderThickness: =0.5
-                                                Default: =LookUp(vendaddr, vend_num = ThisItem.vend_num, name)
+                                                Default: =ThisItem.vendName
                                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                                 DisabledColor: =
                                                 DisabledFill: =
@@ -878,168 +930,638 @@ Screens:
                                                 RadiusTopLeft: =0
                                                 RadiusTopRight: =0
                                                 Size: =12
-                                                Width: =332
+                                                Width: =294
                                                 X: =1020
-                              - ContainerPN_EM_17:
+                                          - Checkbox3_3:
+                                              Control: Classic/CheckBox@2.1.0
+                                              Properties:
+                                                BorderColor: =RGBA(40, 134, 222, 1)
+                                                BorderThickness: =1
+                                                CheckboxSize: =30
+                                                CheckmarkFill: =RGBA(52, 152, 47, 1)
+                                                Default: |-
+                                                  =/*!IsBlank(
+                                                      LookUp(
+                                                          Solicitud_Compras;
+                                                          soli_num = txt_Num_Soli_DSG.Text
+                                                      )
+                                                  )*/
+                                                  ThisItem.aprobado
+                                                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                                                DisabledColor: =RGBA(40, 134, 222, 1)
+                                                DisabledFill: =RGBA(255, 255, 255, 1)
+                                                DisplayMode: |-
+                                                  =If(
+                                                      IsBlank(
+                                                          LookUp(
+                                                              Solicitud_Compras,
+                                                              soli_num = txt_Num_Soli_DSG.Text
+                                                          )
+                                                      ),
+                                                      DisplayMode.Edit,
+                                                      DisplayMode.Disabled
+                                                  )
+                                                Fill: =RGBA(255, 255, 255, 1)
+                                                Height: =30
+                                                OnCheck: |-
+                                                  =Patch(datos_DSGN, ThisItem, {aprobado: true})
+                                                OnSelect: =Select(Parent)
+                                                OnUncheck: |-
+                                                  =Patch(datos_DSGN, ThisItem, {aprobado: false})
+                                                PaddingBottom: =3
+                                                PaddingLeft: =5
+                                                Size: =10
+                                                Text: =
+                                                Width: =40
+                                                X: =1312
+                                    - lbl_PNDato_EM_369:
+                                        Control: Text@0.0.51
+                                        Properties:
+                                          Align: ='TextCanvas.Align'.Center
+                                          BorderColor: =RGBA(40, 134, 222, 1)
+                                          BorderStyle: =BorderStyle.Solid
+                                          BorderThickness: =0.5
+                                          Fill: =RGBA(180, 214, 250, 1)
+                                          Height: =25
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =16
+                                          Text: =
+                                          Weight: ='TextCanvas.Weight'.Regular
+                                          Width: =40
+                                          X: =1312
+                              - ContainerNext_DSG_1:
                                   Control: GroupContainer@1.3.0
                                   Variant: ManualLayout
                                   Properties:
                                     BorderColor: =RGBA(15, 84, 140, 1)
                                     BorderThickness: =2
-                                    DropShadow: =DropShadow.Semilight
-                                    Fill: =RGBA(180, 214, 250, 1)
-                                    Height: =462
+                                    DropShadow: =DropShadow.ExtraBold
+                                    Fill: =RGBA(0, 0, 0, 0.21)
+                                    Height: =664
+                                    RadiusBottomLeft: =10
+                                    RadiusBottomRight: =10
+                                    RadiusTopLeft: =10
+                                    RadiusTopRight: =10
                                     Visible: =showContainer
-                                    Width: =451
-                                    X: =275
-                                    Y: =90
+                                    Width: =1353
+                                    X: =1
+                                    Y: =1
                                   Children:
-                                    - lbl_BarraSeleccion_EM_17:
-                                        Control: Classic/TextInput@2.3.2
+                                    - Rectangle48_3:
+                                        Control: Rectangle@2.3.0
                                         Properties:
-                                          Align: =Align.Center
-                                          BorderColor: =RGBA(0, 0, 0, 1)
-                                          Color: =RGBA(255, 255, 255, 1)
-                                          Default: ="Seleccione el P/N"
-                                          DisplayMode: =DisplayMode.View
-                                          Fill: =RGBA(40, 134, 222, 1)
-                                          Font: =Font.'Open Sans'
-                                          FontWeight: =FontWeight.Bold
-                                          Height: =33
-                                          HintText: ="Tarima"
-                                          HoverBorderColor: =RGBA(204, 231, 246, 1)
-                                          HoverFill: =RGBA(204, 231, 246, 1)
-                                          OnChange: =
-                                          OnSelect: =Reset(lbl_BarraSeleccion_EM_17)
-                                          PaddingLeft: =5
-                                          RadiusBottomLeft: =0
-                                          RadiusBottomRight: =0
-                                          RadiusTopLeft: =0
-                                          RadiusTopRight: =0
-                                          Size: =18
-                                          Width: =453
-                                    - icn_eliminarFiltro_EM_11:
-                                        Control: Classic/Icon@2.5.0
+                                          Fill: =RGBA(0, 0, 0, 0)
+                                          Height: =664
+                                          OnSelect: |-
+                                            =UpdateContext({showContainer: false});
+                                            Reset(txt_Motivo_DSG_1)
+                                          Width: =1353
+                                    - Container77_3:
+                                        Control: GroupContainer@1.3.0
+                                        Variant: ManualLayout
                                         Properties:
-                                          AccessibleLabel: =Self.Tooltip
-                                          BorderColor: =RGBA(0, 0, 0, 1)
-                                          Color: =RGBA(0, 0, 0, 1)
-                                          DisabledBorderColor: =RGBA(56, 56, 56, 1)
-                                          DisabledColor: =RGBA(119, 119, 119, 1)
-                                          Height: =49
-                                          Icon: =Icon.CancelBadge
-                                          OnSelect: =Reset(txt_Filtro_EM_17)
-                                          PaddingBottom: =16
-                                          PaddingLeft: =16
-                                          PaddingRight: =16
-                                          PaddingTop: =16
-                                          Tooltip: ="Ver los detalles del elemento"
-                                          Width: =68
-                                          X: =369
-                                          Y: =41
-                                    - lbl_Filtro_EM_17:
-                                        Control: Text@0.0.51
-                                        Properties:
-                                          Align: ='TextCanvas.Align'.Center
-                                          Height: =42
-                                          Size: =25
-                                          Text: ="Filtro"
-                                          Weight: ='TextCanvas.Weight'.Bold
-                                          Width: =101
-                                          X: =7
-                                          Y: =45
-                                    - txt_Filtro_EM_17:
-                                        Control: Classic/TextInput@2.3.2
-                                        Properties:
-                                          Align: =Align.Center
-                                          Default: =
-                                          Height: =38
-                                          OnSelect: =
-                                          PaddingLeft: =5
-                                          RadiusBottomLeft: =15
-                                          RadiusBottomRight: =15
-                                          RadiusTopLeft: =15
-                                          RadiusTopRight: =15
-                                          Size: =15
-                                          Width: =270
-                                          X: =113
-                                          Y: =49
-                                    - gl_SeleccionPN_EM_17:
-                                        Control: Gallery@2.15.0
-                                        Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
-                                        Properties:
-                                          BorderColor: =RGBA(0, 0, 0, 1)
-                                          BorderThickness: =2
-                                          Height: =365
-                                          Items: |-
-                                            =If(
-                                                IsBlank(txt_Filtro_EM_17.Text), 
-                                                item,
-                                                Search(item, txt_Filtro_EM_17.Text, item)
-                                            )
-                                          TemplateSize: =63
-                                          Transition: =Transition.Pop
-                                          Width: =453
-                                          Y: =97
+                                          BorderColor: =RGBA(40, 134, 222, 1)
+                                          BorderThickness: =4
+                                          DropShadow: =DropShadow.Regular
+                                          Fill: =RGBA(255, 255, 255, 1)
+                                          Height: =546
+                                          RadiusBottomLeft: =10
+                                          RadiusBottomRight: =10
+                                          RadiusTopLeft: =10
+                                          RadiusTopRight: =10
+                                          Width: =960
+                                          X: =196
+                                          Y: =59
                                         Children:
-                                          - icn_AgregarPN_EM_17:
-                                              Control: Classic/Icon@2.5.0
-                                              Properties:
-                                                AccessibleLabel: =Self.Tooltip
-                                                BorderColor: =RGBA(0, 0, 0, 1)
-                                                Color: =RGBA(0, 0, 0, 1)
-                                                DisabledBorderColor: =RGBA(56, 56, 56, 1)
-                                                DisabledColor: =RGBA(119, 119, 119, 1)
-                                                Height: =52
-                                                Icon: =Icon.Add
-                                                OnSelect: |-
-                                                  =UpdateContext({
-                                                      showContainer: false, 
-                                                      txt_Destino: ThisItem.item
-                                                  });
-                                                PaddingBottom: =16
-                                                PaddingLeft: =16
-                                                PaddingRight: =16
-                                                PaddingTop: =16
-                                                Tooltip: ="Ver los detalles del elemento"
-                                                Width: =55
-                                                X: =377
-                                                Y: =5
-                                          - lbl_SeleccionPN_EM_16:
-                                              Control: Text@0.0.51
-                                              Properties:
-                                                Align: ='TextCanvas.Align'.Center
-                                                Height: =42
-                                                Size: =25
-                                                Text: ="P/N"
-                                                Weight: ='TextCanvas.Weight'.Bold
-                                                Width: =80
-                                                X: =14
-                                                Y: =10
-                                          - txt_SeleccionPN_EM_17:
+                                          - lbl_BarraSeleccion_EM_17:
                                               Control: Classic/TextInput@2.3.2
                                               Properties:
                                                 Align: =Align.Center
-                                                Default: =ThisItem.item
+                                                BorderColor: =RGBA(0, 0, 0, 1)
+                                                Color: =RGBA(255, 255, 255, 1)
+                                                Default: ="Revision de items"
                                                 DisplayMode: =DisplayMode.View
-                                                Height: =38
-                                                OnSelect: |-
-                                                  =UpdateContext({showContainer: !showContainer})
+                                                Fill: =RGBA(40, 134, 222, 1)
+                                                Font: =Font.'Open Sans'
+                                                FontWeight: =FontWeight.Bold
+                                                Height: =35
+                                                HintText: ="Tarima"
+                                                HoverBorderColor: =RGBA(204, 231, 246, 1)
+                                                HoverFill: =RGBA(204, 231, 246, 1)
+                                                OnChange: =
+                                                OnSelect: =Reset(lbl_BarraSeleccion_EM_17)
                                                 PaddingLeft: =5
-                                                RadiusBottomLeft: =15
-                                                RadiusBottomRight: =15
-                                                RadiusTopLeft: =15
-                                                RadiusTopRight: =15
-                                                Size: =15
-                                                Width: =287
-                                                X: =90
-                                                Y: =12
-                                          - SeparatorPN_EM_17:
-                                              Control: Rectangle@2.3.0
+                                                RadiusBottomLeft: =0
+                                                RadiusBottomRight: =0
+                                                RadiusTopLeft: =0
+                                                RadiusTopRight: =0
+                                                Size: =18
+                                                Width: =Parent.Width
+                                          - Container78_6:
+                                              Control: GroupContainer@1.3.0
+                                              Variant: ManualLayout
                                               Properties:
-                                                BorderColor: =RGBA(0, 18, 107, 1)
-                                                Fill: =RGBA(255, 255, 255, 1)
-                                                Height: =8
-                                                OnSelect: =Select(Parent)
-                                                Width: =Parent.TemplateWidth
-                                                Y: =56
+                                                BorderColor: =RGBA(52, 152, 47, 1)
+                                                BorderThickness: =3
+                                                DropShadow: =DropShadow.Semibold
+                                                Height: =392
+                                                RadiusBottomLeft: =7
+                                                RadiusBottomRight: =7
+                                                RadiusTopLeft: =7
+                                                RadiusTopRight: =7
+                                                Width: =420
+                                                X: =40
+                                                Y: =47
+                                              Children:
+                                                - lbl_BarraSeleccion_EM_35:
+                                                    Control: Classic/TextInput@2.3.2
+                                                    Properties:
+                                                      BorderColor: =RGBA(0, 0, 0, 1)
+                                                      Default: ="Items aprobados"
+                                                      DisplayMode: =DisplayMode.View
+                                                      Fill: =RGBA(166, 215, 153, 1)
+                                                      Font: =Font.'Open Sans'
+                                                      Height: =30
+                                                      HintText: ="Tarima"
+                                                      HoverBorderColor: =RGBA(204, 231, 246, 1)
+                                                      HoverFill: =RGBA(204, 231, 246, 1)
+                                                      OnChange: =
+                                                      OnSelect: =Reset(lbl_BarraSeleccion_EM_35)
+                                                      RadiusBottomLeft: =0
+                                                      RadiusBottomRight: =0
+                                                      RadiusTopLeft: =0
+                                                      RadiusTopRight: =0
+                                                      Size: =14
+                                                      Width: =Parent.Width
+                                                - tbl_Aprobados_DSG_1:
+                                                    Control: Table@1.0.278
+                                                    Properties:
+                                                      EnableSorting: ='PowerAppsOneGrid.EnableSorting'.Disable
+                                                      Height: =362
+                                                      Items: =Filter(datos_DSGN, aprobado)
+                                                      ReflowBehavior: ='PowerAppsOneGrid.ReflowBehavior'.GridOnly
+                                                      Width: =420
+                                                      Y: =30
+                                                    Children:
+                                                      - crfb9_nfilasolicitud1:
+                                                          Control: TableDataField@1.5.0
+                                                          Variant: textualColumn
+                                                          IsLocked: true
+                                                          Properties:
+                                                            CanGrow: =false
+                                                            FieldDisplayName: ="crfb9_nfilasolicitud"
+                                                            FieldName: ="crfb9_nfilasolicitud"
+                                                            FieldType: ="n"
+                                                            HeaderText: ="N°"
+                                                            Order: =1
+                                                            Width: =60
+                                                      - crfb9_nitem1:
+                                                          Control: TableDataField@1.5.0
+                                                          Variant: textualColumn
+                                                          IsLocked: true
+                                                          Properties:
+                                                            FieldDisplayName: ="crfb9_nitem"
+                                                            FieldName: ="crfb9_nitem"
+                                                            FieldType: ="s"
+                                                            HeaderText: ="Item"
+                                                            Order: =3
+                                                      - subtotal3:
+                                                          Control: TableDataField@1.5.0
+                                                          Variant: textualColumn
+                                                          IsLocked: true
+                                                          Properties:
+                                                            CanGrow: =false
+                                                            FieldDisplayName: ="subtotal"
+                                                            FieldName: ="subtotal"
+                                                            FieldType: ="n"
+                                                            HeaderText: ="Subtotal"
+                                                            Order: =3
+                                                            Width: =120
+                                                - lbl_BarraSeleccion_EM_36:
+                                                    Control: Classic/TextInput@2.3.2
+                                                    Properties:
+                                                      Align: =Align.Right
+                                                      BorderColor: =RGBA(0, 0, 0, 1)
+                                                      Default: |-
+                                                        ="Total: " &
+                                                        Text(Sum(Filter(datos_DSGN, aprobado), subtotal), "###,###,##0.00")
+                                                      DisplayMode: =DisplayMode.View
+                                                      Fill: =RGBA(166, 215, 153, 1)
+                                                      Font: =Font.'Open Sans'
+                                                      FontWeight: =FontWeight.Bold
+                                                      Height: =30
+                                                      HintText: ="Tarima"
+                                                      HoverBorderColor: =RGBA(204, 231, 246, 1)
+                                                      HoverFill: =RGBA(204, 231, 246, 1)
+                                                      OnChange: =
+                                                      OnSelect: =Reset(lbl_BarraSeleccion_EM_36)
+                                                      PaddingLeft: =5
+                                                      PaddingRight: =12
+                                                      RadiusBottomLeft: =0
+                                                      RadiusBottomRight: =0
+                                                      RadiusTopLeft: =0
+                                                      RadiusTopRight: =0
+                                                      Size: =12
+                                                      Width: =244
+                                                      X: =176
+                                          - Container78_7:
+                                              Control: GroupContainer@1.3.0
+                                              Variant: ManualLayout
+                                              Properties:
+                                                BorderColor: =RGBA(215, 58, 60, 1)
+                                                BorderThickness: =3
+                                                DropShadow: =DropShadow.Semibold
+                                                Height: =392
+                                                RadiusBottomLeft: =7
+                                                RadiusBottomRight: =7
+                                                RadiusTopLeft: =7
+                                                RadiusTopRight: =7
+                                                Width: =420
+                                                X: =500
+                                                Y: =47
+                                              Children:
+                                                - lbl_BarraSeleccion_EM_37:
+                                                    Control: Classic/TextInput@2.3.2
+                                                    Properties:
+                                                      BorderColor: =RGBA(0, 0, 0, 1)
+                                                      Default: ="Items no aprobados"
+                                                      DisplayMode: =DisplayMode.View
+                                                      Fill: =RGBA(255, 184, 174, 1)
+                                                      Font: =Font.'Open Sans'
+                                                      Height: =30
+                                                      HintText: ="Tarima"
+                                                      HoverBorderColor: =RGBA(204, 231, 246, 1)
+                                                      HoverFill: =RGBA(204, 231, 246, 1)
+                                                      OnChange: =
+                                                      OnSelect: =Reset(lbl_BarraSeleccion_EM_37)
+                                                      RadiusBottomLeft: =0
+                                                      RadiusBottomRight: =0
+                                                      RadiusTopLeft: =0
+                                                      RadiusTopRight: =0
+                                                      Size: =14
+                                                      Width: =Parent.Width
+                                                - lbl_BarraSeleccion_EM_38:
+                                                    Control: Classic/TextInput@2.3.2
+                                                    Properties:
+                                                      Align: =Align.Right
+                                                      BorderColor: =RGBA(0, 0, 0, 1)
+                                                      Default: |-
+                                                        ="Total: " & Text(Sum(Filter(datos_DSGN, !aprobado), subtotal), "###,###,##0.00")
+                                                      DisplayMode: =DisplayMode.View
+                                                      Fill: =RGBA(255, 184, 174, 1)
+                                                      Font: =Font.'Open Sans'
+                                                      FontWeight: =FontWeight.Bold
+                                                      Height: =30
+                                                      HintText: ="Tarima"
+                                                      HoverBorderColor: =RGBA(204, 231, 246, 1)
+                                                      HoverFill: =RGBA(204, 231, 246, 1)
+                                                      OnChange: =
+                                                      OnSelect: =Reset(lbl_BarraSeleccion_EM_38)
+                                                      PaddingLeft: =5
+                                                      PaddingRight: =12
+                                                      RadiusBottomLeft: =0
+                                                      RadiusBottomRight: =0
+                                                      RadiusTopLeft: =0
+                                                      RadiusTopRight: =0
+                                                      Size: =12
+                                                      Width: =218
+                                                      X: =202
+                                                - tbl_Aprobados_DSG_2:
+                                                    Control: Table@1.0.278
+                                                    Properties:
+                                                      EnableSorting: ='PowerAppsOneGrid.EnableSorting'.Disable
+                                                      Height: =362
+                                                      Items: =Filter(datos_DSGN, !aprobado)
+                                                      ReflowBehavior: ='PowerAppsOneGrid.ReflowBehavior'.GridOnly
+                                                      Width: =420
+                                                      Y: =30
+                                                    Children:
+                                                      - crfb9_nfilasolicitud1_1:
+                                                          Control: TableDataField@1.5.0
+                                                          Variant: textualColumn
+                                                          IsLocked: true
+                                                          Properties:
+                                                            CanGrow: =false
+                                                            FieldDisplayName: ="crfb9_nfilasolicitud"
+                                                            FieldName: ="crfb9_nfilasolicitud"
+                                                            FieldType: ="n"
+                                                            HeaderText: ="N°"
+                                                            Order: =1
+                                                            Width: =60
+                                                      - crfb9_nitem1_1:
+                                                          Control: TableDataField@1.5.0
+                                                          Variant: textualColumn
+                                                          IsLocked: true
+                                                          Properties:
+                                                            FieldDisplayName: ="crfb9_nitem"
+                                                            FieldName: ="crfb9_nitem"
+                                                            FieldType: ="s"
+                                                            HeaderText: ="Item"
+                                                            Order: =3
+                                                      - subtotal3_1:
+                                                          Control: TableDataField@1.5.0
+                                                          Variant: textualColumn
+                                                          IsLocked: true
+                                                          Properties:
+                                                            CanGrow: =false
+                                                            FieldDisplayName: ="subtotal"
+                                                            FieldName: ="subtotal"
+                                                            FieldType: ="n"
+                                                            HeaderText: ="Subtotal"
+                                                            Order: =3
+                                                            Width: =120
+                                          - txt_Motivo_DSG_1:
+                                              Control: Classic/TextInput@2.3.2
+                                              Properties:
+                                                BorderColor: =RGBA(215, 58, 60, 1)
+                                                BorderThickness: =3
+                                                Default: =
+                                                DisplayMode: =If(CountIf(datos_DSGN, !aprobado) > 0, DisplayMode.Edit, DisplayMode.Disabled)
+                                                Height: =83
+                                                HintText: ="¿Por qué no aprobó los ítems?"
+                                                HoverBorderColor: =RGBA(215, 58, 60, 1)
+                                                HoverFill: =RGBA(255, 184, 174, 0.15)
+                                                MaxLength: =500
+                                                Mode: =TextMode.MultiLine
+                                                OnSelect: =
+                                                PaddingRight: =12
+                                                PressedBorderColor: =RGBA(215, 58, 60, 1)
+                                                RadiusBottomLeft: =7
+                                                RadiusBottomRight: =7
+                                                RadiusTopLeft: =7
+                                                RadiusTopRight: =7
+                                                Size: =12
+                                                Width: =420
+                                                X: =500
+                                                Y: =449
+                                          - Button10_19:
+                                              Control: Classic/Button@2.2.0
+                                              Properties:
+                                                BorderColor: =RGBA(215, 58, 60, 1)
+                                                Fill: =RGBA(215, 58, 60, 1)
+                                                Height: =50
+                                                HoverBorderColor: =RGBA(132, 40, 38, 1)
+                                                HoverFill: =RGBA(132, 40, 38, 1)
+                                                OnSelect: |-
+                                                  =UpdateContext({showContainer: false});
+                                                  Reset(txt_Motivo_DSG_1)
+                                                PressedBorderColor: =RGBA(215, 58, 60, 1)
+                                                PressedColor: =RGBA(215, 58, 60, 1)
+                                                PressedFill: =RGBA(255, 255, 255, 1)
+                                                Text: ="Cancelar"
+                                                Width: =140
+                                                X: =83
+                                                Y: =465
+                                          - Button10_20:
+                                              Control: Classic/Button@2.2.0
+                                              Properties:
+                                                BorderColor: =RGBA(52, 152, 47, 1)
+                                                Fill: =RGBA(52, 152, 47, 1)
+                                                FontWeight: =FontWeight.Bold
+                                                Height: =50
+                                                HoverBorderColor: =RGBA(21, 68, 18, 1)
+                                                HoverFill: =RGBA(21, 68, 18, 1)
+                                                OnSelect: |
+                                                  =If(
+                                                      IsBlank(txt_Motivo_DSG_1.Text) && CountIf(
+                                                          datos_DSGN,
+                                                          !aprobado
+                                                      ) > 0,
+                                                      UpdateContext(
+                                                          {
+                                                              Aviso: {
+                                                                  Ver: true,
+                                                                  Tipo: 0,
+                                                                  Texto: "Debe indicar el motivo del rechazo de los items"
+                                                              }
+                                                          }
+                                                      ),
+                                                      true,
+                                                      UpdateContext({Guardando: true});
+                                                      RemoveIf(
+                                                          Compras_NoMarcadas,
+                                                          NSolicitud = Soli && NFilaSolicitud in Filter(
+                                                              datos_DSGN,
+                                                              aprobado
+                                                          ).NFilaSolicitud && Tipo_Envio = varEmpleado.Codigo
+                                                      );
+                                                      With(
+                                                          {
+                                                              Consecutivo: CountIf(
+                                                                  Solicitud_Compras,
+                                                                  Soli in soli_num
+                                                              )
+                                                          },
+                                                          Collect(
+                                                              Solicitud_Compras,
+                                                              {
+                                                                  soli_num: If(
+                                                                      Consecutivo = 0,
+                                                                      Upper(Soli),
+                                                                      Upper(Soli) & "-" & (Consecutivo + 1)
+                                                                  ),
+                                                                  fecha: DateValue(txt_Fecha_DSGN.Text),
+                                                                  solicitante: txt_Solicitante_DSGN.Text,
+                                                                  user: varEmpleado.Nombre,
+                                                                  total: Value(
+                                                                      Sum(
+                                                                          Filter(
+                                                                              datos_DSGN,
+                                                                              aprobado
+                                                                          ),
+                                                                          subtotal
+                                                                      )
+                                                                  ),
+                                                                  estado: "Gerencia"
+                                                              }
+                                                          );
+                                                          ForAll(
+                                                              Filter(
+                                                                  datos_DSGN,
+                                                                  aprobado
+                                                              ),
+                                                              Collect(
+                                                                  Detalle_Solicitud_Compras,
+                                                                  {
+                                                                      soli_num: If(
+                                                                          Consecutivo = 0,
+                                                                          Upper(Soli),
+                                                                          Upper(Soli) & "-" & (Consecutivo + 1)
+                                                                      ),
+                                                                      item: ThisRecord.NItem,
+                                                                      descripcion: ThisRecord.Descripcion,
+                                                                      linea: ThisRecord.NFilaSolicitud
+                                                                  }
+                                                              )
+                                                          );
+                                                      );
+                                                      Reset(txt_Num_Soli_DSGN);
+                                                      UpdateContext({showContainer: false});
+                                                      Reset(txt_Motivo_DSG_1);
+                                                      UpdateContext({Guardando: false});
+                                                      Clear(datos_DSGN);
+                                                      Back(),
+                                                      UpdateContext(
+                                                          {
+                                                              Aviso: {
+                                                                  Ver: true,
+                                                                  Tipo: 0,
+                                                                  Texto: "La solicitud seleccionada ya fue enviada"
+                                                              }
+                                                          }
+                                                      )
+                                                  );
+                                                PressedBorderColor: =RGBA(52, 152, 47, 1)
+                                                PressedColor: =RGBA(52, 152, 47, 1)
+                                                PressedFill: =RGBA(255, 255, 255, 1)
+                                                Text: ="Continuar"
+                                                Width: =140
+                                                X: =276
+                                                Y: =465
+                                          - lbl_BarraSeleccion_EM_39:
+                                              Control: Classic/TextInput@2.3.2
+                                              Properties:
+                                                Align: =Align.Right
+                                                BorderColor: =RGBA(0, 0, 0, 1)
+                                                Default: =Len(txt_Motivo_DSG_1.Text) & "/500"
+                                                DisplayMode: =DisplayMode.View
+                                                Fill: =RGBA(0, 0, 0, 0)
+                                                Font: =Font.'Open Sans'
+                                                Height: =15
+                                                HintText: ="Tarima"
+                                                HoverBorderColor: =RGBA(204, 231, 246, 1)
+                                                HoverFill: =RGBA(204, 231, 246, 1)
+                                                OnChange: =
+                                                OnSelect: =Reset(lbl_BarraSeleccion_EM_39)
+                                                PaddingBottom: =2
+                                                PaddingLeft: =0
+                                                PaddingTop: =2
+                                                RadiusBottomLeft: =0
+                                                RadiusBottomRight: =0
+                                                RadiusTopLeft: =0
+                                                RadiusTopRight: =0
+                                                Size: =8
+                                                Width: =56
+                                                X: =864
+                                                Y: =514
+      - cnt_Avisos_BC_9:
+          Control: GroupContainer@1.3.0
+          Variant: ManualLayout
+          Properties:
+            Fill: =RGBA(0, 0, 0, 0.15)
+            Height: =768
+            RadiusBottomLeft: =12
+            RadiusBottomRight: =12
+            RadiusTopLeft: =12
+            RadiusTopRight: =12
+            Visible: '=Guardando || Aviso.Ver '
+            Width: =1366
+          Children:
+            - Icon3_97:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  BorderColor: =RGBA(12, 59, 94, 1)
+                  BorderStyle: =BorderStyle.None
+                  BorderThickness: =2
+                  Color: =If(Aviso.Tipo = 0, RGBA(255, 0, 0, 1), Aviso.Tipo = 1, RGBA(255, 191, 0, 1), RGBA(54, 176, 75, 1))
+                  DisplayMode: =DisplayMode.View
+                  FocusedBorderThickness: =20
+                  Height: =150
+                  HoverBorderColor: =App.Theme.Colors.Darker10
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =App.Theme.Colors.Darker10
+                  Icon: =If(Aviso.Tipo = 0, Icon.Error, Aviso.Tipo = 1, Icon.Warning, Icon.CheckBadge)
+                  OnSelect: |
+                    =Navigate(MenuAdministrativo);
+                  PaddingBottom: =5
+                  PaddingLeft: =5
+                  PaddingRight: =5
+                  PaddingTop: =5
+                  Visible: =Aviso.Ver && !Guardando
+                  Width: =150
+                  X: =600
+                  Y: =217
+            - Container70_11:
+                Control: GroupContainer@1.3.0
+                Variant: ManualLayout
+                Properties:
+                  BorderColor: =If(Aviso.Tipo = 0, RGBA(255, 0, 0, 1), Aviso.Tipo = 1, RGBA(255, 191, 0, 1), RGBA(54, 176, 75, 1))
+                  BorderThickness: =4
+                  Fill: =RGBA(255, 255, 255, 1)
+                  Height: =112
+                  RadiusBottomLeft: =10
+                  RadiusBottomRight: =10
+                  RadiusTopLeft: =10
+                  RadiusTopRight: =10
+                  Visible: =Aviso.Ver && !Guardando
+                  X: =425
+                  Y: =377
+                Children:
+                  - TextInput15_11:
+                      Control: Classic/TextInput@2.3.2
+                      Properties:
+                        Align: =Align.Center
+                        Default: =Aviso.Texto
+                        DisplayMode: =DisplayMode.View
+                        Height: =100
+                        Mode: =TextMode.MultiLine
+                        PaddingBottom: =12
+                        PaddingRight: =12
+                        PaddingTop: =12
+                        Size: =16
+                        Width: =500
+                  - Rectangle43_22:
+                      Control: Rectangle@2.3.0
+                      Properties:
+                        Fill: =RGBA(235, 235, 235, 1)
+                        Height: =12
+                        Width: =500
+                        Y: =100
+                  - Rectangle43_23:
+                      Control: Rectangle@2.3.0
+                      Properties:
+                        Fill: =If(Aviso.Tipo = 0, RGBA(255, 0, 0, 1), Aviso.Tipo = 1, RGBA(255, 191, 0, 1), RGBA(54, 176, 75, 1))
+                        Height: =12
+                        Width: =(tmp_Aviso_BC_11.Value / 3200) * 500
+                        Y: =100
+            - tmp_Aviso_BC_11:
+                Control: Timer@2.1.0
+                Properties:
+                  Duration: =3500
+                  OnTimerEnd: |-
+                    =UpdateContext({Aviso: {Ver: false, Tipo: 3, Texto: ""}, Guardando: false}); Reset(Self)
+                  Start: =Aviso.Ver
+                  Visible: =false
+            - cnt_spinner_7:
+                Control: GroupContainer@1.3.0
+                Variant: ManualLayout
+                Properties:
+                  Fill: =RGBA(255, 255, 255, 1)
+                  Height: =125
+                  RadiusBottomLeft: =10
+                  RadiusBottomRight: =10
+                  RadiusTopLeft: =10
+                  RadiusTopRight: =10
+                  Visible: =Guardando && !Aviso.Ver
+                  Width: =468
+                  X: =441
+                  Y: =301
+                Children:
+                  - Spinner1_11:
+                      Control: Spinner@1.4.6
+                      Properties:
+                        Appearance: ='Spinner.Appearance'.Primary
+                        BasePaletteColor: =RGBA(5, 102, 178, 1)
+                        FontColor: =RGBA(40, 134, 222, 1)
+                        FontSize: =20
+                        FontWeight: =FontWeight.Bold
+                        Height: =125
+                        Label: ="Cargando..."
+                        LabelPosition: ='Spinner.LabelPosition'.Below
+                        SpinnerColor: =RGBA(15, 108, 189, 1)
+                        SpinnerSize: ='Spinner.SpinnerSize'.Huge
+                        TrackColor: =RGBA(180, 214, 250, 1)
+                        Width: =468
