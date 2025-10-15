@@ -40,7 +40,7 @@ Screens:
                     ShowColumns(
                         Filter(
                             Detalle_Solicitud_Compras,
-                            soli_num = glr_Solicitudes_SC.Selected.soli_num
+                            soli_num = Soli
                         ),
                         linea,
                         item,
@@ -731,9 +731,7 @@ Screens:
                                           Clear: =true
                                           Default: =glr_Solicitudes_SC.Selected.soli_num
                                           DisabledBorderColor: =RGBA(180, 214, 250, 1)
-                                          DisabledColor: =RGBA(0, 0, 0, 1)
                                           DisabledFill: =RGBA(255, 255, 255, 1)
-                                          DisplayMode: =DisplayMode.Disabled
                                           Height: =30
                                           HintText: ="Solicitud"
                                           HoverBorderColor: =RGBA(180, 214, 250, 1)
@@ -822,7 +820,7 @@ Screens:
                                         Control: Classic/Button@2.2.0
                                         Properties:
                                           DisplayMode: |-
-                                            =If(CountIf(datos_DSC, aprobado) > 0 && IsBlank(
+                                            =If(CountIf(glr_Detalles_DSC.AllItems, true) > 0 && IsBlank(
                                                     LookUp(
                                                         Solicitud_Compras,
                                                         soli_num = txt_Num_Soli_DSC.Text && estado <> "Gerencia"
@@ -1335,7 +1333,12 @@ Screens:
                                                               }
                                                           }
                                                       ), 
-                                                      true,
+                                                      IsBlank(
+                                                          LookUp(
+                                                              Compras_NoMarcadas,
+                                                              NSolicitud = txt_Num_Soli_DSC.Text && Enviado = 0 && Tipo_Envio = "Compras"
+                                                          )
+                                                      ),
                                                       UpdateContext({Guardando: true});
                                                       ForAll(
                                                           Filter(
@@ -1345,10 +1348,8 @@ Screens:
                                                           Collect(
                                                               Compras_NoMarcadas,
                                                               {
-                                                                  NSolicitud: Upper(Soli),
+                                                                  NSolicitud: Upper(txt_Num_Soli_DSC.Text),
                                                                   NFilaSolicitud: ThisRecord.crfb9_linea,
-                                                                  NItem: ThisRecord.crfb9_item,
-                                                                  Descripcion: ThisRecord.crfb9_descripcion,
                                                                   Enviado: 0,
                                                                   Tipo_Envio: "Compras",
                                                                   Motivo: txt_Motivo_DSC.Text
@@ -1357,10 +1358,10 @@ Screens:
                                                       );
                                                       RemoveIf(
                                                           Compras_NoMarcadas,
-                                                          NSolicitud = Soli && NFilaSolicitud in Filter(
-                                                              datos_DSC,
-                                                              aprobado
-                                                          ).crfb9_linea && Enviado = 1 && Tipo_Envio = "Compras"
+                                                          NSolicitud = txt_Num_Soli_DSC.Text && NFilaSolicitud in Filter(
+                                                              datos_DSG,
+                                                              aprovado
+                                                          ).req_line && Enviado = 1 && Tipo_Envio = "Compras"
                                                       );
                                                       Patch(
                                                           Solicitud_Compras,
@@ -1417,7 +1418,6 @@ Screens:
                                                       UpdateContext({showContainer: false});
                                                       Reset(txt_Motivo_DSC);
                                                       UpdateContext({Guardando: false});
-                                                      Clear(datos_DSC);
                                                       Back(),
                                                       UpdateContext(
                                                           {

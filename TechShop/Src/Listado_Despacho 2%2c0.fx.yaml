@@ -511,7 +511,7 @@
                             BorderColor: =RGBA(0, 18, 107, 1)
                             DelayItemLoading: =true
                             Height: =587
-                            Items: =Logistica_Movimientos
+                            Items: =Filter(Logistica_Movimientos, 'Estado (crfb9_estado)' = drp_Tipo_LD_1.SelectedText.Value)
                             Layout: =Layout.Vertical
                             LoadingSpinner: =LoadingSpinner.Data
                             TemplatePadding: =0
@@ -693,34 +693,55 @@
                                                 ),
                                                 ""
                                             ),
-                                     POT,
+                                            POT,
                                             With(
-                                                { potsStr:
-                                                    Concat(
+                                                {
+                                                    potsStr: Concat(
                                                         Distinct(
-                                                            Filter(colTemp, Materiales = Value),
+                                                            Filter(
+                                                                colTemp,
+                                                                Materiales = Value
+                                                            ),
                                                             POT
                                                         ),
                                                         Value & ","
                                                     )
                                                 },
-                                                If(Len(potsStr) > 0, Left(potsStr, Len(potsStr) - 1), "")
-                                            ),
-                                            CantidadRecibida, 0,
-                                            CantidadFaltante,
-                                            Max(
-                                                0,
-                                                Cantidades - If(
-                                                    IsBlank(Value(txt_cantidaRecibida_LD_1.Text)),
-                                                    0,
-                                                    Value(txt_cantidaRecibida_LD_1.Text)
+                                                If(
+                                                    Len(potsStr) > 0,
+                                                    Left(
+                                                        potsStr,
+                                                        Len(potsStr) - 1
+                                                    ),
+                                                    ""
                                                 )
+                                            ),
+                                            CantidadRecibida,
+                                            LookUp(
+                                                LogisticDespachos,
+                                                descripcion = LookUp(
+                                                    colTemp,
+                                                    Materiales = Value,
+                                                    Descripcion
+                                                ),'Cantidad Recibida'
+                                            ),
+                                            CantidadFaltante,
+                                            LookUp(
+                                                LogisticDespachos,
+                                                descripcion = LookUp(
+                                                    colTemp,
+                                                    Materiales = Value,
+                                                    Descripcion
+                                                ),'Cantidad Faltante'
                                             )
                                         )
                                     );
                                     Set(
-                                      SelectedTracking,
-                                      { Tracking: ThisItem.Tracking, ID_Tracking: ThisItem.ID_Tracking }
+                                        SelectedTracking,
+                                        {
+                                            Tracking: ThisItem.Tracking,
+                                            ID_Tracking: ThisItem.ID_Tracking
+                                        }
                                     );
                                     UpdateContext({AbrirCont: true})
                                 PaddingBottom: =2
@@ -1424,22 +1445,52 @@
                     ) > 0,
                     UpdateContext({ MostrarAviso: true, mensajeNotificacion: "Debe completar todas las cantidades recibidas." }),
                 
-                    ForAll(
-                        colMaterialesTracking,
-                        Patch(
-                            LogisticDespachos,
-                            Defaults(LogisticDespachos),
-                            {
-                                POT: ThisRecord.POT,
-                                Fecha: Today(),
-                                'Estado (crfb9_estado)': "",
-                                descripcion: ThisRecord.Descripcion,
-                                Cantidad: ThisRecord.Cantidades,
-                                'Cantidad Recibida': Coalesce(ThisRecord.CantidadRecibida, 0),
-                                'Cantidad Faltante': ThisRecord.CantidadFaltante
-                            }
-                        )
-                    );
+                    
+                ForAll(
+                  colMaterialesTracking,
+                  With(
+                    {
+                      existing: LookUp(
+                        LogisticDespachos,
+                        POT = ThisRecord.POT && descripcion = ThisRecord.descripcion
+                      ),
+                      Cantidad: ThisRecord.Cantidades,
+                      POT: ThisRecord.POT,
+                      CantidadRecibida:ThisRecord.CantidadRecibida,
+                      CantidadFaltante: ThisRecord.CantidadFaltante,
+                      Descripcion: ThisRecord.Descripcion
+                    },
+                    If(
+                      IsBlank(existing),
+                      Patch(
+                        LogisticDespachos,
+                        Defaults(LogisticDespachos),
+                        {
+                         POT: POT,   
+                         Fecha: Today(), 
+                        'Estado (crfb9_estado)': "", 
+                         descripcion: Descripcion, 
+                         Cantidad: Cantidad, 
+                        'Cantidad Recibida': CantidadRecibida,
+                        'Cantidad Faltante': CantidadFaltante
+                        }
+                      ),
+                      Patch(
+                        LogisticDespachos,
+                        existing,
+                        {
+                         Fecha: Today(), 
+                        'Estado (crfb9_estado)': "", 
+                         descripcion: Descripcion, 
+                         Cantidad: Cantidad, 
+                        'Cantidad Recibida': CantidadRecibida,
+                        'Cantidad Faltante': CantidadFaltante
+                        }
+                      )
+                    )
+                  )
+                );
+                
                 
                     UpdateContext(
                         {
@@ -1489,6 +1540,20 @@
                             )
                         )
                     );
+                
+                ForAll(
+                  Filter(colPotsSums, TotalFaltante = 0),
+                  With({ thePOT: POT },
+                    If(
+                      !IsBlank(thePOT),
+                      UpdateIf(
+                        Logistica_Movimientos,
+                        POT = thePOT && ID_Tracking = SelectedTracking.ID_Tracking && Tracking = SelectedTracking.Tracking,
+                        { 'Estado (crfb9_estado)': "Recibido" }
+                      )
+                    )
+                  )
+                );
                 
                     Clear(DespachoCollection);
                     Refresh(LogisticDespachos)
