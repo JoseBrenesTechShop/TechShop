@@ -1933,7 +1933,7 @@ Screens:
                   Text: |-
                     =If(reset, "¿Esta seguro que desea restablecer el estado de esta solicitud?
                     Se perderan los cambios hechos",
-                    "¿Esta seguro que desea rechazar esta solicitud?")
+                    "¿Esta seguro que desea devolver a gerencia esta solicitud?")
                   Width: =400
             - btn_Aceptar_EM_7:
                 Control: Classic/Button@2.2.0
@@ -1949,24 +1949,115 @@ Screens:
                   HoverFill: =RGBA(21, 68, 18, 1)
                   OnSelect: |
                     =UpdateContext({Guardando: true});
-                    If(
-                        !reset,
-                        Patch(
-                            Solicitud_Compras,
-                            glr_Solicitud_AC.Selected,
-                            {
-                                comentario: txt_Comentario_DAC.Text,
-                                estado: "Rechazado"
-                            }
-                        ),
-                        Patch(
-                            Solicitud_Compras,
-                            glr_Solicitud_AC.Selected,
-                            {
-                                comentario: txt_Comentario_DAC.Text,
-                                estado: "Listo"
-                            }
+                    If(!reset,
+                    With(
+                        {
+                            idGerente: If(
+                                StartsWith(
+                                    Nsoli,
+                                    "PRD"
+                                ) && LookUp(
+                                    preq,
+                                    req_num = Nsoli,
+                                    requester
+                                ) <> "raraya",
+                                "16",
+                                StartsWith(
+                                    Nsoli,
+                                    "MTO"
+                                ) && LookUp(
+                                    preq,
+                                    req_num = Nsoli,
+                                    requester
+                                ) <> "rpereira",
+                                "15",
+                                StartsWith(
+                                    Nsoli,
+                                    "QAL"
+                                ) && LookUp(
+                                    preq,
+                                    req_num = Nsoli,
+                                    requester
+                                ) <> "icespedes",
+                                "2618",
+                                (StartsWith(
+                                    Nsoli,
+                                    "TLR"
+                                ) || StartsWith(
+                                    Nsoli,
+                                    "ADM"
+                                ) || StartsWith(
+                                    Nsoli,
+                                    "OFC"
+                                )) && LookUp(
+                                    preq,
+                                    req_num = Nsoli,
+                                    requester
+                                ) <> "marias",
+                                "1124",
+                                StartsWith(
+                                    Nsoli,
+                                    "SOL"
+                                ) && LookUp(
+                                    preq,
+                                    req_num = Nsoli,
+                                    requester
+                                ) <> "vguerrero",
+                                "1133",
+                                (StartsWith(
+                                    Nsoli,
+                                    "TIC"
+                                ) ) && LookUp(
+                                    preq,
+                                    req_num = Nsoli,
+                                    requester
+                                ) <> "jbrenes",
+                                "2648",
+                                "1"
+                            )
+                        },
+                        If(
+                            idGerente = "1",
+                            Remove(
+                                Solicitud_Compras,
+                                glr_Solicitud_AC.Selected
+                            ),
+                            Patch(
+                                Solicitud_Compras,
+                                glr_Solicitud_AC.Selected,
+                                {estado: "Devuelto"}
+                            );
+                            ForAll(
+                                Filter(
+                                    datos_DAC,
+                                    !aprobado
+                                ),
+                                Collect(
+                                    Compras_NoMarcadas,
+                                    {
+                                        NSolicitud: Upper(Nsoli),
+                                        NFilaSolicitud: ThisRecord.crfb9_linea,
+                                        NItem: ThisRecord.crfb9_item,
+                                        Descripcion: ThisRecord.crfb9_descripcion,
+                                        Enviado: 0,
+                                        Tipo_Envio: idGerente,
+                                        Motivo: txt_Motivo_DSC.Text
+                                    }
+                                )
+                            );
+                            RemoveIf(
+                                Compras_NoMarcadas,
+                                NSolicitud = Nsoli && NFilaSolicitud in Filter(
+                                    datos_DAC,
+                                    aprobado
+                                ).crfb9_linea && Enviado = 1 && Tipo_Envio = idGerente
+                            )
                         )
+                    ),Patch(
+                                Solicitud_Compras,
+                                glr_Solicitud_AC.Selected,
+                                {estado: "Listo"}
+                            )
                     );
                     UpdateContext(
                         {
