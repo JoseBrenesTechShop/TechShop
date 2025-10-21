@@ -2491,89 +2491,56 @@ Detalle_Aprobacion_Compra As screen:
             HoverFill: =RGBA(21, 68, 18, 1)
             OnSelect: |
                 =UpdateContext({Guardando: true});
-                If(!reset,
-                With(
-                    {
-                        idGerente: If(
-                            StartsWith(
-                                Nsoli,
-                                "PRD"
-                            ) && LookUp(
-                                preq,
-                                req_num = Nsoli,
-                                requester
-                            ) <> "raraya",
-                            "16",
-                            StartsWith(
-                                Nsoli,
-                                "MTO"
-                            ) && LookUp(
-                                preq,
-                                req_num = Nsoli,
-                                requester
-                            ) <> "rpereira",
-                            "15",
-                            StartsWith(
-                                Nsoli,
-                                "QAL"
-                            ) && LookUp(
-                                preq,
-                                req_num = Nsoli,
-                                requester
-                            ) <> "icespedes",
-                            "2618",
-                            (StartsWith(
-                                Nsoli,
-                                "TLR"
-                            ) || StartsWith(
-                                Nsoli,
-                                "ADM"
-                            ) || StartsWith(
-                                Nsoli,
-                                "OFC"
-                            )) && LookUp(
-                                preq,
-                                req_num = Nsoli,
-                                requester
-                            ) <> "marias",
-                            "1124",
-                            StartsWith(
-                                Nsoli,
-                                "SOL"
-                            ) && LookUp(
-                                preq,
-                                req_num = Nsoli,
-                                requester
-                            ) <> "vguerrero",
-                            "1133",
-                            (StartsWith(
-                                Nsoli,
-                                "TIC"
-                            ) ) && LookUp(
-                                preq,
-                                req_num = Nsoli,
-                                requester
-                            ) <> "jbrenes",
-                            "2648",
-                            "1"
-                        )
-                    },
-                    If(
-                        idGerente = "1",
-                        Remove(
-                            Solicitud_Compras,
-                            glr_Solicitud_AC.Selected
-                        ),
+                If(
+                    !reset,
+                    With(
+                        {
+                            idGerente: If(
+                                StartsWith(
+                                    Nsoli,
+                                    "PRD"
+                                ),
+                                "16",
+                                StartsWith(
+                                    Nsoli,
+                                    "MTO"
+                                ),
+                                "15",
+                                StartsWith(
+                                    Nsoli,
+                                    "QAL"
+                                ),
+                                "2618",
+                                (StartsWith(
+                                    Nsoli,
+                                    "TLR"
+                                ) || StartsWith(
+                                    Nsoli,
+                                    "ADM"
+                                ) || StartsWith(
+                                    Nsoli,
+                                    "OFC"
+                                )),
+                                "1124",
+                                StartsWith(
+                                    Nsoli,
+                                    "SOL"
+                                ),
+                                "1133",
+                                StartsWith(
+                                    Nsoli,
+                                    "TIC"
+                                ),
+                                "2648"
+                            )
+                        },
                         Patch(
                             Solicitud_Compras,
                             glr_Solicitud_AC.Selected,
                             {estado: "Devuelto"}
                         );
                         ForAll(
-                            Filter(
-                                datos_DAC,
-                                !aprobado
-                            ),
+                            datos_DAC,
                             Collect(
                                 Compras_NoMarcadas,
                                 {
@@ -2593,13 +2560,26 @@ Detalle_Aprobacion_Compra As screen:
                                 datos_DAC,
                                 aprobado
                             ).crfb9_linea && Enviado = 1 && Tipo_Envio = idGerente
+                        );
+                        EnviarCorreo.Run(
+                            LookUp(
+                                Empleados,
+                                Codigo = idGerente,
+                                Correo
+                            ) & "emarin@tsicr.com; rocervantes@tsicr.com; marias@tsicr.com",
+                            "Solicitud no aprobada por Don Eric",
+                            "Buenas,
+                La solicitud " & Nsoli & " no fue aprobada por gerencia. Por favor, revise el motivo de la no aprobación y, de ser necesario, corrija la observación indicada o vuelva a enviar la solicitud.
+                Una vez realizado el ajuste, comuníquese con Don Eric para gestionar nuevamente la aprobación.
+                Saludos cordiales,
+                Departamento de Tecnologia"
                         )
+                    ),
+                    Patch(
+                        Solicitud_Compras,
+                        glr_Solicitud_AC.Selected,
+                        {estado: "Listo"}
                     )
-                ),Patch(
-                            Solicitud_Compras,
-                            glr_Solicitud_AC.Selected,
-                            {estado: "Listo"}
-                        )
                 );
                 UpdateContext(
                     {

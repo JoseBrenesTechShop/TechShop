@@ -49,7 +49,10 @@ Screens:
                     ),
                     medida,
                     With(
-                        {myItem: crfb9_item, linea: crfb9_linea},
+                        {
+                            myItem: crfb9_item,
+                            linea: crfb9_linea
+                        },
                         LookUp(
                             preqitem,
                             req_num = Soli && item = myItem && req_line = linea
@@ -57,7 +60,10 @@ Screens:
                     ),
                     cantidad,
                     With(
-                        {myItem: crfb9_item, linea: crfb9_linea},
+                        {
+                            myItem: crfb9_item,
+                            linea: crfb9_linea
+                        },
                         LookUp(
                             preqitem,
                             req_num = Soli && item = myItem && req_line = linea
@@ -65,7 +71,10 @@ Screens:
                     ),
                     precio,
                     With(
-                        {myItem: crfb9_item, linea: crfb9_linea},
+                        {
+                            myItem: crfb9_item,
+                            linea: crfb9_linea
+                        },
                         LookUp(
                             preqitem,
                             req_num = Soli && item = myItem && req_line = linea
@@ -73,7 +82,10 @@ Screens:
                     ),
                     subtotal,
                     With(
-                        {myItem: crfb9_item, linea: crfb9_linea},
+                        {
+                            myItem: crfb9_item,
+                            linea: crfb9_linea
+                        },
                         LookUp(
                             preqitem,
                             req_num = Soli && item = myItem && req_line = linea
@@ -84,7 +96,10 @@ Screens:
                     ),
                     vendNum,
                     With(
-                        {myItem: crfb9_item, linea: crfb9_linea},
+                        {
+                            myItem: crfb9_item,
+                            linea: crfb9_linea
+                        },
                         LookUp(
                             preqitem,
                             req_num = Soli && item = myItem && req_line = linea
@@ -92,7 +107,10 @@ Screens:
                     ),
                     vendName,
                     With(
-                        {myItem: crfb9_item, linea: crfb9_linea},
+                        {
+                            myItem: crfb9_item,
+                            linea: crfb9_linea
+                        },
                         With(
                             {
                                 Vname: LookUp(
@@ -111,6 +129,54 @@ Screens:
                 ),
                 crfb9_linea,
                 SortOrder.Ascending
+            )
+        );
+        ForAll(
+            Filter(
+                preqitem,
+                req_num = Soli && stat = "R"
+            ),
+            With(
+                {
+                    myItem: ThisRecord.item,
+                    myLinea: ThisRecord.req_line,
+                    des: description,
+                    med: u_m,
+                    cant: qty_ordered,
+                    pre: unit_mat_cost,
+                    vend: vend_num
+                },
+                If(
+                    IsBlank(
+                        LookUp(
+                            Detalle_Solicitud_Compras,
+                            soli_num = Soli && item = myItem && linea = myLinea
+                        )
+                    ) && IsBlank(
+                        LookUp(
+                            Compras_NoMarcadas,
+                            NSolicitud = Soli && item = myItem && NFilaSolicitud = myLinea
+                        )
+                    ),
+                    Collect(
+                        datos_DSC,
+                        {
+                            crfb9_linea: myLinea,
+                            crfb9_item: myItem,
+                            crfb9_descripcion: des,
+                            crfb9_soli_num: glr_Solicitudes_SC.Selected.soli_num,
+                            medida: med,
+                            cantidad: cant,
+                            precio: pre,
+                            subtotal: cant * pre,
+                            vendNum: vend,
+                            vendName: LookUp(
+                                vendaddr,
+                                vend_num = vend
+                            ).name
+                        }
+                    )
+                )
             )
         );
         UpdateContext({Guardando: false})
@@ -869,7 +935,7 @@ Screens:
                                           PressedColor: =RGBA(52, 152, 47, 1)
                                           PressedFill: =RGBA(255, 255, 255, 1)
                                           Text: |-
-                                            ="Aprovados: " & CountIf(datos_DSC, aprobado) & "/" & glr_Detalles_DSC.AllItemsCount
+                                            ="Aprobados: " & CountIf(datos_DSC, aprobado) & "/" & glr_Detalles_DSC.AllItemsCount
                                           Width: =176
                                           X: =1163
                                           Y: =7

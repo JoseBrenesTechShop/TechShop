@@ -41,7 +41,10 @@ Detalle_Solicitud_Compra As screen:
                     ),
                     medida,
                     With(
-                        {myItem: crfb9_item, linea: crfb9_linea},
+                        {
+                            myItem: crfb9_item,
+                            linea: crfb9_linea
+                        },
                         LookUp(
                             preqitem,
                             req_num = Soli && item = myItem && req_line = linea
@@ -49,7 +52,10 @@ Detalle_Solicitud_Compra As screen:
                     ),
                     cantidad,
                     With(
-                        {myItem: crfb9_item, linea: crfb9_linea},
+                        {
+                            myItem: crfb9_item,
+                            linea: crfb9_linea
+                        },
                         LookUp(
                             preqitem,
                             req_num = Soli && item = myItem && req_line = linea
@@ -57,7 +63,10 @@ Detalle_Solicitud_Compra As screen:
                     ),
                     precio,
                     With(
-                        {myItem: crfb9_item, linea: crfb9_linea},
+                        {
+                            myItem: crfb9_item,
+                            linea: crfb9_linea
+                        },
                         LookUp(
                             preqitem,
                             req_num = Soli && item = myItem && req_line = linea
@@ -65,7 +74,10 @@ Detalle_Solicitud_Compra As screen:
                     ),
                     subtotal,
                     With(
-                        {myItem: crfb9_item, linea: crfb9_linea},
+                        {
+                            myItem: crfb9_item,
+                            linea: crfb9_linea
+                        },
                         LookUp(
                             preqitem,
                             req_num = Soli && item = myItem && req_line = linea
@@ -76,7 +88,10 @@ Detalle_Solicitud_Compra As screen:
                     ),
                     vendNum,
                     With(
-                        {myItem: crfb9_item, linea: crfb9_linea},
+                        {
+                            myItem: crfb9_item,
+                            linea: crfb9_linea
+                        },
                         LookUp(
                             preqitem,
                             req_num = Soli && item = myItem && req_line = linea
@@ -84,7 +99,10 @@ Detalle_Solicitud_Compra As screen:
                     ),
                     vendName,
                     With(
-                        {myItem: crfb9_item, linea: crfb9_linea},
+                        {
+                            myItem: crfb9_item,
+                            linea: crfb9_linea
+                        },
                         With(
                             {
                                 Vname: LookUp(
@@ -103,6 +121,54 @@ Detalle_Solicitud_Compra As screen:
                 ),
                 crfb9_linea,
                 SortOrder.Ascending
+            )
+        );
+        ForAll(
+            Filter(
+                preqitem,
+                req_num = Soli && stat = "R"
+            ),
+            With(
+                {
+                    myItem: ThisRecord.item,
+                    myLinea: ThisRecord.req_line,
+                    des: description,
+                    med: u_m,
+                    cant: qty_ordered,
+                    pre: unit_mat_cost,
+                    vend: vend_num
+                },
+                If(
+                    IsBlank(
+                        LookUp(
+                            Detalle_Solicitud_Compras,
+                            soli_num = Soli && item = myItem && linea = myLinea
+                        )
+                    ) && IsBlank(
+                        LookUp(
+                            Compras_NoMarcadas,
+                            NSolicitud = Soli && item = myItem && NFilaSolicitud = myLinea
+                        )
+                    ),
+                    Collect(
+                        datos_DSC,
+                        {
+                            crfb9_linea: myLinea,
+                            crfb9_item: myItem,
+                            crfb9_descripcion: des,
+                            crfb9_soli_num: glr_Solicitudes_SC.Selected.soli_num,
+                            medida: med,
+                            cantidad: cant,
+                            precio: pre,
+                            subtotal: cant * pre,
+                            vendNum: vend,
+                            vendName: LookUp(
+                                vendaddr,
+                                vend_num = vend
+                            ).name
+                        }
+                    )
+                )
             )
         );
         UpdateContext({Guardando: false})
@@ -1003,7 +1069,7 @@ Detalle_Solicitud_Compra As screen:
                             PressedFill: =RGBA(255, 255, 255, 1)
                             Size: =15
                             Text: |-
-                                ="Aprovados: " & CountIf(datos_DSC, aprobado) & "/" & glr_Detalles_DSC.AllItemsCount
+                                ="Aprobados: " & CountIf(datos_DSC, aprobado) & "/" & glr_Detalles_DSC.AllItemsCount
                             Width: =176
                             X: =1163
                             Y: =7
