@@ -117,6 +117,25 @@ Detalle_Solicitud_Compra As screen:
                         )
                     ),
                     aprobado,
+                    false,
+                    ver,
+                    false,
+                    motivoRechazo,
+                    "",
+                    noExiste,
+                    With(
+                        {
+                            myItem: crfb9_item,
+                            linea: crfb9_linea
+                        },
+                        IsBlank(
+                            LookUp(
+                                preqitem,
+                                req_num = Soli && item = myItem && req_line = linea
+                            )
+                        )
+                    ),
+                    nuevo,
                     false
                 ),
                 crfb9_linea,
@@ -147,7 +166,7 @@ Detalle_Solicitud_Compra As screen:
                     ) && IsBlank(
                         LookUp(
                             Compras_NoMarcadas,
-                            NSolicitud = Soli && item = myItem && NFilaSolicitud = myLinea
+                            NSolicitud = Soli && NFilaSolicitud = myLinea && NItem = myItem
                         )
                     ),
                     Collect(
@@ -165,7 +184,12 @@ Detalle_Solicitud_Compra As screen:
                             vendName: LookUp(
                                 vendaddr,
                                 vend_num = vend
-                            ).name
+                            ).name,
+                            aprobado: false,
+                            ver: false,
+                            motivoRechazo: "",
+                            noExiste: false,
+                            nuevo: true
                         }
                     )
                 )
@@ -423,7 +447,7 @@ Detalle_Solicitud_Compra As screen:
                                 Default: =ThisItem.crfb9_descripcion
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
-                                DisabledFill: =
+                                DisabledFill: =If(ThisItem.noExiste, RGBA(255, 184, 174, 1),ThisItem.nuevo, RGBA(255, 255, 186, 1), RGBA(255, 255, 255, 1))
                                 DisplayMode: =DisplayMode.Disabled
                                 FocusedBorderThickness: =4
                                 Font: =App.Theme.Font
@@ -449,7 +473,7 @@ Detalle_Solicitud_Compra As screen:
                                 Default: =ThisItem.vendNum
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
-                                DisabledFill: =
+                                DisabledFill: =If(ThisItem.noExiste, RGBA(255, 184, 174, 1),ThisItem.nuevo, RGBA(255, 255, 186, 1), RGBA(255, 255, 255, 1))
                                 DisplayMode: =DisplayMode.Disabled
                                 FocusedBorderThickness: =4
                                 Font: =App.Theme.Font
@@ -476,7 +500,7 @@ Detalle_Solicitud_Compra As screen:
                                 Default: =ThisItem.cantidad
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
-                                DisabledFill: =
+                                DisabledFill: =If(ThisItem.noExiste, RGBA(255, 184, 174, 1),ThisItem.nuevo, RGBA(255, 255, 186, 1), RGBA(255, 255, 255, 1))
                                 DisplayMode: =DisplayMode.Disabled
                                 FocusedBorderThickness: =4
                                 Font: =App.Theme.Font
@@ -503,7 +527,7 @@ Detalle_Solicitud_Compra As screen:
                                 Default: =ThisItem.medida
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
-                                DisabledFill: =
+                                DisabledFill: =If(ThisItem.noExiste, RGBA(255, 184, 174, 1),ThisItem.nuevo, RGBA(255, 255, 186, 1), RGBA(255, 255, 255, 1))
                                 DisplayMode: =DisplayMode.Disabled
                                 FocusedBorderThickness: =4
                                 Font: =App.Theme.Font
@@ -531,7 +555,7 @@ Detalle_Solicitud_Compra As screen:
                                     =Text(ThisItem.precio, "###,###,##0.00")
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
-                                DisabledFill: =
+                                DisabledFill: =If(ThisItem.noExiste, RGBA(255, 184, 174, 1),ThisItem.nuevo, RGBA(255, 255, 186, 1), RGBA(255, 255, 255, 1))
                                 DisplayMode: =DisplayMode.Disabled
                                 FocusedBorderThickness: =4
                                 Font: =App.Theme.Font
@@ -560,19 +584,19 @@ Detalle_Solicitud_Compra As screen:
                                 Default: =ThisItem.aprobado
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =RGBA(40, 134, 222, 1)
-                                DisabledFill: =RGBA(255, 255, 255, 1)
+                                DisabledFill: =If(ThisItem.noExiste, RGBA(255, 184, 174, 1),ThisItem.nuevo, RGBA(255, 255, 186, 1), RGBA(255, 255, 255, 1))
                                 DisplayMode: |-
                                     =If(
-                                        IsBlank(
+                                        (IsBlank(
                                             LookUp(
                                                 Solicitud_Compras,
                                                 soli_num = txt_Num_Soli_DSC.Text && estado <> "Gerencia"
                                             )
-                                        ) && !Rechazo,
+                                        ) && !Rechazo) && !ThisItem.noExiste,
                                         DisplayMode.Edit,
                                         DisplayMode.Disabled
                                     )
-                                Fill: =RGBA(255, 255, 255, 1)
+                                Fill: =If(ThisItem.noExiste, RGBA(255, 184, 174, 1),ThisItem.nuevo, RGBA(255, 255, 186, 1), RGBA(255, 255, 255, 1))
                                 Font: =App.Theme.Font
                                 Height: =30
                                 HoverColor: =App.Theme.Colors.Darker30
@@ -597,7 +621,7 @@ Detalle_Solicitud_Compra As screen:
                                 Default: =ThisItem.vendName
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
-                                DisabledFill: =
+                                DisabledFill: =If(ThisItem.noExiste, RGBA(255, 184, 174, 1),ThisItem.nuevo, RGBA(255, 255, 186, 1), RGBA(255, 255, 255, 1))
                                 DisplayMode: =DisplayMode.Disabled
                                 FocusedBorderThickness: =4
                                 Font: =App.Theme.Font
@@ -625,7 +649,7 @@ Detalle_Solicitud_Compra As screen:
                                     =Text(ThisItem.subtotal, "###,###,##0.00")
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
-                                DisabledFill: =
+                                DisabledFill: =If(ThisItem.noExiste, RGBA(255, 184, 174, 1),ThisItem.nuevo, RGBA(255, 255, 186, 1), RGBA(255, 255, 255, 1))
                                 DisplayMode: =DisplayMode.Disabled
                                 FocusedBorderThickness: =4
                                 Font: =App.Theme.Font
@@ -652,7 +676,7 @@ Detalle_Solicitud_Compra As screen:
                                 Default: =ThisItem.crfb9_item
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
-                                DisabledFill: =
+                                DisabledFill: =If(ThisItem.noExiste, RGBA(255, 184, 174, 1),ThisItem.nuevo, RGBA(255, 255, 186, 1), RGBA(255, 255, 255, 1))
                                 DisplayMode: =DisplayMode.Disabled
                                 FocusedBorderThickness: =4
                                 Font: =App.Theme.Font
@@ -679,7 +703,7 @@ Detalle_Solicitud_Compra As screen:
                                 Default: =ThisItem.crfb9_linea
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
-                                DisabledFill: =RGBA(180, 214, 250, 1)
+                                DisabledFill: =If(ThisItem.noExiste, RGBA(215, 58, 60, 1), ThisItem.nuevo, RGBA(255, 191, 0, 1), RGBA(180, 214, 250, 1))
                                 DisplayMode: =DisplayMode.Disabled
                                 FocusedBorderThickness: =4
                                 Font: =App.Theme.Font
