@@ -128,6 +128,7 @@ Screens:
                           Reset(drp_OP_HxHR);
                           Reset(drp_Turno_HxHR);
                           Reset(dp_Fecha_HxHR);
+                          Reset(drp_Semana_BS);
                           UpdateContext({Mostra: false});
                           UpdateContext({Aviso: false});
                           UpdateContext({AvisoCausa: false});
@@ -264,11 +265,23 @@ Screens:
                                     ChevronFill: =RGBA(255, 255, 255, 1)
                                     ChevronHoverBackground: =RGBA(15, 84, 140, 1)
                                     ChevronHoverFill: =RGBA(255, 255, 255, 1)
-                                    Default: =Max(Sort(Distinct(Filter(BonoSemanals, Año = drp_Año_BS.SelectedText.Value), SemanaNumber),ThisRecord.Value,SortOrder.Descending), Value)
+                                    Default: =
                                     Font: =Font.'Open Sans'
                                     Height: =35
                                     HoverFill: =RGBA(71, 158, 245, 1)
-                                    Items: =Sort(Distinct(Filter(BonoSemanals, Año = drp_Año_BS.SelectedText.Value), SemanaNumber),ThisRecord.Value,SortOrder.Descending)
+                                    Items: |-
+                                      =Sort(
+                                          If(
+                                              drp_Año_BS.Selected.Value = Text(
+                                                  Today(),
+                                                  "yyyy"
+                                              ),
+                                              Sequence(WeekNum(Today()) - 4),
+                                              Sequence(53)
+                                          ),
+                                          Value,
+                                          SortOrder.Descending
+                                      )
                                     Items.Value: =Value
                                     PressedColor: =RGBA(255, 255, 255, 1)
                                     PressedFill: =RGBA(0, 18, 107, 1)
