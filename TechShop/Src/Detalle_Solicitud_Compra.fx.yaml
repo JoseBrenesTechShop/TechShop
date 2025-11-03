@@ -138,7 +138,18 @@ Detalle_Solicitud_Compra As screen:
                     nuevo,
                     false,
                     motivoSolicitud,
-                    "",
+                    With(
+                        {
+                            myItem: crfb9_item,
+                            linea: crfb9_linea
+                        },
+                        ComentarioSoli.Run(
+                            LookUp(
+                                preqitem,
+                                req_num = Soli && item = myItem && req_line = linea
+                            ).RowPointer
+                        ).comentario
+                    ),
                     moneda,
                     With(
                         {
@@ -721,7 +732,7 @@ Detalle_Solicitud_Compra As screen:
                                 FocusedBorderThickness: =4
                                 Font: =App.Theme.Font
                                 FontWeight: =FontWeight.Semibold
-                                Height: =30
+                                Height: =If(ThisItem.ver || !IsBlank(ThisItem.motivoSolicitud), 60, 30)
                                 HintText: =""
                                 HoverBorderColor: =RGBA(40, 134, 222, 1)
                                 HoverColor: =RGBA(0, 0, 0, 1)
@@ -1004,11 +1015,11 @@ Detalle_Solicitud_Compra As screen:
                                 Text: ="Motivo Solicitud"
                                 Tooltip: =""
                                 VerticalAlign: =VerticalAlign.Middle
-                                Visible: =ThisItem.ver
+                                Visible: =ThisItem.ver || !IsBlank(ThisItem.motivoSolicitud)
                                 Weight: ='TextCanvas.Weight'.Regular
-                                Width: =160
+                                Width: =157
                                 Wrap: =true
-                                X: =0
+                                X: =40
                                 Y: =30
                                 ZIndex: =12
 
@@ -1034,9 +1045,9 @@ Detalle_Solicitud_Compra As screen:
                                 RadiusTopLeft: =0
                                 RadiusTopRight: =0
                                 Size: =12
-                                Visible: =ThisItem.ver
-                                Width: =1192
-                                X: =160
+                                Visible: =ThisItem.ver || !IsBlank(ThisItem.motivoSolicitud)
+                                Width: =1155
+                                X: =197
                                 Y: =30
                                 ZIndex: =13
 
@@ -2263,7 +2274,8 @@ Detalle_Solicitud_Compra As screen:
                                                         subtotal: ThisRecord.subtotal,
                                                         num_vend: ThisRecord.vendNum,
                                                         provedor: ThisRecord.vendName,
-                                                        moneda: ThisRecord.moneda
+                                                        moneda: ThisRecord.moneda,
+                                                        motivoSoli: ThisRecord.motivoSolicitud
                                                     }
                                                 ),
                                                 Remove(

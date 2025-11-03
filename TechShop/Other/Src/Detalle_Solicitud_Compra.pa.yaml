@@ -146,7 +146,18 @@ Screens:
                     nuevo,
                     false,
                     motivoSolicitud,
-                    "",
+                    With(
+                        {
+                            myItem: crfb9_item,
+                            linea: crfb9_linea
+                        },
+                        ComentarioSoli.Run(
+                            LookUp(
+                                preqitem,
+                                req_num = Soli && item = myItem && req_line = linea
+                            ).RowPointer
+                        ).comentario
+                    ),
                     moneda,
                     With(
                         {
@@ -640,7 +651,7 @@ Screens:
                                                 DisabledFill: =If(ThisItem.noExiste, RGBA(215, 58, 60, 1), ThisItem.nuevo, RGBA(255, 191, 0, 1), RGBA(180, 214, 250, 1))
                                                 DisplayMode: =DisplayMode.Disabled
                                                 FontWeight: =FontWeight.Semibold
-                                                Height: =30
+                                                Height: =If(ThisItem.ver || !IsBlank(ThisItem.motivoSolicitud), 60, 30)
                                                 HoverBorderColor: =RGBA(40, 134, 222, 1)
                                                 HoverFill: =RGBA(255, 255, 255, 1)
                                                 PaddingLeft: =5
@@ -869,9 +880,10 @@ Screens:
                                                 Size: =16
                                                 Text: ="Motivo Solicitud"
                                                 VerticalAlign: =VerticalAlign.Middle
-                                                Visible: =ThisItem.ver
+                                                Visible: =ThisItem.ver || !IsBlank(ThisItem.motivoSolicitud)
                                                 Weight: ='TextCanvas.Weight'.Regular
-                                                Width: =160
+                                                Width: =157
+                                                X: =40
                                                 Y: =30
                                           - txt_Cantidad_EM_208:
                                               Control: Classic/TextInput@2.3.2
@@ -893,9 +905,9 @@ Screens:
                                                 RadiusTopLeft: =0
                                                 RadiusTopRight: =0
                                                 Size: =12
-                                                Visible: =ThisItem.ver
-                                                Width: =1192
-                                                X: =160
+                                                Visible: =ThisItem.ver || !IsBlank(ThisItem.motivoSolicitud)
+                                                Width: =1155
+                                                X: =197
                                                 Y: =30
                                     - lbl_PNDato_EM_186:
                                         Control: Text@0.0.51
@@ -1914,7 +1926,8 @@ Screens:
                                                                       subtotal: ThisRecord.subtotal,
                                                                       num_vend: ThisRecord.vendNum,
                                                                       provedor: ThisRecord.vendName,
-                                                                      moneda: ThisRecord.moneda
+                                                                      moneda: ThisRecord.moneda,
+                                                                      motivoSoli: ThisRecord.motivoSolicitud
                                                                   }
                                                               ),
                                                               Remove(
