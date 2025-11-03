@@ -1320,14 +1320,14 @@ Detalle_Solicitud_Compra As screen:
                             Clear: =true
                             Color: =RGBA(0, 0, 0, 1)
                             Default: |-
-                                =Text(Sum(Filter(datos_DSC, !noExiste), subtotal), "###,###,##0.00")
+                                ="$" & Text(Sum(Filter(datos_DSC, !noExiste, moneda = "USD"), subtotal), "###,###,##0.00")
                             DisabledBorderColor: =RGBA(180, 214, 250, 1)
                             DisabledColor: =RGBA(0, 0, 0, 1)
                             DisabledFill: =RGBA(255, 255, 255, 1)
                             DisplayMode: =DisplayMode.Disabled
                             FocusedBorderThickness: =4
                             Font: =App.Theme.Font
-                            Height: =30
+                            Height: =25
                             HintText: ="Total"
                             HoverBorderColor: =RGBA(180, 214, 250, 1)
                             HoverColor: =RGBA(0, 0, 0, 1)
@@ -1339,14 +1339,13 @@ Detalle_Solicitud_Compra As screen:
                             PaddingTop: =0
                             PressedColor: =RGBA(0, 0, 0, 1)
                             PressedFill: =RGBA(255, 255, 255, 1)
-                            RadiusBottomLeft: =10
-                            RadiusBottomRight: =10
-                            RadiusTopLeft: =10
-                            RadiusTopRight: =10
+                            RadiusBottomLeft: =0 
+                            RadiusBottomRight: =0
+                            RadiusTopLeft: =12
+                            RadiusTopRight: =12
                             Size: =12
                             Width: =110
-                            X: =879
-                            Y: =10
+                            X: =880
                             ZIndex: =9
 
                         lbl_ValorDato_EM_13 As Texto:
@@ -1427,6 +1426,42 @@ Detalle_Solicitud_Compra As screen:
                             X: =1015
                             Y: =7
                             ZIndex: =11
+
+                        txt_Total_DSC_1 As text:
+                            Align: =Align.Center
+                            BorderColor: =RGBA(180, 214, 250, 1)
+                            BorderThickness: =3
+                            Clear: =true
+                            Color: =RGBA(0, 0, 0, 1)
+                            Default: |-
+                                ="₡" & Text(Sum(Filter(datos_DSC, !noExiste, moneda <> "USD"), subtotal), "###,###,##0.00")
+                            DisabledBorderColor: =RGBA(180, 214, 250, 1)
+                            DisabledColor: =RGBA(0, 0, 0, 1)
+                            DisabledFill: =RGBA(255, 255, 255, 1)
+                            DisplayMode: =DisplayMode.Disabled
+                            FocusedBorderThickness: =4
+                            Font: =App.Theme.Font
+                            Height: =25
+                            HintText: ="Total"
+                            HoverBorderColor: =RGBA(180, 214, 250, 1)
+                            HoverColor: =RGBA(0, 0, 0, 1)
+                            HoverFill: =RGBA(227, 240, 252, 1)
+                            OnChange: =
+                            PaddingBottom: =0
+                            PaddingLeft: =0
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            PressedColor: =RGBA(0, 0, 0, 1)
+                            PressedFill: =RGBA(255, 255, 255, 1)
+                            RadiusBottomLeft: =12
+                            RadiusBottomRight: =12
+                            RadiusTopLeft: =0
+                            RadiusTopRight: =0
+                            Size: =12
+                            Width: =110
+                            X: =880
+                            Y: =25
+                            ZIndex: =12
 
                     ContainerNext_DSC As groupContainer.manualLayoutContainer:
                         BorderColor: =RGBA(15, 84, 140, 1)
@@ -1581,7 +1616,7 @@ Detalle_Solicitud_Compra As screen:
                                         BorderThickness: =0.5
                                         Color: =RGBA(0, 0, 0, 1)
                                         Default: |-
-                                            =Text(ThisItem.subtotal, "###,###,##0.00")
+                                            =If(ThisItem.moneda = "USD", "$", !IsBlank(ThisItem.moneda), "₡", "") & Text(ThisItem.subtotal, "###,###,##0.00")
                                         DisabledBorderColor: =RGBA(0, 0, 0, 1)
                                         DisabledColor: =
                                         DisabledFill: =
@@ -1894,7 +1929,7 @@ Detalle_Solicitud_Compra As screen:
                                         BorderThickness: =0.5
                                         Color: =RGBA(0, 0, 0, 1)
                                         Default: |-
-                                            =Text(ThisItem.subtotal, "###,###,##0.00")
+                                            =If(ThisItem.moneda = "USD", "$", !IsBlank(ThisItem.moneda), "₡", "") & Text(ThisItem.subtotal, "###,###,##0.00")
                                         DisabledBorderColor: =RGBA(0, 0, 0, 1)
                                         DisabledColor: =
                                         DisabledFill: =
@@ -2200,7 +2235,18 @@ Detalle_Solicitud_Compra As screen:
                                                     Sum(
                                                         Filter(
                                                             datos_DSC,
-                                                            aprobado
+                                                            aprobado,
+                                                            moneda = "USD"
+                                                        ),
+                                                        subtotal
+                                                    )
+                                                ),
+                                                totalColones:Value(
+                                                    Sum(
+                                                        Filter(
+                                                            datos_DSC,
+                                                            aprobado,
+                                                            moneda <> "USD"
                                                         ),
                                                         subtotal
                                                     )
@@ -2227,7 +2273,8 @@ Detalle_Solicitud_Compra As screen:
                                                         precio: ThisRecord.precio,
                                                         subtotal: ThisRecord.subtotal,
                                                         num_vend: ThisRecord.vendNum,
-                                                        provedor: ThisRecord.vendName
+                                                        provedor: ThisRecord.vendName,
+                                                        moneda: ThisRecord.moneda
                                                     }
                                                 ),
                                                 Remove(

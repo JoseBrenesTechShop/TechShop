@@ -1140,12 +1140,12 @@ Screens:
                                           BorderColor: =RGBA(180, 214, 250, 1)
                                           BorderThickness: =3
                                           Clear: =true
-                                          Default: =Text(Sum(Filter(datos_DSC, !noExiste), subtotal), "###,###,##0.00")
+                                          Default: ="$" & Text(Sum(Filter(datos_DSC, !noExiste, moneda = "USD"), subtotal), "###,###,##0.00")
                                           DisabledBorderColor: =RGBA(180, 214, 250, 1)
                                           DisabledColor: =RGBA(0, 0, 0, 1)
                                           DisabledFill: =RGBA(255, 255, 255, 1)
                                           DisplayMode: =DisplayMode.Disabled
-                                          Height: =30
+                                          Height: =25
                                           HintText: ="Total"
                                           HoverBorderColor: =RGBA(180, 214, 250, 1)
                                           HoverFill: =RGBA(227, 240, 252, 1)
@@ -1156,14 +1156,13 @@ Screens:
                                           PaddingTop: =0
                                           PressedColor: =RGBA(0, 0, 0, 1)
                                           PressedFill: =RGBA(255, 255, 255, 1)
-                                          RadiusBottomLeft: =10
-                                          RadiusBottomRight: =10
-                                          RadiusTopLeft: =10
-                                          RadiusTopRight: =10
+                                          RadiusBottomLeft: '=0 '
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =12
+                                          RadiusTopRight: =12
                                           Size: =12
                                           Width: =110
-                                          X: =879
-                                          Y: =10
+                                          X: =880
                                     - lbl_ValorDato_EM_13:
                                         Control: Text@0.0.51
                                         Properties:
@@ -1234,6 +1233,37 @@ Screens:
                                           Width: =122
                                           X: =1015
                                           Y: =7
+                                    - txt_Total_DSC_1:
+                                        Control: Classic/TextInput@2.3.2
+                                        Properties:
+                                          Align: =Align.Center
+                                          BorderColor: =RGBA(180, 214, 250, 1)
+                                          BorderThickness: =3
+                                          Clear: =true
+                                          Default: ="₡" & Text(Sum(Filter(datos_DSC, !noExiste, moneda <> "USD"), subtotal), "###,###,##0.00")
+                                          DisabledBorderColor: =RGBA(180, 214, 250, 1)
+                                          DisabledColor: =RGBA(0, 0, 0, 1)
+                                          DisabledFill: =RGBA(255, 255, 255, 1)
+                                          DisplayMode: =DisplayMode.Disabled
+                                          Height: =25
+                                          HintText: ="Total"
+                                          HoverBorderColor: =RGBA(180, 214, 250, 1)
+                                          HoverFill: =RGBA(227, 240, 252, 1)
+                                          OnChange: =
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          PressedColor: =RGBA(0, 0, 0, 1)
+                                          PressedFill: =RGBA(255, 255, 255, 1)
+                                          RadiusBottomLeft: =12
+                                          RadiusBottomRight: =12
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                          Size: =12
+                                          Width: =110
+                                          X: =880
+                                          Y: =25
                               - ContainerNext_DSC:
                                   Control: GroupContainer@1.3.0
                                   Variant: ManualLayout
@@ -1378,7 +1408,7 @@ Screens:
                                                             Align: =Align.Center
                                                             BorderColor: =RGBA(0, 0, 0, 1)
                                                             BorderThickness: =0.5
-                                                            Default: =Text(ThisItem.subtotal, "###,###,##0.00")
+                                                            Default: =If(ThisItem.moneda = "USD", "$", !IsBlank(ThisItem.moneda), "₡", "") & Text(ThisItem.subtotal, "###,###,##0.00")
                                                             DisabledBorderColor: =RGBA(0, 0, 0, 1)
                                                             DisabledColor: =
                                                             DisabledFill: =
@@ -1622,7 +1652,7 @@ Screens:
                                                             Align: =Align.Center
                                                             BorderColor: =RGBA(0, 0, 0, 1)
                                                             BorderThickness: =0.5
-                                                            Default: =Text(ThisItem.subtotal, "###,###,##0.00")
+                                                            Default: =If(ThisItem.moneda = "USD", "$", !IsBlank(ThisItem.moneda), "₡", "") & Text(ThisItem.subtotal, "###,###,##0.00")
                                                             DisabledBorderColor: =RGBA(0, 0, 0, 1)
                                                             DisabledColor: =
                                                             DisabledFill: =
@@ -1856,7 +1886,18 @@ Screens:
                                                                   Sum(
                                                                       Filter(
                                                                           datos_DSC,
-                                                                          aprobado
+                                                                          aprobado,
+                                                                          moneda = "USD"
+                                                                      ),
+                                                                      subtotal
+                                                                  )
+                                                              ),
+                                                              totalColones:Value(
+                                                                  Sum(
+                                                                      Filter(
+                                                                          datos_DSC,
+                                                                          aprobado,
+                                                                          moneda <> "USD"
                                                                       ),
                                                                       subtotal
                                                                   )
@@ -1883,7 +1924,8 @@ Screens:
                                                                       precio: ThisRecord.precio,
                                                                       subtotal: ThisRecord.subtotal,
                                                                       num_vend: ThisRecord.vendNum,
-                                                                      provedor: ThisRecord.vendName
+                                                                      provedor: ThisRecord.vendName,
+                                                                      moneda: ThisRecord.moneda
                                                                   }
                                                               ),
                                                               Remove(

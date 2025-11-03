@@ -40,7 +40,9 @@ Screens:
                     check,
                     true,
                     ver,
-                    false
+                    false,
+                    motivoRechazo,
+                    ""
                 ),
                 linea,
                 SortOrder.Ascending
@@ -325,7 +327,7 @@ Screens:
                                           BorderColor: =RGBA(180, 214, 250, 1)
                                           BorderThickness: =3
                                           Clear: =true
-                                          Default: =Text(LookUp(preq, req_num = Nsoli, req_date), "dd/mm/yyyy")
+                                          Default: =Text(glr_Solicitud_AC.Selected.fecha, "dd/mm/yyyy")
                                           DisabledBorderColor: =RGBA(180, 214, 250, 1)
                                           DisabledColor: =RGBA(0, 0, 0, 1)
                                           DisabledFill: =RGBA(255, 255, 255, 1)
@@ -373,37 +375,7 @@ Screens:
                                           BorderColor: =RGBA(180, 214, 250, 1)
                                           BorderThickness: =3
                                           Clear: =true
-                                          Default: |-
-                                            =With(
-                                                {
-                                                    email: LookUp(
-                                                        preq,
-                                                        req_num =  Nsoli,
-                                                        requester
-                                                    ),
-                                                    name: First(
-                                                        Filter(
-                                                            Empleados,
-                                                            Left(
-                                                                Correo,
-                                                                Find(
-                                                                    "@",
-                                                                    Correo
-                                                                ) - 1
-                                                            ) = LookUp(
-                                                                preq,
-                                                                req_num = Nsoli,
-                                                                requester
-                                                            )
-                                                        )
-                                                    ).Nombre
-                                                },
-                                                If(
-                                                    IsBlank(name),
-                                                    email,
-                                                    name
-                                                )
-                                            )
+                                          Default: =glr_Solicitud_AC.Selected.solicitante
                                           DisabledBorderColor: =RGBA(180, 214, 250, 1)
                                           DisabledColor: =RGBA(0, 0, 0, 1)
                                           DisabledFill: =RGBA(255, 255, 255, 1)
@@ -451,12 +423,12 @@ Screens:
                                           BorderColor: =RGBA(180, 214, 250, 1)
                                           BorderThickness: =3
                                           Clear: =true
-                                          Default: =Text(glr_Solicitud_AC.Selected.total, "###,###,##0.00")
+                                          Default: ="$" & Text(Sum(Filter(datos_DAC, moneda = "USD"), subtotal), "###,###,##0.00")
                                           DisabledBorderColor: =RGBA(180, 214, 250, 1)
                                           DisabledColor: =RGBA(0, 0, 0, 1)
                                           DisabledFill: =RGBA(255, 255, 255, 1)
                                           DisplayMode: =DisplayMode.Disabled
-                                          Height: =30
+                                          Height: =22
                                           HintText: ="Total"
                                           HoverBorderColor: =RGBA(180, 214, 250, 1)
                                           HoverFill: =RGBA(227, 240, 252, 1)
@@ -467,14 +439,14 @@ Screens:
                                           PaddingTop: =0
                                           PressedColor: =RGBA(0, 0, 0, 1)
                                           PressedFill: =RGBA(255, 255, 255, 1)
-                                          RadiusBottomLeft: =10
-                                          RadiusBottomRight: =10
-                                          RadiusTopLeft: =10
-                                          RadiusTopRight: =10
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =12
+                                          RadiusTopRight: =12
                                           Size: =12
                                           Width: =110
-                                          X: =799
-                                          Y: =10
+                                          X: =800
+                                          Y: =2
                                     - Button10_3:
                                         Control: Classic/Button@2.2.0
                                         Properties:
@@ -606,7 +578,7 @@ Screens:
                                           DisabledBorderColor: =RGBA(180, 214, 250, 1)
                                           DisabledColor: =RGBA(0, 0, 0, 1)
                                           DisabledFill: =RGBA(255, 255, 255, 1)
-                                          DisplayMode: =If(glr_Solicitud_AC.Selected.estado <> "Listo", DisplayMode.Disabled, DisplayMode.Edit)
+                                          DisplayMode: =DisplayMode.Disabled
                                           Height: =30
                                           HintText: ="Comentario"
                                           HoverBorderColor: =RGBA(180, 214, 250, 1)
@@ -646,6 +618,38 @@ Screens:
                                           Width: =208
                                           X: =920
                                           Y: =5
+                                    - txt_Total_DAC_4:
+                                        Control: Classic/TextInput@2.3.2
+                                        Properties:
+                                          Align: =Align.Center
+                                          BorderColor: =RGBA(180, 214, 250, 1)
+                                          BorderThickness: =3
+                                          Clear: =true
+                                          Default: |+
+                                            ="₡" & Text(Sum(Filter(datos_DAC, moneda <> "USD"), subtotal), "###,###,##0.00")
+                                          DisabledBorderColor: =RGBA(180, 214, 250, 1)
+                                          DisabledColor: =RGBA(0, 0, 0, 1)
+                                          DisabledFill: =RGBA(255, 255, 255, 1)
+                                          DisplayMode: =DisplayMode.Disabled
+                                          Height: =22
+                                          HintText: ="Total"
+                                          HoverBorderColor: =RGBA(180, 214, 250, 1)
+                                          HoverFill: =RGBA(227, 240, 252, 1)
+                                          OnChange: =
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          PressedColor: =RGBA(0, 0, 0, 1)
+                                          PressedFill: =RGBA(255, 255, 255, 1)
+                                          RadiusBottomLeft: =12
+                                          RadiusBottomRight: =12
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                          Size: =12
+                                          Width: =110
+                                          X: =800
+                                          Y: =23
                               - ContainerGaleria_EM_4:
                                   Control: GroupContainer@1.3.0
                                   Variant: ManualLayout
@@ -816,7 +820,7 @@ Screens:
                                                 Align: =Align.Center
                                                 BorderColor: =RGBA(40, 134, 222, 1)
                                                 BorderThickness: =0.5
-                                                Default: =Text(ThisItem.precio, "###,###,##0.00")
+                                                Default: =If(ThisItem.moneda = "USD", "$", !IsBlank(ThisItem.moneda), "₡", "") & Text(ThisItem.precio, "###,###,##0.00")
                                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                                 DisabledColor: =
                                                 DisabledFill: =If(ThisItem.linea = edit.item.linea , RGBA(206, 242, 196, 1), ThisItem.check ,RGBA(255, 255, 255, 1), RGBA(255, 208, 201, 1))
@@ -1263,10 +1267,21 @@ Screens:
                                           Fill: =RGBA(0, 0, 0, 0)
                                           Height: =664
                                           OnSelect: |-
-                                            =UpdateContext({showContainer: false});
-                                            Reset(txt_Motivo_DAC)
+                                            =ForAll(
+                                                Filter(
+                                                    datos_DAC,
+                                                    !aprobado
+                                                ),
+                                                Patch(
+                                                    datos_DAC,
+                                                    ThisRecord,
+                                                    {motivoRechazo: ""}
+                                                )
+                                            );
+                                            UpdateContext({showContainer: false});
+                                            Reset(txt_comentarioErick_DAC)
                                           Width: =1353
-                                    - Container77_2:
+                                    - Container77_6:
                                         Control: GroupContainer@1.3.0
                                         Variant: ManualLayout
                                         Properties:
@@ -1283,7 +1298,7 @@ Screens:
                                           X: =196
                                           Y: =59
                                         Children:
-                                          - lbl_BarraSeleccion_EM_29:
+                                          - lbl_BarraSeleccion_EM_23:
                                               Control: Classic/TextInput@2.3.2
                                               Properties:
                                                 Align: =Align.Center
@@ -1299,7 +1314,7 @@ Screens:
                                                 HoverBorderColor: =RGBA(204, 231, 246, 1)
                                                 HoverFill: =RGBA(204, 231, 246, 1)
                                                 OnChange: =
-                                                OnSelect: =Reset(lbl_BarraSeleccion_EM_29)
+                                                OnSelect: =Reset(lbl_BarraSeleccion_EM_23)
                                                 PaddingLeft: =5
                                                 RadiusBottomLeft: =0
                                                 RadiusBottomRight: =0
@@ -1307,7 +1322,7 @@ Screens:
                                                 RadiusTopRight: =0
                                                 Size: =18
                                                 Width: =Parent.Width
-                                          - Container78_4:
+                                          - Container78_12:
                                               Control: GroupContainer@1.3.0
                                               Variant: ManualLayout
                                               Properties:
@@ -1323,7 +1338,86 @@ Screens:
                                                 X: =40
                                                 Y: =47
                                               Children:
-                                                - lbl_BarraSeleccion_EM_30:
+                                                - Gallery10_4:
+                                                    Control: Gallery@2.15.0
+                                                    Variant: Vertical
+                                                    Properties:
+                                                      Height: =332
+                                                      Items: =Filter(datos_DAC, aprobado)
+                                                      TemplatePadding: =0
+                                                      TemplateSize: =30
+                                                      Width: =420
+                                                      Y: =55
+                                                    Children:
+                                                      - txt_Cantidad_EM_216:
+                                                          Control: Classic/TextInput@2.3.2
+                                                          Properties:
+                                                            Align: =Align.Center
+                                                            BorderColor: =RGBA(0, 0, 0, 1)
+                                                            BorderThickness: =0.5
+                                                            Default: =ThisItem.crfb9_linea
+                                                            DisabledBorderColor: =RGBA(0, 0, 0, 1)
+                                                            DisabledColor: =
+                                                            DisabledFill: =RGBA(255, 255, 255, 1)
+                                                            DisplayMode: =DisplayMode.Disabled
+                                                            FontWeight: =FontWeight.Semibold
+                                                            Height: =30
+                                                            HoverBorderColor: =RGBA(40, 134, 222, 1)
+                                                            HoverFill: =RGBA(255, 255, 255, 1)
+                                                            PaddingLeft: =5
+                                                            RadiusBottomLeft: =0
+                                                            RadiusBottomRight: =0
+                                                            RadiusTopLeft: =0
+                                                            RadiusTopRight: =0
+                                                            Size: =12
+                                                            Width: =50
+                                                      - txt_Cantidad_EM_217:
+                                                          Control: Classic/TextInput@2.3.2
+                                                          Properties:
+                                                            Align: =Align.Center
+                                                            BorderColor: =RGBA(0, 0, 0, 1)
+                                                            BorderThickness: =0.5
+                                                            Default: =ThisItem.crfb9_item
+                                                            DisabledBorderColor: =RGBA(0, 0, 0, 1)
+                                                            DisabledColor: =
+                                                            DisabledFill: =
+                                                            DisplayMode: =DisplayMode.Disabled
+                                                            FontWeight: =FontWeight.Semibold
+                                                            Height: =30
+                                                            HoverBorderColor: =RGBA(40, 134, 222, 1)
+                                                            HoverFill: =RGBA(255, 255, 255, 1)
+                                                            PaddingLeft: =5
+                                                            RadiusBottomLeft: =0
+                                                            RadiusBottomRight: =0
+                                                            RadiusTopLeft: =0
+                                                            RadiusTopRight: =0
+                                                            Size: =12
+                                                            Width: =180
+                                                            X: =50
+                                                      - txt_Cantidad_EM_218:
+                                                          Control: Classic/TextInput@2.3.2
+                                                          Properties:
+                                                            Align: =Align.Center
+                                                            BorderColor: =RGBA(0, 0, 0, 1)
+                                                            BorderThickness: =0.5
+                                                            Default: =If(ThisItem.moneda = "USD", "$", !IsBlank(ThisItem.moneda), "₡", "") & Text(ThisItem.subtotal, "###,###,##0.00")
+                                                            DisabledBorderColor: =RGBA(0, 0, 0, 1)
+                                                            DisabledColor: =
+                                                            DisabledFill: =
+                                                            DisplayMode: =DisplayMode.Disabled
+                                                            FontWeight: =FontWeight.Semibold
+                                                            Height: =30
+                                                            HoverBorderColor: =RGBA(40, 134, 222, 1)
+                                                            HoverFill: =RGBA(255, 255, 255, 1)
+                                                            PaddingLeft: =5
+                                                            RadiusBottomLeft: =0
+                                                            RadiusBottomRight: =0
+                                                            RadiusTopLeft: =0
+                                                            RadiusTopRight: =0
+                                                            Size: =12
+                                                            Width: =190
+                                                            X: =230
+                                                - lbl_BarraSeleccion_EM_52:
                                                     Control: Classic/TextInput@2.3.2
                                                     Properties:
                                                       BorderColor: =RGBA(0, 0, 0, 1)
@@ -1336,21 +1430,21 @@ Screens:
                                                       HoverBorderColor: =RGBA(204, 231, 246, 1)
                                                       HoverFill: =RGBA(204, 231, 246, 1)
                                                       OnChange: =
-                                                      OnSelect: =Reset(lbl_BarraSeleccion_EM_30)
+                                                      OnSelect: =Reset(lbl_BarraSeleccion_EM_52)
                                                       RadiusBottomLeft: =0
                                                       RadiusBottomRight: =0
                                                       RadiusTopLeft: =0
                                                       RadiusTopRight: =0
                                                       Size: =14
                                                       Width: =Parent.Width
-                                                - lbl_BarraSeleccion_EM_31:
+                                                - lbl_BarraSeleccion_EM_53:
                                                     Control: Classic/TextInput@2.3.2
                                                     Properties:
                                                       Align: =Align.Right
                                                       BorderColor: =RGBA(0, 0, 0, 1)
                                                       Default: |-
                                                         ="Total: " &
-                                                        Text(Sum(Filter(datos_DAC, check), subtotal), "###,###,##0.00")
+                                                        Text(Sum(Filter(datos_DAC, aprobado), subtotal), "###,###,##0.00")
                                                       DisplayMode: =DisplayMode.View
                                                       Fill: =RGBA(166, 215, 153, 1)
                                                       Font: =Font.'Open Sans'
@@ -1360,7 +1454,7 @@ Screens:
                                                       HoverBorderColor: =RGBA(204, 231, 246, 1)
                                                       HoverFill: =RGBA(204, 231, 246, 1)
                                                       OnChange: =
-                                                      OnSelect: =Reset(lbl_BarraSeleccion_EM_31)
+                                                      OnSelect: =Reset(lbl_BarraSeleccion_EM_53)
                                                       PaddingLeft: =5
                                                       PaddingRight: =12
                                                       RadiusBottomLeft: =0
@@ -1370,49 +1464,63 @@ Screens:
                                                       Size: =12
                                                       Width: =244
                                                       X: =176
-                                                - tbl_Aprobados_DAC:
-                                                    Control: Table@1.0.278
+                                                - lbl_PNDato_EM_369:
+                                                    Control: Text@0.0.51
                                                     Properties:
-                                                      EnableSorting: ='PowerAppsOneGrid.EnableSorting'.Disable
-                                                      Height: =362
-                                                      Items: =Filter(datos_DAC, check)
-                                                      ReflowBehavior: ='PowerAppsOneGrid.ReflowBehavior'.GridOnly
-                                                      Width: =420
+                                                      Align: ='TextCanvas.Align'.Center
+                                                      BorderColor: =RGBA(0, 0, 0, 1)
+                                                      BorderStyle: =BorderStyle.Solid
+                                                      BorderThickness: =0.5
+                                                      Fill: =RGBA(214, 221, 224, 0.4)
+                                                      Height: =25
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =0
+                                                      PaddingRight: =0
+                                                      PaddingTop: =0
+                                                      Size: =16
+                                                      Text: ="Nº"
+                                                      Weight: ='TextCanvas.Weight'.Regular
+                                                      Width: =50
                                                       Y: =30
-                                                    Children:
-                                                      - crfb9_linea1_2:
-                                                          Control: TableDataField@1.5.0
-                                                          Variant: textualColumn
-                                                          IsLocked: true
-                                                          Properties:
-                                                            CanGrow: =false
-                                                            FieldDisplayName: ="crfb9_linea"
-                                                            FieldName: ="crfb9_linea"
-                                                            FieldType: ="n"
-                                                            HeaderText: ="Nº"
-                                                            Order: =2
-                                                            Width: =55
-                                                      - crfb9_item1_2:
-                                                          Control: TableDataField@1.5.0
-                                                          Variant: textualColumn
-                                                          IsLocked: true
-                                                          Properties:
-                                                            FieldDisplayName: ="crfb9_item"
-                                                            FieldName: ="crfb9_item"
-                                                            FieldType: ="s"
-                                                            HeaderText: ="Item"
-                                                            Order: =3
-                                                      - crfb9_subtotal1:
-                                                          Control: TableDataField@1.5.0
-                                                          Variant: textualColumn
-                                                          IsLocked: true
-                                                          Properties:
-                                                            FieldDisplayName: ="crfb9_subtotal"
-                                                            FieldName: ="crfb9_subtotal"
-                                                            FieldType: ="n"
-                                                            HeaderText: ="Subtotal"
-                                                            Order: =3
-                                          - Container78_5:
+                                                - lbl_PNDato_EM_402:
+                                                    Control: Text@0.0.51
+                                                    Properties:
+                                                      Align: ='TextCanvas.Align'.Center
+                                                      BorderColor: =RGBA(0, 0, 0, 1)
+                                                      BorderStyle: =BorderStyle.Solid
+                                                      BorderThickness: =0.5
+                                                      Fill: =RGBA(214, 221, 224, 0.4)
+                                                      Height: =25
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =0
+                                                      PaddingRight: =0
+                                                      PaddingTop: =0
+                                                      Size: =16
+                                                      Text: ="Item"
+                                                      Weight: ='TextCanvas.Weight'.Regular
+                                                      Width: =180
+                                                      X: =50
+                                                      Y: =30
+                                                - lbl_PNDato_EM_403:
+                                                    Control: Text@0.0.51
+                                                    Properties:
+                                                      Align: ='TextCanvas.Align'.Center
+                                                      BorderColor: =RGBA(0, 0, 0, 1)
+                                                      BorderStyle: =BorderStyle.Solid
+                                                      BorderThickness: =0.5
+                                                      Fill: =RGBA(214, 221, 224, 0.4)
+                                                      Height: =25
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =0
+                                                      PaddingRight: =0
+                                                      PaddingTop: =0
+                                                      Size: =16
+                                                      Text: ="Subtotal"
+                                                      Weight: ='TextCanvas.Weight'.Regular
+                                                      Width: =190
+                                                      X: =230
+                                                      Y: =30
+                                          - Container78_13:
                                               Control: GroupContainer@1.3.0
                                               Variant: ManualLayout
                                               Properties:
@@ -1428,7 +1536,7 @@ Screens:
                                                 X: =500
                                                 Y: =47
                                               Children:
-                                                - lbl_BarraSeleccion_EM_32:
+                                                - lbl_BarraSeleccion_EM_54:
                                                     Control: Classic/TextInput@2.3.2
                                                     Properties:
                                                       BorderColor: =RGBA(0, 0, 0, 1)
@@ -1441,62 +1549,20 @@ Screens:
                                                       HoverBorderColor: =RGBA(204, 231, 246, 1)
                                                       HoverFill: =RGBA(204, 231, 246, 1)
                                                       OnChange: =
-                                                      OnSelect: =Reset(lbl_BarraSeleccion_EM_32)
+                                                      OnSelect: =Reset(lbl_BarraSeleccion_EM_54)
                                                       RadiusBottomLeft: =0
                                                       RadiusBottomRight: =0
                                                       RadiusTopLeft: =0
                                                       RadiusTopRight: =0
                                                       Size: =14
                                                       Width: =Parent.Width
-                                                - tbl_NoAprobados_DAC:
-                                                    Control: Table@1.0.278
-                                                    Properties:
-                                                      EnableSorting: ='PowerAppsOneGrid.EnableSorting'.Disable
-                                                      Height: =362
-                                                      Items: =Filter(datos_DAC, !check)
-                                                      ReflowBehavior: ='PowerAppsOneGrid.ReflowBehavior'.GridOnly
-                                                      Width: =420
-                                                      Y: =30
-                                                    Children:
-                                                      - crfb9_linea1_3:
-                                                          Control: TableDataField@1.5.0
-                                                          Variant: textualColumn
-                                                          IsLocked: true
-                                                          Properties:
-                                                            CanGrow: =false
-                                                            FieldDisplayName: ="crfb9_linea"
-                                                            FieldName: ="crfb9_linea"
-                                                            FieldType: ="n"
-                                                            HeaderText: ="Nº"
-                                                            Order: =2
-                                                            Width: =55
-                                                      - crfb9_item1_3:
-                                                          Control: TableDataField@1.5.0
-                                                          Variant: textualColumn
-                                                          IsLocked: true
-                                                          Properties:
-                                                            FieldDisplayName: ="crfb9_item"
-                                                            FieldName: ="crfb9_item"
-                                                            FieldType: ="s"
-                                                            HeaderText: ="Item"
-                                                            Order: =3
-                                                      - crfb9_subtotal2:
-                                                          Control: TableDataField@1.5.0
-                                                          Variant: textualColumn
-                                                          IsLocked: true
-                                                          Properties:
-                                                            FieldDisplayName: ="crfb9_subtotal"
-                                                            FieldName: ="crfb9_subtotal"
-                                                            FieldType: ="n"
-                                                            HeaderText: ="Subtotal"
-                                                            Order: =3
-                                                - lbl_BarraSeleccion_EM_33:
+                                                - lbl_BarraSeleccion_EM_55:
                                                     Control: Classic/TextInput@2.3.2
                                                     Properties:
                                                       Align: =Align.Right
                                                       BorderColor: =RGBA(0, 0, 0, 1)
                                                       Default: |-
-                                                        ="Total: " & Text(Sum(Filter(datos_DAC, !check), subtotal), "###,###,##0.00")
+                                                        ="Total: " & Text(Sum(Filter(datos_DAC, !aprobado), subtotal), "###,###,##0.00")
                                                       DisplayMode: =DisplayMode.View
                                                       Fill: =RGBA(255, 184, 174, 1)
                                                       Font: =Font.'Open Sans'
@@ -1506,7 +1572,7 @@ Screens:
                                                       HoverBorderColor: =RGBA(204, 231, 246, 1)
                                                       HoverFill: =RGBA(204, 231, 246, 1)
                                                       OnChange: =
-                                                      OnSelect: =Reset(lbl_BarraSeleccion_EM_33)
+                                                      OnSelect: =Reset(lbl_BarraSeleccion_EM_55)
                                                       PaddingLeft: =5
                                                       PaddingRight: =12
                                                       RadiusBottomLeft: =0
@@ -1516,31 +1582,201 @@ Screens:
                                                       Size: =12
                                                       Width: =218
                                                       X: =202
-                                          - txt_Motivo_DAC:
+                                                - Gallery10_5:
+                                                    Control: Gallery@2.15.0
+                                                    Variant: Vertical
+                                                    Properties:
+                                                      Height: =337
+                                                      Items: =Filter(datos_DAC, !aprobado)
+                                                      TemplatePadding: =0
+                                                      TemplateSize: =60
+                                                      Width: =420
+                                                      Y: =55
+                                                    Children:
+                                                      - txt_Cantidad_EM_219:
+                                                          Control: Classic/TextInput@2.3.2
+                                                          Properties:
+                                                            Align: =Align.Center
+                                                            BorderColor: =RGBA(0, 0, 0, 1)
+                                                            BorderThickness: =0.5
+                                                            Default: =ThisItem.crfb9_linea
+                                                            DisabledBorderColor: =RGBA(0, 0, 0, 1)
+                                                            DisabledColor: =
+                                                            DisabledFill: =RGBA(255, 255, 255, 1)
+                                                            DisplayMode: =DisplayMode.Disabled
+                                                            FontWeight: =FontWeight.Semibold
+                                                            Height: =30
+                                                            HoverBorderColor: =RGBA(40, 134, 222, 1)
+                                                            HoverFill: =RGBA(255, 255, 255, 1)
+                                                            PaddingLeft: =5
+                                                            RadiusBottomLeft: =0
+                                                            RadiusBottomRight: =0
+                                                            RadiusTopLeft: =0
+                                                            RadiusTopRight: =0
+                                                            Size: =12
+                                                            Width: =50
+                                                      - txt_Cantidad_EM_220:
+                                                          Control: Classic/TextInput@2.3.2
+                                                          Properties:
+                                                            Align: =Align.Center
+                                                            BorderColor: =RGBA(0, 0, 0, 1)
+                                                            BorderThickness: =0.5
+                                                            Default: =ThisItem.crfb9_item
+                                                            DisabledBorderColor: =RGBA(0, 0, 0, 1)
+                                                            DisabledColor: =
+                                                            DisabledFill: =
+                                                            DisplayMode: =DisplayMode.Disabled
+                                                            FontWeight: =FontWeight.Semibold
+                                                            Height: =30
+                                                            HoverBorderColor: =RGBA(40, 134, 222, 1)
+                                                            HoverFill: =RGBA(255, 255, 255, 1)
+                                                            PaddingLeft: =5
+                                                            RadiusBottomLeft: =0
+                                                            RadiusBottomRight: =0
+                                                            RadiusTopLeft: =0
+                                                            RadiusTopRight: =0
+                                                            Size: =12
+                                                            Width: =180
+                                                            X: =50
+                                                      - txt_Cantidad_EM_221:
+                                                          Control: Classic/TextInput@2.3.2
+                                                          Properties:
+                                                            Align: =Align.Center
+                                                            BorderColor: =RGBA(0, 0, 0, 1)
+                                                            BorderThickness: =0.5
+                                                            Default: =If(ThisItem.moneda = "USD", "$", !IsBlank(ThisItem.moneda), "₡", "") & Text(ThisItem.subtotal, "###,###,##0.00")
+                                                            DisabledBorderColor: =RGBA(0, 0, 0, 1)
+                                                            DisabledColor: =
+                                                            DisabledFill: =
+                                                            DisplayMode: =DisplayMode.Disabled
+                                                            FontWeight: =FontWeight.Semibold
+                                                            Height: =30
+                                                            HoverBorderColor: =RGBA(40, 134, 222, 1)
+                                                            HoverFill: =RGBA(255, 255, 255, 1)
+                                                            PaddingLeft: =5
+                                                            RadiusBottomLeft: =0
+                                                            RadiusBottomRight: =0
+                                                            RadiusTopLeft: =0
+                                                            RadiusTopRight: =0
+                                                            Size: =12
+                                                            Width: =190
+                                                            X: =230
+                                                      - txt_Cantidad_EM_222:
+                                                          Control: Classic/TextInput@2.3.2
+                                                          Properties:
+                                                            BorderColor: =RGBA(0, 0, 0, 1)
+                                                            BorderThickness: =0.5
+                                                            Default: =ThisItem.motivoRechazo
+                                                            DisabledBorderColor: =RGBA(0, 0, 0, 1)
+                                                            DisabledColor: =
+                                                            DisabledFill: =
+                                                            Height: =30
+                                                            HintText: ="Indique el motivo de no aprobado"
+                                                            HoverBorderColor: =RGBA(215, 58, 60, 1)
+                                                            HoverFill: =RGBA(255, 255, 255, 1)
+                                                            OnChange: |-
+                                                              =Patch(datos_DAC, ThisItem, {motivoRechazo: Self.Text})
+                                                            PaddingLeft: =5
+                                                            PaddingRight: =25
+                                                            PressedBorderColor: =RGBA(215, 58, 60, 1)
+                                                            RadiusBottomLeft: =0
+                                                            RadiusBottomRight: =0
+                                                            RadiusTopLeft: =0
+                                                            RadiusTopRight: =0
+                                                            Size: =12
+                                                            Width: =420
+                                                            Y: =30
+                                                      - Icon40_2:
+                                                          Control: Icon@0.0.7
+                                                          Properties:
+                                                            Height: =20
+                                                            Icon: =If(IsBlank(Trim(ThisItem.motivoRechazo)), "DismissCircle", "CheckmarkCircle")
+                                                            IconColor: =If(IsBlank(Trim(ThisItem.motivoRechazo)), RGBA(215, 58, 60, 1), RGBA(52, 152, 47, 1))
+                                                            Width: =20
+                                                            X: =398
+                                                            Y: =34
+                                                - lbl_PNDato_EM_404:
+                                                    Control: Text@0.0.51
+                                                    Properties:
+                                                      Align: ='TextCanvas.Align'.Center
+                                                      BorderColor: =RGBA(0, 0, 0, 1)
+                                                      BorderStyle: =BorderStyle.Solid
+                                                      BorderThickness: =0.5
+                                                      Fill: =RGBA(214, 221, 224, 0.4)
+                                                      Height: =25
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =0
+                                                      PaddingRight: =0
+                                                      PaddingTop: =0
+                                                      Size: =16
+                                                      Text: ="Nº"
+                                                      Weight: ='TextCanvas.Weight'.Regular
+                                                      Width: =50
+                                                      Y: =30
+                                                - lbl_PNDato_EM_405:
+                                                    Control: Text@0.0.51
+                                                    Properties:
+                                                      Align: ='TextCanvas.Align'.Center
+                                                      BorderColor: =RGBA(0, 0, 0, 1)
+                                                      BorderStyle: =BorderStyle.Solid
+                                                      BorderThickness: =0.5
+                                                      Fill: =RGBA(214, 221, 224, 0.4)
+                                                      Height: =25
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =0
+                                                      PaddingRight: =0
+                                                      PaddingTop: =0
+                                                      Size: =16
+                                                      Text: ="Item"
+                                                      Weight: ='TextCanvas.Weight'.Regular
+                                                      Width: =180
+                                                      X: =50
+                                                      Y: =30
+                                                - lbl_PNDato_EM_406:
+                                                    Control: Text@0.0.51
+                                                    Properties:
+                                                      Align: ='TextCanvas.Align'.Center
+                                                      BorderColor: =RGBA(0, 0, 0, 1)
+                                                      BorderStyle: =BorderStyle.Solid
+                                                      BorderThickness: =0.5
+                                                      Fill: =RGBA(214, 221, 224, 0.4)
+                                                      Height: =25
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =0
+                                                      PaddingRight: =0
+                                                      PaddingTop: =0
+                                                      Size: =16
+                                                      Text: ="Subtotal"
+                                                      Weight: ='TextCanvas.Weight'.Regular
+                                                      Width: =190
+                                                      X: =230
+                                                      Y: =30
+                                          - txt_Motivo_DSC_1:
                                               Control: Classic/TextInput@2.3.2
                                               Properties:
-                                                BorderColor: =RGBA(215, 58, 60, 1)
+                                                BorderColor: =RGBA(52, 152, 47, 1)
                                                 BorderThickness: =3
                                                 Default: =
-                                                DisplayMode: =If(CountIf(datos_DAC, !check) > 0, DisplayMode.Edit, DisplayMode.Disabled)
+                                                DisplayMode: =If(CountIf(datos_DSG, aprovado) > 0, DisplayMode.Edit, DisplayMode.Disabled)
                                                 Height: =83
-                                                HintText: ="¿Por qué no aprobó los ítems?"
-                                                HoverBorderColor: =RGBA(215, 58, 60, 1)
-                                                HoverFill: =RGBA(255, 184, 174, 0.15)
+                                                HintText: ="¿Por qué aprobó los ítems?"
+                                                HoverBorderColor: =RGBA(52, 152, 47, 1)
+                                                HoverFill: =RGBA(166, 215, 153, 0.14)
                                                 MaxLength: =500
                                                 Mode: =TextMode.MultiLine
                                                 OnSelect: =
                                                 PaddingRight: =12
-                                                PressedBorderColor: =RGBA(215, 58, 60, 1)
+                                                PressedBorderColor: =RGBA(52, 152, 47, 1)
                                                 RadiusBottomLeft: =7
                                                 RadiusBottomRight: =7
                                                 RadiusTopLeft: =7
                                                 RadiusTopRight: =7
                                                 Size: =12
+                                                Visible: =false
                                                 Width: =420
-                                                X: =500
-                                                Y: =449
-                                          - Button10_17:
+                                                X: =40
+                                                Y: =451
+                                          - Button10_27:
                                               Control: Classic/Button@2.2.0
                                               Properties:
                                                 BorderColor: =RGBA(215, 58, 60, 1)
@@ -1549,16 +1785,27 @@ Screens:
                                                 HoverBorderColor: =RGBA(132, 40, 38, 1)
                                                 HoverFill: =RGBA(132, 40, 38, 1)
                                                 OnSelect: |-
-                                                  =UpdateContext({showContainer: false});
-                                                  Reset(txt_Motivo_DAC)
+                                                  =ForAll(
+                                                      Filter(
+                                                          datos_DAC,
+                                                          !aprobado
+                                                      ),
+                                                      Patch(
+                                                          datos_DAC,
+                                                          ThisRecord,
+                                                          {motivoRechazo: ""}
+                                                      )
+                                                  );
+                                                  UpdateContext({showContainer: false});
+                                                  Reset(txt_comentarioErick_DAC)
                                                 PressedBorderColor: =RGBA(215, 58, 60, 1)
                                                 PressedColor: =RGBA(215, 58, 60, 1)
                                                 PressedFill: =RGBA(255, 255, 255, 1)
                                                 Text: ="Cancelar"
                                                 Width: =140
-                                                X: =83
-                                                Y: =465
-                                          - Button10_18:
+                                                X: =543
+                                                Y: =467
+                                          - Button10_28:
                                               Control: Classic/Button@2.2.0
                                               Properties:
                                                 BorderColor: =RGBA(52, 152, 47, 1)
@@ -1567,20 +1814,20 @@ Screens:
                                                 Height: =50
                                                 HoverBorderColor: =RGBA(21, 68, 18, 1)
                                                 HoverFill: =RGBA(21, 68, 18, 1)
-                                                OnSelect: "=If(\n    IsBlank(txt_Motivo_DAC.Text) && CountIf(\n        datos_DAC,\n        !aprobado\n    ) > 0,\n    UpdateContext(\n        {\n            Aviso: {\n                Ver: true,\n                Tipo: 0,\n                Texto: \"Debe indicar el motivo del rechazo de los items\"\n            }\n        }\n    ), \n    true,\n    UpdateContext({Guardando: true});\n    ForAll(\n        Filter(\n            datos_DAC,\n            !aprobado\n        ),\n        Collect(\n            Compras_NoMarcadas,\n            {\n                NSolicitud: Upper(First(Split(glr_Solicitud_AC.Selected.soli_num, \"-\")).Value),\n                NFilaSolicitud: ThisRecord.linea,\n                NItem: ThisRecord.item,\n                Descripcion: ThisRecord.descripcion,\n                Enviado: 0,\n                Tipo_Envio: \"Compras\",\n                Motivo: txt_Motivo_DAC.Text\n            }\n        )\n    );\n    RemoveIf(\n        Compras_NoMarcadas,\n        NSolicitud = txt_Num_Soli_DAC.Text && NFilaSolicitud in Filter(\n            datos_DAC,\n            aprobado\n        ).linea && Enviado = 1 && Tipo_Envio = \"Compras\"\n    );\n    Patch(\n        Solicitud_Compras,\n        glr_Solicitud_AC.Selected,\n        {\n            total: Value(\n                Sum(\n                    Filter(\n                        datos_DAC,\n                        check\n                    ),\n                    subtotal\n                )\n            ),\n            estado: \"Aprobado\",\n            comentario:  txt_Comentario_DAC.Text\n        }\n    );\n    ForAll(\n        datos_DAC,\n        If(\n            ThisRecord.check,\n            Patch(\n                Detalle_Solicitud_Compras,\n                With(\n                    {line: ThisRecord.linea},\n                    LookUp(\n                        Detalle_Solicitud_Compras,\n                        soli_num = Upper(txt_Num_Soli_DAC.Text) && linea = line\n                    )\n                ),\n                {\n                    cantidad: ThisRecord.cantidad,\n                    aprobado: 1,\n                    comentario: ThisRecord.comentario\n                }\n            ),\n            Remove(\n                Detalle_Solicitud_Compras,\n                With(\n                    {line: ThisRecord.linea},\n                    LookUp(\n                        Detalle_Solicitud_Compras,\n                        soli_num = Upper(txt_Num_Soli_DAC.Text) && linea = line\n                    )\n                )\n            )\n        )\n    );\n    Reset(txt_Num_Soli_DAC);\n    UpdateContext({showContainer: false});\n    Reset(txt_Motivo_DAC);\n    UpdateContext({Guardando: false});\n    \n    Back(),\n    UpdateContext(\n        {\n            Aviso: {\n                Ver: true,\n                Tipo: 0,\n                Texto: \"La solicitud seleccionada no puede ser procesada\"\n            }\n        }\n    )\n);\n"
+                                                OnSelect: "=If(\n   CountIf(\n        datos_DSC,\n        !aprobado && IsBlank(Trim(motivoRechazo))\n    ) > 0,\n    UpdateContext(\n        {\n            Aviso: {\n                Ver: true,\n                Tipo: 0,\n                Texto: \"Todos los no aprobados deben tener un motivo de porque no fueron aprobados\"\n            }\n        }\n    ), \n    true,\n    UpdateContext({Guardando: true});\n    ForAll(\n        Filter(\n            datos_DAC,\n            !aprobado\n        ),\n        Collect(\n            Compras_NoMarcadas,\n            {\n                NSolicitud: Upper(First(Split(glr_Solicitud_AC.Selected.soli_num, \"-\")).Value),\n                NFilaSolicitud: ThisRecord.linea,\n                NItem: ThisRecord.item,\n                Descripcion: ThisRecord.descripcion,\n                Enviado: 0,\n                Tipo_Envio: \"Compras\",\n                Motivo: ThisRecord.motivoRechazo\n            }\n        )\n    );\n    RemoveIf(\n        Compras_NoMarcadas,\n        NSolicitud = txt_Num_Soli_DAC.Text && NFilaSolicitud in Filter(\n            datos_DAC,\n            aprobado\n        ).linea && Enviado = 1 && Tipo_Envio = \"Compras\"\n    );\n    Patch(\n        Solicitud_Compras,\n        glr_Solicitud_AC.Selected,\n        {\n            total: Value(\n                Sum(\n                    Filter(\n                        datos_DAC,\n                        check,\n                        moneda = \"USD\"\n                    ),\n                    subtotal\n                )\n            ),\n            totalColones: Value(\n                Sum(\n                    Filter(\n                        datos_DAC,\n                        check,\n                        moneda <> \"USD\"\n                    ),\n                    subtotal\n                )\n            ),\n            estado: \"Aprobado\",\n            comentario: If(IsBlank(txt_comentarioErick_DAC.Text), txt_Comentario_DAC.Text, txt_comentarioErick_DAC.Text)\n        }\n    );\n    ForAll(\n        datos_DAC,\n        If(\n            ThisRecord.check,\n            Patch(\n                Detalle_Solicitud_Compras,\n                With(\n                    {line: ThisRecord.linea},\n                    LookUp(\n                        Detalle_Solicitud_Compras,\n                        soli_num = Upper(txt_Num_Soli_DAC.Text) && linea = line\n                    )\n                ),\n                {\n                    cantidad: ThisRecord.cantidad,\n                    aprobado: 1,\n                    comentario: ThisRecord.comentario\n                }\n            ),\n            Remove(\n                Detalle_Solicitud_Compras,\n                With(\n                    {line: ThisRecord.linea},\n                    LookUp(\n                        Detalle_Solicitud_Compras,\n                        soli_num = Upper(txt_Num_Soli_DAC.Text) && linea = line\n                    )\n                )\n            )\n        )\n    );\n    Reset(txt_Num_Soli_DAC);\n    UpdateContext({showContainer: false});\n    UpdateContext({Guardando: false});\n    \n    Back(),\n    UpdateContext(\n        {\n            Aviso: {\n                Ver: true,\n                Tipo: 0,\n                Texto: \"La solicitud seleccionada no puede ser procesada\"\n            }\n        }\n    )\n);\n"
                                                 PressedBorderColor: =RGBA(52, 152, 47, 1)
                                                 PressedColor: =RGBA(52, 152, 47, 1)
                                                 PressedFill: =RGBA(255, 255, 255, 1)
                                                 Text: ="Continuar"
                                                 Width: =140
-                                                X: =276
-                                                Y: =465
-                                          - lbl_BarraSeleccion_EM_34:
+                                                X: =736
+                                                Y: =467
+                                          - lbl_BarraSeleccion_EM_56:
                                               Control: Classic/TextInput@2.3.2
                                               Properties:
                                                 Align: =Align.Right
                                                 BorderColor: =RGBA(0, 0, 0, 1)
-                                                Default: =Len(txt_Motivo_DAC.Text) & "/500"
+                                                Default: =Len(txt_Motivo_DSC_1.Text) & "/500"
                                                 DisplayMode: =DisplayMode.View
                                                 Fill: =RGBA(0, 0, 0, 0)
                                                 Font: =Font.'Open Sans'
@@ -1589,7 +1836,7 @@ Screens:
                                                 HoverBorderColor: =RGBA(204, 231, 246, 1)
                                                 HoverFill: =RGBA(204, 231, 246, 1)
                                                 OnChange: =
-                                                OnSelect: =Reset(lbl_BarraSeleccion_EM_34)
+                                                OnSelect: =Reset(lbl_BarraSeleccion_EM_56)
                                                 PaddingBottom: =2
                                                 PaddingLeft: =0
                                                 PaddingTop: =2
@@ -1598,9 +1845,38 @@ Screens:
                                                 RadiusTopLeft: =0
                                                 RadiusTopRight: =0
                                                 Size: =8
+                                                Visible: =false
                                                 Width: =56
-                                                X: =864
-                                                Y: =514
+                                                X: =404
+                                                Y: =519
+                                          - txt_comentarioErick_DAC:
+                                              Control: Classic/TextInput@2.3.2
+                                              Properties:
+                                                BorderColor: =RGBA(52, 152, 47, 1)
+                                                Default: =
+                                                Height: =77
+                                                HintText: ="Agregue algún comentario adicional"
+                                                HoverBorderColor: =RGBA(52, 152, 47, 1)
+                                                HoverFill: =RGBA(166, 215, 153, 0.14)
+                                                MaxLength: =300
+                                                Mode: =TextMode.MultiLine
+                                                Size: =12
+                                                Width: =420
+                                                X: =40
+                                                Y: =454
+                                          - Label34:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Height: =10
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =8
+                                                Text: =Len(txt_comentarioErick_DAC.Text) & "/300"
+                                                Width: =30
+                                                X: =430
+                                                Y: =517
       - Rectangle12:
           Control: Rectangle@2.3.0
           Properties:
@@ -2096,12 +2372,12 @@ Screens:
                                     Compras_NoMarcadas,
                                     {
                                         NSolicitud: Upper(Nsoli),
-                                        NFilaSolicitud: ThisRecord.crfb9_linea,
-                                        NItem: ThisRecord.crfb9_item,
-                                        Descripcion: ThisRecord.crfb9_descripcion,
+                                        NFilaSolicitud: ThisRecord.linea,
+                                        NItem: ThisRecord.item,
+                                        Descripcion: ThisRecord.descripcion,
                                         Enviado: 0,
                                         Tipo_Envio: idGerente,
-                                        Motivo: txt_Motivo_DSC.Text
+                                        Motivo: "Rechazo por Don Erick"
                                     }
                                 )
                             );
@@ -2110,7 +2386,7 @@ Screens:
                                 NSolicitud = Nsoli && NFilaSolicitud in Filter(
                                     datos_DAC,
                                     aprobado
-                                ).crfb9_linea && Enviado = 1 && Tipo_Envio = idGerente
+                                ).linea && Enviado = 1 && Tipo_Envio = idGerente
                             );
                             EnviarCorreo.Run(
                                 LookUp(
