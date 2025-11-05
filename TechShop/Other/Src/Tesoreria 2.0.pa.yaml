@@ -1,0 +1,2831 @@
+# ************************************************************************************************
+# Warning: YAML source code for Canvas Apps should only be used to review changes made within Power Apps Studio and for minor edits (Preview).
+# Use the maker portal to create and edit your Power Apps.
+# 
+# The schema file for Canvas Apps is available at https://go.microsoft.com/fwlink/?linkid=2304907
+# 
+# For more information, visit https://go.microsoft.com/fwlink/?linkid=2292623
+# ************************************************************************************************
+Screens:
+  Tesoreria 2.0:
+    Properties:
+      BackgroundImage: ='abstracto geométrico blanco y gris'
+      ImagePosition: =ImagePosition.Fill
+      OnVisible: |+
+        =// Inicializamos paginación
+        UpdateContext({ currentPage: 1, pageSize: 13 });
+
+        // Refrescar fuentes
+        Refresh(poitem);
+        Refresh(po);
+        Refresh(Compras_Pots);
+
+        // Traer todas las compras
+        ClearCollect(colComprasFiltered, Compras_Pots);
+
+        // Traer todos los PO distintos
+        ClearCollect(colPOs, Distinct(poitem, po_num));
+
+        // Calcular TotalPagar y dejar solo los que sean > 0
+        ClearCollect(
+            colContenedoresAll,
+            Filter(
+                AddColumns(
+                    colPOs,
+                    pon, Value,
+                    TotalPagar,
+                        Value( LookUp(po, po_num = Value, po_cost) )
+                        - Sum( Filter(colComprasFiltered, POT = Value), Value(Total) )
+                ),
+                TotalPagar > 0
+            )
+        );
+
+        // Calcular total de páginas
+        UpdateContext({
+            totalPages: RoundUp(CountRows(colContenedoresAll) / pageSize, 0)
+        });
+
+        // Crear lista de páginas para el dropdown
+        ClearCollect(
+            colPaginas,
+            ForAll(
+                Sequence(totalPages),
+                { NumeroPagina: Value }
+            )
+        );
+
+        // Cargar primera página
+        ClearCollect(
+            colContenedores,
+            FirstN(
+                Sort(colContenedoresAll, pon, SortOrder.Descending),
+                pageSize
+            )
+        );
+    Children:
+      - ScreenContainer_EM_14:
+          Control: GroupContainer@1.3.0
+          Variant: AutoLayout
+          Properties:
+            Height: =Parent.Height
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutGap: =16
+            PaddingBottom: =5
+            PaddingLeft: =5
+            PaddingRight: =5
+            PaddingTop: =5
+            Width: =Parent.Width
+          Children:
+            - HeaderContainer_EM_14:
+                Control: GroupContainer@1.3.0
+                Variant: AutoLayout
+                Properties:
+                  Fill: =RGBA(12, 59, 94, 1)
+                  FillPortions: =0
+                  Height: =75
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                Children:
+                  - icn_Usuario_EM_14:
+                      Control: Classic/Icon@2.5.0
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Center
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisplayMode: =DisplayMode.View
+                        Height: =75
+                        Icon: =Icon.Person
+                        PaddingBottom: =2
+                        PaddingLeft: =5
+                        PaddingRight: =2
+                        PaddingTop: =2
+                        Width: =75
+                  - txt_EmpleadoUso_EM_7:
+                      Control: Classic/TextInput@2.3.2
+                      Properties:
+                        Align: =Align.Center
+                        AlignInContainer: =AlignInContainer.Center
+                        BorderColor: =RGBA(204, 231, 246, 1)
+                        BorderThickness: =20
+                        Color: =RGBA(12, 59, 94, 1)
+                        Default: =varEmpleado.Nombre
+                        DisplayMode: =DisplayMode.View
+                        FontWeight: =FontWeight.Bold
+                        Height: =60
+                        PaddingLeft: =5
+                        RadiusBottomLeft: =20
+                        RadiusBottomRight: =20
+                        RadiusTopLeft: =20
+                        RadiusTopRight: =20
+                        Size: =18
+                        Width: =400
+                  - icn_Separador2_EM_17:
+                      Control: Classic/Icon@2.5.0
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Center
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisplayMode: =DisplayMode.View
+                        Height: =60
+                        Icon: =Icon.VerticalLine
+                        Width: =30
+                        X: =820
+                        Y: =22
+                  - Listado de solicitud de compra_2:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        AlignInContainer: =AlignInContainer.Center
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisplayMode: =DisplayMode.View
+                        FontWeight: =FontWeight.Bold
+                        Height: =60
+                        Size: =25
+                        Text: ="Tesoreria"
+                        Width: =740
+                  - icn_Separador_EM_14:
+                      Control: Classic/Icon@2.5.0
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Center
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisplayMode: =DisplayMode.View
+                        Height: =60
+                        Icon: =Icon.VerticalLine
+                        Width: =30
+                        X: =820
+                        Y: =22
+                  - icn_Home_EM_11:
+                      Control: Classic/Icon@2.5.0
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Center
+                        BorderColor: =App.Theme.Colors.Primary
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =2
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisplayMode: =
+                        Fill: =RGBA(12, 59, 94, 1)
+                        FocusedBorderThickness: =20
+                        Height: =60
+                        HoverBorderColor: =RGBA(0, 134, 208, 1)
+                        HoverColor: =RGBA(255, 255, 255, 1)
+                        HoverFill: =RGBA(0, 134, 208, 1)
+                        Icon: =Icon.Home
+                        OnSelect: |-
+                          =UpdateContext(
+                              {
+                                  AbrirConfirmar: false,
+                                  Disable: false,
+                                  AbrirC: false,
+                                  isProcesando: false,
+                                  AbrirInfo: false
+                              }
+                          );
+                          Reset(drp_MetodoPago_OLP);
+                          Reset(drp_EstadoPago_OLP);
+                          Reset(txt_montopagar_OPL);
+                          Reset(txt_NumTransferencia_OLP);
+                          Reset(txt_Requisicion_OLP);
+                          Reset(dt_Fecha_OLP);
+                          Reset(drp_Estado_OLP);
+                          Reset(drp_Ano_OLP);
+                          Refresh(Metodo_Pagos);
+                          Refresh(RegistroPagos);
+                          Refresh(Solicitud_Compras);
+                           UpdateContext({ varReloadContenedores: Now() });
+                          Back()
+                        PaddingBottom: =5
+                        PaddingLeft: =5
+                        PaddingRight: =5
+                        PaddingTop: =5
+                        Width: =65
+            - BottomContainer_EM_14:
+                Control: GroupContainer@1.3.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =16
+                  LayoutWrap: =true
+                  PaddingBottom: =2
+                  PaddingLeft: =2
+                  PaddingRight: =2
+                  PaddingTop: =2
+                Children:
+                  - MainContainer_EM_14:
+                      Control: GroupContainer@1.3.0
+                      Variant: AutoLayout
+                      Properties:
+                        BorderColor: =RGBA(40, 134, 222, 1)
+                        BorderThickness: =3
+                        FillPortions: =7
+                        LayoutDirection: =LayoutDirection.Vertical
+                        RadiusBottomLeft: =10
+                        RadiusBottomRight: =10
+                        RadiusTopLeft: =10
+                        RadiusTopRight: =10
+                      Children:
+                        - Container_EM_14:
+                            Control: GroupContainer@1.3.0
+                            Variant: ManualLayout
+                            Properties:
+                              Fill: =RGBA(204, 231, 246, 0.7)
+                            Children:
+                              - lbl_BarraVista_EM_7:
+                                  Control: Classic/TextInput@2.3.2
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(0, 0, 0, 1)
+                                    BorderThickness: =3
+                                    Color: =RGBA(255, 255, 255, 1)
+                                    Default: =
+                                    DisplayMode: =DisplayMode.View
+                                    Fill: =RGBA(40, 134, 222, 1)
+                                    Font: =Font.'Open Sans'
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =50
+                                    HintText: =
+                                    HoverBorderColor: =RGBA(204, 231, 246, 1)
+                                    HoverFill: =RGBA(204, 231, 246, 1)
+                                    OnChange: =
+                                    OnSelect: =Reset(lbl_BarraVista_EM_7)
+                                    PaddingLeft: =5
+                                    RadiusBottomLeft: =0
+                                    RadiusBottomRight: =0
+                                    RadiusTopLeft: =0
+                                    RadiusTopRight: =0
+                                    Size: =18
+                                    Width: =1352
+                              - icn_Eliminar_EM_17:
+                                  Control: Classic/Icon@2.5.0
+                                  Properties:
+                                    BorderColor: =RGBA(40, 134, 222, 1)
+                                    BorderThickness: =0.5
+                                    Color: =RGBA(255, 255, 255, 1)
+                                    DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                                    DisabledColor: =
+                                    DisabledFill: =
+                                    DisplayMode: |
+                                      =
+                                      If(Disable, DisplayMode.Disabled, DisplayMode.Edit)
+                                    FocusedBorderThickness: =20
+                                    Height: =47
+                                    HoverBorderColor: =RGBA(0, 0, 0, 0)
+                                    HoverColor: =
+                                    HoverFill: =
+                                    Icon: =Icon.Filter
+                                    OnSelect: |-
+                                      =Reset(txt_Requisicion_OLP_1);
+                                      Reset(drp_Estado_OLP_1); 
+                                      Reset(drp_Ano_OLP_1); 
+                                      Reset(dt_Fecha_OLP_1);
+                                    PaddingBottom: =6
+                                    PaddingLeft: =2
+                                    PaddingRight: =2
+                                    PaddingTop: =6
+                                    X: =1086
+                              - dt_Fecha_OLP_1:
+                                  Control: DatePicker@0.0.46
+                                  Properties:
+                                    BorderRadius: =10
+                                    DisplayMode: |
+                                      =If(Disable, DisplayMode.Disabled, DisplayMode.Edit)
+                                    Width: =192
+                                    X: =382
+                                    Y: =9
+                              - lbl_ValorDato_EM_52:
+                                  Control: Text@0.0.51
+                                  Properties:
+                                    Align: ='TextCanvas.Align'.Center
+                                    FontColor: =RGBA(255, 255, 255, 1)
+                                    Height: =38
+                                    Size: =21
+                                    Text: ="Reiniciar Filtros"
+                                    Weight: ='TextCanvas.Weight'.Bold
+                                    Width: =174
+                                    X: =929
+                                    Y: =9
+                              - btn_Guardar_EC_49:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    BorderColor: =RGBA(9, 33, 98, 1)
+                                    Color: =RGBA(255, 255, 255, 1)
+                                    DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                                    DisplayMode: =
+                                    Fill: =RGBA(15, 108, 189, 1)
+                                    Font: =Font.'Open Sans'
+                                    Height: =30
+                                    HoverBorderColor: =RGBA(40, 134, 222, 1)
+                                    HoverColor: =RGBA(255, 255, 255, 1)
+                                    HoverFill: =RGBA(15, 84, 140, 1)
+                                    OnSelect: |-
+                                      =If(
+                                          CountRows(colSelectedPOTs) = 0,
+                                          UpdateContext(
+                                              {
+                                                  MostrarAviso: true,
+                                                  mensajeNotificacion: "Selecciona al menos un POT"
+                                              }
+                                          ),
+                                          CountRows(
+                                              Distinct(
+                                                  colSelectedPOTs,
+                                                  Moneda
+                                              )
+                                          ) > 1,
+                                          UpdateContext(
+                                              {
+                                                  MostrarAviso: true,
+                                                  mensajeNotificacion: "No se pueden seleccionar POTs con diferentes Tipos de cambio (USD, CRC). Por favor seleccione solo un tipo."
+                                              }
+                                          ),
+                                          Concurrent(
+                                              ClearCollect(
+                                                  colPOTtoProcess,
+                                                  ForAll(
+                                                      colSelectedPOTs,
+                                                      {
+                                                          POT: ThisRecord.POT,
+                                                          MontoAPagar: ThisRecord.MontoAPagar,
+                                                          Moneda: ThisRecord.Moneda,
+                                                          Codigo_Proveedor: ThisRecord.Codigo_Proveedor,
+                                                          Nombre_Proveedor: ThisRecord.Nombre_Proveedor,
+                                                          Num_Referencia: ""
+                                                      }
+                                                  )
+                                              ),
+                                              UpdateContext(
+                                                  {
+                                                      AbrirConfirmar: true,
+                                                      Disable: true
+                                                  }
+                                              )
+                                          )
+                                      )
+                                    PressedBorderColor: =Self.Fill
+                                    PressedColor: =Self.Fill
+                                    PressedFill: =Self.Color
+                                    Text: ="Pagar"
+                                    Visible: =!AbrirInfo
+                                    Width: =141
+                                    X: =1200
+                                    Y: =8
+                              - lbl_ValorDato_EM_57:
+                                  Control: Text@0.0.51
+                                  Properties:
+                                    Align: ='TextCanvas.Align'.Center
+                                    FontColor: =RGBA(255, 255, 255, 1)
+                                    Height: =30
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =20
+                                    Text: ="Buscadores"
+                                    Weight: ='TextCanvas.Weight'.Bold
+                                    Width: =110
+                                    X: =10
+                                    Y: =10
+                              - txt_Requisicion_OLP_1:
+                                  Control: Classic/TextInput@2.3.2
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(180, 214, 250, 1)
+                                    BorderThickness: =3
+                                    Clear: =true
+                                    Default: =
+                                    DisabledBorderColor: =RGBA(180, 214, 250, 1)
+                                    DisabledFill: =RGBA(255, 255, 255, 1)
+                                    DisplayMode: |
+                                      =If(Disable, DisplayMode.Disabled, DisplayMode.Edit)
+                                    Height: =30
+                                    HintText: ="Requisicion"
+                                    HoverBorderColor: =RGBA(180, 214, 250, 1)
+                                    HoverFill: =RGBA(227, 240, 252, 1)
+                                    OnChange: =
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    PressedColor: =RGBA(0, 0, 0, 1)
+                                    PressedFill: =RGBA(255, 255, 255, 1)
+                                    RadiusBottomLeft: =10
+                                    RadiusBottomRight: =10
+                                    RadiusTopLeft: =10
+                                    RadiusTopRight: =10
+                                    Size: =15
+                                    Width: =180
+                                    X: =130
+                                    Y: =10
+                              - lbl_ValorDato_EM_58:
+                                  Control: Text@0.0.51
+                                  Properties:
+                                    Align: ='TextCanvas.Align'.Center
+                                    FontColor: =RGBA(255, 255, 255, 1)
+                                    Height: =30
+                                    Size: =20
+                                    Text: ="Fecha"
+                                    Weight: ='TextCanvas.Weight'.Bold
+                                    Width: =72
+                                    X: =310
+                                    Y: =10
+                              - lbl_ValorDato_EM_59:
+                                  Control: Text@0.0.51
+                                  Properties:
+                                    Align: ='TextCanvas.Align'.Center
+                                    FontColor: =RGBA(255, 255, 255, 1)
+                                    Height: =30
+                                    Size: =20
+                                    Text: ="Estado"
+                                    Weight: ='TextCanvas.Weight'.Bold
+                                    Width: =80
+                                    X: =574
+                                    Y: =11
+                              - ContainerPais_EM_25:
+                                  Control: GroupContainer@1.3.0
+                                  Variant: ManualLayout
+                                  Properties:
+                                    BorderColor: =RGBA(180, 214, 250, 1)
+                                    BorderThickness: =3
+                                    DropShadow: =DropShadow.None
+                                    Fill: =RGBA(255, 255, 255, 1)
+                                    Height: =30
+                                    RadiusBottomLeft: =10
+                                    RadiusBottomRight: =10
+                                    RadiusTopLeft: =10
+                                    RadiusTopRight: =10
+                                    Width: =115
+                                    X: =654
+                                    Y: =11
+                                  Children:
+                                    - drp_Estado_OLP_1:
+                                        Control: Classic/DropDown@2.3.1
+                                        Properties:
+                                          BorderColor: =RGBA(0, 0, 0, 0)
+                                          BorderThickness: =3
+                                          ChevronBackground: =RGBA(255, 255, 255, 1)
+                                          ChevronDisabledBackground: =RGBA(255, 255, 255, 1)
+                                          ChevronDisabledFill: =RGBA(138, 138, 138, 1)
+                                          ChevronFill: =RGBA(0, 0, 0, 1)
+                                          ChevronHoverBackground: =RGBA(15, 108, 189, 1)
+                                          ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                                          Default: =
+                                          DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                                          DisabledFill: =RGBA(255, 255, 255, 1)
+                                          DisplayMode: |
+                                            =
+                                            If(Disable, DisplayMode.Disabled, DisplayMode.Edit)
+                                          Font: =Font.'Open Sans'
+                                          Height: =30
+                                          HoverBorderColor: =RGBA(180, 214, 250, 1)
+                                          HoverFill: =RGBA(180, 214, 250, 1)
+                                          Items: =["En proceso", "Cancelado"]
+                                          Items.Value: =Value
+                                          PressedColor: =RGBA(255, 255, 255, 1)
+                                          PressedFill: =RGBA(15, 108, 189, 1)
+                                          SelectionColor: =RGBA(255, 255, 255, 1)
+                                          SelectionFill: =RGBA(15, 108, 189, 1)
+                                          Size: =10
+                                          Tooltip: ="Seleccione el año"
+                                          Width: =115
+                              - lbl_ValorDato_EM_60:
+                                  Control: Text@0.0.51
+                                  Properties:
+                                    Align: ='TextCanvas.Align'.Center
+                                    FontColor: =RGBA(255, 255, 255, 1)
+                                    Height: =30
+                                    Size: =20
+                                    Text: ="Año"
+                                    Weight: ='TextCanvas.Weight'.Bold
+                                    Width: =60
+                                    X: =769
+                                    Y: =11
+                              - ContainerPais_EM_32:
+                                  Control: GroupContainer@1.3.0
+                                  Variant: ManualLayout
+                                  Properties:
+                                    BorderColor: =RGBA(180, 214, 250, 1)
+                                    BorderThickness: =3
+                                    DropShadow: =DropShadow.None
+                                    Fill: =RGBA(255, 255, 255, 1)
+                                    Height: =30
+                                    RadiusBottomLeft: =10
+                                    RadiusBottomRight: =10
+                                    RadiusTopLeft: =10
+                                    RadiusTopRight: =10
+                                    Width: =100
+                                    X: =829
+                                    Y: =11
+                                  Children:
+                                    - drp_Ano_OLP_1:
+                                        Control: Classic/DropDown@2.3.1
+                                        Properties:
+                                          BorderColor: =RGBA(0, 0, 0, 0)
+                                          BorderThickness: =3
+                                          ChevronBackground: =RGBA(255, 255, 255, 1)
+                                          ChevronDisabledBackground: =RGBA(255, 255, 255, 1)
+                                          ChevronDisabledFill: =RGBA(138, 138, 138, 1)
+                                          ChevronFill: =RGBA(0, 0, 0, 1)
+                                          ChevronHoverBackground: =RGBA(15, 108, 189, 1)
+                                          ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                                          Default: =Year(Today())
+                                          DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                                          DisabledFill: =RGBA(255, 255, 255, 1)
+                                          DisplayMode: |
+                                            =
+                                            If(Disable, DisplayMode.Disabled, DisplayMode.Edit)
+                                          Font: =Font.'Open Sans'
+                                          Height: =30
+                                          HoverBorderColor: =RGBA(180, 214, 250, 1)
+                                          HoverFill: =RGBA(180, 214, 250, 1)
+                                          Items: |-
+                                            =ForAll(
+                                                Sequence(3),
+                                                Year(Today()) + Value - 3
+                                            )
+                                          Items.Value: =Value
+                                          PressedColor: =RGBA(255, 255, 255, 1)
+                                          PressedFill: =RGBA(15, 108, 189, 1)
+                                          SelectionColor: =RGBA(255, 255, 255, 1)
+                                          SelectionFill: =RGBA(15, 108, 189, 1)
+                                          Size: =15
+                                          Tooltip: ="Seleccione el año"
+                                          Width: =100
+                              - ContainerGaleria_EM_16:
+                                  Control: GroupContainer@1.3.0
+                                  Variant: ManualLayout
+                                  Properties:
+                                    BorderStyle: =BorderStyle.None
+                                    BorderThickness: =2
+                                    Height: =612
+                                    Width: =1352
+                                    Y: =50
+                                  Children:
+                                    - lbl_PNDato_EM_188:
+                                        Control: Text@0.0.51
+                                        Properties:
+                                          Align: ='TextCanvas.Align'.Center
+                                          BorderColor: =RGBA(40, 134, 222, 1)
+                                          BorderStyle: =BorderStyle.Solid
+                                          BorderThickness: =0.5
+                                          Fill: =RGBA(180, 214, 250, 1)
+                                          Height: =25
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =16
+                                          Text: ="POT"
+                                          Weight: ='TextCanvas.Weight'.Semibold
+                                          Width: =300
+                                    - lbl_PNDato_EM_190:
+                                        Control: Text@0.0.51
+                                        Properties:
+                                          Align: ='TextCanvas.Align'.Center
+                                          BorderColor: =RGBA(40, 134, 222, 1)
+                                          BorderStyle: =BorderStyle.Solid
+                                          BorderThickness: =0.5
+                                          Fill: =RGBA(180, 214, 250, 1)
+                                          Height: =25
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =16
+                                          Text: ="Codigo de proveedor"
+                                          Weight: ='TextCanvas.Weight'.Semibold
+                                          Width: =188
+                                          X: =300
+                                    - txt_Total_OLP_1:
+                                        Control: Text@0.0.51
+                                        Properties:
+                                          Align: ='TextCanvas.Align'.Center
+                                          BorderColor: =RGBA(40, 134, 222, 1)
+                                          BorderStyle: =BorderStyle.Solid
+                                          BorderThickness: =0.5
+                                          Fill: =RGBA(180, 214, 250, 1)
+                                          Height: =25
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =16
+                                          Text: ="Nombre proveedor"
+                                          Weight: ='TextCanvas.Weight'.Semibold
+                                          Width: =408
+                                          X: =488
+                                    - lbl_PNDato_EM_215:
+                                        Control: Text@0.0.51
+                                        Properties:
+                                          Align: ='TextCanvas.Align'.Center
+                                          BorderColor: =RGBA(40, 134, 222, 1)
+                                          BorderStyle: =BorderStyle.Solid
+                                          BorderThickness: =0.5
+                                          Fill: =RGBA(180, 214, 250, 1)
+                                          Height: =25
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =16
+                                          Text: ="Moneda"
+                                          Weight: ='TextCanvas.Weight'.Semibold
+                                          Width: =150
+                                          X: =896
+                                    - lbl_PNDato_EM_216:
+                                        Control: Text@0.0.51
+                                        Properties:
+                                          Align: ='TextCanvas.Align'.Center
+                                          BorderColor: =RGBA(40, 134, 222, 1)
+                                          BorderStyle: =BorderStyle.Solid
+                                          BorderThickness: =0.5
+                                          Fill: =RGBA(180, 214, 250, 1)
+                                          Height: =25
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =16
+                                          Text: ="Seleccionar"
+                                          Weight: ='TextCanvas.Weight'.Semibold
+                                          Width: =94
+                                          X: =1258
+                                    - gl_ListaContenedores_LE_3:
+                                        Control: Gallery@2.15.0
+                                        Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
+                                        Properties:
+                                          BorderColor: =RGBA(0, 18, 107, 1)
+                                          Height: =499
+                                          Items: =colContenedores
+                                          TemplateSize: =38
+                                          Width: =1352
+                                          Y: =21
+                                        Children:
+                                          - txt_PN_EM_10:
+                                              Control: Classic/TextInput@2.3.2
+                                              Properties:
+                                                Align: =Align.Center
+                                                BorderColor: =RGBA(40, 134, 222, 1)
+                                                BorderThickness: =0.5
+                                                Default: =ThisItem.Value
+                                                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                                                DisabledColor: =
+                                                DisabledFill: =
+                                                DisplayMode: =DisplayMode.Disabled
+                                                Fill: |
+                                                  =RGBA(255, 255, 255, 1) 
+                                                Height: =36
+                                                HoverFill: =RGBA(255, 255, 255, 1)
+                                                PaddingLeft: =5
+                                                RadiusBottomLeft: =0
+                                                RadiusBottomRight: =0
+                                                RadiusTopLeft: =0
+                                                RadiusTopRight: =0
+                                                Size: =15
+                                                Width: =300
+                                          - txt_PN_EM_12:
+                                              Control: Classic/TextInput@2.3.2
+                                              Properties:
+                                                Align: =Align.Center
+                                                BorderColor: =RGBA(40, 134, 222, 1)
+                                                BorderThickness: =0.5
+                                                Default: =LookUp(po, po_num = ThisItem.Value, vend_num)
+                                                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                                                DisabledColor: =
+                                                DisabledFill: =
+                                                DisplayMode: =DisplayMode.Disabled
+                                                Fill: |
+                                                  =RGBA(255, 255, 255, 1) 
+                                                Height: =36
+                                                HoverFill: =RGBA(255, 255, 255, 1)
+                                                PaddingLeft: =5
+                                                RadiusBottomLeft: =0
+                                                RadiusBottomRight: =0
+                                                RadiusTopLeft: =0
+                                                RadiusTopRight: =0
+                                                Size: =15
+                                                Width: =188
+                                                X: =300
+                                          - txt_PN_EM_15:
+                                              Control: Classic/TextInput@2.3.2
+                                              Properties:
+                                                Align: =Align.Center
+                                                BorderColor: =RGBA(40, 134, 222, 1)
+                                                BorderThickness: =0.5
+                                                Default: =LookUp(vendaddr, vend_num = LookUp(po, po_num = ThisItem.Value, vend_num), name)
+                                                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                                                DisabledColor: =
+                                                DisabledFill: =
+                                                DisplayMode: =DisplayMode.Disabled
+                                                Fill: |
+                                                  =RGBA(255, 255, 255, 1) 
+                                                Height: =36
+                                                HoverFill: =RGBA(255, 255, 255, 1)
+                                                PaddingLeft: =5
+                                                RadiusBottomLeft: =0
+                                                RadiusBottomRight: =0
+                                                RadiusTopLeft: =0
+                                                RadiusTopRight: =0
+                                                Size: =15
+                                                Width: =408
+                                                X: =488
+                                          - txt_PN_EM_16:
+                                              Control: Classic/TextInput@2.3.2
+                                              Properties:
+                                                Align: =Align.Center
+                                                BorderColor: =RGBA(40, 134, 222, 1)
+                                                BorderThickness: =0.5
+                                                Default: |-
+                                                  =Coalesce(
+                                                    Upper(
+                                                      LookUp(
+                                                        vendor,
+                                                        vend_num = LookUp(po, po_num = ThisItem.Value, vend_num),
+                                                        curr_code
+                                                      )
+                                                    ),
+                                                    "SIN MONEDA"
+                                                  )
+                                                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                                                DisabledColor: =
+                                                DisabledFill: =
+                                                DisplayMode: =DisplayMode.Disabled
+                                                Fill: |
+                                                  =RGBA(255, 255, 255, 1) 
+                                                Height: =36
+                                                HoverFill: =RGBA(255, 255, 255, 1)
+                                                PaddingLeft: =5
+                                                RadiusBottomLeft: =0
+                                                RadiusBottomRight: =0
+                                                RadiusTopLeft: =0
+                                                RadiusTopRight: =0
+                                                Size: =15
+                                                Width: =150
+                                                X: =896
+                                          - txt_PN_EM_17:
+                                              Control: Classic/TextInput@2.3.2
+                                              Properties:
+                                                Align: =Align.Center
+                                                BorderColor: =RGBA(40, 134, 222, 1)
+                                                BorderThickness: =0.5
+                                                Default: =ThisItem.TotalPagar
+                                                DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                                                DisabledColor: =
+                                                DisabledFill: =
+                                                DisplayMode: =DisplayMode.Disabled
+                                                Fill: |
+                                                  =RGBA(255, 255, 255, 1) 
+                                                Height: =36
+                                                HoverFill: =RGBA(255, 255, 255, 1)
+                                                PaddingLeft: =5
+                                                RadiusBottomLeft: =0
+                                                RadiusBottomRight: =0
+                                                RadiusTopLeft: =0
+                                                RadiusTopRight: =0
+                                                Size: =15
+                                                Width: =212
+                                                X: =1046
+                                          - chkSelect_2:
+                                              Control: Classic/CheckBox@2.1.0
+                                              Properties:
+                                                BorderColor: =
+                                                CheckboxBorderColor: =
+                                                CheckboxSize: =60
+                                                CheckmarkFill: =RGBA(9, 33, 98, 1)
+                                                Default: |
+                                                  =CountRows( Filter( colSelectedPOTs, POT = ThisItem.Value ) ) > 0
+                                                DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                                                DisplayMode: =
+                                                FontWeight: =FontWeight.Bold
+                                                Height: =36
+                                                HoverBorderColor: =
+                                                OnCheck: |-
+                                                  =Collect(
+                                                      colSelectedPOTs,
+                                                      {
+                                                          POT: ThisItem.Value,
+                                                          MontoAPagar: Value(txt_Total_Pagar_OLP.Text),
+                                                          Moneda: Coalesce(
+                                                              Upper(
+                                                                  LookUp(
+                                                                      vendor,
+                                                                      vend_num = LookUp(
+                                                                          po,
+                                                                          po_num = ThisItem.Value,
+                                                                          vend_num
+                                                                      ),
+                                                                      curr_code
+                                                                  )
+                                                              ),
+                                                              "SIN MONEDA"
+                                                          ),
+                                                          Nombre_Proveedor:LookUp(vendaddr, vend_num = LookUp(po, po_num = ThisItem.Value, vend_num), name),
+                                                          Codigo_Proveedor: LookUp(po, po_num = ThisItem.Value, vend_num)
+                                                      }
+                                                  )
+                                                OnUncheck: |
+                                                  =RemoveIf(colSelectedPOTs, POT = ThisItem.Value)
+                                                PressedBorderColor: =
+                                                PressedColor: =
+                                                Text: =
+                                                Visible: =!AbrirInfo
+                                                Width: =59
+                                                X: =1273
+                                    - lbl_PNDato_EM_220:
+                                        Control: Text@0.0.51
+                                        Properties:
+                                          Align: ='TextCanvas.Align'.Center
+                                          BorderColor: =RGBA(40, 134, 222, 1)
+                                          BorderStyle: =BorderStyle.Solid
+                                          BorderThickness: =0.5
+                                          Fill: =RGBA(180, 214, 250, 1)
+                                          Height: =25
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =16
+                                          Text: ="Total Pagar"
+                                          Weight: ='TextCanvas.Weight'.Semibold
+                                          Width: =212
+                                          X: =1046
+                                    - btn_EnviarCorreo_1:
+                                        Control: Classic/Button@2.2.0
+                                        Properties:
+                                          BorderColor: =RGBA(0, 0, 0, 1)
+                                          BorderThickness: =3
+                                          Fill: =RGBA(15, 84, 140, 1)
+                                          Height: =35
+                                          HoverBorderColor: =RGBA(12, 59, 94, 1)
+                                          HoverFill: =RGBA(12, 59, 94, 1)
+                                          OnSelect: |
+                                            =If(
+                                                currentPage < totalPages,
+                                                UpdateContext({ currentPage: currentPage + 1 }),
+                                                ClearCollect(
+                                                    colContenedores,
+                                                    FirstN(
+                                                        LastN(
+                                                            Sort(colContenedoresAll, pon, SortOrder.Descending),
+                                                            CountRows(colContenedoresAll) - ((currentPage - 1) * pageSize)
+                                                        ),
+                                                        pageSize
+                                                    )
+                                                )
+                                            )
+                                          PressedBorderColor: =RGBA(15, 84, 140, 1)
+                                          PressedColor: =RGBA(15, 84, 140, 1)
+                                          PressedFill: =RGBA(180, 214, 250, 1)
+                                          Size: =16
+                                          Text: ="Siguiente"
+                                          Width: =146
+                                          X: =750
+                                          Y: =535
+                                    - btn_EnviarCorreo_2:
+                                        Control: Classic/Button@2.2.0
+                                        Properties:
+                                          BorderColor: =RGBA(0, 0, 0, 1)
+                                          BorderThickness: =3
+                                          Fill: =RGBA(15, 84, 140, 1)
+                                          Height: =35
+                                          HoverBorderColor: =RGBA(12, 59, 94, 1)
+                                          HoverFill: =RGBA(12, 59, 94, 1)
+                                          OnSelect: |
+                                            =If(
+                                                currentPage > 1,
+                                                UpdateContext({ currentPage: currentPage - 1 }),
+                                                ClearCollect(
+                                                    colContenedores,
+                                                    FirstN(
+                                                        LastN(
+                                                            Sort(colContenedoresAll, pon, SortOrder.Descending),
+                                                            CountRows(colContenedoresAll) - ((currentPage - 1) * pageSize)
+                                                        ),
+                                                        pageSize
+                                                    )
+                                                )
+                                            )
+                                          PressedBorderColor: =RGBA(15, 84, 140, 1)
+                                          PressedColor: =RGBA(15, 84, 140, 1)
+                                          PressedFill: =RGBA(180, 214, 250, 1)
+                                          Size: =16
+                                          Text: ="Anterior"
+                                          Width: =146
+                                          X: =488
+                                          Y: =535
+                                    - ddPaginas:
+                                        Control: Classic/DropDown@2.3.1
+                                        Properties:
+                                          BorderColor: =RGBA(0, 0, 0, 0)
+                                          BorderThickness: =3
+                                          ChevronBackground: =RGBA(255, 255, 255, 1)
+                                          ChevronDisabledBackground: =RGBA(255, 255, 255, 1)
+                                          ChevronDisabledFill: =RGBA(138, 138, 138, 1)
+                                          ChevronFill: =RGBA(0, 0, 0, 1)
+                                          ChevronHoverBackground: =RGBA(15, 108, 189, 1)
+                                          ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                                          Default: |+
+                                            =LookUp(colPaginas, NumeroPagina = currentPage).NumeroPagina
+
+                                          DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                                          DisabledFill: =RGBA(255, 255, 255, 1)
+                                          DisplayMode: |
+                                            =
+                                            If(Disable, DisplayMode.Disabled, DisplayMode.Edit)
+                                          Font: =Font.'Open Sans'
+                                          Height: =35
+                                          HoverBorderColor: =RGBA(180, 214, 250, 1)
+                                          HoverFill: =RGBA(180, 214, 250, 1)
+                                          Items: =colPaginas
+                                          Items.Value: =NumeroPagina
+                                          OnChange: |+
+                                            =UpdateContext({ currentPage: ddPaginas.Selected.NumeroPagina });
+                                            ClearCollect(
+                                                colContenedores,
+                                                FirstN(
+                                                    LastN(
+                                                        Sort(colContenedoresAll, pon, SortOrder.Descending),
+                                                        CountRows(colContenedoresAll) - ((currentPage - 1) * pageSize)
+                                                    ),
+                                                    pageSize
+                                                )
+                                            )
+                                          PressedColor: =RGBA(255, 255, 255, 1)
+                                          PressedFill: =RGBA(15, 108, 189, 1)
+                                          SelectionColor: =RGBA(255, 255, 255, 1)
+                                          SelectionFill: =RGBA(15, 108, 189, 1)
+                                          Size: =10
+                                          Tooltip: ="Seleccione el año"
+                                          Width: =87
+                                          X: =648
+                                          Y: =535
+      - Capa1_17:
+          Control: GroupContainer@1.3.0
+          Variant: ManualLayout
+          Properties:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            Fill: =RGBA(0, 0, 0, 0.12)
+            Height: =673
+            Visible: =AbrirConfirmar || AbrirC || AbrirInfo
+            Width: =1366
+            Y: =95
+      - cnt_CONFIRMAR_OLD_1:
+          Control: GroupContainer@1.3.0
+          Variant: ManualLayout
+          Properties:
+            BorderColor: =RGBA(40, 134, 222, 1)
+            BorderThickness: =4
+            DropShadow: =DropShadow.ExtraBold
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =393
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Visible: =AbrirC || AbrirInfo
+            Width: =1133
+            X: =116
+            Y: =238
+          Children:
+            - txt_OrdenView_HxH_30:
+                Control: Classic/TextInput@2.3.2
+                Properties:
+                  Align: =Align.Center
+                  BorderColor: =RGBA(0, 0, 0, 1)
+                  Color: =RGBA(255, 255, 255, 1)
+                  Default: =
+                  DisplayMode: =DisplayMode.View
+                  Fill: =RGBA(40, 134, 222, 1)
+                  Font: =Font.'Open Sans'
+                  FontWeight: =FontWeight.Bold
+                  HintText: =
+                  HoverBorderColor: =RGBA(204, 231, 246, 1)
+                  HoverFill: =RGBA(204, 231, 246, 1)
+                  OnChange: =
+                  OnSelect: =Reset(txt_OrdenView_HxH_30)
+                  PaddingLeft: =5
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =18
+                  Width: =1133
+            - icn_Home_EM_32:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  BorderColor: =App.Theme.Colors.Primary
+                  BorderStyle: =BorderStyle.None
+                  BorderThickness: =2
+                  Color: =RGBA(255, 255, 255, 1)
+                  DisabledColor: =RGBA(214, 221, 224, 1)
+                  DisplayMode: |
+                    =
+                    If(Disable && AbrirC, DisplayMode.Disabled, DisplayMode.Edit)
+                  Fill: =RGBA(40, 134, 222, 1)
+                  FocusedBorderThickness: =20
+                  Height: =40
+                  HoverBorderColor: =RGBA(0, 134, 208, 1)
+                  HoverColor: =RGBA(0, 0, 0, 1)
+                  HoverFill: =RGBA(40, 134, 222, 1)
+                  Icon: =Icon.CancelBadge
+                  OnSelect: |-
+                    =Concurrent(
+                        Refresh(poitem),
+                        Refresh(po),
+                        Clear(colSelectedPOTs),
+                        Clear(colPOTtoProcess),
+                        Reset(gl_Contenedores_RC_6),
+                        UpdateContext({varReloadPOTs: Now()}),
+                        UpdateContext(
+                            {
+                                AbrirC: false,
+                                Disable: false,
+                                AbrirInfo: false
+                            }
+                        )
+                    )
+                  PaddingBottom: =5
+                  PaddingLeft: =5
+                  PaddingRight: =5
+                  PaddingTop: =5
+                  Width: =40
+                  X: =1080
+            - lbl_Nomenclatura_EC_15:
+                Control: Text@0.0.51
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  FontColor: =RGBA(255, 255, 255, 1)
+                  Height: =30
+                  Size: =20
+                  Text: |-
+                    ="Requisicion
+                    "
+                  Weight: ='TextCanvas.Weight'.Bold
+                  Width: =120
+                  X: =268
+                  Y: =5
+            - txt_Nomenclatura_EC_13:
+                Control: Classic/TextInput@2.3.2
+                Properties:
+                  Align: =Align.Center
+                  BorderStyle: =BorderStyle.None
+                  Default: =
+                  DisplayMode: =DisplayMode.View
+                  FontWeight: =FontWeight.Bold
+                  Height: =30
+                  OnChange: =
+                  PaddingLeft: =5
+                  RadiusBottomLeft: =10
+                  RadiusBottomRight: =10
+                  RadiusTopLeft: =10
+                  RadiusTopRight: =10
+                  Size: =17
+                  Width: =190
+                  X: =388
+                  Y: =5
+            - lbl_Fecha_EC_9:
+                Control: Text@0.0.51
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  FontColor: =RGBA(255, 255, 255, 1)
+                  Height: =30
+                  Size: =20
+                  Text: |-
+                    ="Fecha solicitud
+                    "
+                  Weight: ='TextCanvas.Weight'.Bold
+                  Width: =145
+                  X: =594
+                  Y: =5
+            - txt_Fecha_EC_9:
+                Control: Classic/TextInput@2.3.2
+                Properties:
+                  Align: =Align.Center
+                  Default: =
+                  DisplayMode: =DisplayMode.View
+                  FontWeight: =FontWeight.Semibold
+                  Height: =30
+                  OnChange: =
+                  PaddingLeft: =5
+                  RadiusBottomLeft: =10
+                  RadiusBottomRight: =10
+                  RadiusTopLeft: =10
+                  RadiusTopRight: =10
+                  Size: =15
+                  Width: =140
+                  X: =755
+                  Y: =5
+            - btn_Guardar_EC_43:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =RGBA(9, 33, 98, 1)
+                  Color: =RGBA(255, 255, 255, 1)
+                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                  DisplayMode: |
+                    =
+                  Fill: =RGBA(15, 108, 189, 1)
+                  Font: =Font.'Open Sans'
+                  Height: =30
+                  HoverBorderColor: =RGBA(40, 134, 222, 1)
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =RGBA(15, 84, 140, 1)
+                  OnSelect: |-
+                    =If(
+                        CountRows(colSelectedPOTs) = 0,
+                        UpdateContext(
+                            {
+                                MostrarAviso: true,
+                                mensajeNotificacion: "Selecciona al menos un POT"
+                            }
+                        ),
+                        CountRows(
+                            Distinct(
+                                colSelectedPOTs,
+                                Moneda
+                            )
+                        ) > 1,
+                        UpdateContext(
+                            {
+                                MostrarAviso: true,
+                                mensajeNotificacion: "No se pueden seleccionar POTs con diferentes Tipos de cambio (USD, CRC). Por favor seleccione solo un tipo."
+                            }
+                        ),
+                        Concurrent(
+                            ClearCollect(
+                                colPOTtoProcess,
+                                ForAll(
+                                    colSelectedPOTs,
+                                    {
+                                        POT: ThisRecord.POT,
+                                        MontoAPagar: ThisRecord.MontoAPagar,
+                                        Moneda: ThisRecord.Moneda,
+                                        Codigo_Proveedor: ThisRecord.Codigo_Proveedor,
+                                        Nombre_Proveedor: ThisRecord.Nombre_Proveedor,
+                                        Num_Referencia: ""
+                                    }
+                                )
+                            ),
+                            UpdateContext(
+                                {
+                                    AbrirConfirmar: true,
+                                    Disable: true
+                                }
+                            )
+                        )
+                    )
+                  PressedBorderColor: =Self.Fill
+                  PressedColor: =Self.Fill
+                  PressedFill: =Self.Color
+                  Text: ="Pagar"
+                  Visible: =!AbrirInfo
+                  Width: =141
+                  X: =930
+                  Y: =6
+            - gl_Contenedores_RC_6:
+                Control: Gallery@2.15.0
+                Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Height: =353
+                  Items: |-
+                    =
+                    Sort(colContenedores, TotalPagar, SortOrder.Descending)
+
+                    /*Distinct(
+                        Filter(
+                            poitem;
+                            req_num = Text(
+                                First(
+                                    Split(
+                                        gl_ListaContenedores_LE_2.Selected.soli_num;
+                                        "-"
+                                    )
+                                ).Value
+                            );
+                            (varReloadPOTs = varReloadPOTs)
+                        );
+                        po_num
+                    )*/
+                  TemplateSize: =53
+                  Width: =1133
+                  Y: =35
+                Children:
+                  - Container46_7:
+                      Control: GroupContainer@1.3.0
+                      Variant: ManualLayout
+                      Properties:
+                        BorderColor: =RGBA(40, 134, 222, 1)
+                        BorderThickness: =3
+                        DropShadow: =DropShadow.Regular
+                        Fill: |-
+                          =If(
+                              Value(txt_Total_Pagar_OLP_3.Text) = 0,
+                              RGBA(200, 255, 200, 1), // Verde cuando es 0
+                              RGBA(180, 214, 250, 1) // Color normal
+                          )
+                        Height: =45
+                        RadiusBottomLeft: =15
+                        RadiusBottomRight: =15
+                        RadiusTopLeft: =15
+                        RadiusTopRight: =15
+                        Width: =1113
+                        X: =13
+                        Y: =8
+                      Children:
+                        - lbl_PNDato_EC_30:
+                            Control: Text@0.0.51
+                            Properties:
+                              Align: ='TextCanvas.Align'.Center
+                              Height: =40
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =18
+                              Text: |-
+                                ="POT
+                                "
+                              VerticalAlign: =VerticalAlign.Middle
+                              Weight: ='TextCanvas.Weight'.Regular
+                              Width: =50
+                              X: =4
+                        - lbl_PNDato_EC_31:
+                            Control: Text@0.0.51
+                            Properties:
+                              Align: ='TextCanvas.Align'.Center
+                              Height: =35
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =15
+                              Text: |-
+                                ="Codigo proveedor
+                                "
+                              VerticalAlign: =VerticalAlign.Middle
+                              Weight: ='TextCanvas.Weight'.Regular
+                              Width: =139
+                              X: =202
+                        - lbl_PNDato_EC_32:
+                            Control: Text@0.0.51
+                            Properties:
+                              Align: ='TextCanvas.Align'.Center
+                              Height: =35
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =15
+                              Text: ="Nombre Proveedor"
+                              VerticalAlign: =VerticalAlign.Middle
+                              Weight: ='TextCanvas.Weight'.Regular
+                              Width: =138
+                              X: =486
+                        - lbl_PNDato_EC_33:
+                            Control: Text@0.0.51
+                            Properties:
+                              Align: ='TextCanvas.Align'.Center
+                              Height: =40
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =18
+                              Text: ="Total"
+                              VerticalAlign: =VerticalAlign.Middle
+                              Weight: ='TextCanvas.Weight'.Regular
+                              Width: =46
+                              X: =900
+                        - txt_PN_OLP_2:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(40, 134, 222, 1)
+                              BorderThickness: =4
+                              Default: =ThisItem.Value
+                              DisplayMode: =DisplayMode.View
+                              FontWeight: =FontWeight.Semibold
+                              Height: =30
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              RadiusBottomLeft: =10
+                              RadiusBottomRight: =10
+                              RadiusTopLeft: =10
+                              RadiusTopRight: =10
+                              Size: =15
+                              Width: =148
+                              X: =54
+                              Y: =5
+                        - txt_CodigoProvedor_OLP_1:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(40, 134, 222, 1)
+                              BorderThickness: =4
+                              Default: =LookUp(po, po_num = ThisItem.Value, vend_num)
+                              DisplayMode: =DisplayMode.View
+                              FontWeight: =FontWeight.Semibold
+                              Height: =30
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              RadiusBottomLeft: =10
+                              RadiusBottomRight: =10
+                              RadiusTopLeft: =10
+                              RadiusTopRight: =10
+                              Size: =15
+                              Width: =148
+                              X: =341
+                              Y: =5
+                        - txt_NombreProveedor_OLP_2:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(40, 134, 222, 1)
+                              BorderThickness: =4
+                              Default: =LookUp(vendaddr, vend_num = LookUp(po, po_num = ThisItem.Value, vend_num), name)
+                              DisplayMode: =DisplayMode.View
+                              FontWeight: =FontWeight.Semibold
+                              Height: =30
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              RadiusBottomLeft: =10
+                              RadiusBottomRight: =10
+                              RadiusTopLeft: =10
+                              RadiusTopRight: =10
+                              Size: =15
+                              Width: =276
+                              X: =624
+                              Y: =5
+                        - txt_Total_Pagar_OLP_3:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(40, 134, 222, 1)
+                              BorderThickness: =4
+                              Default: =ThisItem.TotalPagar
+                              DisplayMode: =DisplayMode.View
+                              FontWeight: =FontWeight.Semibold
+                              Height: =30
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              RadiusBottomLeft: =10
+                              RadiusBottomRight: =10
+                              RadiusTopLeft: =10
+                              RadiusTopRight: =10
+                              Size: =15
+                              Width: =81
+                              X: =997
+                              Y: =5
+                        - txt_Moneda_1:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(40, 134, 222, 1)
+                              BorderThickness: =4
+                              Default: |-
+                                =Coalesce(
+                                  Upper(
+                                    LookUp(
+                                      vendor,
+                                      vend_num = LookUp(po, po_num = ThisItem.Value, vend_num),
+                                      curr_code
+                                    )
+                                  ),
+                                  "SIN MONEDA"
+                                )
+                              DisplayMode: =DisplayMode.View
+                              FontWeight: =FontWeight.Semibold
+                              Height: =30
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              RadiusBottomLeft: =10
+                              RadiusBottomRight: =10
+                              RadiusTopLeft: =10
+                              RadiusTopRight: =10
+                              Size: =15
+                              Width: =40
+                              X: =950
+                              Y: =6
+                        - chkSelect_1:
+                            Control: Classic/CheckBox@2.1.0
+                            Properties:
+                              BorderColor: =
+                              CheckboxBorderColor: =
+                              CheckboxSize: =30
+                              CheckmarkFill: =RGBA(9, 33, 98, 1)
+                              Default: |
+                                =CountRows( Filter( colSelectedPOTs, POT = ThisItem.Value ) ) > 0
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisplayMode: =
+                              Height: =29
+                              HoverBorderColor: =
+                              OnCheck: |-
+                                =Collect(
+                                    colSelectedPOTs,
+                                    {
+                                        POT: ThisItem.Value,
+                                        MontoAPagar: Value(txt_Total_Pagar_OLP.Text),
+                                        Moneda: Coalesce(
+                                            Upper(
+                                                LookUp(
+                                                    vendor,
+                                                    vend_num = LookUp(
+                                                        po,
+                                                        po_num = ThisItem.Value,
+                                                        vend_num
+                                                    ),
+                                                    curr_code
+                                                )
+                                            ),
+                                            "SIN MONEDA"
+                                        ),
+                                        Nombre_Proveedor:LookUp(vendaddr, vend_num = LookUp(po, po_num = ThisItem.Value, vend_num), name),
+                                        Codigo_Proveedor: LookUp(po, po_num = ThisItem.Value, vend_num)
+                                    }
+                                )
+                              OnUncheck: |
+                                =RemoveIf(colSelectedPOTs, POT = ThisItem.Value)
+                              PressedBorderColor: =
+                              PressedColor: =
+                              Text: =
+                              Visible: =!AbrirInfo
+                              Width: =29
+                              X: =1078
+                              Y: =6
+            - cnt_Aviso_LE_5:
+                Control: GroupContainer@1.3.0
+                Variant: ManualLayout
+                Properties:
+                  BorderColor: =RGBA(52, 152, 47, 1)
+                  BorderThickness: =5
+                  DropShadow: =DropShadow.ExtraBold
+                  Fill: =RGBA(255, 255, 255, 1)
+                  Height: =152
+                  RadiusBottomLeft: =20
+                  RadiusBottomRight: =20
+                  RadiusTopLeft: =20
+                  RadiusTopRight: =20
+                  Visible: =
+                  Width: =318
+                  X: =281
+                  Y: =103
+                Children:
+                  - txt_MensajeNoti_EM_31:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        Font: =Font.Arial
+                        Height: =90
+                        Size: =20
+                        Text: ="El P/N se agrego exitosamente"
+                        Width: =318
+                  - btn_Aceptar_EM_34:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        BorderColor: =RGBA(52, 152, 47, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                        Fill: =RGBA(52, 152, 47, 1)
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Bold
+                        Height: =50
+                        HoverBorderColor: =RGBA(52, 152, 47, 1)
+                        HoverColor: =RGBA(255, 255, 255, 1)
+                        HoverFill: =RGBA(21, 68, 18, 1)
+                        OnSelect: =
+                        PressedBorderColor: =RGBA(52, 152, 47, 1)
+                        PressedColor: =Self.Fill
+                        PressedFill: =Self.Color
+                        Text: ="Aceptar"
+                        Width: =180
+                        X: =69
+                        Y: =90
+      - Container5_17:
+          Control: GroupContainer@1.3.0
+          Variant: ManualLayout
+          Properties:
+            BorderColor: =RGBA(40, 134, 222, 1)
+            BorderThickness: =3
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =280
+            RadiusBottomLeft: =15
+            RadiusBottomRight: =15
+            RadiusTopLeft: =15
+            RadiusTopRight: =15
+            Visible: =AbrirConfirmar
+            Width: =1115
+            X: =125
+            Y: =307
+          Children:
+            - lbl_PNDato_EM_218:
+                Control: Text@0.0.51
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  BorderColor: =RGBA(40, 134, 222, 1)
+                  BorderStyle: =BorderStyle.Solid
+                  BorderThickness: =0.5
+                  Fill: =RGBA(40, 134, 222, 0.72)
+                  FontColor: =RGBA(255, 255, 255, 1)
+                  Height: =43
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  Size: =25
+                  Text: ="Procesar Pago"
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =1115
+            - Container5_18:
+                Control: GroupContainer@1.3.0
+                Variant: ManualLayout
+                Properties:
+                  BorderColor: =RGBA(40, 134, 222, 1)
+                  BorderThickness: =3
+                  Fill: =RGBA(255, 255, 255, 1)
+                  Height: =283
+                  RadiusBottomLeft: =15
+                  RadiusBottomRight: =15
+                  RadiusTopLeft: =15
+                  RadiusTopRight: =15
+                  Visible: =AbrirConfirmar
+                  Width: =1115
+                Children:
+                  - lbl_PNDato_EM_219:
+                      Control: Text@0.0.51
+                      Properties:
+                        Align: ='TextCanvas.Align'.Center
+                        BorderColor: =RGBA(40, 134, 222, 1)
+                        BorderStyle: =BorderStyle.Solid
+                        BorderThickness: =0.5
+                        Fill: =RGBA(40, 134, 222, 0.72)
+                        FontColor: =RGBA(255, 255, 255, 1)
+                        Height: =43
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =25
+                        Text: ="Procesar Pago"
+                        Weight: ='TextCanvas.Weight'.Semibold
+                        Width: =1115
+                  - ContainerGaleria_EM_30:
+                      Control: GroupContainer@1.3.0
+                      Variant: ManualLayout
+                      Properties:
+                        BorderThickness: =2
+                        Height: =240
+                        Width: =581
+                        X: =529
+                        Y: =43
+                      Children:
+                        - lbl_PNDato_EM_413:
+                            Control: Text@0.0.51
+                            Properties:
+                              Align: ='TextCanvas.Align'.Center
+                              BorderColor: =RGBA(180, 214, 250, 1)
+                              BorderStyle: =BorderStyle.Solid
+                              BorderThickness: =0.5
+                              Fill: =RGBA(40, 134, 222, 1)
+                              FontColor: =RGBA(255, 255, 255, 1)
+                              Height: =30
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =20
+                              Text: ="POT "
+                              Weight: ='TextCanvas.Weight'.Regular
+                              Width: =139
+                        - lbl_PNDato_EM_414:
+                            Control: Text@0.0.51
+                            Properties:
+                              Align: ='TextCanvas.Align'.Center
+                              BorderColor: =RGBA(180, 214, 250, 1)
+                              BorderStyle: =BorderStyle.Solid
+                              BorderThickness: =0.5
+                              Fill: =RGBA(40, 134, 222, 1)
+                              FontColor: =RGBA(255, 255, 255, 1)
+                              Height: =30
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =20
+                              Text: ="Moneda"
+                              Weight: ='TextCanvas.Weight'.Regular
+                              Width: =91
+                              X: =139
+                        - lbl_PNDato_EM_415:
+                            Control: Text@0.0.51
+                            Properties:
+                              Align: ='TextCanvas.Align'.Center
+                              BorderColor: =RGBA(180, 214, 250, 1)
+                              BorderStyle: =BorderStyle.Solid
+                              BorderThickness: =0.5
+                              Fill: =RGBA(40, 134, 222, 1)
+                              FontColor: =RGBA(255, 255, 255, 1)
+                              Height: =30
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =20
+                              Text: ="Total"
+                              Weight: ='TextCanvas.Weight'.Regular
+                              Width: =102
+                              X: =230
+                        - lbl_PNDato_EM_416:
+                            Control: Text@0.0.51
+                            Properties:
+                              Align: ='TextCanvas.Align'.Center
+                              BorderColor: =RGBA(180, 214, 250, 1)
+                              BorderStyle: =BorderStyle.Solid
+                              BorderThickness: =0.5
+                              Fill: =RGBA(40, 134, 222, 1)
+                              FontColor: =RGBA(255, 255, 255, 1)
+                              Height: =30
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =20
+                              Text: ="Nº Referencia"
+                              Weight: ='TextCanvas.Weight'.Regular
+                              Width: =249
+                              X: =332
+                        - glr_POTS_PC_3:
+                            Control: Gallery@2.15.0
+                            Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
+                            Properties:
+                              BorderColor: =RGBA(9, 33, 98, 1)
+                              BorderThickness: =2
+                              Height: =208
+                              Items: |
+                                =colPOTtoProcess
+                              TemplateSize: =35
+                              Width: =581
+                              Y: =30
+                            Children:
+                              - txt_Cantidad_EM_138:
+                                  Control: Classic/TextInput@2.3.2
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(40, 134, 222, 1)
+                                    BorderThickness: =0.5
+                                    Color: =
+                                    Default: =ThisItem.POT
+                                    DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                                    DisabledColor: =
+                                    DisabledFill: =
+                                    DisplayMode: =DisplayMode.Disabled
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =35
+                                    HoverBorderColor: =RGBA(40, 134, 222, 1)
+                                    HoverFill: =RGBA(255, 255, 255, 1)
+                                    PaddingLeft: =5
+                                    RadiusBottomLeft: =0
+                                    RadiusBottomRight: =0
+                                    RadiusTopLeft: =0
+                                    RadiusTopRight: =0
+                                    Size: =17
+                                    Width: =139
+                              - txt_Cantidad_EM_139:
+                                  Control: Classic/TextInput@2.3.2
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(40, 134, 222, 1)
+                                    BorderThickness: =0.5
+                                    Color: =
+                                    Default: =ThisItem.Moneda
+                                    DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                                    DisabledColor: =
+                                    DisabledFill: =
+                                    DisplayMode: =DisplayMode.Disabled
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =35
+                                    HoverBorderColor: =RGBA(40, 134, 222, 1)
+                                    HoverFill: =RGBA(255, 255, 255, 1)
+                                    PaddingLeft: =5
+                                    RadiusBottomLeft: =0
+                                    RadiusBottomRight: =0
+                                    RadiusTopLeft: =0
+                                    RadiusTopRight: =0
+                                    Size: =17
+                                    Width: =91
+                                    X: =139
+                              - txt_Cantidad_EM_140:
+                                  Control: Classic/TextInput@2.3.2
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(40, 134, 222, 1)
+                                    BorderThickness: =0.5
+                                    Color: =
+                                    Default: =ThisItem.MontoAPagar
+                                    DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                                    DisabledColor: =
+                                    DisabledFill: =
+                                    DisplayMode: =DisplayMode.Disabled
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =35
+                                    HoverBorderColor: =RGBA(40, 134, 222, 1)
+                                    HoverFill: =RGBA(255, 255, 255, 1)
+                                    PaddingLeft: =5
+                                    RadiusBottomLeft: =0
+                                    RadiusBottomRight: =0
+                                    RadiusTopLeft: =0
+                                    RadiusTopRight: =0
+                                    Size: =17
+                                    Width: =102
+                                    X: =230
+                              - txt_NumTransferencia_OLP_3:
+                                  Control: Classic/TextInput@2.3.2
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(40, 134, 222, 1)
+                                    BorderThickness: =0.5
+                                    Clear: =true
+                                    Default: =ThisItem.Num_Referencia
+                                    DisabledBorderColor: =RGBA(180, 214, 250, 1)
+                                    DisabledFill: =RGBA(255, 255, 255, 1)
+                                    DisplayMode: |-
+                                      =If(
+                                          drp_MetodoPago_OLP_2.SelectedText.Value = "Transferencia" || drp_MetodoPago_OLP_2.SelectedText.Value = "Cheque" || drp_MetodoPago_OLP_2.SelectedText.Value = "Tarjeta" , 
+                                          DisplayMode.Edit, 
+                                          DisplayMode.Disabled
+                                      )
+                                    Height: =34
+                                    HintText: ="#"
+                                    HoverBorderColor: =RGBA(180, 214, 250, 1)
+                                    HoverFill: =RGBA(227, 240, 252, 1)
+                                    OnChange: |-
+                                      =UpdateIf(
+                                        colPOTtoProcess,
+                                        POT = ThisItem.POT,
+                                        { Num_Referencia: Self.Text }
+                                      )
+                                    OnSelect: |
+                                      =
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    PressedColor: =RGBA(0, 0, 0, 1)
+                                    PressedFill: =RGBA(255, 255, 255, 1)
+                                    RadiusBottomLeft: =0
+                                    RadiusBottomRight: =0
+                                    RadiusTopLeft: =0
+                                    RadiusTopRight: =0
+                                    Size: =15
+                                    Width: =249
+                                    X: =332
+                                    Y: =1
+                  - TextCanvas1_41:
+                      Control: Text@0.0.51
+                      Properties:
+                        Align: ='TextCanvas.Align'.Start
+                        Font: =Font.Arial
+                        Height: =30
+                        Size: =21
+                        Text: ="Metodo de pago"
+                        Weight: ='TextCanvas.Weight'.Semibold
+                        Width: =186
+                        X: =8
+                        Y: =47
+                  - TextCanvas1_87:
+                      Control: Text@0.0.51
+                      Properties:
+                        Align: ='TextCanvas.Align'.Start
+                        Font: =Font.Arial
+                        Height: =30
+                        Size: =21
+                        Text: ="Estado de pago"
+                        Weight: ='TextCanvas.Weight'.Semibold
+                        Width: =186
+                        X: =211
+                        Y: =48
+                  - lbl_Total_OLP_4:
+                      Control: Text@0.0.51
+                      Properties:
+                        Align: ='TextCanvas.Align'.Center
+                        Font: =Font.Arial
+                        Height: =30
+                        Size: =21
+                        Text: ="ID"
+                        VerticalAlign: =VerticalAlign.Middle
+                        Weight: ='TextCanvas.Weight'.Semibold
+                        Width: =30
+                        X: =448
+                        Y: =48
+                  - txt_NumTransferencia_OLP_4:
+                      Control: Classic/TextInput@2.3.2
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(13, 50, 61, 1)
+                        BorderThickness: =3
+                        Clear: =true
+                        Default: =
+                        DisabledBorderColor: =RGBA(180, 214, 250, 1)
+                        DisabledFill: =RGBA(255, 255, 255, 1)
+                        DisplayMode: =DisplayMode.Disabled
+                        Format: =TextFormat.Number
+                        Height: =34
+                        HintText: =
+                        HoverBorderColor: =RGBA(180, 214, 250, 1)
+                        HoverFill: =RGBA(227, 240, 252, 1)
+                        OnChange: =
+                        OnSelect: |
+                          =
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        PressedColor: =RGBA(0, 0, 0, 1)
+                        PressedFill: =RGBA(255, 255, 255, 1)
+                        RadiusBottomLeft: =10
+                        RadiusBottomRight: =10
+                        RadiusTopLeft: =10
+                        RadiusTopRight: =10
+                        Size: =15
+                        Width: =99
+                        X: =414
+                        Y: =77
+                  - ContainerPais_EM_39:
+                      Control: GroupContainer@1.3.0
+                      Variant: ManualLayout
+                      Properties:
+                        BorderColor: =RGBA(40, 134, 222, 1)
+                        BorderThickness: =3
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        Height: =34
+                        RadiusBottomLeft: =10
+                        RadiusBottomRight: =10
+                        RadiusTopLeft: =10
+                        RadiusTopRight: =10
+                        Width: =186
+                        X: =211
+                        Y: =78
+                      Children:
+                        - drp_EstadoPago_OLP_2:
+                            Control: Classic/DropDown@2.3.1
+                            Properties:
+                              AllowEmptySelection: =true
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderThickness: =3
+                              ChevronBackground: =RGBA(0, 0, 0, 0)
+                              ChevronDisabledBackground: =RGBA(255, 255, 255, 1)
+                              ChevronDisabledFill: =RGBA(120, 120, 120, 1)
+                              ChevronFill: =RGBA(0, 0, 0, 1)
+                              ChevronHoverBackground: =RGBA(15, 108, 189, 1)
+                              ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                              Default: ="Pendiente"
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledFill: =RGBA(255, 255, 255, 1)
+                              DisplayMode: |+
+                                =If(isProcesando, DisplayMode.Disabled, DisplayMode.Edit)
+
+                              Font: =Font.'Open Sans'
+                              Height: =34
+                              HoverBorderColor: =RGBA(180, 214, 250, 1)
+                              HoverFill: =RGBA(180, 214, 250, 1)
+                              Items: =["Parcial", "Cancelado"]
+                              Items.Value: =Value
+                              PressedColor: =RGBA(255, 255, 255, 1)
+                              PressedFill: =RGBA(15, 108, 189, 1)
+                              SelectionColor: =RGBA(255, 255, 255, 1)
+                              SelectionFill: =RGBA(15, 108, 189, 1)
+                              Size: =15
+                              Tooltip: ="Seleccione el metodo"
+                              Width: =186
+                  - ContainerPais_EM_40:
+                      Control: GroupContainer@1.3.0
+                      Variant: ManualLayout
+                      Properties:
+                        BorderColor: =RGBA(40, 134, 222, 1)
+                        BorderThickness: =3
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        Height: =34
+                        RadiusBottomLeft: =10
+                        RadiusBottomRight: =10
+                        RadiusTopLeft: =10
+                        RadiusTopRight: =10
+                        Width: =186
+                        X: =8
+                        Y: =79
+                      Children:
+                        - drp_MetodoPago_OLP_2:
+                            Control: Classic/DropDown@2.3.1
+                            Properties:
+                              AllowEmptySelection: =true
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderThickness: =3
+                              ChevronBackground: =RGBA(0, 0, 0, 0)
+                              ChevronDisabledBackground: =RGBA(255, 255, 255, 1)
+                              ChevronDisabledFill: =RGBA(120, 120, 120, 1)
+                              ChevronFill: =RGBA(0, 0, 0, 1)
+                              ChevronHoverBackground: =RGBA(15, 108, 189, 1)
+                              ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                              Default: ="Pendiente"
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledFill: =RGBA(255, 255, 255, 1)
+                              DisplayMode: |+
+                                =If(isProcesando, DisplayMode.Disabled, DisplayMode.Edit)
+
+                              Font: =Font.'Open Sans'
+                              Height: =34
+                              HoverBorderColor: =RGBA(180, 214, 250, 1)
+                              HoverFill: =RGBA(180, 214, 250, 1)
+                              Items: =Metodo_Pagos
+                              Items.Value: =crfb9_metodo
+                              PressedColor: =RGBA(255, 255, 255, 1)
+                              PressedFill: =RGBA(15, 108, 189, 1)
+                              SelectionColor: =RGBA(255, 255, 255, 1)
+                              SelectionFill: =RGBA(15, 108, 189, 1)
+                              Size: =15
+                              Tooltip: ="Seleccione el metodo"
+                              Width: =186
+                  - TextCanvas1_88:
+                      Control: Text@0.0.51
+                      Properties:
+                        Align: ='TextCanvas.Align'.Center
+                        Font: =Font.Arial
+                        Height: =30
+                        Size: =21
+                        Text: ="Total a pagar"
+                        Weight: ='TextCanvas.Weight'.Semibold
+                        Width: =168
+                        X: =8
+                        Y: =129
+                  - TextCanvas1_89:
+                      Control: Text@0.0.51
+                      Properties:
+                        Align: ='TextCanvas.Align'.Center
+                        Font: =Font.Arial
+                        Height: =30
+                        Size: =21
+                        Text: ="Total cancelado"
+                        Weight: ='TextCanvas.Weight'.Semibold
+                        Width: =173
+                        X: =176
+                        Y: =129
+                  - lbl_Total_OLP_5:
+                      Control: Text@0.0.51
+                      Properties:
+                        Align: ='TextCanvas.Align'.Center
+                        Font: =Font.Arial
+                        Height: =30
+                        Size: =21
+                        Text: ="Total"
+                        Weight: ='TextCanvas.Weight'.Semibold
+                        Width: =165
+                        X: =349
+                        Y: =129
+                  - lbl_montoTotal_OLP_2:
+                      Control: Classic/TextInput@2.3.2
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(13, 50, 61, 1)
+                        BorderThickness: =3
+                        Clear: =true
+                        Default: |-
+                          =Text(
+                              Sum(colPOTtoProcess, MontoAPagar),
+                              "[$-es-ES]#.###.###.###,00"
+                          )
+                        DisabledBorderColor: =RGBA(180, 214, 250, 1)
+                        DisabledFill: =RGBA(255, 255, 255, 1)
+                        DisplayMode: =DisplayMode.View
+                        Height: =30
+                        HintText: ="Monto"
+                        HoverBorderColor: =RGBA(180, 214, 250, 1)
+                        HoverFill: =RGBA(227, 240, 252, 1)
+                        OnChange: =
+                        OnSelect: |
+                          =
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        PressedColor: =RGBA(0, 0, 0, 1)
+                        PressedFill: =RGBA(255, 255, 255, 1)
+                        RadiusBottomLeft: =10
+                        RadiusBottomRight: =10
+                        RadiusTopLeft: =10
+                        RadiusTopRight: =10
+                        Size: =15
+                        Width: =168
+                        X: =8
+                        Y: =153
+                  - lbl_montoCancelado_OLP_2:
+                      Control: Classic/TextInput@2.3.2
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(13, 50, 61, 1)
+                        BorderThickness: =3
+                        Clear: =true
+                        Default: =Text(Value(txt_montopagar_OPL_1.Text), "[$-es-ES]#.###.###.###,00")
+                        DisabledBorderColor: =RGBA(180, 214, 250, 1)
+                        DisabledFill: =RGBA(255, 255, 255, 1)
+                        DisplayMode: =DisplayMode.View
+                        Height: =30
+                        HintText: ="Monto"
+                        HoverBorderColor: =RGBA(180, 214, 250, 1)
+                        HoverFill: =RGBA(227, 240, 252, 1)
+                        OnChange: =
+                        OnSelect: |
+                          =
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        PressedColor: =RGBA(0, 0, 0, 1)
+                        PressedFill: =RGBA(255, 255, 255, 1)
+                        RadiusBottomLeft: =10
+                        RadiusBottomRight: =10
+                        RadiusTopLeft: =10
+                        RadiusTopRight: =10
+                        Size: =15
+                        Width: =173
+                        X: =176
+                        Y: =153
+                  - txt_totalPOT_OLP_2:
+                      Control: Classic/TextInput@2.3.2
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(13, 50, 61, 1)
+                        BorderThickness: =3
+                        Clear: =true
+                        Default: |+
+                          =Text(Value(lbl_montoTotal_OLP_2.Text) - Value(lbl_montoCancelado_OLP_2.Text), "[$-es-ES]#.###.###.###,00")
+
+                        DisabledBorderColor: =RGBA(180, 214, 250, 1)
+                        DisabledFill: =RGBA(255, 255, 255, 1)
+                        DisplayMode: =DisplayMode.View
+                        Height: =30
+                        HintText: ="Monto"
+                        HoverBorderColor: =RGBA(180, 214, 250, 1)
+                        HoverFill: =RGBA(227, 240, 252, 1)
+                        OnChange: =
+                        OnSelect: |
+                          =
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        PressedColor: =RGBA(0, 0, 0, 1)
+                        PressedFill: =RGBA(255, 255, 255, 1)
+                        RadiusBottomLeft: =10
+                        RadiusBottomRight: =10
+                        RadiusTopLeft: =10
+                        RadiusTopRight: =10
+                        Size: =15
+                        Width: =165
+                        X: =349
+                        Y: =153
+                  - TextCanvas1_90:
+                      Control: Text@0.0.51
+                      Properties:
+                        Align: ='TextCanvas.Align'.Center
+                        Font: =Font.Arial
+                        Height: =31
+                        Size: =21
+                        Text: ="Monto a pagar"
+                        VerticalAlign: =VerticalAlign.Middle
+                        Weight: ='TextCanvas.Weight'.Semibold
+                        Width: =248
+                        X: =10
+                        Y: =191
+                  - btn_Guardar_EC_45:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        BorderColor: =RGBA(40, 134, 222, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                        DisplayMode: |
+                          =If(
+                              drp_EstadoPago_OLP_2.Selected.Value = "Parcial" &&
+                              CountRows(colPOTtoProcess) >= 2,
+                              DisplayMode.Disabled,
+                              DisplayMode.Edit
+                          )
+                        Fill: =RGBA(40, 134, 222, 1)
+                        Font: =Font.'Open Sans'
+                        Height: =47
+                        HoverBorderColor: =RGBA(40, 134, 222, 1)
+                        HoverColor: =RGBA(255, 255, 255, 1)
+                        HoverFill: =RGBA(15, 84, 140, 1)
+                        OnSelect: |
+                          =UpdateContext({isProcesando: true});
+                          If(
+                              CountRows(colPOTtoProcess) = 0,
+                              UpdateContext(
+                                  {
+                                      MostrarAviso: true,
+                                      mensajeNotificacion: "Selecciona al menos un POT"
+                                  }
+                              ),
+                              CountRows(
+                                  Filter(
+                                      colPOTtoProcess,
+                                      IsBlank(Trim(Num_Referencia))
+                                  )
+                              ) > 0,
+                              UpdateContext(
+                                  {
+                                      MostrarAviso: true,
+                                      mensajeNotificacion: "Debe ingresar la referencia para TODOS los POTs antes de continuar."
+                                  }
+                              ),
+                              IsBlank(txt_montopagar_OPL.Text) || Value(txt_montopagar_OPL.Text) <= 0,
+                              UpdateContext(
+                                  {
+                                      MostrarAviso: true,
+                                      mensajeNotificacion: "El monto a pagar no puede estar vacío o ser negativo."
+                                  }
+                              ),
+                              IsBlank(drp_MetodoPago_OLP_1.SelectedText.Value) || IsBlank(drp_EstadoPago_OLP_1.SelectedText.Value),
+                              UpdateContext(
+                                  {
+                                      MostrarAviso: true,
+                                      mensajeNotificacion: "Asegurese de seleccionar el metodo de pago y el estado de pago"
+                                  }
+                              ),
+                              IsBlank(txt_totalPOT_OLP.Text) || Value(txt_totalPOT_OLP.Text) < 0,
+                              UpdateContext(
+                                  {
+                                      MostrarAviso: true,
+                                      mensajeNotificacion: "El total no puede ser negativo o estar vacío. Revisa los valores antes de continuar."
+                                  }
+                              ),
+                              (drp_MetodoPago_OLP_1.SelectedText.Metodo = "Cheque" || drp_MetodoPago_OLP_1.SelectedText.Metodo = "Transferencia") && IsBlank(txt_NumTransferencia_OLP_1.Text),
+                              UpdateContext(
+                                  {
+                                      MostrarAviso: true,
+                                      mensajeNotificacion: "El número de transferencia es obligatorio si el método de pago es Cheque o Transferencia."
+                                  }
+                              ),
+                              UpdateContext({MostrarAviso: false}),
+                              Collect(
+                                  RegistroPagos,
+                                  {
+                                      Fecha_Solicitud: gl_ListaContenedores_LE_2.Selected.fecha,
+                                      Requisicion: gl_ListaContenedores_LE_2.Selected.soli_num,
+                                      Total_Pagar: Value(lbl_montoTotal_OLP.Text),
+                                      Total_Cancelado: Value(lbl_montoCancelado_OLP.Text),
+                                      Total: Value(txt_totalPOT_OLP.Text),
+                                      Fecha_UltimoPago: Today(),
+                                      'Estado (crfb9_estado)': drp_EstadoPago_OLP_1.Selected.Value,
+                                      Metodo_Pago: drp_MetodoPago_OLP_1.SelectedText.Metodo,
+                                      NUM_ID: txt_NumTransferencia_OLP_2.Text
+                                  }
+                              );
+                              ForAll(
+                                  colPOTtoProcess,
+                                  With(
+                                      {
+                                          pot: ThisRecord.POT,
+                                          codigoproveedor: ThisRecord.Codigo_Proveedor,
+                                          nombreproveedor: ThisRecord.Nombre_Proveedor,
+                                          totalPo: Value(txt_totalPOT_OLP.Text),
+                                          totalCancelado: Value(lbl_montoCancelado_OLP.Text),
+                                          montoPago: Value(ThisRecord.MontoAPagar),
+                                          numRef: Coalesce(
+                                              ThisRecord.Num_Referencia,
+                                              txt_NumTransferencia_OLP_1.Text
+                                          )
+                                      },
+                                      If(
+                                          drp_EstadoPago_OLP_1.SelectedText.Value = "Parcial",
+                                          Collect(
+                                              Compras_Pots,
+                                              {
+                                                  Requisicion: gl_ListaContenedores_LE_2.Selected.soli_num,
+                                                  POT: pot,
+                                                  Total: Value(txt_montopagar_OPL.Text),
+                                                  'Estado (crfb9_estado)': drp_EstadoPago_OLP_1.Selected.Value,
+                                                  Num_Vend: codigoproveedor,
+                                                  Provedor: nombreproveedor,
+                                                  Num_Transferencia: numRef,
+                                                  NUM_ID: txt_NumTransferencia_OLP_2.Text,
+                                                  Valor_POT:  Text( LookUp(po, po_num = pot, po_cost) )
+                                              }
+                                          ),
+                                          Collect(
+                                              Compras_Pots,
+                                              {
+                                                  Requisicion: gl_ListaContenedores_LE_2.Selected.soli_num,
+                                                  POT: pot,
+                                                  Total: montoPago,
+                                                  'Estado (crfb9_estado)': drp_EstadoPago_OLP_1.Selected.Value,
+                                                  Num_Vend: codigoproveedor,
+                                                  Provedor: nombreproveedor,
+                                                  Num_Transferencia: numRef,
+                                                  NUM_ID: txt_NumTransferencia_OLP_2.Text,
+                                                  Valor_POT: Text( LookUp(po, po_num = pot, po_cost) )
+                                              }
+                                          )
+                                      )
+                                  )
+                              );
+                              Refresh(RegistroPagos);
+                              If(
+                                  Sum(
+                                      gl_Contenedores_RC_4.AllItems,
+                                      txt_Total_Pagar_OLP.Text
+                                  ) - Value(lbl_montoCancelado_OLP.Text) = 0,
+                                  Patch(
+                                      Solicitud_Compras,
+                                      LookUp(
+                                          Solicitud_Compras,
+                                          soli_num = gl_ListaContenedores_LE_2.Selected.soli_num
+                                      ),
+                                      {estado: "Cancelado"}
+                                  )
+                              );
+                              /*If(
+                               Value(gl_ListaContenedores_LE_2.Selected.txt_TotalPagar_OLP.Text) - Value( gl_ListaContenedores_LE_2.Selected.txt_Cantidad_EM_58.Text) = 0  ;
+                                  Patch(
+                                      Solicitud_Compras;
+                                      LookUp(
+                                          Solicitud_Compras;
+                                          soli_num = gl_ListaContenedores_LE_2.Selected.soli_num
+                                      );
+                                      {estado: "Cancelado"}
+                                  )
+                              );;*/
+                          Reset(drp_MetodoPago_OLP_1);
+                              Reset(drp_EstadoPago_OLP_1);
+                              Reset(txt_montopagar_OPL);
+                              Clear(colSelectedPOTs);
+                              Clear(colPOTtoProcess);
+                              UpdateContext({AbrirConfirmar: false});
+                              UpdateContext({isProcesando: false});
+                              UpdateContext(
+                                  {
+                                      AbrirC: false,
+                                      Disable: false
+                                  }
+                              )
+                          );
+                          Refresh(poitem);
+                          Refresh(po);
+                          Refresh(RegistroPagos);
+                          Refresh(Solicitud_Compras);
+                          UpdateContext(
+                              {
+                                  varReloadPOTs: Now(),
+                                  varReloadContenedores: Now()
+                              }
+                          );
+                        PressedBorderColor: =Self.Fill
+                        PressedColor: =Self.Fill
+                        PressedFill: =Self.Color
+                        Text: ="Pagar"
+                        Width: =113
+                        X: =278
+                        Y: =213
+                  - btn_Guardar_EC_46:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        BorderColor: =RGBA(215, 58, 60, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                        DisplayMode: |+
+                          =If(isProcesando, DisplayMode.Disabled, DisplayMode.Edit)
+
+                        Fill: =RGBA(255, 0, 0, 1)
+                        Font: =Font.'Open Sans'
+                        Height: =47
+                        HoverBorderColor: =RGBA(215, 58, 60, 1)
+                        HoverColor: =RGBA(255, 255, 255, 1)
+                        HoverFill: =RGBA(132, 40, 38, 1)
+                        OnSelect: |
+                          =UpdateContext({AbrirConfirmar: false, Disable: false});
+                              Reset(drp_MetodoPago_OLP_1);
+                              Reset(drp_EstadoPago_OLP_1);
+                        PressedBorderColor: =RGBA(215, 58, 60, 1)
+                        PressedColor: =RGBA(215, 58, 60, 1)
+                        PressedFill: =RGBA(255, 255, 255, 1)
+                        Text: ="Cancelar"
+                        Width: =110
+                        X: =408
+                        Y: =213
+                  - txt_montopagar_OPL_1:
+                      Control: Classic/TextInput@2.3.2
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(40, 134, 222, 1)
+                        BorderThickness: =3
+                        Clear: =true
+                        Default: =If(drp_EstadoPago_OLP_2.SelectedText.Value = "Cancelado", lbl_montoTotal_OLP_2.Text, "")
+                        DisabledBorderColor: =RGBA(180, 214, 250, 1)
+                        DisabledFill: =RGBA(255, 255, 255, 1)
+                        DisplayMode: =If(drp_EstadoPago_OLP_2.SelectedText.Value in ["Parcial"] || isProcesando, DisplayMode.Edit, DisplayMode.Disabled)
+                        Format: =TextFormat.Number
+                        Height: =37
+                        HintText: ="Monto"
+                        HoverBorderColor: =RGBA(180, 214, 250, 1)
+                        HoverFill: =RGBA(227, 240, 252, 1)
+                        LineHeight: =
+                        MaxLength: |
+                          =
+                        OnChange: =
+                        OnSelect: |
+                          =
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        PressedColor: =RGBA(0, 0, 0, 1)
+                        PressedFill: =RGBA(255, 255, 255, 1)
+                        RadiusBottomLeft: =10
+                        RadiusBottomRight: =10
+                        RadiusTopLeft: =10
+                        RadiusTopRight: =10
+                        Size: =15
+                        Width: =246
+                        X: =10
+                        Y: =222
+            - ContainerGaleria_EM_31:
+                Control: GroupContainer@1.3.0
+                Variant: ManualLayout
+                Properties:
+                  BorderThickness: =2
+                  Height: =284
+                  Width: =331
+                  X: =781
+                  Y: =43
+                Children:
+                  - lbl_PNDato_EM_417:
+                      Control: Text@0.0.51
+                      Properties:
+                        Align: ='TextCanvas.Align'.Center
+                        BorderColor: =RGBA(40, 134, 222, 1)
+                        BorderStyle: =BorderStyle.Solid
+                        BorderThickness: =0.5
+                        Fill: =RGBA(180, 214, 250, 1)
+                        Height: =25
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =16
+                        Text: ="POT"
+                        Weight: ='TextCanvas.Weight'.Regular
+                        Width: =332
+                  - glr_POTS_PC_4:
+                      Control: Gallery@2.15.0
+                      Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
+                      Properties:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Height: =214
+                        Items: =
+                        TemplateSize: =30
+                        Width: =331
+                        Y: =25
+                      Children:
+                        - txt_Cantidad_EM_141:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: =RGBA(40, 134, 222, 1)
+                              BorderThickness: =0.5
+                              Color: =
+                              Default: =
+                              DisabledBorderColor: =RGBA(40, 134, 222, 1)
+                              DisabledColor: =
+                              DisabledFill: =
+                              DisplayMode: =DisplayMode.Disabled
+                              FontWeight: =FontWeight.Semibold
+                              Height: =30
+                              HoverBorderColor: =RGBA(40, 134, 222, 1)
+                              HoverFill: =RGBA(255, 255, 255, 1)
+                              PaddingLeft: =5
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              Size: =12
+                              Width: =332
+            - TextCanvas1_91:
+                Control: Text@0.0.51
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  Font: =Font.Arial
+                  Height: =30
+                  Size: =21
+                  Text: ="Nº Referencia"
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =218
+                  X: =88
+                  Y: =44
+            - TextCanvas1_92:
+                Control: Text@0.0.51
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  Font: =Font.Arial
+                  Height: =30
+                  Size: =21
+                  Text: ="Total a pagar"
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =186
+                  X: =391
+                  Y: =59
+            - btn_Guardar_EC_47:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =RGBA(40, 134, 222, 1)
+                  Color: =RGBA(255, 255, 255, 1)
+                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                  DisplayMode: =
+                  Fill: =RGBA(40, 134, 222, 1)
+                  Font: =Font.'Open Sans'
+                  Height: =47
+                  HoverBorderColor: =RGBA(40, 134, 222, 1)
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =RGBA(15, 84, 140, 1)
+                  OnSelect: "=UpdateContext({isProcesando: true});\n\nIf(\n    IsBlank(txt_montopagar_OPL_1.Text) || Value(txt_montopagar_OPL_1.Text) <= 0,\n    UpdateContext(\n        {\n            MostrarAviso: true,\n            mensajeNotificacion: \"El monto a pagar no puede estar vacío o ser negativo.\"\n        }\n    ),\n        IsBlank(drp_MetodoPago_OLP.SelectedText.Value) || IsBlank(drp_EstadoPago_OLP.SelectedText.Value),\n    UpdateContext(\n        {\n            MostrarAviso: true,\n            mensajeNotificacion: \"Asegurese de seleccionar el metodo de pago y el estado de pago\"\n        }\n    ),\n    IsBlank(txt_totalPOT_OLP.Text) || Value(txt_totalPOT_OLP.Text) < 0,\n    UpdateContext(\n        {\n            MostrarAviso: true,\n            mensajeNotificacion: \"El total no puede ser negativo o estar vacío. Revisa los valores antes de continuar.\"\n        }\n    ),\n    (drp_MetodoPago_OLP.SelectedText.Metodo = \"Cheque\" || drp_MetodoPago_OLP.SelectedText.Metodo = \"Transferencia\") && IsBlank(txt_NumTransferencia_OLP.Text),\n    UpdateContext(\n        {\n            MostrarAviso: true,\n            mensajeNotificacion: \"El número de transferencia es obligatorio si el método de pago es Cheque o Transferencia.\"\n        }\n    ),\n    // Si todas las validaciones pasan:\n    UpdateContext({MostrarAviso: false}),\n    \n    Collect(\n        RegistroPagos,\n        {\n            Fecha_Solicitud: gl_ListaContenedores_LE_2.Selected.fecha,\n            Requisicion: gl_ListaContenedores_LE_2.Selected.soli_num,\n            POT: gl_Contenedores_RC_4.Selected.Value,\n            Codigo_Proveedor: gl_Contenedores_RC_4.Selected.txt_CodigoProvedor_OLP.Text,\n            Nombre_Proveedor: gl_Contenedores_RC_4.Selected.txt_NombreProveedor_OLP.Text,\n            Total_Pagar: Value(gl_Contenedores_RC_4.Selected.txt_Total_Pagar_OLP.Text),\n            Total_Cancelado: Value(lbl_montoCancelado_OLP.Text),\n            Total: Value(txt_totalPOT_OLP.Text),\n            Fecha_UltimoPago: Today(),\n            'Estado (crfb9_estado)': drp_EstadoPago_OLP.Selected.Value,\n            Metodo_Pago: drp_MetodoPago_OLP.SelectedText.Metodo,\n            Num_Transferencia: txt_NumTransferencia_OLP.Text\n        }\n    );\n    If( \n        IsBlank(LookUp(Compras_Pots, POT = gl_Contenedores_RC_4.Selected.Value)),\n        Collect(\n            Compras_Pots,\n            {\n                Requisicion: gl_ListaContenedores_LE_2.Selected.soli_num,\n                POT: gl_Contenedores_RC_4.Selected.Value,\n                Total: Value(lbl_montoTotal_OLP.Text),\n                'Estado (crfb9_estado)': drp_EstadoPago_OLP.Selected.Value,\n                Num_Vend: gl_Contenedores_RC_4.Selected.txt_CodigoProvedor_OLP.Text,\n                Provedor: gl_Contenedores_RC_4.Selected.txt_NombreProveedor_OLP.Text\n            }\n        ),\n        LookUp(Compras_Pots, POT = gl_Contenedores_RC_4.Selected.Value).'Estado (crfb9_estado)' = \"Parcial\" && Value(txt_totalPOT_OLP.Text) = 0,\n        Patch(\n            Compras_Pots,\n            LookUp(Compras_Pots, POT = gl_Contenedores_RC_4.Selected.Value),\n            {\n                'Estado (crfb9_estado)': drp_EstadoPago_OLP.Selected.Value\n            }\n        )\n    );\n    Refresh(RegistroPagos);\n    \n    If(\n        Sum(\n            gl_Contenedores_RC_4.AllItems,\n            txt_Total_Pagar_OLP.Text \n        ) - Value(lbl_montoCancelado_OLP.Text) = 0,\n        Patch(\n            Solicitud_Compras,\n            LookUp(\n                Solicitud_Compras,\n                soli_num = gl_ListaContenedores_LE_2.Selected.soli_num\n            ),\n            {estado: \"Cancelado\"}\n        )\n    );\n    \n    Reset(drp_MetodoPago_OLP);\n    Reset(drp_EstadoPago_OLP);\n    Reset(txt_montopagar_OPL);\n    Reset(txt_NumTransferencia_OLP);\n    \n    UpdateContext({AbrirConfirmar: false});    \n    UpdateContext({isProcesando: false});\n    UpdateContext({AbrirC: false, Disable: false})\n);\n\nRefresh(RegistroPagos);\nRefresh(Solicitud_Compras)\n"
+                  PressedBorderColor: =Self.Fill
+                  PressedColor: =Self.Fill
+                  PressedFill: =Self.Color
+                  Text: ="Pagar"
+                  Width: =161
+                  X: =596
+                  Y: =61
+            - txt_NumTransferencia_OLP_5:
+                Control: Classic/TextInput@2.3.2
+                Properties:
+                  Align: =Align.Center
+                  BorderColor: =RGBA(13, 50, 61, 1)
+                  BorderThickness: =3
+                  Clear: =true
+                  Default: =
+                  DisabledBorderColor: =RGBA(180, 214, 250, 1)
+                  DisabledFill: =RGBA(255, 255, 255, 1)
+                  DisplayMode: |-
+                    =If(
+                        drp_MetodoPago_OLP_3.SelectedText.Value = "Transferencia" || drp_MetodoPago_OLP_3.SelectedText.Value = "Cheque" || drp_MetodoPago_OLP_3.SelectedText.Value = "Tarjeta" , 
+                        DisplayMode.Edit, 
+                        DisplayMode.Disabled
+                    )
+                  Height: =34
+                  HintText: ="#"
+                  HoverBorderColor: =RGBA(180, 214, 250, 1)
+                  HoverFill: =RGBA(227, 240, 252, 1)
+                  OnChange: =
+                  OnSelect: |
+                    =
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  PressedColor: =RGBA(0, 0, 0, 1)
+                  PressedFill: =RGBA(255, 255, 255, 1)
+                  RadiusBottomLeft: =10
+                  RadiusBottomRight: =10
+                  RadiusTopLeft: =10
+                  RadiusTopRight: =10
+                  Size: =15
+                  Width: =363
+                  X: =16
+                  Y: =74
+            - lbl_montoTotal_OLP_3:
+                Control: Classic/TextInput@2.3.2
+                Properties:
+                  Align: =Align.Center
+                  BorderColor: =RGBA(13, 50, 61, 1)
+                  BorderThickness: =3
+                  Clear: =true
+                  Default: =Text(Value(txt_Total_Pagar_OLP_1.Text), "[$-es-ES]#.###.###.###,00")
+                  DisabledBorderColor: =RGBA(180, 214, 250, 1)
+                  DisabledFill: =RGBA(255, 255, 255, 1)
+                  DisplayMode: =DisplayMode.View
+                  Height: =30
+                  HintText: ="Monto"
+                  HoverBorderColor: =RGBA(180, 214, 250, 1)
+                  HoverFill: =RGBA(227, 240, 252, 1)
+                  OnChange: =
+                  OnSelect: |
+                    =
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  PressedColor: =RGBA(0, 0, 0, 1)
+                  PressedFill: =RGBA(255, 255, 255, 1)
+                  RadiusBottomLeft: =10
+                  RadiusBottomRight: =10
+                  RadiusTopLeft: =10
+                  RadiusTopRight: =10
+                  Size: =15
+                  Width: =186
+                  X: =391
+                  Y: =89
+            - TextCanvas1_93:
+                Control: Text@0.0.51
+                Properties:
+                  Align: ='TextCanvas.Align'.Start
+                  Font: =Font.Arial
+                  Height: =30
+                  Size: =21
+                  Text: ="Metodo de pago"
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =186
+                  X: =104
+                  Y: =108
+            - btn_Guardar_EC_48:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =RGBA(215, 58, 60, 1)
+                  Color: =RGBA(255, 255, 255, 1)
+                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                  DisplayMode: |+
+                    =If(isProcesando, DisplayMode.Disabled, DisplayMode.Edit)
+
+                  Fill: =RGBA(255, 0, 0, 1)
+                  Font: =Font.'Open Sans'
+                  Height: =47
+                  HoverBorderColor: =RGBA(215, 58, 60, 1)
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =RGBA(132, 40, 38, 1)
+                  OnSelect: |-
+                    =UpdateContext({AbrirConfirmar: false, Disable: false});
+                        Reset(drp_MetodoPago_OLP);
+                        Reset(drp_EstadoPago_OLP);
+                        Reset(txt_NumTransferencia_OLP)
+                  PressedBorderColor: =RGBA(215, 58, 60, 1)
+                  PressedColor: =RGBA(215, 58, 60, 1)
+                  PressedFill: =RGBA(255, 255, 255, 1)
+                  Text: ="Cancelar"
+                  Width: =157
+                  X: =600
+                  Y: =132
+            - TextCanvas1_94:
+                Control: Text@0.0.51
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  Font: =Font.Arial
+                  Height: =30
+                  Size: =21
+                  Text: ="Total cancelado"
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =186
+                  X: =391
+                  Y: =134
+            - ContainerPais_EM_41:
+                Control: GroupContainer@1.3.0
+                Variant: ManualLayout
+                Properties:
+                  BorderColor: =RGBA(40, 134, 222, 1)
+                  BorderThickness: =3
+                  DropShadow: =DropShadow.None
+                  Fill: =RGBA(255, 255, 255, 1)
+                  Height: =34
+                  RadiusBottomLeft: =10
+                  RadiusBottomRight: =10
+                  RadiusTopLeft: =10
+                  RadiusTopRight: =10
+                  Width: =186
+                  X: =104
+                  Y: =140
+                Children:
+                  - drp_MetodoPago_OLP_3:
+                      Control: Classic/DropDown@2.3.1
+                      Properties:
+                        AllowEmptySelection: =true
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderThickness: =3
+                        ChevronBackground: =RGBA(0, 0, 0, 0)
+                        ChevronDisabledBackground: =RGBA(255, 255, 255, 1)
+                        ChevronDisabledFill: =RGBA(120, 120, 120, 1)
+                        ChevronFill: =RGBA(0, 0, 0, 1)
+                        ChevronHoverBackground: =RGBA(15, 108, 189, 1)
+                        ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                        Default: ="Pendiente"
+                        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                        DisabledFill: =RGBA(255, 255, 255, 1)
+                        DisplayMode: |+
+                          =If(isProcesando, DisplayMode.Disabled, DisplayMode.Edit)
+
+                        Font: =Font.'Open Sans'
+                        Height: =34
+                        HoverBorderColor: =RGBA(180, 214, 250, 1)
+                        HoverFill: =RGBA(180, 214, 250, 1)
+                        Items: =Metodo_Pagos
+                        Items.Value: =crfb9_metodo
+                        PressedColor: =RGBA(255, 255, 255, 1)
+                        PressedFill: =RGBA(15, 108, 189, 1)
+                        SelectionColor: =RGBA(255, 255, 255, 1)
+                        SelectionFill: =RGBA(15, 108, 189, 1)
+                        Size: =15
+                        Tooltip: ="Seleccione el metodo"
+                        Width: =186
+            - lbl_montoCancelado_OLP_3:
+                Control: Classic/TextInput@2.3.2
+                Properties:
+                  Align: =Align.Center
+                  BorderColor: =RGBA(13, 50, 61, 1)
+                  BorderThickness: =3
+                  Clear: =true
+                  Default: =Text(Value(txt_montopagar_OPL_1.Text), "[$-es-ES]#.###.###.###,00")
+                  DisabledBorderColor: =RGBA(180, 214, 250, 1)
+                  DisabledFill: =RGBA(255, 255, 255, 1)
+                  DisplayMode: =DisplayMode.View
+                  Height: =30
+                  HintText: ="Monto"
+                  HoverBorderColor: =RGBA(180, 214, 250, 1)
+                  HoverFill: =RGBA(227, 240, 252, 1)
+                  OnChange: =
+                  OnSelect: |
+                    =
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  PressedColor: =RGBA(0, 0, 0, 1)
+                  PressedFill: =RGBA(255, 255, 255, 1)
+                  RadiusBottomLeft: =10
+                  RadiusBottomRight: =10
+                  RadiusTopLeft: =10
+                  RadiusTopRight: =10
+                  Size: =15
+                  Width: =186
+                  X: =391
+                  Y: =164
+            - TextCanvas1_95:
+                Control: Text@0.0.51
+                Properties:
+                  Align: ='TextCanvas.Align'.Start
+                  Font: =Font.Arial
+                  Height: =30
+                  Size: =21
+                  Text: ="Estado de pago"
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =186
+                  X: =104
+                  Y: =184
+            - lbl_Total_OLP_6:
+                Control: Text@0.0.51
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  Font: =Font.Arial
+                  Height: =30
+                  Size: =21
+                  Text: ="Total"
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  Width: =183
+                  X: =390
+                  Y: =204
+            - ContainerPais_EM_42:
+                Control: GroupContainer@1.3.0
+                Variant: ManualLayout
+                Properties:
+                  BorderColor: =RGBA(40, 134, 222, 1)
+                  BorderThickness: =3
+                  DropShadow: =DropShadow.None
+                  Fill: =RGBA(255, 255, 255, 1)
+                  Height: =34
+                  RadiusBottomLeft: =10
+                  RadiusBottomRight: =10
+                  RadiusTopLeft: =10
+                  RadiusTopRight: =10
+                  Width: =186
+                  X: =104
+                  Y: =214
+                Children:
+                  - drp_EstadoPago_OLP_3:
+                      Control: Classic/DropDown@2.3.1
+                      Properties:
+                        AllowEmptySelection: =true
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderThickness: =3
+                        ChevronBackground: =RGBA(0, 0, 0, 0)
+                        ChevronDisabledBackground: =RGBA(255, 255, 255, 1)
+                        ChevronDisabledFill: =RGBA(120, 120, 120, 1)
+                        ChevronFill: =RGBA(0, 0, 0, 1)
+                        ChevronHoverBackground: =RGBA(15, 108, 189, 1)
+                        ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                        Default: ="Pendiente"
+                        DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                        DisabledFill: =RGBA(255, 255, 255, 1)
+                        DisplayMode: |+
+                          =If(isProcesando, DisplayMode.Disabled, DisplayMode.Edit)
+
+                        Font: =Font.'Open Sans'
+                        Height: =34
+                        HoverBorderColor: =RGBA(180, 214, 250, 1)
+                        HoverFill: =RGBA(180, 214, 250, 1)
+                        Items: =["Parcial", "Cancelado"]
+                        Items.Value: =Value
+                        PressedColor: =RGBA(255, 255, 255, 1)
+                        PressedFill: =RGBA(15, 108, 189, 1)
+                        SelectionColor: =RGBA(255, 255, 255, 1)
+                        SelectionFill: =RGBA(15, 108, 189, 1)
+                        Size: =15
+                        Tooltip: ="Seleccione el metodo"
+                        Width: =186
+            - txt_totalPOT_OLP_3:
+                Control: Classic/TextInput@2.3.2
+                Properties:
+                  Align: =Align.Center
+                  BorderColor: =RGBA(13, 50, 61, 1)
+                  BorderThickness: =3
+                  Clear: =true
+                  Default: |+
+                    =Text(Value(lbl_montoTotal_OLP_3.Text) - Value(lbl_montoCancelado_OLP_3.Text), "[$-es-ES]#.###.###.###,00")
+
+                  DisabledBorderColor: =RGBA(180, 214, 250, 1)
+                  DisabledFill: =RGBA(255, 255, 255, 1)
+                  DisplayMode: =DisplayMode.View
+                  Height: =30
+                  HintText: ="Monto"
+                  HoverBorderColor: =RGBA(180, 214, 250, 1)
+                  HoverFill: =RGBA(227, 240, 252, 1)
+                  OnChange: =
+                  OnSelect: |
+                    =
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  PressedColor: =RGBA(0, 0, 0, 1)
+                  PressedFill: =RGBA(255, 255, 255, 1)
+                  RadiusBottomLeft: =10
+                  RadiusBottomRight: =10
+                  RadiusTopLeft: =10
+                  RadiusTopRight: =10
+                  Size: =15
+                  Width: =183
+                  X: =390
+                  Y: =234
+      - cnt_Comentario_EM_17:
+          Control: GroupContainer@1.3.0
+          Variant: ManualLayout
+          Properties:
+            BorderColor: =RGBA(40, 134, 222, 1)
+            BorderThickness: =5
+            DropShadow: =DropShadow.ExtraBold
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =264
+            RadiusBottomLeft: =20
+            RadiusBottomRight: =20
+            RadiusTopLeft: =20
+            RadiusTopRight: =20
+            Visible: =MostrarAviso
+            Width: =703
+            X: =331
+            Y: =323
+          Children:
+            - txt_MensajeNoti_EM_32:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Font: =Font.Arial
+                  Height: =166
+                  Size: =25
+                  Text: =mensajeNotificacion
+                  Width: =703
+                  Y: =5
+            - btn_Aceptar_EM_37:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  BorderColor: =RGBA(52, 152, 47, 1)
+                  Color: =RGBA(255, 255, 255, 1)
+                  DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                  Fill: =RGBA(52, 152, 47, 1)
+                  Font: =Font.'Open Sans'
+                  FontWeight: =FontWeight.Bold
+                  Height: =50
+                  HoverBorderColor: =RGBA(180, 214, 250, 1)
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =RGBA(52, 152, 47, 1)
+                  OnSelect: |-
+                    =UpdateContext(
+                        {
+                            MostrarAviso: false,
+                            Disable: false,
+                            mensajeNotificacion: "",
+                            isProcesando: false
+                        }
+                    )
+                  PressedBorderColor: =RGBA(52, 152, 47, 1)
+                  PressedColor: =Self.Fill
+                  PressedFill: =Self.Color
+                  Text: ="Aceptar"
+                  Width: =180
+                  X: =268
+                  Y: =171
