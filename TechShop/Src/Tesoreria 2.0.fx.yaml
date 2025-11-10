@@ -5,53 +5,69 @@
     LoadingSpinnerColor: =App.Theme.Colors.Primary
     OnVisible: |
         =// Inicializamos paginación
-        UpdateContext({ currentPage: 1, pageSize: 13 });
-        
+        UpdateContext(
+            {
+                currentPage: 1,
+                pageSize: 13
+            }
+        );
         // Refrescar fuentes
         Refresh(poitem);
         Refresh(po);
         Refresh(Compras_Pots);
-        
         // Traer todas las compras
-        ClearCollect(colComprasFiltered, Compras_Pots);
-        
-        // Traer todos los PO distintos
-        ClearCollect(colPOs, Distinct(poitem, po_num));
-        
-        // Calcular TotalPagar y dejar solo los que sean > 0
         ClearCollect(
-            colContenedoresAll,
-            Filter(
-                AddColumns(
-                    colPOs,
-                    pon, Value,
-                    TotalPagar,
-                        Value( LookUp(po, po_num = Value, po_cost) )
-                        - Sum( Filter(colComprasFiltered, POT = Value), Value(Total) )
-                ),
-                TotalPagar > 0
+            colComprasFiltered,
+            Compras_Pots
+        );
+        // Traer todos los PO distintos
+        ClearCollect(
+            colPOs,
+            Distinct(
+                poitem,
+                po_num
             )
         );
-        
+        // Calcular TotalPagar y dejar solo los que sean > 0
+        ClearCollect(
+          colContenedoresAll,
+          Filter(
+            AddColumns(
+              colPOs,
+              pon, Value,
+              TotalPagar,
+                Value( LookUp(po, po_num = Value, po_cost) )
+                - Sum( Filter(colComprasFiltered, POT = Value), Value(Total) )
+            ),
+            TotalPagar > 0
+          )
+        );
         // Calcular total de páginas
-        UpdateContext({
-            totalPages: RoundUp(CountRows(colContenedoresAll) / pageSize, 0)
-        });
-        
+        UpdateContext(
+            {
+                totalPages: RoundUp(
+                    CountRows(colContenedoresAll) / pageSize,
+                    0
+                )
+            }
+        );
         // Crear lista de páginas para el dropdown
         ClearCollect(
             colPaginas,
             ForAll(
                 Sequence(totalPages),
-                { NumeroPagina: Value }
+                {NumeroPagina: Value}
             )
         );
-        
         // Cargar primera página
         ClearCollect(
             colContenedores,
             FirstN(
-                Sort(colContenedoresAll, pon, SortOrder.Descending),
+                Sort(
+                    colContenedoresAll,
+                    pon,
+                    SortOrder.Descending
+                ),
                 pageSize
             )
         );
@@ -354,7 +370,9 @@
                                                 Moneda: ThisRecord.Moneda,
                                                 Codigo_Proveedor: ThisRecord.Codigo_Proveedor,
                                                 Nombre_Proveedor: ThisRecord.Nombre_Proveedor,
-                                                Num_Referencia: ""
+                                                Num_Referencia: "",
+                                                FechaSolicitud: ThisRecord.FechaSolicitud,
+                                                Requisicion: ThisRecord.Requisicion
                                             }
                                         )
                                     ),
@@ -405,8 +423,8 @@
                             =If(Disable, DisplayMode.Disabled, DisplayMode.Edit)
                         FocusedBorderThickness: =4
                         Font: =App.Theme.Font
-                        Height: =31
-                        HintText: ="POT"
+                        Height: =30
+                        HintText: ="POT / Codigo / Nombre"
                         HoverBorderColor: =RGBA(180, 214, 250, 1)
                         HoverColor: =RGBA(0, 0, 0, 1)
                         HoverFill: =RGBA(227, 240, 252, 1)
@@ -422,7 +440,7 @@
                         RadiusTopLeft: =10
                         RadiusTopRight: =10
                         Size: =15
-                        Width: =280
+                        Width: =303
                         X: =130
                         Y: =10
                         ZIndex: =16
@@ -580,6 +598,7 @@
                             Items: =colContenedores
                             Layout: =Layout.Vertical
                             LoadingSpinner: =LoadingSpinner.Data
+                            OnSelect: =
                             TemplatePadding: =0
                             TemplateSize: =38
                             Width: =1352
@@ -745,7 +764,9 @@
                                                    "SIN MONEDA"
                                                  ),
                                           Nombre_Proveedor: LookUp(vendaddr, vend_num = LookUp(po, po_num = ThisItem.pon, vend_num), name),
-                                          Codigo_Proveedor: LookUp(po, po_num = ThisItem.pon, vend_num)
+                                          Codigo_Proveedor: LookUp(po, po_num = ThisItem.pon, vend_num),
+                                          Requisicion: LookUp(Compras_Pots, POT = ThisItem.pon, Requisicion),
+                                          FechaSolicitud: LookUp(Solicitud_Compras, soli_num = LookUp(Compras_Pots, POT = ThisItem.pon, Requisicion), fecha)
                                         }
                                       )
                                     )
@@ -868,7 +889,7 @@
                             ZIndex: =9
 
                         ddPaginas As dropdown:
-                            BorderColor: =RGBA(0, 0, 0, 0)
+                            BorderColor: =RGBA(12, 59, 94, 1)
                             BorderThickness: =3
                             ChevronBackground: =RGBA(255, 255, 255, 1)
                             ChevronDisabledBackground: =RGBA(255, 255, 255, 1)
@@ -2000,7 +2021,7 @@
                 BorderThickness: =3
                 Clear: =true
                 Color: =RGBA(0, 0, 0, 1)
-                Default: =
+                Default: =First( Sort( RegistroPagos, Value(NUM_ID), SortOrder.Descending ) ).NUM_ID + 1
                 DisabledBorderColor: =RGBA(180, 214, 250, 1)
                 DisabledColor: =RGBA(166, 166, 166, 1)
                 DisabledFill: =RGBA(255, 255, 255, 1)
