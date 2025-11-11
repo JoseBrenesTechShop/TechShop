@@ -3,79 +3,7 @@
     Fill: =Color.White
     ImagePosition: =ImagePosition.Fill
     LoadingSpinnerColor: =App.Theme.Colors.Primary
-    OnVisible: |
-        =
-        UpdateContext(
-            {
-                currentPage: 1,
-                pageSize: 13
-            }
-        );
-        Refresh(poitem);
-        Refresh(po);
-        Refresh(Compras_Pots);
-        ClearCollect(
-            colComprasFiltered,
-            Compras_Pots
-        );
-        ClearCollect(
-            colPOs,
-            Distinct(
-                poitem,
-                po_num
-            )
-        );
-        ClearCollect(
-            colContenedoresAll,
-            Filter(
-                AddColumns(
-                    colPOs,
-                    pon,
-                    Value,
-                    TotalPagar,
-                    Value(
-                        LookUp(
-                            po,
-                            po_num = Value,
-                            po_cost
-                        )
-                    ) - Sum(
-                        Filter(
-                            colComprasFiltered,
-                            POT = Value
-                        ),
-                        Value(Total)
-                    )
-                ),
-                TotalPagar > 0
-            )
-        );
-        UpdateContext(
-            {
-                totalPages: RoundUp(
-                    CountRows(colContenedoresAll) / pageSize,
-                    0
-                )
-            }
-        );
-        ClearCollect(
-            colPaginas,
-            ForAll(
-                Sequence(totalPages),
-                {NumeroPagina: Value}
-            )
-        );
-        ClearCollect(
-            colContenedores,
-            FirstN(
-                Sort(
-                    colContenedoresAll,
-                    pon,
-                    SortOrder.Descending
-                ),
-                pageSize
-            )
-        );
+    OnVisible: =
 
     ScreenContainer_EM_14 As groupContainer.verticalAutoLayoutContainer:
         DropShadow: =DropShadow.Light
@@ -600,7 +528,7 @@
                             BorderColor: =RGBA(0, 18, 107, 1)
                             DelayItemLoading: =true
                             Height: =499
-                            Items: =colContenedores
+                            Items: =poitem
                             Layout: =Layout.Vertical
                             LoadingSpinner: =LoadingSpinner.Data
                             OnSelect: =
@@ -615,7 +543,7 @@
                                 BorderColor: =RGBA(40, 134, 222, 1)
                                 BorderThickness: =0.5
                                 Color: =RGBA(0, 0, 0, 1)
-                                Default: =ThisItem.Value
+                                Default: =ThisItem.po_num
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
                                 DisabledFill: =
@@ -643,7 +571,7 @@
                                 BorderColor: =RGBA(40, 134, 222, 1)
                                 BorderThickness: =0.5
                                 Color: =RGBA(0, 0, 0, 1)
-                                Default: =LookUp(po, po_num = ThisItem.Value, vend_num)
+                                Default: =LookUp(po, po_num = ThisItem.po_num, vend_num)
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
                                 DisabledFill: =
@@ -672,7 +600,7 @@
                                 BorderColor: =RGBA(40, 134, 222, 1)
                                 BorderThickness: =0.5
                                 Color: =RGBA(0, 0, 0, 1)
-                                Default: =LookUp(vendaddr, vend_num = LookUp(po, po_num = ThisItem.Value, vend_num), name)
+                                Default: =LookUp(vendaddr, vend_num = LookUp(po, po_num = ThisItem.po_num, vend_num), name)
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
                                 DisabledFill: =
@@ -706,7 +634,7 @@
                                       Upper(
                                         LookUp(
                                           vendor,
-                                          vend_num = LookUp(po, po_num = ThisItem.Value, vend_num),
+                                          vend_num = LookUp(po, po_num = ThisItem.po_num, vend_num),
                                           curr_code
                                         )
                                       ),
@@ -908,21 +836,7 @@
                             HoverBorderColor: =RGBA(12, 59, 94, 1)
                             HoverColor: =App.Theme.Colors.PrimaryForeground
                             HoverFill: =RGBA(12, 59, 94, 1)
-                            OnSelect: |
-                                =If(
-                                    currentPage > 1,
-                                    UpdateContext({ currentPage: currentPage - 1 }),
-                                    ClearCollect(
-                                        colContenedores,
-                                        FirstN(
-                                            LastN(
-                                                Sort(colContenedoresAll, pon, SortOrder.Descending),
-                                                CountRows(colContenedoresAll) - ((currentPage - 1) * pageSize)
-                                            ),
-                                            pageSize
-                                        )
-                                    )
-                                )
+                            OnSelect: =
                             PressedBorderColor: =RGBA(15, 84, 140, 1)
                             PressedColor: =RGBA(15, 84, 140, 1)
                             PressedFill: =RGBA(180, 214, 250, 1)
@@ -956,18 +870,7 @@
                             HoverColor: =RGBA(0, 0, 0, 1)
                             HoverFill: =RGBA(180, 214, 250, 1)
                             Items: =colPaginas
-                            OnChange: |
-                                =UpdateContext({ currentPage: ddPaginas.Selected.NumeroPagina });
-                                ClearCollect(
-                                    colContenedores,
-                                    FirstN(
-                                        LastN(
-                                            Sort(colContenedoresAll, pon, SortOrder.Descending),
-                                            CountRows(colContenedoresAll) - ((currentPage - 1) * pageSize)
-                                        ),
-                                        pageSize
-                                    )
-                                )
+                            OnChange: =
                             PressedColor: =RGBA(255, 255, 255, 1)
                             PressedFill: =RGBA(15, 108, 189, 1)
                             SelectionFill: =RGBA(15, 108, 189, 1)
