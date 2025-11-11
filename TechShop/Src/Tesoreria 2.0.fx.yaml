@@ -3,7 +3,31 @@
     Fill: =Color.White
     ImagePosition: =ImagePosition.Fill
     LoadingSpinnerColor: =App.Theme.Colors.Primary
-    OnVisible: =
+    OnVisible: |+
+        =ClearCollect(Filtro, Compras_Pots);
+        ClearCollect(Filtro2 ,poitem);
+        
+        
+        ClearCollect(
+            ContenedorTesoreria,
+            AddColumns(
+                poitem,
+        
+                pot, ThisRecord.po_num,
+        
+                Requisicion, ThisRecord.req_num,
+        
+                CodigoProveedor, LookUp(po, po_num = ThisRecord.po_num, vend_num),
+        
+                NombreProveedor,LookUp(vendaddr,vend_num = LookUp(po, po_num = ThisRecord.po_num, vend_num), name),
+        
+                Moneda,Coalesce(Upper(LookUp(vendor,vend_num = LookUp(po, po_num = ThisRecord.po_num, vend_num),curr_code)),"SIN MONEDA"),
+                
+                TotalPagar,Value(LookUp(po, po_num = ThisRecord.po_num, po_cost)) - Sum(Filter(Filtro, POT = po_num),Value(Total))
+        
+            )
+        );
+        
 
     ScreenContainer_EM_14 As groupContainer.verticalAutoLayoutContainer:
         DropShadow: =DropShadow.Light
@@ -304,7 +328,7 @@
                                                 Codigo_Proveedor: ThisRecord.Codigo_Proveedor,
                                                 Nombre_Proveedor: ThisRecord.Nombre_Proveedor,
                                                 Num_Referencia: "",
-                                                FechaSolicitud: ThisRecord.FechaSolicitud,
+                                                //FechaSolicitud: ThisRecord.FechaSolicitud;
                                                 Requisicion: ThisRecord.Requisicion
                                             }
                                         )
@@ -528,7 +552,7 @@
                             BorderColor: =RGBA(0, 18, 107, 1)
                             DelayItemLoading: =true
                             Height: =499
-                            Items: =poitem
+                            Items: =ContenedorTesoreria
                             Layout: =Layout.Vertical
                             LoadingSpinner: =LoadingSpinner.Data
                             OnSelect: =
@@ -543,7 +567,7 @@
                                 BorderColor: =RGBA(40, 134, 222, 1)
                                 BorderThickness: =0.5
                                 Color: =RGBA(0, 0, 0, 1)
-                                Default: =ThisItem.po_num
+                                Default: =ThisItem.pot
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
                                 DisabledFill: =
@@ -571,7 +595,7 @@
                                 BorderColor: =RGBA(40, 134, 222, 1)
                                 BorderThickness: =0.5
                                 Color: =RGBA(0, 0, 0, 1)
-                                Default: =LookUp(po, po_num = ThisItem.po_num, vend_num)
+                                Default: =ThisItem.CodigoProveedor
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
                                 DisabledFill: =
@@ -600,7 +624,7 @@
                                 BorderColor: =RGBA(40, 134, 222, 1)
                                 BorderThickness: =0.5
                                 Color: =RGBA(0, 0, 0, 1)
-                                Default: =LookUp(vendaddr, vend_num = LookUp(po, po_num = ThisItem.po_num, vend_num), name)
+                                Default: =ThisItem.NombreProveedor
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
                                 DisabledFill: =
@@ -629,17 +653,7 @@
                                 BorderColor: =RGBA(40, 134, 222, 1)
                                 BorderThickness: =0.5
                                 Color: =RGBA(0, 0, 0, 1)
-                                Default: |-
-                                    =Coalesce(
-                                      Upper(
-                                        LookUp(
-                                          vendor,
-                                          vend_num = LookUp(po, po_num = ThisItem.po_num, vend_num),
-                                          curr_code
-                                        )
-                                      ),
-                                      "SIN MONEDA"
-                                    )
+                                Default: =ThisItem.Moneda
                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                 DisabledColor: =
                                 DisabledFill: =
@@ -670,7 +684,7 @@
                                 CheckmarkFill: =RGBA(15, 84, 140, 1)
                                 Color: =RGBA(0, 0, 0, 1)
                                 Default: |
-                                    =CountRows( Filter(colSelectedPOTs, POT = ThisItem.pon) ) > 0
+                                    =CountRows( Filter(colSelectedPOTs, POT = ThisItem.pot) ) > 0
                                 DisabledBorderColor: =RGBA(0, 0, 0, 0)
                                 DisplayMode: =
                                 Font: =App.Theme.Font
@@ -678,73 +692,24 @@
                                 Height: =36
                                 HoverBorderColor: =
                                 HoverColor: =App.Theme.Colors.Darker30
-                                OnCheck: |-
+                                OnCheck: |
                                     =If(
-                                        IsBlank(
-                                            LookUp(
-                                                colSelectedPOTs,
-                                                POT = ThisItem.pon
-                                            )
-                                        ),
-                                        With(
-                                            {
-                                                req: LookUp(
-                                                    Compras_Pots,
-                                                    POT = ThisItem.pon,
-                                                    Requisicion
-                                                )
-                                            },
+                                        IsBlank(LookUp(colSelectedPOTs,POT = ThisItem.pot)),
                                             Collect(
                                                 colSelectedPOTs,
                                                 {
-                                                    POT: ThisItem.pon,
-                                                    MontoAPagar: Coalesce(
-                                                        Value(ThisItem.TotalPagar),
-                                                        Value(txt_Total_Pagar_OLP.Text),
-                                                        0
-                                                    ),
-                                                    Moneda: Coalesce(
-                                                        Upper(
-                                                            LookUp(
-                                                                vendor,
-                                                                vend_num = LookUp(
-                                                                    po,
-                                                                    po_num = ThisItem.pon,
-                                                                    vend_num
-                                                                ),
-                                                                curr_code
-                                                            )
-                                                        ),
-                                                        "SIN MONEDA"
-                                                    ),
-                                                    Nombre_Proveedor: LookUp(
-                                                        vendaddr,
-                                                        vend_num = LookUp(
-                                                            po,
-                                                            po_num = ThisItem.pon,
-                                                            vend_num
-                                                        ),
-                                                        name
-                                                    ),
-                                                    Codigo_Proveedor: LookUp(
-                                                        po,
-                                                        po_num = ThisItem.pon,
-                                                        vend_num
-                                                    ),
-                                                    Requisicion: LookUp(
-                                                        poitem,
-                                                        po_num = ThisItem.pon,
-                                                        req_num),
-                                                    FechaSolicitud: LookUp(Solicitud_Compras, soli_num = LookUp(
-                                                        poitem,
-                                                        po_num = ThisItem.pon,
-                                                        req_num))
+                                                    POT: ThisItem.pot,
+                                                    MontoAPagar: ThisItem.TotalPagar,
+                                                    Moneda: ThisItem.Moneda,
+                                                    Nombre_Proveedor: ThisItem.NombreProveedor,
+                                                    Codigo_Proveedor: ThisItem.CodigoProveedor,
+                                                    Requisicion: ThisItem.Requisicion
+                                                   // FechaSolicitud: ThisItem.FechSolicitud
                                                 }
                                             )
                                         )
-                                    )
                                 OnUncheck: |
-                                    =RemoveIf(colSelectedPOTs, POT = ThisItem.pon)
+                                    =RemoveIf(colSelectedPOTs, POT = ThisItem.pot)
                                 PressedBorderColor: =
                                 PressedColor: =
                                 Size: =13
@@ -797,20 +762,11 @@
                             HoverBorderColor: =RGBA(12, 59, 94, 1)
                             HoverColor: =App.Theme.Colors.PrimaryForeground
                             HoverFill: =RGBA(12, 59, 94, 1)
-                            OnSelect: |
+                            OnSelect: |-
                                 =If(
-                                    currentPage < totalPages,
-                                    UpdateContext({ currentPage: currentPage + 1 }),
-                                    ClearCollect(
-                                        colContenedores,
-                                        FirstN(
-                                            LastN(
-                                                Sort(colContenedoresAll, pon, SortOrder.Descending),
-                                                CountRows(colContenedoresAll) - ((currentPage - 1) * pageSize)
-                                            ),
-                                            pageSize
-                                        )
-                                    )
+                                    CountRows(ContenedorTesoreria) > 0,
+                                    Notify("AddColumns funciona", NotificationType.Success, 5000),
+                                    Notify("AddColumns falla", NotificationType.Error, 5000)
                                 )
                             PressedBorderColor: =RGBA(15, 84, 140, 1)
                             PressedColor: =RGBA(15, 84, 140, 1)
@@ -856,9 +812,8 @@
                             ChevronFill: =RGBA(0, 0, 0, 1)
                             ChevronHoverBackground: =RGBA(15, 108, 189, 1)
                             ChevronHoverFill: =RGBA(255, 255, 255, 1)
-                            Default: |+
-                                =LookUp(colPaginas, NumeroPagina = currentPage).NumeroPagina
-                                
+                            Default: |
+                                =
                             DisabledBorderColor: =RGBA(0, 0, 0, 0)
                             DisabledColor: =RGBA(166, 166, 166, 1)
                             DisabledFill: =RGBA(255, 255, 255, 1)
@@ -869,7 +824,6 @@
                             HoverBorderColor: =RGBA(180, 214, 250, 1)
                             HoverColor: =RGBA(0, 0, 0, 1)
                             HoverFill: =RGBA(180, 214, 250, 1)
-                            Items: =colPaginas
                             OnChange: =
                             PressedColor: =RGBA(255, 255, 255, 1)
                             PressedFill: =RGBA(15, 108, 189, 1)
