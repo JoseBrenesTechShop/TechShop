@@ -11,17 +11,13 @@
                 pageSize: 13
             }
         );
-        
         Refresh(poitem);
         Refresh(po);
         Refresh(Compras_Pots);
-        
-        
         ClearCollect(
             colComprasFiltered,
             Compras_Pots
         );
-        
         ClearCollect(
             colPOs,
             Distinct(
@@ -29,26 +25,31 @@
                 po_num
             )
         );
-        
         ClearCollect(
-          colContenedoresAll,
-          Filter(
-            AddColumns(
-              colPOs,
-              pon, Value,
-        
-              Requisicion, LookUp( poitem, po_num = Value, req_num ),
-              FechaSolicitud, LookUp( Solicitud_Compras, soli_num = LookUp(poitem, po_num = Value, req_num), fecha ),
-              
-              TotalPagar,
-                Value( LookUp(po, po_num = Value, po_cost) )
-                - Sum( Filter(colComprasFiltered, POT = Value), Value(Total) )
-            ),
-            TotalPagar > 0
-          )
+            colContenedoresAll,
+            Filter(
+                AddColumns(
+                    colPOs,
+                    pon,
+                    Value,
+                    TotalPagar,
+                    Value(
+                        LookUp(
+                            po,
+                            po_num = Value,
+                            po_cost
+                        )
+                    ) - Sum(
+                        Filter(
+                            colComprasFiltered,
+                            POT = Value
+                        ),
+                        Value(Total)
+                    )
+                ),
+                TotalPagar > 0
+            )
         );
-        
-        
         UpdateContext(
             {
                 totalPages: RoundUp(
@@ -802,8 +803,14 @@
                                                         po_num = ThisItem.pon,
                                                         vend_num
                                                     ),
-                                                    Requisicion: ThisItem.Requisicion,
-                                                    FechaSolicitud: ThisItem.FechaSolicitud
+                                                    Requisicion: LookUp(
+                                                        poitem,
+                                                        po_num = ThisItem.pon,
+                                                        req_num),
+                                                    FechaSolicitud: LookUp(Solicitud_Compras, soli_num = LookUp(
+                                                        poitem,
+                                                        po_num = ThisItem.pon,
+                                                        req_num))
                                                 }
                                             )
                                         )

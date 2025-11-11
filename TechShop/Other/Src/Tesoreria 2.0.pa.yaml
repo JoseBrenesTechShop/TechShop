@@ -11,7 +11,79 @@ Screens:
     Properties:
       BackgroundImage: ='abstracto geométrico blanco y gris'
       ImagePosition: =ImagePosition.Fill
-      OnVisible: "=\r\nUpdateContext(\r\n    {\r\n        currentPage: 1,\r\n        pageSize: 13\r\n    }\r\n);\r\n\r\nRefresh(poitem);\r\nRefresh(po);\r\nRefresh(Compras_Pots);\r\n\r\n\r\nClearCollect(\r\n    colComprasFiltered,\r\n    Compras_Pots\r\n);\r\n\r\nClearCollect(\r\n    colPOs,\r\n    Distinct(\r\n        poitem,\r\n        po_num\r\n    )\r\n);\r\n\r\nClearCollect(\r\n  colContenedoresAll,\r\n  Filter(\r\n    AddColumns(\r\n      colPOs,\r\n      pon, Value,\r\n\r\n      Requisicion, LookUp( poitem, po_num = Value, req_num ),\r\n      FechaSolicitud, LookUp( Solicitud_Compras, soli_num = LookUp(poitem, po_num = Value, req_num), fecha ),\r\n      \r\n      TotalPagar,\r\n        Value( LookUp(po, po_num = Value, po_cost) )\r\n        - Sum( Filter(colComprasFiltered, POT = Value), Value(Total) )\r\n    ),\r\n    TotalPagar > 0\r\n  )\r\n);\r\n\r\n\r\nUpdateContext(\r\n    {\r\n        totalPages: RoundUp(\r\n            CountRows(colContenedoresAll) / pageSize,\r\n            0\r\n        )\r\n    }\r\n);\r\nClearCollect(\r\n    colPaginas,\r\n    ForAll(\r\n        Sequence(totalPages),\r\n        {NumeroPagina: Value}\r\n    )\r\n);\r\nClearCollect(\r\n    colContenedores,\r\n    FirstN(\r\n        Sort(\r\n            colContenedoresAll,\r\n            pon,\r\n            SortOrder.Descending\r\n        ),\r\n        pageSize\r\n    )\r\n);\r\n"
+      OnVisible: |
+        =
+        UpdateContext(
+            {
+                currentPage: 1,
+                pageSize: 13
+            }
+        );
+        Refresh(poitem);
+        Refresh(po);
+        Refresh(Compras_Pots);
+        ClearCollect(
+            colComprasFiltered,
+            Compras_Pots
+        );
+        ClearCollect(
+            colPOs,
+            Distinct(
+                poitem,
+                po_num
+            )
+        );
+        ClearCollect(
+            colContenedoresAll,
+            Filter(
+                AddColumns(
+                    colPOs,
+                    pon,
+                    Value,
+                    TotalPagar,
+                    Value(
+                        LookUp(
+                            po,
+                            po_num = Value,
+                            po_cost
+                        )
+                    ) - Sum(
+                        Filter(
+                            colComprasFiltered,
+                            POT = Value
+                        ),
+                        Value(Total)
+                    )
+                ),
+                TotalPagar > 0
+            )
+        );
+        UpdateContext(
+            {
+                totalPages: RoundUp(
+                    CountRows(colContenedoresAll) / pageSize,
+                    0
+                )
+            }
+        );
+        ClearCollect(
+            colPaginas,
+            ForAll(
+                Sequence(totalPages),
+                {NumeroPagina: Value}
+            )
+        );
+        ClearCollect(
+            colContenedores,
+            FirstN(
+                Sort(
+                    colContenedoresAll,
+                    pon,
+                    SortOrder.Descending
+                ),
+                pageSize
+            )
+        );
     Children:
       - ScreenContainer_EM_14:
           Control: GroupContainer@1.3.0
@@ -619,8 +691,14 @@ Screens:
                                                                       po_num = ThisItem.pon,
                                                                       vend_num
                                                                   ),
-                                                                  Requisicion: ThisItem.Requisicion,
-                                                                  FechaSolicitud: ThisItem.FechaSolicitud
+                                                                  Requisicion: LookUp(
+                                                                      poitem,
+                                                                      po_num = ThisItem.pon,
+                                                                      req_num),
+                                                                  FechaSolicitud: LookUp(Solicitud_Compras, soli_num = LookUp(
+                                                                      poitem,
+                                                                      po_num = ThisItem.pon,
+                                                                      req_num))
                                                               }
                                                           )
                                                       )
