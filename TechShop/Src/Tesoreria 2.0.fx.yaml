@@ -4,23 +4,24 @@
     ImagePosition: =ImagePosition.Fill
     LoadingSpinnerColor: =App.Theme.Colors.Primary
     OnVisible: |
-        =// Inicializamos paginación
+        =
         UpdateContext(
             {
                 currentPage: 1,
                 pageSize: 13
             }
         );
-        // Refrescar fuentes
+        
         Refresh(poitem);
         Refresh(po);
         Refresh(Compras_Pots);
-        // Traer todas las compras
+        
+        
         ClearCollect(
             colComprasFiltered,
             Compras_Pots
         );
-        // Traer todos los PO distintos
+        
         ClearCollect(
             colPOs,
             Distinct(
@@ -28,13 +29,17 @@
                 po_num
             )
         );
-        // Calcular TotalPagar y dejar solo los que sean > 0
+        
         ClearCollect(
           colContenedoresAll,
           Filter(
             AddColumns(
               colPOs,
               pon, Value,
+        
+              Requisicion, LookUp( poitem, po_num = Value, req_num ),
+              FechaSolicitud, LookUp( Solicitud_Compras, soli_num = LookUp(poitem, po_num = Value, req_num), fecha ),
+              
               TotalPagar,
                 Value( LookUp(po, po_num = Value, po_cost) )
                 - Sum( Filter(colComprasFiltered, POT = Value), Value(Total) )
@@ -42,7 +47,8 @@
             TotalPagar > 0
           )
         );
-        // Calcular total de páginas
+        
+        
         UpdateContext(
             {
                 totalPages: RoundUp(
@@ -51,7 +57,6 @@
                 )
             }
         );
-        // Crear lista de páginas para el dropdown
         ClearCollect(
             colPaginas,
             ForAll(
@@ -59,7 +64,6 @@
                 {NumeroPagina: Value}
             )
         );
-        // Cargar primera página
         ClearCollect(
             colContenedores,
             FirstN(
@@ -745,30 +749,64 @@
                                 Height: =36
                                 HoverBorderColor: =
                                 HoverColor: =App.Theme.Colors.Darker30
-                                OnCheck: |
+                                OnCheck: |-
                                     =If(
-                                      IsBlank( LookUp(colSelectedPOTs, POT = ThisItem.pon) ),
-                                      Collect(
-                                        colSelectedPOTs,
-                                        {
-                                          POT: ThisItem.pon,
-                                          MontoAPagar: Coalesce( Value(ThisItem.TotalPagar), Value(txt_Total_Pagar_OLP.Text), 0 ),
-                                          Moneda: Coalesce(
-                                                   Upper(
-                                                     LookUp(
-                                                       vendor,
-                                                       vend_num = LookUp(po, po_num = ThisItem.pon, vend_num),
-                                                       curr_code
-                                                     )
-                                                   ),
-                                                   "SIN MONEDA"
-                                                 ),
-                                          Nombre_Proveedor: LookUp(vendaddr, vend_num = LookUp(po, po_num = ThisItem.pon, vend_num), name),
-                                          Codigo_Proveedor: LookUp(po, po_num = ThisItem.pon, vend_num),
-                                          Requisicion: LookUp(Compras_Pots, POT = ThisItem.pon, Requisicion),
-                                          FechaSolicitud: LookUp(Solicitud_Compras, soli_num = LookUp(Compras_Pots, POT = ThisItem.pon, Requisicion), fecha)
-                                        }
-                                      )
+                                        IsBlank(
+                                            LookUp(
+                                                colSelectedPOTs,
+                                                POT = ThisItem.pon
+                                            )
+                                        ),
+                                        With(
+                                            {
+                                                req: LookUp(
+                                                    Compras_Pots,
+                                                    POT = ThisItem.pon,
+                                                    Requisicion
+                                                )
+                                            },
+                                            Collect(
+                                                colSelectedPOTs,
+                                                {
+                                                    POT: ThisItem.pon,
+                                                    MontoAPagar: Coalesce(
+                                                        Value(ThisItem.TotalPagar),
+                                                        Value(txt_Total_Pagar_OLP.Text),
+                                                        0
+                                                    ),
+                                                    Moneda: Coalesce(
+                                                        Upper(
+                                                            LookUp(
+                                                                vendor,
+                                                                vend_num = LookUp(
+                                                                    po,
+                                                                    po_num = ThisItem.pon,
+                                                                    vend_num
+                                                                ),
+                                                                curr_code
+                                                            )
+                                                        ),
+                                                        "SIN MONEDA"
+                                                    ),
+                                                    Nombre_Proveedor: LookUp(
+                                                        vendaddr,
+                                                        vend_num = LookUp(
+                                                            po,
+                                                            po_num = ThisItem.pon,
+                                                            vend_num
+                                                        ),
+                                                        name
+                                                    ),
+                                                    Codigo_Proveedor: LookUp(
+                                                        po,
+                                                        po_num = ThisItem.pon,
+                                                        vend_num
+                                                    ),
+                                                    Requisicion: ThisItem.Requisicion,
+                                                    FechaSolicitud: ThisItem.FechaSolicitud
+                                                }
+                                            )
+                                        )
                                     )
                                 OnUncheck: |
                                     =RemoveIf(colSelectedPOTs, POT = ThisItem.pon)
@@ -2426,8 +2464,8 @@
                         Collect(
                             RegistroPagos,
                             {
-                                Fecha_Solicitud: gl_ListaContenedores_LE_2.Selected.fecha,
-                                Requisicion: gl_ListaContenedores_LE_2.Selected.soli_num,
+                                // Fecha_Solicitud: ;
+                                // Requisicion: ;
                                 Total_Pagar: Value(lbl_montoTotal_OLP.Text),
                                 Total_Cancelado: Value(lbl_montoCancelado_OLP.Text),
                                 Total: Value(txt_totalPOT_OLP.Text),
@@ -2457,7 +2495,7 @@
                                     Collect(
                                         Compras_Pots,
                                         {
-                                            Requisicion: gl_ListaContenedores_LE_2.Selected.soli_num,
+                                          //  Requisicion: ;
                                             POT: pot,
                                             Total: Value(txt_montopagar_OPL.Text),
                                             'Estado (crfb9_estado)': drp_EstadoPago_OLP_1.Selected.Value,
@@ -2471,7 +2509,7 @@
                                     Collect(
                                         Compras_Pots,
                                         {
-                                            Requisicion: gl_ListaContenedores_LE_2.Selected.soli_num,
+                                           // Requisicion: ;
                                             POT: pot,
                                             Total: montoPago,
                                             'Estado (crfb9_estado)': drp_EstadoPago_OLP_1.Selected.Value,
@@ -2495,22 +2533,12 @@
                                 Solicitud_Compras,
                                 LookUp(
                                     Solicitud_Compras,
-                                    soli_num = gl_ListaContenedores_LE_2.Selected.soli_num
+                                   // soli_num = 
                                 ),
                                 {estado: "Cancelado"}
                             )
                         );
-                        /*If(
-                         Value(gl_ListaContenedores_LE_2.Selected.txt_TotalPagar_OLP.Text) - Value( gl_ListaContenedores_LE_2.Selected.txt_Cantidad_EM_58.Text) = 0  ;
-                            Patch(
-                                Solicitud_Compras;
-                                LookUp(
-                                    Solicitud_Compras;
-                                    soli_num = gl_ListaContenedores_LE_2.Selected.soli_num
-                                );
-                                {estado: "Cancelado"}
-                            )
-                        );;*/
+                    
                     Reset(drp_MetodoPago_OLP_1);
                         Reset(drp_EstadoPago_OLP_1);
                         Reset(txt_montopagar_OPL);
