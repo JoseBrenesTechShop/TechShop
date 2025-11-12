@@ -3,30 +3,90 @@
     Fill: =Color.White
     ImagePosition: =ImagePosition.Fill
     LoadingSpinnerColor: =App.Theme.Colors.Primary
-    OnVisible: |+
-        =ClearCollect(Filtro, Compras_Pots);
-        
-        ClearCollect(ObtenerPot, Distinct(Filter(poitem, req_num = LookUp(preqitem, po_num = ThisRecord.po_num,req_num) ), po_num ) );
-        
-        ClearCollect(
+    OnVisible: |-
+        =ClearCollect(
             ContenedorTesoreria,
-            AddColumns(
-                ObtenerPot,
-        
-                pot, Value,
-        
-                Requisicion,LookUp(preqitem,po_num = Value, req_num),
-        
-                CodigoProveedor, LookUp(po, po_num = Value, vend_num),
-        
-                NombreProveedor,LookUp(vendaddr,vend_num = LookUp(po, po_num = Value, vend_num), name),
-        
-                Moneda,Coalesce(Upper(LookUp(vendor,vend_num = LookUp(po, po_num = Value, vend_num),curr_code)),"SIN MONEDA"),
-                
-                TotalPagar,Value(LookUp(po, po_num = Value, po_cost)) - Sum(Filter(Filtro, POT = Value),Total)
+            Filter(
+                AddColumns(
+                    ShowColumns(
+                        poitem,
+                        po_num
+                    ),
+                    pot,
+                    With(
+                        {Pot: ThisRecord.po_num},
+                        Pot
+                    ),
+                    Requisicion,
+                    With(
+                        {Pot: ThisRecord.po_num},
+                        LookUp(
+                            preqitem,
+                            po_num = Pot,
+                            req_num
+                        )
+                    ),
+                    CodigoProveedor,
+                    With(
+                        {Pot: ThisRecord.po_num},
+                        LookUp(
+                            po,
+                            po_num = Pot,
+                            vend_num
+                        )
+                    ),
+                    NombreProveedor,
+                    With(
+                        {Pot: ThisRecord.po_num},
+                        LookUp(
+                            vendaddr,
+                            vend_num = LookUp(
+                                po,
+                                po_num = Pot,
+                                vend_num
+                            ),
+                            name
+                        )
+                    ),
+                    Moneda,
+                    With(
+                        {Pot: ThisRecord.po_num},
+                        Coalesce(
+                            Upper(
+                                LookUp(
+                                    vendor,
+                                    vend_num = LookUp(
+                                        po,
+                                        po_num = Pot,
+                                        vend_num
+                                    ),
+                                    curr_code
+                                )
+                            ),
+                            "SIN MONEDA"
+                        )
+                    ),
+                    TotalPagar,
+                    With(
+                        {Pot: ThisRecord.po_num},
+                        Value(
+                            LookUp(
+                                po,
+                                po_num = Pot,
+                                po_cost
+                            )
+                        ) - Sum(
+                            Filter(
+                                Compras_Pots,
+                                POT = Pot
+                            ),
+                            Total
+                        )
+                    )
+                ),
+                TotalPagar > 0
             )
-        );
-        
+        )
 
     ScreenContainer_EM_14 As groupContainer.verticalAutoLayoutContainer:
         DropShadow: =DropShadow.Light
