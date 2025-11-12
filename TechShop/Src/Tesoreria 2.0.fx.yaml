@@ -5,26 +5,25 @@
     LoadingSpinnerColor: =App.Theme.Colors.Primary
     OnVisible: |+
         =ClearCollect(Filtro, Compras_Pots);
-        ClearCollect(Filtro2 ,preqitem);
         
+        ClearCollect(ObtenerPot, Distinct(Filter(poitem, req_num = LookUp(preqitem, po_num = ThisRecord.po_num,req_num) ), po_num ) );
         
         ClearCollect(
             ContenedorTesoreria,
             AddColumns(
-                poitem,
+                ObtenerPot,
         
-                pot, ThisRecord.po_num,
+                pot, Value,
         
-                Requisicion,LookUp(preqitem,po_num = ThisRecord.po_num, req_num),
+                Requisicion,LookUp(preqitem,po_num = Value, req_num),
         
-                CodigoProveedor, LookUp(po, po_num = ThisRecord.po_num, vend_num),
+                CodigoProveedor, LookUp(po, po_num = Value, vend_num),
         
-                NombreProveedor,LookUp(vendaddr,vend_num = LookUp(po, po_num = ThisRecord.po_num, vend_num), name),
+                NombreProveedor,LookUp(vendaddr,vend_num = LookUp(po, po_num = Value, vend_num), name),
         
-                Moneda,Coalesce(Upper(LookUp(vendor,vend_num = LookUp(po, po_num = ThisRecord.po_num, vend_num),curr_code)),"SIN MONEDA"),
+                Moneda,Coalesce(Upper(LookUp(vendor,vend_num = LookUp(po, po_num = Value, vend_num),curr_code)),"SIN MONEDA"),
                 
-                TotalPagar,Value(LookUp(po, po_num = ThisRecord.po_num, po_cost)) - Sum(Filter(Filtro, POT = po_num),Total)
-        
+                TotalPagar,Value(LookUp(po, po_num = Value, po_cost)) - Sum(Filter(Filtro, POT = Value),Total)
             )
         );
         
