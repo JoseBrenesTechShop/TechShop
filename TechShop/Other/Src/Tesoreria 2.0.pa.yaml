@@ -19,7 +19,8 @@ Screens:
                     ShowColumns(
                         poitem,
                         po_num,
-                        req_num
+                        req_num,
+                        po_line
                     ) As P,
                     pot,
                     With(
@@ -27,16 +28,26 @@ Screens:
                         Pot
                     ),
                     Requisicion,
-                    Coalesce(
-                        With(
-                            {req: P.req_num},
+                    With(
+                        {
+                            Pot: P.po_num,
+                            Line: P.po_line,
+                            ReqNum: Trim(
+                                LookUp(
+                                    preqitem,
+                                    po_num = P.po_num && po_line = P.po_line,
+                                    req_num
+                                )
+                            )
+                        },
+                        Coalesce(
                             LookUp(
                                 Solicitud_Compras,
-                                soli_num = req,
+                                soli_num = ReqNum,
                                 soli_num
-                            )
-                        ),
-                        "SIN REQUISICION"  
+                            ),
+                            "SIN REQUISICION"
+                        )
                     ),
                     CodigoProveedor,
                     With(
