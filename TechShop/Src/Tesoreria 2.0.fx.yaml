@@ -11,15 +11,15 @@
                     ShowColumns(
                         poitem,
                         po_num
-                    ),
+                    ) As P,
                     pot,
                     With(
-                        {Pot: ThisRecord.po_num},
+                        {Pot: P.po_num},
                         Pot
                     ),
                     Requisicion,
                     With(
-                        {Pot: ThisRecord.po_num},
+                        {Pot: P.po_num},
                         LookUp(
                             preqitem,
                             po_num = Pot,
@@ -28,7 +28,7 @@
                     ),
                     CodigoProveedor,
                     With(
-                        {Pot: ThisRecord.po_num},
+                        {Pot: P.po_num},
                         LookUp(
                             po,
                             po_num = Pot,
@@ -36,21 +36,18 @@
                         )
                     ),
                     NombreProveedor,
-                    With(
-                        {Pot: ThisRecord.po_num},
-                        LookUp(
-                            vendaddr,
-                            vend_num = LookUp(
-                                po,
-                                po_num = Pot,
-                                vend_num
-                            ),
-                            name
-                        )
+                    LookUp(
+                        vendaddr,
+                        vend_num = LookUp(
+                            po,
+                            po_num = P.po_num,
+                            vend_num
+                        ),
+                        name
                     ),
                     Moneda,
                     With(
-                        {Pot: ThisRecord.po_num},
+                        {Pot: P.po_num},
                         Coalesce(
                             Upper(
                                 LookUp(
@@ -68,7 +65,7 @@
                     ),
                     TotalPagar,
                     With(
-                        {Pot: ThisRecord.po_num},
+                        {Pot: P.po_num},
                         Value(
                             LookUp(
                                 po,
@@ -85,6 +82,14 @@
                     )
                 ),
                 TotalPagar > 0
+            )
+        );
+        
+        Set(
+            tmpVendor,
+            LookUp(
+                vendaddr,
+                vend_num = LookUp(po, po_num = gl_ListaContenedores_LE_3.Selected.pot, vend_num)
             )
         )
 
@@ -418,7 +423,7 @@
                         PaddingRight: =0
                         PaddingTop: =0
                         Size: =20
-                        Text: ="Buscadores"
+                        Text: ="Buscador"
                         Weight: ='TextCanvas.Weight'.Bold
                         Width: =110
                         X: =10
@@ -888,6 +893,39 @@
                             X: =648
                             Y: =535
                             ZIndex: =10
+
+                    lbl_ValorDato_EM_58 As Texto:
+                        Align: ='TextCanvas.Align'.Center
+                        AutoHeight: =false
+                        BorderStyle: =""
+                        ContentLanguage: =""
+                        DisplayMode: =DisplayMode.Edit
+                        Font: =""
+                        FontColor: =RGBA(255, 255, 255, 1)
+                        FontItalic: =false
+                        FontStrikethrough: =false
+                        FontUnderline: =false
+                        Height: =30
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =20
+                        TabIndex: =0
+                        Text: |-
+                            =    LookUp(
+                                    vendaddr,
+                                    vend_num = LookUp(po, po_num = gl_ListaContenedores_LE_3.Selected.pot, vend_num)
+                                ).name
+                        Tooltip: =""
+                        VerticalAlign: =""
+                        Visible: =true
+                        Weight: ='TextCanvas.Weight'.Bold
+                        Width: =110
+                        Wrap: =true
+                        X: =461
+                        Y: =10
+                        ZIndex: =25
 
     Capa1_17 As groupContainer.manualLayoutContainer:
         BorderColor: =RGBA(0, 0, 0, 0)
