@@ -17,9 +17,9 @@ Screens:
             Filter(
                 AddColumns(
                     ShowColumns(
-                        poitem,
+                        preqitem,
                         po_num,
-                        po_line
+                        req_num
                     ) As P,
                     pot,
                     With(
@@ -30,12 +30,12 @@ Screens:
                     With(
                         {
                             Pot: P.po_num,
-                            Line: P.po_line
+                            req: P.req_num
                         },
                         Coalesce(
                                 LookUp(
-                                    preqitem,
-                                    po_num = Pot && po_line = Line,
+                                    preq,
+                                    req_num = req,
                                     req_num
                                 ),
                             "No encontrado"
@@ -66,18 +66,14 @@ Screens:
                     With(
                         {Pot: P.po_num},
                         Coalesce(
-                            Upper(
-                                LookUp(
-                                    vendor,
-                                    vend_num = LookUp(
-                                        po,
-                                        po_num = Pot,
-                                        vend_num
-                                    ),
-                                    curr_code
-                                )
-                            ),
-                            "SIN MONEDA"
+                        Upper(
+                            LookUp(
+                            vendor,
+                            vend_num = LookUp(po, po_num = P.po_num, vend_num),
+                            curr_code
+                            )
+                        ),
+                        "SIN MONEDA"
                         )
                     ),
                     TotalPagar,
@@ -429,7 +425,7 @@ Screens:
                                           BorderStyle: =BorderStyle.Solid
                                           BorderThickness: =0.5
                                           Fill: =RGBA(180, 214, 250, 1)
-                                          Height: =21
+                                          Height: =22
                                           PaddingBottom: =0
                                           PaddingLeft: =0
                                           PaddingRight: =0
@@ -591,7 +587,7 @@ Screens:
                                                 Align: =Align.Center
                                                 BorderColor: =RGBA(40, 134, 222, 1)
                                                 BorderThickness: =0.5
-                                                Default: =Text(ThisItem.NombreProveedor)
+                                                Default: =ThisItem.NombreProveedor
                                                 DisabledBorderColor: =RGBA(40, 134, 222, 1)
                                                 DisabledColor: =
                                                 DisabledFill: =
@@ -719,7 +715,7 @@ Screens:
                                           Height: =35
                                           HoverBorderColor: =RGBA(12, 59, 94, 1)
                                           HoverFill: =RGBA(12, 59, 94, 1)
-                                          OnSelect: =
+                                          OnSelect: =Clear(ContenedorTesoreria)
                                           PressedBorderColor: =RGBA(15, 84, 140, 1)
                                           PressedColor: =RGBA(15, 84, 140, 1)
                                           PressedFill: =RGBA(180, 214, 250, 1)
