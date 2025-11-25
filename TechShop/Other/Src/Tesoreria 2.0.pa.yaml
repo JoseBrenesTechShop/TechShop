@@ -12,12 +12,41 @@ Screens:
       BackgroundImage: ='abstracto geométrico blanco y gris'
       ImagePosition: =ImagePosition.Fill
       OnVisible: |-
-        =ClearCollect(
+        =// Primero: Cargar SOLO las requisiciones en proceso (esto es delegable)
+        ClearCollect(
+            colRequisicionesProceso,
+            Filter(
+                Solicitud_Compras,
+                estado = "En Proceso"
+            )
+        );
+
+        // Segundo: Cargar TODOS los preqitems (delegable)
+        ClearCollect(
+            colTodosPreqitems,
+            preqitem
+        );
+
+        // Tercero: Filtrar LOCALMENTE (sin delegación)
+        ClearCollect(
+            colPreqitemsFiltrados,
+            Filter(
+                colTodosPreqitems,
+                CountRows(
+                    Filter(
+                        colRequisicionesProceso,
+                        soli_num = req_num
+                    )
+                ) > 0
+            )
+        );
+
+        ClearCollect(
             ContenedorTesoreria,
             Filter(
                 AddColumns(
                     ShowColumns(
-                        preqitem,
+                        colPreqitemsFiltrados,
                         po_num,
                         req_num
                     ) As P,
@@ -28,7 +57,7 @@ Screens:
                     Moneda, With({Pot: P.po_num, VendNumTemp: LookUp(po, po_num = P.po_num, vend_num)}, Coalesce(Upper(LookUp(vendor, vend_num = VendNumTemp, curr_code)), "SIN MONEDA")),
                     TotalPagar, With({Pot: P.po_num}, Value(LookUp(po, po_num = Pot, po_cost)) - Sum(Filter(Compras_Pots, POT = Pot), Total))
                 ),
-                TotalPagar > 0 And !IsBlank(LookUp(Solicitud_Compras,soli_num = req_num And estado = "En Proceso"))
+                TotalPagar > 0 
             )
         )
     Children:
@@ -112,7 +141,7 @@ Screens:
                         FontWeight: =FontWeight.Bold
                         Height: =60
                         Size: =25
-                        Text: '="Tesoreria" '
+                        Text: ="Tesoreria"
                         Width: =740
                   - icn_Separador_EM_14:
                       Control: Classic/Icon@2.5.0
@@ -359,7 +388,7 @@ Screens:
                                           BorderStyle: =BorderStyle.Solid
                                           BorderThickness: =0.5
                                           Fill: =RGBA(180, 214, 250, 1)
-                                          Height: =22
+                                          Height: =25
                                           PaddingBottom: =0
                                           PaddingLeft: =0
                                           PaddingRight: =0
