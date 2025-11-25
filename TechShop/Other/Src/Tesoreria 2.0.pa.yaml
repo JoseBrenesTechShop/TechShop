@@ -12,41 +12,58 @@ Screens:
       BackgroundImage: ='abstracto geométrico blanco y gris'
       ImagePosition: =ImagePosition.Fill
       OnVisible: |-
-        =// Primero: Cargar SOLO las requisiciones en proceso (esto es delegable)
+        =// Primero: Obtener todas las requisiciones en estado "En Proceso"
         ClearCollect(
-            colRequisicionesProceso,
-            Filter(
-                Solicitud_Compras,
-                estado = "En Proceso"
+            colRequisicionesEnProceso,
+            Distinct(
+                Filter(
+                    Solicitud_Compras,
+                    estado = "En Proceso"
+                ),
+                soli_num
             )
         );
 
-        // Segundo: Cargar TODOS los preqitems (delegable)
         ClearCollect(
-            colTodosPreqitems,
-            preqitem
-        );
-
-        // Tercero: Filtrar LOCALMENTE (sin delegación)
-        ClearCollect(
-            colPreqitemsFiltrados,
-            Filter(
-                colTodosPreqitems,
-                CountRows(
-                    Filter(
-                        colRequisicionesProceso,
-                        soli_num = req_num
-                    )
-                ) > 0
+            colPOs,
+            Distinct(
+                Filter(
+                    poitem,
+                    CountRows(
+                        Filter(
+                            colRequisicionesEnProceso,
+                            Value = req_num
+                        )
+                    ) > 0
+                ),
+                po_num
             )
         );
+
+        // Segundo: Obtener las POTs únicas usando poitem - SIMILAR A TU CÓDIGO ORIGINAL
+        ClearCollect(
+            colPOs,
+            Distinct(
+                Filter(
+                    poitem,
+                    CountRows(
+                        Filter(
+                            colRequisicionesEnProceso,
+                            Value = req_num
+                        )
+                    ) > 0
+                ),
+                po_num
+            )
+        );
+
 
         ClearCollect(
             ContenedorTesoreria,
             Filter(
                 AddColumns(
                     ShowColumns(
-                        colPreqitemsFiltrados,
+                        preqitem,
                         po_num,
                         req_num
                     ) As P,
