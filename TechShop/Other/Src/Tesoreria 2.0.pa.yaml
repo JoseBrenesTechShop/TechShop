@@ -12,71 +12,60 @@ Screens:
       BackgroundImage: ='abstracto geométrico blanco y gris'
       ImagePosition: =ImagePosition.Fill
       OnVisible: |-
-        =// Primero: Obtener todas las requisiciones en estado "En Proceso"
-        ClearCollect(
-            colRequisicionesEnProceso,
-            Distinct(
-                Filter(
-                    Solicitud_Compras,
-                    estado = "En Proceso"
-                ),
-                soli_num
-            )
+        =ClearCollect(
+          colReqNums,
+          Distinct(
+            Filter(Solicitud_Compras, estado = "En Proceso"),
+            soli_num
+          )
         );
-
-        ClearCollect(
-            colPOs,
-            Distinct(
-                Filter(
-                    poitem,
-                    CountRows(
-                        Filter(
-                            colRequisicionesEnProceso,
-                            Value = req_num
-                        )
-                    ) > 0
-                ),
-                po_num
-            )
+        Clear(colPOsTemp);
+        ForAll(
+          colReqNums,
+          Collect(
+            colPOsTemp,
+            Filter(poitem, req_num = Value)      
+          )
         );
-
-        // Segundo: Obtener las POTs únicas usando poitem - SIMILAR A TU CÓDIGO ORIGINAL
         ClearCollect(
-            colPOs,
-            Distinct(
-                Filter(
-                    poitem,
-                    CountRows(
-                        Filter(
-                            colRequisicionesEnProceso,
-                            Value = req_num
-                        )
-                    ) > 0
-                ),
-                po_num
-            )
+          colPOs,
+          Distinct(colPOsTemp, po_num)
         );
-
-
-        ClearCollect(
+        Clear(ContenedorTesoreria);
+        ForAll(
+          colPOs,
+          Collect(
             ContenedorTesoreria,
-            Filter(
-                AddColumns(
-                    ShowColumns(
-                        preqitem,
-                        po_num,
-                        req_num
-                    ) As P,
-                    pot, With({Pot: P.po_num}, Pot),
-                    Requisicion, With({Pot: P.po_num, req: P.req_num}, Coalesce(LookUp(preq, req_num = req, req_num), "No encontrado")),
-                    CodigoProveedor, With({Pot: P.po_num}, LookUp(po, po_num = Pot, vend_num)),
-                    NombreProveedor, With({Pot: P.po_num, VendNumTemp: LookUp(po, po_num = P.po_num, vend_num)}, LookUp(vendaddr, vend_num = VendNumTemp, name)),
-                    Moneda, With({Pot: P.po_num, VendNumTemp: LookUp(po, po_num = P.po_num, vend_num)}, Coalesce(Upper(LookUp(vendor, vend_num = VendNumTemp, curr_code)), "SIN MONEDA")),
-                    TotalPagar, With({Pot: P.po_num}, Value(LookUp(po, po_num = Pot, po_cost)) - Sum(Filter(Compras_Pots, POT = Pot), Total))
-                ),
-                TotalPagar > 0 
+            AddColumns(
+              ShowColumns(
+                Filter(preqitem, po_num = Value), 
+                po_num,
+                req_num
+              ) As P,
+              pot, P.po_num,
+              Requisicion, Coalesce(LookUp(preq, req_num = P.req_num, req_num), "No encontrado"),
+              CodigoProveedor, LookUp(po, po_num = P.po_num, vend_num),
+              NombreProveedor, With({VendNumTemp: LookUp(po, po_num = P.po_num, vend_num)}, LookUp(vendaddr, vend_num = VendNumTemp, name)),
+              Moneda, With({VendNumTemp: LookUp(po, po_num = P.po_num, vend_num)}, Coalesce(Upper(LookUp(vendor, vend_num = VendNumTemp, curr_code)), "SIN MONEDA")),
+              TotalPagar, Value(LookUp(po, po_num = P.po_num, po_cost)) - Sum(Filter(Compras_Pots, POT = P.po_num), Total)
             )
-        )
+          )
+        );
+
+        RemoveIf(ContenedorTesoreria, TotalPagar <= 0);
+
+        ClearCollect(
+          ContenedorTesoreriaUnico,
+          ForAll(
+            Distinct(
+              AddColumns(ContenedorTesoreria, Key, pot & "|" & Requisicion),
+              Key
+            ),
+            First(
+              Filter(ContenedorTesoreria, pot & "|" & Requisicion = Value)
+            )
+          )
+        );
     Children:
       - ScreenContainer_EM_14:
           Control: GroupContainer@1.3.0
@@ -510,7 +499,7 @@ Screens:
                                         Properties:
                                           BorderColor: =RGBA(0, 18, 107, 1)
                                           Height: =499
-                                          Items: =ContenedorTesoreria
+                                          Items: =ContenedorTesoreriaUnico
                                           OnSelect: =
                                           TemplateSize: =38
                                           Width: =1352
@@ -695,7 +684,7 @@ Screens:
                                           Height: =35
                                           HoverBorderColor: =RGBA(12, 59, 94, 1)
                                           HoverFill: =RGBA(12, 59, 94, 1)
-                                          OnSelect: =Clear(ContenedorTesoreria)
+                                          OnSelect: =Clear(ContenedorTesoreriaUnico)
                                           PressedBorderColor: =RGBA(15, 84, 140, 1)
                                           PressedColor: =RGBA(15, 84, 140, 1)
                                           PressedFill: =RGBA(180, 214, 250, 1)
