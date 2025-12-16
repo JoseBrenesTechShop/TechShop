@@ -11,61 +11,7 @@ Screens:
     Properties:
       BackgroundImage: ='abstracto geométrico blanco y gris'
       ImagePosition: =ImagePosition.Fill
-      OnVisible: |-
-        =ClearCollect(
-          FiltroRequisicion,
-          Distinct(
-            Filter(Solicitud_Compras, estado = "En Proceso"),
-            soli_num
-          )
-        );
-        Clear(FiltroPots);
-        ForAll(
-         FiltroRequisicion,
-          Collect(
-            FiltroPots,
-            Filter(poitem, req_num = Value)      
-          )
-        );
-        ClearCollect(
-          FiltroPots2,
-          Distinct(FiltroPots, po_num)
-        );
-        Clear(ContenedorTesoreria);
-        ForAll(
-          FiltroPots2,
-          Collect(
-            ContenedorTesoreria,
-            AddColumns(
-              ShowColumns(
-                Filter(preqitem, po_num = Value), 
-                po_num,
-                req_num
-              ) As P,
-              pot, P.po_num,
-              Requisicion, Coalesce(LookUp(preq, req_num = P.req_num, req_num), "No encontrado"),
-              CodigoProveedor, LookUp(po, po_num = P.po_num, vend_num),
-              NombreProveedor, With({VendNumTemp: LookUp(po, po_num = P.po_num, vend_num)}, LookUp(vendaddr, vend_num = VendNumTemp, name)),
-              Moneda, With({VendNumTemp: LookUp(po, po_num = P.po_num, vend_num)}, Coalesce(Upper(LookUp(vendor, vend_num = VendNumTemp, curr_code)), "SIN MONEDA")),
-              TotalPagar, Value(LookUp(po, po_num = P.po_num, po_cost)) - Sum(Filter(Compras_Pots, POT = P.po_num), Total)
-            )
-          )
-        );
-
-        RemoveIf(ContenedorTesoreria, TotalPagar <= 0);
-
-        ClearCollect(
-          ContenedorTesoreriaUnico,
-          ForAll(
-            Distinct(
-              AddColumns(ContenedorTesoreria, Key, pot & "|" & Requisicion),
-              Key
-            ),
-            First(
-              Filter(ContenedorTesoreria, pot & "|" & Requisicion = Value)
-            )
-          )
-        );
+      OnVisible: =Select(btn_cargadatos_TS)
     Children:
       - ScreenContainer_EM_14:
           Control: GroupContainer@1.3.0
@@ -198,7 +144,7 @@ Screens:
                           Refresh(RegistroPagos);
                           Refresh(Solicitud_Compras);
                            UpdateContext({ varReloadContenedores: Now() });
-                          Back()
+                          Navigate(MenuCompras)
                         PaddingBottom: =5
                         PaddingLeft: =5
                         PaddingRight: =5
@@ -276,7 +222,8 @@ Screens:
                                     HoverColor: =RGBA(255, 255, 255, 1)
                                     HoverFill: =RGBA(15, 84, 140, 1)
                                     OnSelect: |-
-                                      =If(
+                                      =
+                                      If(
                                           CountRows(colSelectedPOTs) = 0,
                                           UpdateContext(
                                               {
@@ -320,7 +267,8 @@ Screens:
                                                   }
                                               )
                                           )
-                                      )
+                                      );
+                                      ClearCollect(RequisicionesUnicas, Distinct(colPOTtoProcess, Requisicion));
                                     PressedBorderColor: =Self.Fill
                                     PressedColor: =Self.Fill
                                     PressedFill: =Self.Color
@@ -657,7 +605,7 @@ Screens:
                                                 Size: =15
                                                 Width: =201
                                                 X: =1105
-                                    - btn_EnviarCorreo_1:
+                                    - btn_cargadatos_TS:
                                         Control: Classic/Button@2.2.0
                                         Properties:
                                           BorderColor: =RGBA(0, 0, 0, 1)
@@ -666,66 +614,70 @@ Screens:
                                           Height: =35
                                           HoverBorderColor: =RGBA(12, 59, 94, 1)
                                           HoverFill: =RGBA(12, 59, 94, 1)
-                                          OnSelect: =
-                                          PressedBorderColor: =RGBA(15, 84, 140, 1)
-                                          PressedColor: =RGBA(15, 84, 140, 1)
-                                          PressedFill: =RGBA(180, 214, 250, 1)
-                                          Size: =16
-                                          Text: ="Siguiente"
-                                          Width: =146
-                                          X: =750
-                                          Y: =535
-                                    - btn_EnviarCorreo_2:
-                                        Control: Classic/Button@2.2.0
-                                        Properties:
-                                          BorderColor: =RGBA(0, 0, 0, 1)
-                                          BorderThickness: =3
-                                          Fill: =RGBA(15, 84, 140, 1)
-                                          Height: =35
-                                          HoverBorderColor: =RGBA(12, 59, 94, 1)
-                                          HoverFill: =RGBA(12, 59, 94, 1)
-                                          OnSelect: =Clear(ContenedorTesoreriaUnico)
+                                          OnSelect: |-
+                                            =UpdateContext({Guardando: true});
+                                            ClearCollect(
+                                              FiltroRequisicion,
+                                              Distinct(
+                                                Filter(Solicitud_Compras, estado = "En Proceso"),
+                                                soli_num
+                                              )
+                                            );
+                                            Clear(FiltroPots);
+                                            ForAll(
+                                             FiltroRequisicion,
+                                              Collect(
+                                                FiltroPots,
+                                                Filter(poitem, req_num = Value)      
+                                              )
+                                            );
+                                            ClearCollect(
+                                              FiltroPots2,
+                                              Distinct(FiltroPots, po_num)
+                                            );
+                                            Clear(ContenedorTesoreria);
+                                            ForAll(
+                                              FiltroPots2,
+                                              Collect(
+                                                ContenedorTesoreria,
+                                                AddColumns(
+                                                  ShowColumns(
+                                                    Filter(preqitem, po_num = Value), 
+                                                    po_num,
+                                                    req_num
+                                                  ) As P,
+                                                  pot, P.po_num,
+                                                  Requisicion, Coalesce(LookUp(preq, req_num = P.req_num, req_num), "No encontrado"),
+                                                  CodigoProveedor, LookUp(po, po_num = P.po_num, vend_num),
+                                                  NombreProveedor, With({VendNumTemp: LookUp(po, po_num = P.po_num, vend_num)}, LookUp(vendaddr, vend_num = VendNumTemp, name)),
+                                                  Moneda, With({VendNumTemp: LookUp(po, po_num = P.po_num, vend_num)}, Coalesce(Upper(LookUp(vendor, vend_num = VendNumTemp, curr_code)), "SIN MONEDA")),
+                                                  TotalPagar, Value(LookUp(po, po_num = P.po_num, po_cost)) - Sum(Filter(Compras_Pots, POT = P.po_num), Total)
+                                                )
+                                              )
+                                            );
+
+                                            RemoveIf(ContenedorTesoreria, TotalPagar <= 0);
+
+                                            ClearCollect(
+                                              ContenedorTesoreriaUnico,
+                                              ForAll(
+                                                Distinct(
+                                                  AddColumns(ContenedorTesoreria, Key, pot & "|" & Requisicion),
+                                                  Key
+                                                ),
+                                                First(
+                                                  Filter(ContenedorTesoreria, pot & "|" & Requisicion = Value)
+                                                )
+                                              )
+                                            );
+                                            UpdateContext({Guardando: false})
                                           PressedBorderColor: =RGBA(15, 84, 140, 1)
                                           PressedColor: =RGBA(15, 84, 140, 1)
                                           PressedFill: =RGBA(180, 214, 250, 1)
                                           Size: =16
                                           Text: ="Anterior"
+                                          Visible: =false
                                           Width: =146
-                                          X: =488
-                                          Y: =535
-                                    - ddPaginas:
-                                        Control: Classic/DropDown@2.3.1
-                                        Properties:
-                                          BorderColor: =RGBA(12, 59, 94, 1)
-                                          BorderThickness: =3
-                                          ChevronBackground: =RGBA(255, 255, 255, 1)
-                                          ChevronDisabledBackground: =RGBA(255, 255, 255, 1)
-                                          ChevronDisabledFill: =RGBA(138, 138, 138, 1)
-                                          ChevronFill: =RGBA(0, 0, 0, 1)
-                                          ChevronHoverBackground: =RGBA(15, 108, 189, 1)
-                                          ChevronHoverFill: =RGBA(255, 255, 255, 1)
-                                          Default: |
-                                            =
-                                          DisabledBorderColor: =RGBA(0, 0, 0, 0)
-                                          DisabledFill: =RGBA(255, 255, 255, 1)
-                                          DisplayMode: |
-                                            =
-                                            If(Disable, DisplayMode.Disabled, DisplayMode.Edit)
-                                          Font: =Font.'Open Sans'
-                                          Height: =35
-                                          HoverBorderColor: =RGBA(180, 214, 250, 1)
-                                          HoverFill: =RGBA(180, 214, 250, 1)
-                                          Items: =
-                                          Items.Value: =NumeroPagina
-                                          OnChange: =
-                                          PressedColor: =RGBA(255, 255, 255, 1)
-                                          PressedFill: =RGBA(15, 108, 189, 1)
-                                          SelectionColor: =RGBA(255, 255, 255, 1)
-                                          SelectionFill: =RGBA(15, 108, 189, 1)
-                                          Size: =10
-                                          Tooltip: ="Seleccione el año"
-                                          Width: =87
-                                          X: =648
                                           Y: =535
       - Capa1_17:
           Control: GroupContainer@1.3.0
@@ -1889,11 +1841,273 @@ Screens:
                           )
                         Fill: =RGBA(40, 134, 222, 1)
                         Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Bold
                         Height: =47
                         HoverBorderColor: =RGBA(40, 134, 222, 1)
                         HoverColor: =RGBA(255, 255, 255, 1)
                         HoverFill: =RGBA(15, 84, 140, 1)
-                        OnSelect: "=UpdateContext({isProcesando: true});\n\nIf(\n    CountRows(colPOTtoProcess) = 0,\n    UpdateContext(\n        {\n            MostrarAviso: true,\n            mensajeNotificacion: \"Selecciona al menos un POT\"\n        }\n    ),\n    CountRows(\n        Filter(\n            colPOTtoProcess,\n            IsBlank(Trim(Num_Referencia))\n        )\n    ) > 0,\n    UpdateContext(\n        {\n            MostrarAviso: true,\n            mensajeNotificacion: \"Debe ingresar la referencia para TODOS los POTs antes de continuar.\"\n        }\n    ),\n    IsBlank(txt_montopagar_OPL_1.Text) || Value(txt_montopagar_OPL_1.Text) <= 0,\n    UpdateContext(\n        {\n            MostrarAviso: true,\n            mensajeNotificacion: \"El monto a pagar no puede estar vacío o ser negativo.\"\n        }\n    ),\n    IsBlank(drp_MetodoPago_OLP_2.SelectedText.Value) || IsBlank(drp_EstadoPago_OLP_2.SelectedText.Value),\n    UpdateContext(\n        {\n            MostrarAviso: true,\n            mensajeNotificacion: \"Asegurese de seleccionar el metodo de pago y el estado de pago\"\n        }\n    ),\n    IsBlank(txt_totalPOT_OLP_2.Text) || Value(txt_totalPOT_OLP_2.Text) < 0,\n    UpdateContext(\n        {\n            MostrarAviso: true,\n            mensajeNotificacion: \"El total no puede ser negativo o estar vacío. Revisa los valores antes de continuar.\"\n        }\n    ),\n    (drp_MetodoPago_OLP_2.SelectedText.Metodo = \"Cheque\" || drp_MetodoPago_OLP_2.SelectedText.Metodo = \"Transferencia\") && IsBlank(txt_NumTransferencia_OLP_3.Text),\n    UpdateContext(\n        {\n            MostrarAviso: true,\n            mensajeNotificacion: \"El número de transferencia es obligatorio si el método de pago es Cheque o Transferencia.\"\n        }\n    ),\n    \n    UpdateContext({MostrarAviso: false}),\n    \n    Collect(\n        RegistroPagos,\n        {\n            Total_Pagar: Value(lbl_montoTotal_OLP_2.Text),\n            Total_Cancelado: Value(lbl_montoCancelado_OLP_2.Text),\n            Total: Value(txt_totalPOT_OLP_2.Text),\n            Fecha_UltimoPago: Today(),\n            'Estado (crfb9_estado)': drp_EstadoPago_OLP_2.Selected.Value,\n            Metodo_Pago: drp_MetodoPago_OLP_2.SelectedText.Metodo,\n            NUM_ID: txt_NumTransferencia_OLP_4.Text\n        }\n    );\n    \n    ClearCollect(colRequisicionesUnicas, Distinct(colPOTtoProcess, Requisicion)),\n    \n    ForAll(\n        colPOTtoProcess,\n        With(\n            {\n                pot: ThisRecord.POT,\n                codigoproveedor: ThisRecord.Codigo_Proveedor,\n                nombreproveedor: ThisRecord.Nombre_Proveedor,\n                totalPo: Value(txt_totalPOT_OLP_2.Text),\n                totalCancelado: Value(lbl_montoCancelado_OLP_2.Text),\n                montoPago: Value(ThisRecord.MontoAPagar),\n                requisicion: ThisRecord.Requisicion,  \n                numRef: Coalesce(\n                    ThisRecord.Num_Referencia,\n                    txt_NumTransferencia_OLP_3.Text\n                )\n            },\n            If(\n                drp_EstadoPago_OLP_2.SelectedText.Value = \"Parcial\",\n                Collect(\n                    Compras_Pots,\n                    {\n                        Requisicion: requisicion,  \n                        POT: pot,\n                        Total: Value(txt_montopagar_OPL_1.Text),\n                        'Estado (crfb9_estado)': drp_EstadoPago_OLP_2.Selected.Value,\n                        Num_Vend: codigoproveedor,\n                        Provedor: nombreproveedor,\n                        Num_Transferencia: numRef,\n                        NUM_ID: txt_NumTransferencia_OLP_4.Text,\n                        Valor_POT: Text(LookUp(po, po_num = pot, po_cost))\n                    }\n                ),\n                Collect(\n                    Compras_Pots,\n                    {\n                        Requisicion: requisicion, \n                        POT: pot,\n                        Total: montoPago,\n                        'Estado (crfb9_estado)': drp_EstadoPago_OLP_2.Selected.Value,\n                        Num_Vend: codigoproveedor,\n                        Provedor: nombreproveedor,\n                        Num_Transferencia: numRef,\n                        NUM_ID: txt_NumTransferencia_OLP_4.Text,\n                        Valor_POT: Text(LookUp(po, po_num = pot, po_cost))\n                    }\n                )\n            )\n        )\n    );\n    \n    Refresh(RegistroPagos);\n\n    // Aqui se debe de Verificar si las requisiciones deben cambiar a \"Cancelado\" PENDIENTE POR HACER...\n\n\n\n    Reset(drp_MetodoPago_OLP_2);\n    Reset(drp_EstadoPago_OLP_2);\n    Reset(txt_montopagar_OPL_1);\n    Clear(colSelectedPOTs);\n    Clear(colPOTtoProcess);\n    Clear(colRequisicionesUnicas);\n    UpdateContext({AbrirConfirmar: false, isProcesando: false, AbrirC: false, Disable: false});\n\nRefresh(poitem);\nRefresh(po);\nRefresh(RegistroPagos);\nRefresh(Solicitud_Compras)\n\n)"
+                        OnSelect: |
+                          =UpdateContext({Guardando: true});
+                          If(
+                              CountRows(colPOTtoProcess) = 0,
+                              UpdateContext(
+                                  {
+                                      Aviso: {
+                                          Ver: true,
+                                          Tipo: 0,
+                                          Texto: "Selecciona al menos un POT"
+                                      }
+                                  }
+                              ),
+                              CountRows(
+                                  Filter(
+                                      colPOTtoProcess,
+                                      IsBlank(Trim(Num_Referencia))
+                                  )
+                              ) > 0,
+                              UpdateContext(
+                                  {
+                                      Aviso: {
+                                          Ver: true,
+                                          Tipo: 0,
+                                          Texto: "Debe ingresar la referencia para TODOS los POTs antes de continuar."
+                                      }
+                                  }
+                              ),
+                              IsBlank(txt_montopagar_OPL_1.Text) || Value(txt_montopagar_OPL_1.Text) <= 0,
+                              UpdateContext(
+                                  {
+                                      Aviso: {
+                                          Ver: true,
+                                          Tipo: 0,
+                                          Texto: "El monto a pagar no puede estar vacío o ser negativo."
+                                      }
+                                  }
+                              ),
+                              IsBlank(drp_MetodoPago_OLP_2.SelectedText.Value) || IsBlank(drp_EstadoPago_OLP_2.SelectedText.Value),
+                              UpdateContext(
+                                  {
+                                      Aviso: {
+                                          Ver: true,
+                                          Tipo: 0,
+                                          Texto: "Asegurese de seleccionar el metodo de pago y el estado de pago"
+                                      }
+                                  }
+                              ),
+                              IsBlank(txt_totalPOT_OLP_2.Text) || Value(txt_totalPOT_OLP_2.Text) < 0,
+                              UpdateContext(
+                                  {
+                                      Aviso: {
+                                          Ver: true,
+                                          Tipo: 0,
+                                          Texto: "El total no puede ser negativo o estar vacío. Revisa los valores antes de continuar."
+                                      }
+                                  }
+                              ),
+                              (drp_MetodoPago_OLP_2.SelectedText.Metodo = "Cheque" || drp_MetodoPago_OLP_2.SelectedText.Metodo = "Transferencia") && IsBlank(txt_NumTransferencia_OLP_3.Text),
+                              UpdateContext(
+                                  {
+                                      Aviso: {
+                                          Ver: true,
+                                          Tipo: 0,
+                                          Texto: "El número de transferencia es obligatorio si el método de pago es Cheque o Transferencia."
+                                      }
+                                  }
+                              ),
+                              UpdateContext({MostrarAviso: false}),
+                              Collect(
+                                  RegistroPagos,
+                                  {
+                                      Total_Pagar: Value(lbl_montoTotal_OLP_2.Text),
+                                      Total_Cancelado: Value(lbl_montoCancelado_OLP_2.Text),
+                                      Total: Value(txt_totalPOT_OLP_2.Text),
+                                      Fecha_UltimoPago: Today(),
+                                      'Estado (crfb9_estado)': drp_EstadoPago_OLP_2.Selected.Value,
+                                      Metodo_Pago: drp_MetodoPago_OLP_2.SelectedText.Metodo,
+                                      NUM_ID: txt_NumTransferencia_OLP_4.Text
+                                  }
+                              );
+                              ForAll(
+                                  colPOTtoProcess,
+                                  With(
+                                      {
+                                          pot: ThisRecord.POT,
+                                          codigoproveedor: ThisRecord.Codigo_Proveedor,
+                                          nombreproveedor: ThisRecord.Nombre_Proveedor,
+                                          totalPo: Value(txt_totalPOT_OLP_2.Text),
+                                          totalCancelado: Value(lbl_montoCancelado_OLP_2.Text),
+                                          montoPago: Value(ThisRecord.MontoAPagar),
+                                          requisicion: ThisRecord.Requisicion,
+                                          numRef: Coalesce(
+                                              ThisRecord.Num_Referencia,
+                                              txt_NumTransferencia_OLP_3.Text
+                                          ),
+                                          moneda: ThisRecord.Moneda
+                                      },
+                                      If(
+                                          drp_EstadoPago_OLP_2.SelectedText.Value = "Parcial",
+                                          Collect(
+                                              Compras_Pots,
+                                              {
+                                                  Requisicion: requisicion,
+                                                  POT: pot,
+                                                  Total: Value(txt_montopagar_OPL_1.Text),
+                                                  'Estado (crfb9_estado)': drp_EstadoPago_OLP_2.Selected.Value,
+                                                  Num_Vend: codigoproveedor,
+                                                  Provedor: nombreproveedor,
+                                                  Num_Transferencia: numRef,
+                                                  NUM_ID: txt_NumTransferencia_OLP_4.Text,
+                                                  Valor__POT_NUM: LookUp(
+                                                      po,
+                                                      po_num = pot,
+                                                      po_cost
+                                                  ),
+                                                  Valor_POT: Text(
+                                                      LookUp(
+                                                          po,
+                                                          po_num = pot,
+                                                          po_cost
+                                                      )
+                                                  ),
+                                                  Moneda: moneda,
+                                                  Fecha_Pago: Now()
+                                              }
+                                          ),
+                                          Collect(
+                                              Compras_Pots,
+                                              {
+                                                  Requisicion: requisicion,
+                                                  POT: pot,
+                                                  Total: montoPago,
+                                                  'Estado (crfb9_estado)': drp_EstadoPago_OLP_2.Selected.Value,
+                                                  Num_Vend: codigoproveedor,
+                                                  Provedor: nombreproveedor,
+                                                  Num_Transferencia: numRef,
+                                                  NUM_ID: txt_NumTransferencia_OLP_4.Text,
+                                                  Valor__POT_NUM: LookUp(
+                                                      po,
+                                                      po_num = pot,
+                                                      po_cost
+                                                  ),
+                                                  Valor_POT: Text(
+                                                      LookUp(
+                                                          po,
+                                                          po_num = pot,
+                                                          po_cost
+                                                      )
+                                                  ),
+                                                  Moneda: moneda,
+                                                  Fecha_Pago: Now()
+                                              }
+                                          )
+                                      )
+                                  )
+                              );
+                              Refresh(RegistroPagos);
+                              Refresh(Compras_Pots);
+                              Clear(ComprasPotsCanceladas);
+                              ForAll(
+                                  RequisicionesUnicas,
+                                  With(
+                                      {req: ThisRecord.Value},
+                                      With(
+                                          {
+                                              TodasPots: Distinct(
+                                                  Filter(
+                                                      preqitem,
+                                                      req_num = req
+                                                  ),
+                                                  po_num
+                                              )
+                                          },
+                                          Collect(
+                                              ComprasPotsCanceladas,
+                                              ForAll(
+                                                  TodasPots,
+                                                  With(
+                                                      {potnum: ThisRecord.Value},
+                                                      With(
+                                                          {
+                                                              pot: LookUp(
+                                                                  po,
+                                                                  po_num = potnum
+                                                              ),
+                                                              listaPots: Filter(
+                                                                  Compras_Pots,
+                                                                  POT = potnum
+                                                              )
+                                                          },
+                                                          If(
+                                                              pot.po_cost = Sum(
+                                                                  listaPots,
+                                                                  Total
+                                                              ),
+                                                              {
+                                                                  Completo: 1,
+                                                                  Pot: potnum,
+                                                                  cost: pot.po_cost,
+                                                                  sum: Sum(
+                                                                      listaPots,
+                                                                      Total
+                                                                  )
+                                                              },
+                                                              {
+                                                                  Completo: 0,
+                                                                  Pot: potnum,
+                                                                  cost: pot.po_cost,
+                                                                  sum: Sum(
+                                                                      listaPots,
+                                                                      Total
+                                                                  )
+                                                              }
+                                                          )
+                                                      )
+                                                  )
+                                              )
+                                          );
+                                          If(
+                                              CountIf(
+                                                  ComprasPotsCanceladas,
+                                                  Completo = 0
+                                              ) = 0,
+                                              Patch(
+                                                  Solicitud_Compras,
+                                                  LookUp(
+                                                      Solicitud_Compras,
+                                                      soli_num = req
+                                                  ),
+                                                  {estado: "Cancelado"}
+                                              )
+                                          );
+                                          RemoveIf(
+                                              ComprasPotsCanceladas,
+                                              true
+                                          )
+                                      )
+                                  )
+                              );
+                              Reset(drp_MetodoPago_OLP_2);
+                              Reset(drp_EstadoPago_OLP_2);
+                              Reset(txt_montopagar_OPL_1);
+                              Clear(colSelectedPOTs);
+                              Clear(colPOTtoProcess);
+                              Clear(RequisicionesUnicas);
+                              UpdateContext(
+                                  {
+                                      AbrirConfirmar: false,
+                                      isProcesando: false,
+                                      AbrirC: false,
+                                      Disable: false
+                                  }
+                              );
+                              Refresh(poitem);
+                              Refresh(po);
+                              Refresh(RegistroPagos);
+                              Refresh(Solicitud_Compras);
+                              Select(btn_cargadatos_TS)
+                          );
+                          UpdateContext({isProcesando: false});
+                          UpdateContext({Guardando: false});
                         PressedBorderColor: =Self.Fill
                         PressedColor: =Self.Fill
                         PressedFill: =Self.Color
@@ -2020,3 +2234,121 @@ Screens:
                   Width: =180
                   X: =268
                   Y: =171
+      - cnt_Avisos_BC_7:
+          Control: GroupContainer@1.3.0
+          Variant: ManualLayout
+          Properties:
+            Fill: =RGBA(0, 0, 0, 0.15)
+            Height: =768
+            RadiusBottomLeft: =12
+            RadiusBottomRight: =12
+            RadiusTopLeft: =12
+            RadiusTopRight: =12
+            Visible: '=Guardando || Aviso.Ver '
+            Width: =1366
+          Children:
+            - Icon3_95:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  BorderColor: =RGBA(12, 59, 94, 1)
+                  BorderStyle: =BorderStyle.None
+                  BorderThickness: =2
+                  Color: =If(Aviso.Tipo = 0, RGBA(255, 0, 0, 1), Aviso.Tipo = 1, RGBA(255, 191, 0, 1), RGBA(54, 176, 75, 1))
+                  DisplayMode: =DisplayMode.View
+                  FocusedBorderThickness: =20
+                  Height: =150
+                  HoverBorderColor: =App.Theme.Colors.Darker10
+                  HoverColor: =RGBA(255, 255, 255, 1)
+                  HoverFill: =App.Theme.Colors.Darker10
+                  Icon: =If(Aviso.Tipo = 0, Icon.Error, Aviso.Tipo = 1, Icon.Warning, Icon.CheckBadge)
+                  OnSelect: |
+                    =Navigate(MenuAdministrativo);
+                  PaddingBottom: =5
+                  PaddingLeft: =5
+                  PaddingRight: =5
+                  PaddingTop: =5
+                  Visible: =Aviso.Ver && !Guardando
+                  Width: =150
+                  X: =600
+                  Y: =217
+            - Container70_9:
+                Control: GroupContainer@1.3.0
+                Variant: ManualLayout
+                Properties:
+                  BorderColor: =If(Aviso.Tipo = 0, RGBA(255, 0, 0, 1), Aviso.Tipo = 1, RGBA(255, 191, 0, 1), RGBA(54, 176, 75, 1))
+                  BorderThickness: =4
+                  Fill: =RGBA(255, 255, 255, 1)
+                  Height: =112
+                  RadiusBottomLeft: =10
+                  RadiusBottomRight: =10
+                  RadiusTopLeft: =10
+                  RadiusTopRight: =10
+                  Visible: =Aviso.Ver && !Guardando
+                  X: =425
+                  Y: =377
+                Children:
+                  - TextInput15_9:
+                      Control: Classic/TextInput@2.3.2
+                      Properties:
+                        Align: =Align.Center
+                        Default: =Aviso.Texto
+                        DisplayMode: =DisplayMode.View
+                        Height: =100
+                        Mode: =TextMode.MultiLine
+                        PaddingBottom: =12
+                        PaddingRight: =12
+                        PaddingTop: =12
+                        Size: =16
+                        Width: =500
+                  - Rectangle43_18:
+                      Control: Rectangle@2.3.0
+                      Properties:
+                        Fill: =RGBA(235, 235, 235, 1)
+                        Height: =12
+                        Width: =500
+                        Y: =100
+                  - Rectangle43_19:
+                      Control: Rectangle@2.3.0
+                      Properties:
+                        Fill: =If(Aviso.Tipo = 0, RGBA(255, 0, 0, 1), Aviso.Tipo = 1, RGBA(255, 191, 0, 1), RGBA(54, 176, 75, 1))
+                        Height: =12
+                        Width: =(tmp_Aviso_BC_9.Value / 3200) * 500
+                        Y: =100
+            - tmp_Aviso_BC_9:
+                Control: Timer@2.1.0
+                Properties:
+                  Duration: =3500
+                  OnTimerEnd: |-
+                    =UpdateContext({Aviso: {Ver: false, Tipo: 3, Texto: ""}, Guardando: false}); Reset(Self)
+                  Start: =Aviso.Ver
+                  Visible: =false
+            - cnt_spinner_5:
+                Control: GroupContainer@1.3.0
+                Variant: ManualLayout
+                Properties:
+                  Fill: =RGBA(255, 255, 255, 1)
+                  Height: =125
+                  RadiusBottomLeft: =10
+                  RadiusBottomRight: =10
+                  RadiusTopLeft: =10
+                  RadiusTopRight: =10
+                  Visible: =Guardando && !Aviso.Ver
+                  Width: =468
+                  X: =441
+                  Y: =301
+                Children:
+                  - Spinner1_9:
+                      Control: Spinner@1.4.6
+                      Properties:
+                        Appearance: ='Spinner.Appearance'.Primary
+                        BasePaletteColor: =RGBA(5, 102, 178, 1)
+                        FontColor: =RGBA(40, 134, 222, 1)
+                        FontSize: =20
+                        FontWeight: =FontWeight.Bold
+                        Height: =125
+                        Label: ="Cargando..."
+                        LabelPosition: ='Spinner.LabelPosition'.Below
+                        SpinnerColor: =RGBA(15, 108, 189, 1)
+                        SpinnerSize: ='Spinner.SpinnerSize'.Huge
+                        TrackColor: =RGBA(180, 214, 250, 1)
+                        Width: =468
