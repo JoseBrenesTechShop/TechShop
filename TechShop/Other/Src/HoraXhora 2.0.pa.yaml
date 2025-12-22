@@ -239,7 +239,7 @@ Screens:
                                     HintText: ="Escanear Maquina"
                                     HoverBorderColor: =RGBA(204, 231, 246, 1)
                                     HoverFill: =RGBA(204, 231, 246, 1)
-                                    OnChange: |-
+                                    OnChange: |
                                       =UpdateContext(
                                           {
                                               OrdenInfo: LookUp(
@@ -253,9 +253,28 @@ Screens:
                                                   ).Operacion
                                               ),
                                               zonaMaquina: LookUp(
-                                                      Maquinas,
-                                                      Maquina = Self.Text
-                                                  ).Ubicacion
+                                                  Maquinas,
+                                                  Maquina = Self.Text
+                                              ).Ubicacion,
+                                              maximoTarima: With(
+                                                  {
+                                                      tipo: LookUp(
+                                                          Maquinas,
+                                                          Maquina = Self.Text
+                                                      ).Guns
+                                                  },
+                                                  If(
+                                                      tipo = "Guns",
+                                                      50,
+                                                      tipo = "Tandem",
+                                                      150,
+                                                      tipo = "Dona",
+                                                      112,
+                                                      tipo = "Tornillo",
+                                                      96,
+                                                      50
+                                                  )
+                                              )
                                           }
                                       );
                                       Reset(txt_Tarima_HxH2);
@@ -289,7 +308,7 @@ Screens:
                                     Align: =Align.Center
                                     BorderColor: =RGBA(0, 18, 107, 1)
                                     BorderStyle: =BorderStyle.None
-                                    Default: =If(LookUp(Maquinas, txt_Maquina_HxH2.Text = Maquina, Guns) = "SI" || IsBlank(txt_Maquina_HxH2.Text), "", "T00")
+                                    Default: =If(LookUp(Maquinas, txt_Maquina_HxH2.Text = Maquina, Guns) in ["Guns", "Tandem", "Dona", "Tornillo"]|| IsBlank(txt_Maquina_HxH2.Text), "", "T00")
                                     DisplayMode: |-
                                       =If(
                                           Disable, 
@@ -1322,8 +1341,8 @@ Screens:
                                     LookUp(
                                         Maquinas,
                                         Maquina = Upper(txt_Maquina_HxH2.Text)
-                                    ).Guns = "SI" && ((txt_CantProducida_HxH2.Text + txt_CantDañada_HxH2.Text) + txt_CantTarima_HxH2.Text) > 50,
-                                    UpdateContext({TextoAdvertencia: "La cantidad digitada supera la cantidad maxima (50) permitida por tarima. Por favor revisar la informacion digitada."});
+                                    ).Guns in ["Guns", "Tandem", "Dona", "Tornillo"] && ((txt_CantProducida_HxH2.Text + txt_CantDañada_HxH2.Text) + txt_CantTarima_HxH2.Text) > maximoTarima,
+                                    UpdateContext({TextoAdvertencia: "La cantidad digitada supera la cantidad maxima (" & maximoTarima & ") permitida por tarima. Por favor revisar la informacion digitada."});
                                     UpdateContext({Mostra: true}),
                                   //Validadcion de registros
                                     CountRows(
