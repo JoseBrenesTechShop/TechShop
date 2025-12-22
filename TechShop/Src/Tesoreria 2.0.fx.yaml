@@ -548,7 +548,7 @@
                                 =Filter(
                                     ContenedorTesoreriaUnico,
                                     IsBlank(txt_buscador.Text)
-                                    || Lower(txt_buscador.Text) in Lower(pot & Requisicion & CodigoProveedor & NombreProveedor)
+                                    || Lower(txt_buscador.Text) in Lower(pot & Requisicion & CodigoProveedor & NombreProveedor & Moneda)
                                 )
                             Layout: =Layout.Vertical
                             LoadingSpinner: =LoadingSpinner.Data
@@ -2049,6 +2049,15 @@
                     HoverColor: =RGBA(0, 0, 0, 1)
                     HoverFill: =RGBA(180, 214, 250, 1)
                     Items: =Metodo_Pagos
+                    OnChange: |-
+                        =If(
+                            drp_MetodoPago_OLP_2.SelectedText.Metodo = "Efectivo" || drp_MetodoPago_OLP_2.SelectedText.Metodo = "Caja chica",
+                            UpdateIf(
+                                colPOTtoProcess,
+                                true,
+                                { Num_Referencia: Blank() }
+                            )
+                        )
                     PressedColor: =RGBA(255, 255, 255, 1)
                     PressedFill: =RGBA(15, 108, 189, 1)
                     SelectionFill: =RGBA(15, 108, 189, 1)
@@ -2317,7 +2326,12 @@
                         CountRows(
                             Filter(
                                 colPOTtoProcess,
-                                IsBlank(Trim(Num_Referencia))
+                                Not(
+                                    drp_MetodoPago_OLP_2.SelectedText.Metodo in [
+                                        "Efectivo",
+                                        "Caja chica"
+                                    ]
+                                ) && IsBlank(Trim(Num_Referencia))
                             )
                         ) > 0,
                         UpdateContext(
@@ -2325,7 +2339,7 @@
                                 Aviso: {
                                     Ver: true,
                                     Tipo: 0,
-                                    Texto: "Debe ingresar la referencia para TODOS los POTs antes de continuar."
+                                    Texto: "Debe ingresar la referencia para todas las POTs antes de continuar."
                                 }
                             }
                         ),
@@ -2544,7 +2558,6 @@
                         Reset(drp_MetodoPago_OLP_2);
                         Reset(drp_EstadoPago_OLP_2);
                         Reset(txt_montopagar_OPL_1);
-                        Reset(txt_NumTransferencia_OLP_3);
                         Clear(colSelectedPOTs);
                         Clear(colPOTtoProcess);
                         Clear(RequisicionesUnicas);
