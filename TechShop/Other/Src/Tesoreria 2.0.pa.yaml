@@ -1866,7 +1866,7 @@ Screens:
                         HoverBorderColor: =RGBA(40, 134, 222, 1)
                         HoverColor: =RGBA(255, 255, 255, 1)
                         HoverFill: =RGBA(15, 84, 140, 1)
-                        OnSelect: |
+                        OnSelect: |-
                           =UpdateContext({Guardando: true});
                           If(
                               CountRows(colPOTtoProcess) = 0,
@@ -1969,62 +1969,99 @@ Screens:
                                           ),
                                           moneda: ThisRecord.Moneda
                                       },
-                                      If(
-                                          drp_EstadoPago_OLP_2.SelectedText.Value = "Parcial",
-                                          Collect(
-                                              Compras_Pots,
-                                              {
-                                                  Requisicion: requisicion,
-                                                  POT: pot,
-                                                  Total: Value(txt_montopagar_OPL_1.Text),
-                                                  'Estado (crfb9_estado)': If(Value(txt_totalPOT_OLP_2.Text) = 0, "Cancelado", "Parcial"),
-                                                  Num_Vend: codigoproveedor,
-                                                  Provedor: nombreproveedor,
-                                                  Num_Transferencia: numRef,
-                                                  NUM_ID: txt_NumTransferencia_OLP_4.Text,
-                                                  Valor__POT_NUM: LookUp(
-                                                      po,
-                                                      po_num = pot,
-                                                      po_cost
+                                      With(
+                                          {
+                                              existingRecord: LookUp(
+                                                  Compras_Pots,
+                                                  POT = pot && Requisicion = requisicion
+                                              )
+                                          },
+                                          If(
+                                              drp_EstadoPago_OLP_2.SelectedText.Value = "Parcial",
+                                              If(
+                                                  Not(IsBlank(existingRecord)),
+                                                  Patch(
+                                                      Compras_Pots,
+                                                      existingRecord,
+                                                      {
+                                                          Total: existingRecord.Total + Value(txt_montopagar_OPL_1.Text),
+                                                          'Estado (crfb9_estado)': If(Value(txt_totalPOT_OLP_2.Text) = 0, "Cancelado", "Parcial"),
+                                                          Num_Transferencia: numRef,
+                                                          NUM_ID: txt_NumTransferencia_OLP_4.Text,
+                                                          Valor__POT_NUM: LookUp(po, po_num = pot, po_cost),
+                                                          Valor_POT: Text(LookUp(po, po_num = pot, po_cost)),
+                                                          Fecha_Pago: Now()
+                                                      }
                                                   ),
-                                                  Valor_POT: Text(
-                                                      LookUp(
-                                                          po,
-                                                          po_num = pot,
-                                                          po_cost
-                                                      )
+                                                  Collect(
+                                                      Compras_Pots,
+                                                      {
+                                                          Requisicion: requisicion,
+                                                          POT: pot,
+                                                          Total: Value(txt_montopagar_OPL_1.Text),
+                                                          'Estado (crfb9_estado)': If(Value(txt_totalPOT_OLP_2.Text) = 0, "Cancelado", "Parcial"),
+                                                          Num_Vend: codigoproveedor,
+                                                          Provedor: nombreproveedor,
+                                                          Num_Transferencia: numRef,
+                                                          NUM_ID: txt_NumTransferencia_OLP_4.Text,
+                                                          Valor__POT_NUM: LookUp(po, po_num = pot, po_cost),
+                                                          Valor_POT: Text(LookUp(po, po_num = pot, po_cost)),
+                                                          Moneda: moneda,
+                                                          Fecha_Pago: Now()
+                                                      }
+                                                  )
+                                              ),
+                                              If(
+                                                  Not(IsBlank(existingRecord)),
+                                                  Patch(
+                                                      Compras_Pots,
+                                                      existingRecord,
+                                                      {
+                                                          Total: existingRecord.Total + montoPago,
+                                                          'Estado (crfb9_estado)': drp_EstadoPago_OLP_2.Selected.Value,
+                                                          Num_Transferencia: numRef,
+                                                          NUM_ID: txt_NumTransferencia_OLP_4.Text,
+                                                          Valor__POT_NUM: LookUp(po, po_num = pot, po_cost),
+                                                          Valor_POT: Text(LookUp(po, po_num = pot, po_cost)),
+                                                          Fecha_Pago: Now()
+                                                      }
                                                   ),
-                                                  Moneda: moneda,
-                                                  Fecha_Pago: Now()
-                                              }
-                                          ),
-                                          Collect(
-                                              Compras_Pots,
-                                              {
-                                                  Requisicion: requisicion,
-                                                  POT: pot,
-                                                  Total: montoPago,
-                                                  'Estado (crfb9_estado)': drp_EstadoPago_OLP_2.Selected.Value,
-                                                  Num_Vend: codigoproveedor,
-                                                  Provedor: nombreproveedor,
-                                                  Num_Transferencia: numRef,
-                                                  NUM_ID: txt_NumTransferencia_OLP_4.Text,
-                                                  Valor__POT_NUM: LookUp(
-                                                      po,
-                                                      po_num = pot,
-                                                      po_cost
-                                                  ),
-                                                  Valor_POT: Text(
-                                                      LookUp(
-                                                          po,
-                                                          po_num = pot,
-                                                          po_cost
-                                                      )
-                                                  ),
-                                                  Moneda: moneda,
-                                                  Fecha_Pago: Now()
-                                              }
+                                                  Collect(
+                                                      Compras_Pots,
+                                                      {
+                                                          Requisicion: requisicion,
+                                                          POT: pot,
+                                                          Total: montoPago,
+                                                          'Estado (crfb9_estado)': drp_EstadoPago_OLP_2.Selected.Value,
+                                                          Num_Vend: codigoproveedor,
+                                                          Provedor: nombreproveedor,
+                                                          Num_Transferencia: numRef,
+                                                          NUM_ID: txt_NumTransferencia_OLP_4.Text,
+                                                          Valor__POT_NUM: LookUp(po, po_num = pot, po_cost),
+                                                          Valor_POT: Text(LookUp(po, po_num = pot, po_cost)),
+                                                          Moneda: moneda,
+                                                          Fecha_Pago: Now()
+                                                      }
+                                                  )
+                                              )
                                           )
+                                      );
+                                      Collect(
+                                          Pots,
+                                          {
+                                              Requisición: requisicion,
+                                              POT: pot,
+                                              Total: If(drp_EstadoPago_OLP_2.SelectedText.Value = "Parcial", Value(txt_montopagar_OPL_1.Text), montoPago),
+                                              'Estado (crfb9_estado)': If(drp_EstadoPago_OLP_2.SelectedText.Value = "Parcial", If(Value(txt_totalPOT_OLP_2.Text) = 0, "Cancelado", "Parcial"), drp_EstadoPago_OLP_2.Selected.Value),
+                                              Num_Vend: codigoproveedor,
+                                              Proveedor: nombreproveedor,
+                                              Num_Transferencia: numRef,
+                                              Num_ID: txt_NumTransferencia_OLP_4.Text,
+                                              Valor_Pagado: LookUp(po, po_num = pot, po_cost),
+                                              Valor_total: Value(LookUp(po, po_num = pot, po_cost)),
+                                              Moneda: moneda,
+                                              Fecha_Pago: Now()
+                                          }
                                       )
                                   )
                               );
@@ -2129,6 +2166,7 @@ Screens:
                               Refresh(po);
                               Refresh(RegistroPagos);
                               Refresh(Solicitud_Compras);
+                              Refresh(Pots);
                               Select(btn_cargadatos_TS)
                           );
                           UpdateContext({isProcesando: false});
