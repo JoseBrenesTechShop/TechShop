@@ -1834,7 +1834,133 @@ Screens:
                                                 Height: =50
                                                 HoverBorderColor: =RGBA(21, 68, 18, 1)
                                                 HoverFill: =RGBA(21, 68, 18, 1)
-                                                OnSelect: "=If(\n   CountIf(\n        datos_DSC,\n        !aprobado && IsBlank(Trim(motivoRechazo))\n    ) > 0,\n    UpdateContext(\n        {\n            Aviso: {\n                Ver: true,\n                Tipo: 0,\n                Texto: \"Todos los no aprobados deben tener un motivo de porque no fueron aprobados\"\n            }\n        }\n    ), \n    true,\n    UpdateContext({Guardando: true});\n    ForAll(\n        Filter(\n            datos_DAC,\n            !aprobado\n        ),\n        Collect(\n            Compras_NoMarcadas,\n            {\n                NSolicitud: Upper(First(Split(glr_Solicitud_AC.Selected.soli_num, \"-\")).Value),\n                NFilaSolicitud: ThisRecord.linea,\n                NItem: ThisRecord.item,\n                Descripcion: ThisRecord.descripcion,\n                Enviado: 0,\n                Tipo_Envio: \"Compras\",\n                Motivo: ThisRecord.motivoRechazo\n            }\n        )\n    );\n    RemoveIf(\n        Compras_NoMarcadas,\n        NSolicitud = txt_Num_Soli_DAC.Text && NFilaSolicitud in Filter(\n            datos_DAC,\n            aprobado\n        ).linea && Enviado = 1 && Tipo_Envio = \"Compras\"\n    );\n    Patch(\n        Solicitud_Compras,\n        glr_Solicitud_AC.Selected,\n        {\n            total: Value(\n                Sum(\n                    Filter(\n                        datos_DAC,\n                        check,\n                        moneda = \"USD\"\n                    ),\n                    subtotal\n                )\n            ),\n            totalColones: Value(\n                Sum(\n                    Filter(\n                        datos_DAC,\n                        check,\n                        moneda <> \"USD\"\n                    ),\n                    subtotal\n                )\n            ),\n            estado: \"Aprobado\",\n            comentario: If(IsBlank(txt_comentarioErick_DAC.Text), txt_Comentario_DAC.Text, txt_comentarioErick_DAC.Text)\n        }\n    );\n    ForAll(\n        datos_DAC,\n        If(\n            ThisRecord.check,\n            Patch(\n                Detalle_Solicitud_Compras,\n                With(\n                    {line: ThisRecord.linea},\n                    LookUp(\n                        Detalle_Solicitud_Compras,\n                        soli_num = Upper(txt_Num_Soli_DAC.Text) && linea = line\n                    )\n                ),\n                {\n                    cantidad: ThisRecord.cantidad,\n                    aprobado: 1,\n                    comentario: ThisRecord.comentario\n                }\n            ),\n            Remove(\n                Detalle_Solicitud_Compras,\n                With(\n                    {line: ThisRecord.linea},\n                    LookUp(\n                        Detalle_Solicitud_Compras,\n                        soli_num = Upper(txt_Num_Soli_DAC.Text) && linea = line\n                    )\n                )\n            )\n        )\n    );\n    Reset(txt_Num_Soli_DAC);\n    UpdateContext({showContainer: false});\n    UpdateContext({Guardando: false});\n    \n    Back(),\n    UpdateContext(\n        {\n            Aviso: {\n                Ver: true,\n                Tipo: 0,\n                Texto: \"La solicitud seleccionada no puede ser procesada\"\n            }\n        }\n    )\n);\n"
+                                                OnSelect: |
+                                                  =If(
+                                                      CountIf(
+                                                          datos_DSC,
+                                                          !aprobado && IsBlank(Trim(motivoRechazo))
+                                                      ) > 0,
+                                                      UpdateContext(
+                                                          {
+                                                              Aviso: {
+                                                                  Ver: true,
+                                                                  Tipo: 0,
+                                                                  Texto: "Todos los no aprobados deben tener un motivo de porque no fueron aprobados"
+                                                              }
+                                                          }
+                                                      ),
+                                                      true,
+                                                      UpdateContext({Guardando: true});
+                                                      ForAll(
+                                                          Filter(
+                                                              datos_DAC,
+                                                              !aprobado
+                                                          ),
+                                                          Collect(
+                                                              Compras_NoMarcadas,
+                                                              {
+                                                                  NSolicitud: Upper(
+                                                                      First(
+                                                                          Split(
+                                                                              glr_Solicitud_AC.Selected.soli_num,
+                                                                              "-"
+                                                                          )
+                                                                      ).Value
+                                                                  ),
+                                                                  NFilaSolicitud: ThisRecord.linea,
+                                                                  NItem: ThisRecord.item,
+                                                                  Descripcion: ThisRecord.descripcion,
+                                                                  Enviado: 0,
+                                                                  Tipo_Envio: "Compras",
+                                                                  Motivo: ThisRecord.motivoRechazo
+                                                              }
+                                                          )
+                                                      );
+                                                      RemoveIf(
+                                                          Compras_NoMarcadas,
+                                                          NSolicitud = txt_Num_Soli_DAC.Text && NFilaSolicitud in Filter(
+                                                              datos_DAC,
+                                                              aprobado
+                                                          ).linea && Enviado = 1 && Tipo_Envio = "Compras"
+                                                      );
+                                                      Patch(
+                                                          Solicitud_Compras,
+                                                          glr_Solicitud_AC.Selected,
+                                                          {
+                                                              total: Value(
+                                                                  Sum(
+                                                                      Filter(
+                                                                          datos_DAC,
+                                                                          check,
+                                                                          moneda = "USD"
+                                                                      ),
+                                                                      subtotal
+                                                                  )
+                                                              ),
+                                                              totalColones: Value(
+                                                                  Sum(
+                                                                      Filter(
+                                                                          datos_DAC,
+                                                                          check,
+                                                                          moneda <> "USD"
+                                                                      ),
+                                                                      subtotal
+                                                                  )
+                                                              ),
+                                                              estado: "Aprobado",
+                                                              Fecha_Aprobado: Now(),
+                                                              comentario: If(
+                                                                  IsBlank(txt_comentarioErick_DAC.Text),
+                                                                  txt_Comentario_DAC.Text,
+                                                                  txt_comentarioErick_DAC.Text
+                                                              )
+                                                          }
+                                                      );
+                                                      ForAll(
+                                                          datos_DAC,
+                                                          If(
+                                                              ThisRecord.check,
+                                                              Patch(
+                                                                  Detalle_Solicitud_Compras,
+                                                                  With(
+                                                                      {line: ThisRecord.linea},
+                                                                      LookUp(
+                                                                          Detalle_Solicitud_Compras,
+                                                                          soli_num = Upper(txt_Num_Soli_DAC.Text) && linea = line
+                                                                      )
+                                                                  ),
+                                                                  {
+                                                                      cantidad: ThisRecord.cantidad,
+                                                                      aprobado: 1,
+                                                                      comentario: ThisRecord.comentario
+                                                                  }
+                                                              ),
+                                                              Remove(
+                                                                  Detalle_Solicitud_Compras,
+                                                                  With(
+                                                                      {line: ThisRecord.linea},
+                                                                      LookUp(
+                                                                          Detalle_Solicitud_Compras,
+                                                                          soli_num = Upper(txt_Num_Soli_DAC.Text) && linea = line
+                                                                      )
+                                                                  )
+                                                              )
+                                                          )
+                                                      );
+                                                      Reset(txt_Num_Soli_DAC);
+                                                      UpdateContext({showContainer: false});
+                                                      UpdateContext({Guardando: false});
+                                                      Back(),
+                                                      UpdateContext(
+                                                          {
+                                                              Aviso: {
+                                                                  Ver: true,
+                                                                  Tipo: 0,
+                                                                  Texto: "La solicitud seleccionada no puede ser procesada"
+                                                              }
+                                                          }
+                                                      )
+                                                  );
                                                 PressedBorderColor: =RGBA(52, 152, 47, 1)
                                                 PressedColor: =RGBA(52, 152, 47, 1)
                                                 PressedFill: =RGBA(255, 255, 255, 1)
@@ -2384,7 +2510,7 @@ Screens:
                             Patch(
                                 Solicitud_Compras,
                                 glr_Solicitud_AC.Selected,
-                                {estado: "Devuelto"}
+                                {estado: "Devuelto", Fecha_Devuelto: Now()}
                             );
                             ForAll(
                                 datos_DAC,
@@ -2425,7 +2551,7 @@ Screens:
                         Patch(
                             Solicitud_Compras,
                             glr_Solicitud_AC.Selected,
-                            {estado: "Listo"}
+                            {estado: "Listo", Fecha_Listo: Blank()}
                         )
                     );
                     UpdateContext(

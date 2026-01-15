@@ -2207,7 +2207,7 @@ Detalle_Aprobacion_Compra As screen:
                                 HoverFill: =RGBA(21, 68, 18, 1)
                                 OnSelect: |
                                     =If(
-                                       CountIf(
+                                        CountIf(
                                             datos_DSC,
                                             !aprobado && IsBlank(Trim(motivoRechazo))
                                         ) > 0,
@@ -2219,7 +2219,7 @@ Detalle_Aprobacion_Compra As screen:
                                                     Texto: "Todos los no aprobados deben tener un motivo de porque no fueron aprobados"
                                                 }
                                             }
-                                        ), 
+                                        ),
                                         true,
                                         UpdateContext({Guardando: true});
                                         ForAll(
@@ -2230,7 +2230,14 @@ Detalle_Aprobacion_Compra As screen:
                                             Collect(
                                                 Compras_NoMarcadas,
                                                 {
-                                                    NSolicitud: Upper(First(Split(glr_Solicitud_AC.Selected.soli_num, "-")).Value),
+                                                    NSolicitud: Upper(
+                                                        First(
+                                                            Split(
+                                                                glr_Solicitud_AC.Selected.soli_num,
+                                                                "-"
+                                                            )
+                                                        ).Value
+                                                    ),
                                                     NFilaSolicitud: ThisRecord.linea,
                                                     NItem: ThisRecord.item,
                                                     Descripcion: ThisRecord.descripcion,
@@ -2272,7 +2279,12 @@ Detalle_Aprobacion_Compra As screen:
                                                     )
                                                 ),
                                                 estado: "Aprobado",
-                                                comentario: If(IsBlank(txt_comentarioErick_DAC.Text), txt_Comentario_DAC.Text, txt_comentarioErick_DAC.Text)
+                                                Fecha_Aprobado: Now(),
+                                                comentario: If(
+                                                    IsBlank(txt_comentarioErick_DAC.Text),
+                                                    txt_Comentario_DAC.Text,
+                                                    txt_comentarioErick_DAC.Text
+                                                )
                                             }
                                         );
                                         ForAll(
@@ -2309,7 +2321,6 @@ Detalle_Aprobacion_Compra As screen:
                                         Reset(txt_Num_Soli_DAC);
                                         UpdateContext({showContainer: false});
                                         UpdateContext({Guardando: false});
-                                        
                                         Back(),
                                         UpdateContext(
                                             {
@@ -3041,7 +3052,7 @@ Detalle_Aprobacion_Compra As screen:
                         Patch(
                             Solicitud_Compras,
                             glr_Solicitud_AC.Selected,
-                            {estado: "Devuelto"}
+                            {estado: "Devuelto", Fecha_Devuelto: Now()}
                         );
                         ForAll(
                             datos_DAC,
@@ -3082,7 +3093,7 @@ Detalle_Aprobacion_Compra As screen:
                     Patch(
                         Solicitud_Compras,
                         glr_Solicitud_AC.Selected,
-                        {estado: "Listo"}
+                        {estado: "Listo", Fecha_Listo: Blank()}
                     )
                 );
                 UpdateContext(
