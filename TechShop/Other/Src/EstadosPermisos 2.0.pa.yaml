@@ -216,7 +216,7 @@ Screens:
                                     Size: =16
                                     Text: ="Nombre"
                                     Weight: ='TextCanvas.Weight'.Semibold
-                                    Width: =300
+                                    Width: =370
                                     X: =365
                                     Y: =50
                               - Fecha llegada Miami_4:
@@ -273,8 +273,8 @@ Screens:
                                     Size: =16
                                     Text: ="Puesto"
                                     Weight: ='TextCanvas.Weight'.Semibold
-                                    Width: =400
-                                    X: =665
+                                    Width: =330
+                                    X: =735
                                     Y: =50
                               - Tipo de envio_4:
                                   Control: Text@0.0.51
@@ -600,8 +600,8 @@ Screens:
                                           PaddingTop: =0
                                           Size: =12
                                           Text: =ThisItem.Puesto
-                                          Width: =400
-                                          X: =665
+                                          Width: =330
+                                          X: =735
                                     - lbl_Nombreinf_EstadoPermiso_1:
                                         Control: Label@2.5.1
                                         Properties:
@@ -644,7 +644,7 @@ Screens:
                                           PaddingTop: =0
                                           Size: =12
                                           Text: =ThisItem.Nombre
-                                          Width: =300
+                                          Width: =370
                                           X: =365
                                     - lbl_Estado_EstadoPermisos_2:
                                         Control: Label@2.5.1
@@ -932,17 +932,19 @@ Screens:
                   "</style>",
                   "</head>",
                   "<body>",
-                    "<table style='width: 100%; border: none;'>",
-                 "<tr>",
+                  "<table style='width: 100%; border: none;'>",
+                  "<tr>",
                   "<td style='width: 50%; text-align: left; padding: 0;'>",
-                  "<img src=", LogotipoTechShop, " style='width: 200px;'></img>",
+                  "<img src=",
+                  LogotipoTechShop,
+                  " style='width: 200px;'></img>",
                   "</td>",
                   "<td style='width: 50%; text-align: right; padding: 0;'>",
-                     "<div style='text-align: right; margin-right: 20px;'>",
-                          "<h3 style='margin: 0;'>FO-CH-01</h3>",
-                      "</div>",
+                  "<div style='text-align: right; margin-right: 20px;'>",
+                  "<h3 style='margin: 0;'>FO-CH-01</h3>",
+                  "</div>",
                   "</td>",
-              "</tr>",
+                  "</tr>",
                   "</table>",
                   "<h1>TRAMITE PARA PERMISOS, VACACIONES E INCAPACIDADES</h1>",
                   "<table>",
@@ -955,7 +957,7 @@ Screens:
                   "</td>",
                   "</tr>",
                   "<tr>",
-                  "<td colspan='2'>Estado: Aprobado",
+                  "<td colspan='2'>Estado: " & glr_EstadoPermisos_EP.Selected.EstadoDeProceso,
                   "</td>",
                   "</tr>",
                   "</table>",
@@ -982,25 +984,17 @@ Screens:
                   glr_EstadoPermisos_EP.Selected.DiasSolicitados,
                   "</td>",
                   "<td><strong>Remunerado:</strong> ",
-                   " ",
+                  glr_EstadoPermisos_EP.Selected.Remunerado,
                   "</td>",
                   "</tr>",
-                  "<tr>",
-                 "<td><strong>Institución:</strong> ",
-                  glr_EstadoPermisos_EP.Selected.Institucion,
                   If(
-                      glr_EstadoPermisos_EP.Selected.Institucion = "OTRO",
-                      Concatenate(
-                          "<br><strong>Otra Institución:</strong> ",
-                          glr_EstadoPermisos_EP.Selected.OtraInstitucion
-                      ),
-                      ""
+                      !IsBlank(glr_EstadoPermisos_EP.Selected.Institucion),
+                      "<tr> <td><strong>Institución:</strong> " & glr_EstadoPermisos_EP.Selected.Institucion &
+                      If(
+                          glr_EstadoPermisos_EP.Selected.Institucion = "OTRO",
+                          Concatenate("<br><strong>Otra Institución:</strong> " & glr_EstadoPermisos_EP.Selected.OtraInstitucion) & ""
+                      ) & "</td> " & "<td><strong>Número de documento:</strong> " & glr_EstadoPermisos_EP.Selected.NumDocumento & "</td>" & "</tr>"
                   ),
-                  "</td>",
-                  "<td><strong>Número de documento:</strong> ",
-                  glr_EstadoPermisos_EP.Selected.NumDocumento,
-                  "</td>",
-                  "</tr>",
                   "<tr>",
                   "<td colspan='2'>",
                   "<h2>Motivo:</h2>",
@@ -1009,11 +1003,25 @@ Screens:
                   "</p>",
                   "</td>",
                   "</tr>",
-                 "<tr>",
+                  If(
+                      glr_EstadoPermisos_EP.Selected.EstadoDeProceso = "Rechazado",
+                      Concatenate(
+                        "<tr>",                                  
+                          "<td colspan='2'>",
+                            "<h2>Motivo del Rechazo:</h2>",
+                            "<p>", glr_EstadoPermisos_EP.Selected.MotivoRechazo, "</p>",
+                          "</td>",
+                        "</tr>"
+                      ),
+                      ""
+                    ),
+                  "<tr>",
                   "<td colspan='2'>",
                   "<center>",
                   "<h3>Firma del jefe directo:</h3>",
-                  "<img src=", varFirmaJefeIncapacidad, " style='width: 150px;'></img>",
+                  "<img src=",
+                  varFirmaJefeIncapacidad,
+                  " style='width: 150px;'></img>",
                   "</center>",
                   "</td>",
                   "</tr>",
@@ -1907,17 +1915,17 @@ Screens:
                     //Correo Empleado pdf_Incapacidad_EP.HtmlText
                     CorreoConPDF.Run(
                     pdf_Incapacidad_EP.HtmlText ,
-                        LookUp(Empleados, Codigo = glr_EstadoPermisos_EP.Selected.Codigo, correoEmpleado),
+                        LookUp(Empleados, Codigo = glr_EstadoPermisos_EP.Selected.Codigo).Correo,
                          "Revisión de Solicitudes",
                             "Estimado/a,<br><br>" &
-                            "Se ha aprobado la solicitud del colaborador " & glr_EstadoPermisos_EP.Selected.Nombre & 
+                            "Se ha " & glr_EstadoPermisos_EP.Selected.EstadoDeProceso & " la solicitud del colaborador " & glr_EstadoPermisos_EP.Selected.Nombre & 
                             ", con el ID " & glr_EstadoPermisos_EP.Selected.Codigo & 
                             ".<br><br>" &
-                            "La solicitud aprobada comprende un total de " & glr_EstadoPermisos_EP.Selected.DiasSolicitados & 
+                            "La solicitud comprende un total de " & glr_EstadoPermisos_EP.Selected.DiasSolicitados & 
                             " días, con fecha de inicio " & glr_EstadoPermisos_EP.Selected.Fecha_Inicio & 
                             " y fecha de fin " & glr_EstadoPermisos_EP.Selected.Fecha_Fin & 
                             ".<br><br>" &
-                            "Para obtener más detalles sobre la solicitud aceptada, por favor, consulte el PDF adjunto o revise la solicitud desde el módulo correspondiente.<br><br>" &
+                            "Para obtener más detalles sobre la solicitud, por favor, consulte el PDF adjunto o revise la solicitud desde el módulo correspondiente.<br><br>" &
                             "Gracias,<br>"
                     );
                     //correo a RH
