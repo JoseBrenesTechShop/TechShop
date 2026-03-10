@@ -18,7 +18,9 @@ EmbalajeEditor As screen:
         LayoutAlignItems: =LayoutAlignItems.Stretch
         LayoutDirection: =LayoutDirection.Vertical
         LayoutGap: =16
+        LayoutGridColumnMinWidth: =0
         LayoutGridColumns: =6
+        LayoutGridRowMinHeight: =0
         LayoutGridRows: =6
         LayoutMode: =LayoutMode.Auto
         PaddingBottom: =5
@@ -37,7 +39,9 @@ EmbalajeEditor As screen:
             Fill: =RGBA(12, 59, 94, 1)
             FillPortions: =0
             Height: =75
+            LayoutGridColumnMinWidth: =0
             LayoutGridColumns: =6
+            LayoutGridRowMinHeight: =0
             LayoutGridRows: =6
             LayoutMaxHeight: =
             LayoutMaxWidth: =
@@ -196,7 +200,9 @@ EmbalajeEditor As screen:
         BottomContainer_EC_1 As groupContainer.horizontalAutoLayoutContainer:
             LayoutAlignItems: =LayoutAlignItems.Stretch
             LayoutGap: =16
+            LayoutGridColumnMinWidth: =0
             LayoutGridColumns: =6
+            LayoutGridRowMinHeight: =0
             LayoutGridRows: =6
             LayoutMaxHeight: =
             LayoutMaxWidth: =
@@ -220,7 +226,9 @@ EmbalajeEditor As screen:
                 DropShadow: =DropShadow.Light
                 FillPortions: =7
                 LayoutDirection: =LayoutDirection.Vertical
+                LayoutGridColumnMinWidth: =0
                 LayoutGridColumns: =6
+                LayoutGridRowMinHeight: =0
                 LayoutGridRows: =6
                 LayoutMaxHeight: =
                 LayoutMaxWidth: =
@@ -236,7 +244,9 @@ EmbalajeEditor As screen:
                 Container_EC_1 As groupContainer.manualLayoutContainer:
                     DropShadow: =DropShadow.Light
                     Fill: =RGBA(204, 231, 246, 0.7)
+                    LayoutGridColumnMinWidth: =0
                     LayoutGridColumns: =6
+                    LayoutGridRowMinHeight: =0
                     LayoutGridRows: =6
                     LayoutMaxHeight: =
                     LayoutMaxWidth: =
@@ -279,7 +289,9 @@ EmbalajeEditor As screen:
                         BorderThickness: =2
                         DropShadow: =DropShadow.Light
                         Height: =70
+                        LayoutGridColumnMinWidth: =0
                         LayoutGridColumns: =6
+                        LayoutGridRowMinHeight: =0
                         LayoutGridRows: =6
                         RadiusBottomLeft: =4
                         RadiusBottomRight: =4
@@ -770,7 +782,9 @@ EmbalajeEditor As screen:
                         BorderThickness: =2
                         DropShadow: =DropShadow.Light
                         Height: =512
+                        LayoutGridColumnMinWidth: =0
                         LayoutGridColumns: =6
+                        LayoutGridRowMinHeight: =0
                         LayoutGridRows: =6
                         RadiusBottomLeft: =4
                         RadiusBottomRight: =4
@@ -1546,7 +1560,9 @@ EmbalajeEditor As screen:
                         DropShadow: =DropShadow.Bold
                         Fill: =RGBA(180, 214, 250, 1)
                         Height: =75 + gl_SeleccionPN_EM_5.Height
+                        LayoutGridColumnMinWidth: =0
                         LayoutGridColumns: =6
+                        LayoutGridRowMinHeight: =0
                         LayoutGridRows: =6
                         RadiusBottomLeft: =15
                         RadiusBottomRight: =15
@@ -1748,7 +1764,9 @@ EmbalajeEditor As screen:
                         BorderThickness: =3
                         Fill: =RGBA(255, 255, 255, 1)
                         Height: =30
+                        LayoutGridColumnMinWidth: =0
                         LayoutGridColumns: =6
+                        LayoutGridRowMinHeight: =0
                         LayoutGridRows: =6
                         RadiusBottomLeft: =10
                         RadiusBottomRight: =10
@@ -2045,7 +2063,35 @@ EmbalajeEditor As screen:
                                                 Cantidad_Total: ThisRecord.Cantidad_Total,
                                                 Valor_Total: ThisRecord.Valor_Total,
                                                 PesoTotal: ThisRecord.PesoTotal,
-                                                Impresion: 0
+                                                Impresion: 0,
+                                                Registro_Impresion: If(
+                                                    With(
+                                                        {
+                                                            pn: ThisRecord.'P/N',
+                                                            cantidad: ThisRecord.Cantidad_Tarima
+                                                        },
+                                                        cantidad <> LookUp(
+                                                            ContenedorPNS_2,
+                                                            Nomenclatura = txt_Nomenclatura_EC.Text && 'P/N' = ThisRecord.'P/N'
+                                                        ).Cantidad_Tarima
+                                                    ),
+                                                    "",
+                                                   With(
+                                                        {
+                                                            pn: ThisRecord.'P/N',
+                                                            cantidad: ThisRecord.Cantidad_Tarima
+                                                        },
+                                                        LookUp(
+                                                            ContenedorPNS_2,
+                                                            Nomenclatura = txt_Nomenclatura_EC.Text && 'P/N' = ThisRecord.'P/N'
+                                                        ).Registro_Impresion <> ""
+                                                    ),
+                                                    Concat(
+                                                        Sequence(ThisRecord.Cantidad),
+                                                        Value,
+                                                        ","
+                                                    )
+                                                )
                                             }
                                         )
                                     )
@@ -2090,6 +2136,10 @@ EmbalajeEditor As screen:
                                         "None"
                                     )
                                 );
+                                If(
+                                    gl_ListaContenedores_LE.Selected.Estado_Contenedor = "Activo",
+                                    Etiquetas_Contenedor.Run(txt_Nomenclatura_EC.Text)
+                                );
                                 Reset(gl_Contenedores_EC);
                                 UpdateContext(
                                     {
@@ -2111,12 +2161,37 @@ EmbalajeEditor As screen:
                         Y: =113
                         ZIndex: =15
 
+                    btn_Agregar_EM_6 As button:
+                        BorderColor: =RGBA(40, 134, 222, 1)
+                        BorderThickness: =3
+                        DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                        DisabledColor: =RGBA(166, 166, 166, 1)
+                        DisabledFill: =RGBA(244, 244, 244, 1)
+                        DisplayMode: |
+                            =If(isSaving || Disable, DisplayMode.Disabled, DisplayMode.Edit)
+                        Fill: =RGBA(15, 108, 189, 1)
+                        FontWeight: =FontWeight.Bold
+                        Height: =30
+                        HoverColor: =RGBA(255, 255, 255, 1)
+                        HoverFill: =RGBA(15, 84, 140, 1)
+                        OnSelect: =
+                        PressedFill: =RGBA(255, 255, 255, 1)
+                        Size: =12
+                        Text: ="Reimprimir etiquetas"
+                        Visible: =gl_ListaContenedores_LE.Selected.Estado_Contenedor = "Activos"
+                        Width: =206
+                        X: =1128
+                        Y: =5
+                        ZIndex: =72
+
     Capa1_11 As groupContainer.manualLayoutContainer:
         BorderColor: =RGBA(0, 0, 0, 0)
         DropShadow: =DropShadow.Light
         Fill: =RGBA(0, 0, 0, 0.12)
         Height: =665
+        LayoutGridColumnMinWidth: =0
         LayoutGridColumns: =6
+        LayoutGridRowMinHeight: =0
         LayoutGridRows: =6
         RadiusBottomLeft: =4
         RadiusBottomRight: =4
@@ -2134,7 +2209,9 @@ EmbalajeEditor As screen:
         DropShadow: =DropShadow.ExtraBold
         Fill: =RGBA(255, 255, 255, 1)
         Height: =141
+        LayoutGridColumnMinWidth: =0
         LayoutGridColumns: =6
+        LayoutGridRowMinHeight: =0
         LayoutGridRows: =6
         RadiusBottomLeft: =20
         RadiusBottomRight: =20
@@ -2225,7 +2302,9 @@ EmbalajeEditor As screen:
         DropShadow: =DropShadow.ExtraBold
         Fill: =RGBA(255, 255, 255, 1)
         Height: =485
+        LayoutGridColumnMinWidth: =0
         LayoutGridColumns: =6
+        LayoutGridRowMinHeight: =0
         LayoutGridRows: =6
         RadiusBottomLeft: =5
         RadiusBottomRight: =5
@@ -2497,7 +2576,9 @@ EmbalajeEditor As screen:
         DropShadow: =DropShadow.ExtraBold
         Fill: =RGBA(255, 255, 255, 1)
         Height: =486
+        LayoutGridColumnMinWidth: =0
         LayoutGridColumns: =6
+        LayoutGridRowMinHeight: =0
         LayoutGridRows: =6
         RadiusBottomLeft: =5
         RadiusBottomRight: =5
@@ -3096,7 +3177,9 @@ EmbalajeEditor As screen:
         DropShadow: =DropShadow.ExtraBold
         Fill: =RGBA(255, 255, 255, 1)
         Height: =210
+        LayoutGridColumnMinWidth: =0
         LayoutGridColumns: =6
+        LayoutGridRowMinHeight: =0
         LayoutGridRows: =6
         RadiusBottomLeft: =20
         RadiusBottomRight: =20
@@ -3148,4 +3231,18 @@ EmbalajeEditor As screen:
             X: =235
             Y: =150
             ZIndex: =71
+
+    Container79 As groupContainer.manualLayoutContainer:
+        DropShadow: =DropShadow.Light
+        LayoutGridColumnMinWidth: =0
+        LayoutGridColumns: =6
+        LayoutGridRowMinHeight: =0
+        LayoutGridRows: =6
+        RadiusBottomLeft: =4
+        RadiusBottomRight: =4
+        RadiusTopLeft: =4
+        RadiusTopRight: =4
+        X: =40
+        Y: =40
+        ZIndex: =7
 
