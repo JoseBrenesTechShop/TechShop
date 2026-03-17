@@ -276,8 +276,9 @@ Bodega_Controlador As screen:
                             Icon: =Icon.Reload
                             OnSelect: |-
                                 =UpdateContext({SetMaterial: Blank()});
-                                Refresh(Controlador_Bodegas);
                                 Reset(glr_Materiales_BC);
+                                Reset(txt_Filter_BC);
+                                Refresh(Controlador_Bodegas);
                             PaddingBottom: =8
                             PaddingLeft: =2
                             PaddingRight: =2
@@ -312,7 +313,7 @@ Bodega_Controlador As screen:
                             PressedFill: =RGBA(166, 215, 153, 1)
                             Size: =14
                             Text: ="Agregar Orden"
-                            X: =15
+                            X: =427
                             Y: =10
                             ZIndex: =10
 
@@ -343,7 +344,7 @@ Bodega_Controlador As screen:
                             Size: =14
                             Text: ="Eliminar Orden"
                             Visible: =false
-                            X: =918
+                            X: =913
                             Y: =10
                             ZIndex: =11
 
@@ -373,7 +374,7 @@ Bodega_Controlador As screen:
                             PressedFill: =RGBA(255, 238, 189, 1)
                             Size: =14
                             Text: ="Editar Material"
-                            X: =366
+                            X: =778
                             Y: =10
                             ZIndex: =12
 
@@ -404,7 +405,7 @@ Bodega_Controlador As screen:
                             PressedFill: =RGBA(180, 214, 250, 1)
                             Size: =14
                             Text: ="Agregar Material"
-                            X: =190
+                            X: =602
                             Y: =10
                             ZIndex: =13
 
@@ -497,9 +498,28 @@ Bodega_Controlador As screen:
                             Size: =14
                             Text: ="Ver Ordenes"
                             Width: =120
-                            X: =541
+                            X: =953
                             Y: =10
                             ZIndex: =15
+
+                        txt_Filter_BC As modernTextInput:
+                            Appearance: =Appearance.FilledDarker
+                            Height: =30
+                            PaddingBottom: =0
+                            PaddingLeft: =0
+                            PaddingRight: =0
+                            PaddingTop: =0
+                            RadiusBottomLeft: =8
+                            RadiusBottomRight: =8
+                            RadiusTopLeft: =8
+                            RadiusTopRight: =8
+                            Size: =13
+                            TriggerOutput: =TriggerOutput.Keypress
+                            ValidationState: =ValidationState.None
+                            Width: =400
+                            X: =10
+                            Y: =10
+                            ZIndex: =16
 
                     "glr_Materiales_BC As gallery.'BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0'":
                         '#CopilotOverlayLabel': ="Filtrada"
@@ -508,7 +528,14 @@ Bodega_Controlador As screen:
                         BorderThickness: =3
                         DelayItemLoading: =true
                         Height: =588
-                        Items: =Distinct(Controlador_Bodegas, Material)
+                        Items: |-
+                            =Distinct(
+                                Filter(
+                                    Controlador_Bodegas,
+                                    (IsBlank(txt_Filter_BC.Text) || (txt_Filter_BC.Text in Material || txt_Filter_BC.Text in Descripcion))
+                                ),
+                                Material
+                            )
                         Layout: =Layout.Vertical
                         LoadingSpinner: =LoadingSpinner.Data
                         TemplatePadding: =0
