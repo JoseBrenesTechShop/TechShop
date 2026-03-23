@@ -168,29 +168,47 @@ EmbalajeEditor As screen:
                 Icon: =Icon.BackArrow
                 LayoutMaxHeight: =
                 LayoutMaxWidth: =
-                OnSelect: |-
-                    =Back();
-                    UpdateContext({
-                        isEditing: false, 
-                        varRegistroSeleccionado: Blank(),
-                        txt_Destino: Blank(),
-                        txt_Destino2: Blank()
-                    });
+                OnSelect: |
+                    =UpdateContext(
+                        {
+                            isEditing: false,
+                            varRegistroSeleccionado: Blank(),
+                            txt_Destino: Blank(),
+                            txt_Destino2: Blank()
+                        }
+                    );
                     Reset(txt_Nomenclatura_EC);
                     Reset(txt_Fecha_EC);
                     Reset(txt_Pais_EC);
                     Reset(drp_Estado_EC);
-                    UpdateContext({locShowContenedor: false, Capa:false});
-                    UpdateContext({ Revision: false });
-                      Clear(RevisionCalidad);
-                      Refresh(ContenedorPNS_2);
-                        Reset(gl_Contenedores_EC);
-                      UpdateContext({
-                        Disable: false,
-                        isSaving: false,
-                       Revision: false ,
-                       VerMaquinas: false
-                      })
+                    UpdateContext(
+                        {
+                            locShowContenedor: false,
+                            Capa: false
+                        }
+                    );
+                    Reset(txt_ContenedorFisico);
+                    Reset(txt_Marchamo1);
+                    Reset(txt_Marchamo2);
+                    UpdateContext(
+                        {
+                            locShowContenedor: false,
+                            Capa: false
+                        }
+                    );
+                    UpdateContext({Revision: false});
+                    Clear(RevisionCalidad);
+                    Refresh(ContenedorPNS_2);
+                    Reset(gl_Contenedores_EC);
+                    UpdateContext(
+                        {
+                            Disable: false,
+                            isSaving: false,
+                            Revision: false,
+                            VerMaquinas: false
+                        }
+                    );
+                    Back();
                 PaddingBottom: =5
                 PaddingLeft: =5
                 PaddingRight: =5
@@ -3284,10 +3302,8 @@ EmbalajeEditor As screen:
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(15, 84, 140, 1)
             OnSelect: |-
-                =
-                If(
+                =If(
                     IsBlank(txt_ContenedorFisico.Text) || IsBlank(txt_Marchamo1.Text) || IsBlank(txt_Marchamo2.Text),
-                
                     UpdateContext(
                         {
                             Aviso: {
@@ -3297,124 +3313,40 @@ EmbalajeEditor As screen:
                             }
                         }
                     ),
-                
                     // Si todo está lleno, ejecutar lógica completa
                     With(
                         {
                             listaMaterialesCompleta: Concat(
                                 gl_Contenedores_EC.AllItems,
-                                "<tr>" &
-                                    "<td style='padding:8px; border:1px solid #ddd;'>" & 'P/N' & "</td>" &
-                                    "<td style='padding:8px; border:1px solid #ddd;'>" & POS & "</td>" &
-                                    "<td style='padding:8px; border:1px solid #ddd;'>" & Cantidad & "</td>" &
-                                    "<td style='padding:8px; border:1px solid #ddd;'>" & Cantidad_Tarima & "</td>" &
-                                    "<td style='padding:8px; border:1px solid #ddd;'>" & Cantidad_Total & "</td>" &
-                                    "<td style='padding:8px; border:1px solid #ddd;'>" & Peso & "kg" & "</td>" &
-                                    "<td style='padding:8px; border:1px solid #ddd;'>" & PesoTotal & "kg" & "</td>" &
-                                    "<td style='padding:8px; border:1px solid #ddd;'>" & "$" & Text(Valor_Pieza, "###,###,##0.0#") & "</td>" &
-                                    "<td style='padding:8px; border:1px solid #ddd;'>" & "$" & Text(Valor_Total, "###,###,##0.0#") & "</td>" &
-                                    "<td style='padding:8px; border:1px solid #ddd;'>" & TipoCaja & "</td>" &
-                                    "<td style='padding:8px; border:1px solid #ddd;'>" & Tipo & "</td>" &
-                                "</tr>"
+                                "<tr>" & "<td style='padding:8px; border:1px solid #ddd;'>" & 'P/N' & "</td>" & "<td style='padding:8px; border:1px solid #ddd;'>" & POS & "</td>" & "<td style='padding:8px; border:1px solid #ddd;'>" & Cantidad & "</td>" & "<td style='padding:8px; border:1px solid #ddd;'>" & Cantidad_Tarima & "</td>" & "<td style='padding:8px; border:1px solid #ddd;'>" & Cantidad_Total & "</td>" & "<td style='padding:8px; border:1px solid #ddd;'>" & Peso & "kg" & "</td>" & "<td style='padding:8px; border:1px solid #ddd;'>" & PesoTotal & "kg" & "</td>" & "<td style='padding:8px; border:1px solid #ddd;'>" & "$" & Text(
+                                    Valor_Pieza,
+                                    "###,###,##0.0#"
+                                ) & "</td>" & "<td style='padding:8px; border:1px solid #ddd;'>" & "$" & Text(
+                                    Valor_Total,
+                                    "###,###,##0.0#"
+                                ) & "</td>" & "<td style='padding:8px; border:1px solid #ddd;'>" & TipoCaja & "</td>" & "<td style='padding:8px; border:1px solid #ddd;'>" & Tipo & "</td>" & "</tr>"
                             )
                         },
                         With(
-                            {
-                                cuerpoCorreo: "<html><body style='font-family: Arial, sans-serif; color:#333;'>" &
-                                    "<h3>Se ha finalizado el contenedor: " & contenedor & "</h3>" &
-                                    "<p>Estimado equipo,</p>" &
-                                    "<p>Se ha finalizado el contenedor con los siguientes datos:</p>" &
-                                    "<table style='border-collapse: collapse; width:100%; margin-bottom:20px;'>" &
-                                        "<tr style='background-color:#2F75B5; color:#fff;'>" &
-                                            "<th style='padding:8px; border:1px solid #ddd;'>Contenedor</th>" &
-                                            "<th style='padding:8px; border:1px solid #ddd;'>Fecha Salida</th>" &
-                                            "<th style='padding:8px; border:1px solid #ddd;'>Semana</th>" &
-                                            "<th style='padding:8px; border:1px solid #ddd;'>Cantidad Total</th>" &
-                                            "<th style='padding:8px; border:1px solid #ddd;'>Peso Total</th>" &
-                                            "<th style='padding:8px; border:1px solid #ddd;'>Valor Total</th>" &
-                                        "</tr>" &
-                                        "<tr>" &
-                                            "<td style='padding:8px; border:1px solid #ddd;'>" & contenedor & "</td>" &
-                                            "<td style='padding:8px; border:1px solid #ddd;'>" & fechaSalida & "</td>" &
-                                            "<td style='padding:8px; border:1px solid #ddd;'>" & semana & "</td>" &
-                                            "<td style='padding:8px; border:1px solid #ddd;'>" & cantidadTotal & "</td>" &
-                                            "<td style='padding:8px; border:1px solid #ddd;'>" & pesoTotal & "</td>" &
-                                            "<td style='padding:8px; border:1px solid #ddd;'>" & valorTotal & "</td>" &
-                                        "</tr>" &
-                                    "</table>" &
-                                    "<h3>Lista dentro del contenedor</h3>" &
-                                    "<table style='border-collapse: collapse; width:100%;'>" &
-                                        "<tr style='background-color:#2F75B5; color:#fff;'>" &
-                                            "<th style='padding:8px; border:1px solid #ddd;'>P/N</th>" &
-                                            "<th style='padding:8px; border:1px solid #ddd;'>PO</th>" &
-                                            "<th style='padding:8px; border:1px solid #ddd;'>Tarimas</th>" &
-                                            "<th style='padding:8px; border:1px solid #ddd;'>Piezas</th>" &
-                                            "<th style='padding:8px; border:1px solid #ddd;'>Total Piezas</th>" &
-                                            "<th style='padding:8px; border:1px solid #ddd;'>Peso Pieza</th>" &
-                                            "<th style='padding:8px; border:1px solid #ddd;'>Peso Total</th>" &
-                                            "<th style='padding:8px; border:1px solid #ddd;'>Valor Pieza</th>" &
-                                            "<th style='padding:8px; border:1px solid #ddd;'>Valor Total</th>" &
-                                            "<th style='padding:8px; border:1px solid #ddd;'>Tipo Caja</th>" &
-                                            "<th style='padding:8px; border:1px solid #ddd;'>Tipo</th>" &
-                                        "</tr>" &
-                                        listaMaterialesCompleta &
-                                    "</table>" &
-                                    "<p style='margin-top:20px;'>Saludos,<br/>Departamento de Desarrollo y Análisis<br/><em>Nota: Por favor, no responda a este correo.</em></p>" &
-                                    "</body></html>"
-                            },
-                            EnviarCorreo.Run("nmarin@tsicr.com; raraya@tsicr.com; eguzo@tsicr.com; lfernandez@tsicr.com; jbrenes@tsicr.com; yrojas@tsicr.com; prodriguez@tsicr.com", "Contenedor Finalizado", cuerpoCorreo)
+                            {cuerpoCorreo: "<html><body style='font-family: Arial, sans-serif; color:#333;'>" & "<h3>Se ha finalizado el contenedor: " & contenedor & "</h3>" & "<p>Estimado equipo,</p>" & "<p>Se ha finalizado el contenedor con los siguientes datos:</p>" & "<table style='border-collapse: collapse; width:100%; margin-bottom:20px;'>" & "<tr style='background-color:#2F75B5; color:#fff;'>" & "<th style='padding:8px; border:1px solid #ddd;'>Contenedor</th>" & "<th style='padding:8px; border:1px solid #ddd;'>Fecha Salida</th>" & "<th style='padding:8px; border:1px solid #ddd;'>Semana</th>" & "<th style='padding:8px; border:1px solid #ddd;'>Cantidad Total</th>" & "<th style='padding:8px; border:1px solid #ddd;'>Peso Total</th>" & "<th style='padding:8px; border:1px solid #ddd;'>Valor Total</th>" & "</tr>" & "<tr>" & "<td style='padding:8px; border:1px solid #ddd;'>" & contenedor & "</td>" & "<td style='padding:8px; border:1px solid #ddd;'>" & fechaSalida & "</td>" & "<td style='padding:8px; border:1px solid #ddd;'>" & semana & "</td>" & "<td style='padding:8px; border:1px solid #ddd;'>" & cantidadTotal & "</td>" & "<td style='padding:8px; border:1px solid #ddd;'>" & pesoTotal & "</td>" & "<td style='padding:8px; border:1px solid #ddd;'>" & valorTotal & "</td>" & "</tr>" & "</table>" & "<h3>Lista dentro del contenedor</h3>" & "<table style='border-collapse: collapse; width:100%;'>" & "<tr style='background-color:#2F75B5; color:#fff;'>" & "<th style='padding:8px; border:1px solid #ddd;'>P/N</th>" & "<th style='padding:8px; border:1px solid #ddd;'>PO</th>" & "<th style='padding:8px; border:1px solid #ddd;'>Tarimas</th>" & "<th style='padding:8px; border:1px solid #ddd;'>Piezas</th>" & "<th style='padding:8px; border:1px solid #ddd;'>Total Piezas</th>" & "<th style='padding:8px; border:1px solid #ddd;'>Peso Pieza</th>" & "<th style='padding:8px; border:1px solid #ddd;'>Peso Total</th>" & "<th style='padding:8px; border:1px solid #ddd;'>Valor Pieza</th>" & "<th style='padding:8px; border:1px solid #ddd;'>Valor Total</th>" & "<th style='padding:8px; border:1px solid #ddd;'>Tipo Caja</th>" & "<th style='padding:8px; border:1px solid #ddd;'>Tipo</th>" & "</tr>" & listaMaterialesCompleta & "</table>" & "<p style='margin-top:20px;'>Saludos,<br/>Departamento de Desarrollo y Análisis<br/><em>Nota: Por favor, no responda a este correo.</em></p>" & "</body></html>"},
+                            EnviarCorreo.Run(
+                                "nmarin@tsicr.com; raraya@tsicr.com; eguzo@tsicr.com; lfernandez@tsicr.com; jbrenes@tsicr.com; yrojas@tsicr.com; prodriguez@tsicr.com",
+                                "Contenedor Finalizado",
+                                cuerpoCorreo
+                            )
                         )
                     );
-                
                     // SEGUNDO CORREO (cliente)
                     With(
-                        {
-                            cuerpoCorreo: "<html><body style='font-family: Arial, sans-serif; color:#333;'>" &
-                                "<h3>Container: " & contenedor & " </h3>" &
-                                "<p>Dear customer,</p>" &
-                                "<p>We are pleased to inform you that the container <strong>" & contenedor & "</strong> has been successfully completed and is ready for its next stage.</p>" &
-                                "<p>Below are the general details and the contents of the container:</p>" &
-                                "<table style='border-collapse: collapse; width:100%; margin-bottom:20px;'>" &
-                                    "<tr style='background-color:#2F75B5; color:#fff;'>" &
-                                        "<th style='padding:8px; border:1px solid #ddd;'>Container</th>" &
-                                        "<th style='padding:8px; border:1px solid #ddd;'>Departure Date</th>" &
-                                        "<th style='padding:8px; border:1px solid #ddd;'>Week</th>" &
-                                        "<th style='padding:8px; border:1px solid #ddd;'>Country</th>" &
-                                        "<th style='padding:8px; border:1px solid #ddd;'>Total Quantity</th>" &
-                                        "<th style='padding:8px; border:1px solid #ddd;'>Total Weight</th>" &
-                                    "</tr>" &
-                                    "<tr>" &
-                                        "<td style='padding:8px; border:1px solid #ddd; text-align: center;'>" & contenedor & "</td>" &
-                                        "<td style='padding:8px; border:1px solid #ddd; text-align: center;'>" & fechaSalida & "</td>" &
-                                        "<td style='padding:8px; border:1px solid #ddd; text-align: center;'>" & semana & "</td>" &
-                                        "<td style='padding:8px; border:1px solid #ddd; text-align: center;'>" & pais & "</td>" &
-                                        "<td style='padding:8px; border:1px solid #ddd; text-align: center;'>" & cantidadTotal & "</td>" &
-                                        "<td style='padding:8px; border:1px solid #ddd; text-align: center;'>" & pesoTotal & "</td>" &
-                                    "</tr>" &
-                                "</table>" &
-                                "<h3>Container listing</h3>" &
-                                "<table style='border-collapse: collapse; width:100%;'>" &
-                                    "<tr style='background-color:#2F75B5; color:#fff;'>" &
-                                        "<th style='padding:8px; border:1px solid #ddd;'>Part Number</th>" &
-                                        "<th style='padding:8px; border:1px solid #ddd;'>PO</th>" &
-                                        "<th style='padding:8px; border:1px solid #ddd;'>Pallets</th>" &
-                                        "<th style='padding:8px; border:1px solid #ddd;'>Pieces</th>" &
-                                        "<th style='padding:8px; border:1px solid #ddd;'>Total Pieces</th>" &
-                                        "<th style='padding:8px; border:1px solid #ddd;'>Piece Weight</th>" &
-                                        "<th style='padding:8px; border:1px solid #ddd;'>Total Weight</th>" &
-                                        "<th style='padding:8px; border:1px solid #ddd;'>Box Type</th>" &
-                                        "<th style='padding:8px; border:1px solid #ddd;'>Type</th>" &
-                                    "</tr>" &
-                                    listaMaterialesCliente &
-                                "</table>" &
-                                "<p style='margin-top:20px;'>Sincerely,<br/><strong>TechShop International S.A</strong></p>" &
-                                "<p style='font-size:12px; color:#888;'><em>This email has been sent automatically, please do not reply directly to this address.</em></p>" &
-                                "</body></html>"
-                        },
-                        EnviarCorreo.Run("rpeeples@ghdiv.com; eguzo@tsicr.com; jbrenes@tsicr.com; yrojas@tsicr.com; prodriguez@tsicr.com; ymartinez@ghdiv.com; kblackshear@ghdiv.com", "The container has been completed:" & contenedor, cuerpoCorreo)
+                        {cuerpoCorreo: "<html><body style='font-family: Arial, sans-serif; color:#333;'>" & "<h3>Container: " & contenedor & " </h3>" & "<p>Dear customer,</p>" & "<p>We are pleased to inform you that the container <strong>" & contenedor & "</strong> has been successfully completed and is ready for its next stage.</p>" & "<p>Below are the general details and the contents of the container:</p>" & "<table style='border-collapse: collapse; width:100%; margin-bottom:20px;'>" & "<tr style='background-color:#2F75B5; color:#fff;'>" & "<th style='padding:8px; border:1px solid #ddd;'>Container</th>" & "<th style='padding:8px; border:1px solid #ddd;'>Departure Date</th>" & "<th style='padding:8px; border:1px solid #ddd;'>Week</th>" & "<th style='padding:8px; border:1px solid #ddd;'>Country</th>" & "<th style='padding:8px; border:1px solid #ddd;'>Total Quantity</th>" & "<th style='padding:8px; border:1px solid #ddd;'>Total Weight</th>" & "</tr>" & "<tr>" & "<td style='padding:8px; border:1px solid #ddd; text-align: center;'>" & contenedor & "</td>" & "<td style='padding:8px; border:1px solid #ddd; text-align: center;'>" & fechaSalida & "</td>" & "<td style='padding:8px; border:1px solid #ddd; text-align: center;'>" & semana & "</td>" & "<td style='padding:8px; border:1px solid #ddd; text-align: center;'>" & pais & "</td>" & "<td style='padding:8px; border:1px solid #ddd; text-align: center;'>" & cantidadTotal & "</td>" & "<td style='padding:8px; border:1px solid #ddd; text-align: center;'>" & pesoTotal & "</td>" & "</tr>" & "</table>" & "<h3>Container listing</h3>" & "<table style='border-collapse: collapse; width:100%;'>" & "<tr style='background-color:#2F75B5; color:#fff;'>" & "<th style='padding:8px; border:1px solid #ddd;'>Part Number</th>" & "<th style='padding:8px; border:1px solid #ddd;'>PO</th>" & "<th style='padding:8px; border:1px solid #ddd;'>Pallets</th>" & "<th style='padding:8px; border:1px solid #ddd;'>Pieces</th>" & "<th style='padding:8px; border:1px solid #ddd;'>Total Pieces</th>" & "<th style='padding:8px; border:1px solid #ddd;'>Piece Weight</th>" & "<th style='padding:8px; border:1px solid #ddd;'>Total Weight</th>" & "<th style='padding:8px; border:1px solid #ddd;'>Box Type</th>" & "<th style='padding:8px; border:1px solid #ddd;'>Type</th>" & "</tr>" & listaMaterialesCliente & "</table>" & "<p style='margin-top:20px;'>Sincerely,<br/><strong>TechShop International S.A</strong></p>" & "<p style='font-size:12px; color:#888;'><em>This email has been sent automatically, please do not reply directly to this address.</em></p>" & "</body></html>"},
+                        EnviarCorreo.Run(
+                            "rpeeples@ghdiv.com; eguzo@tsicr.com; jbrenes@tsicr.com; yrojas@tsicr.com; prodriguez@tsicr.com; ymartinez@ghdiv.com; kblackshear@ghdiv.com",
+                            "The container has been completed:" & contenedor,
+                            cuerpoCorreo
+                        )
                     );
-                
-                
+                    Empaque_Contenedor_Finalizado.Run(gl_ListaContenedores_LE.Selected.Nomenclatura);
+                    Facturacion_Contenedor_1.Run(gl_ListaContenedores_LE.Selected.Nomenclatura);
                     Patch(
                         Contenedors_2,
                         gl_ListaContenedores_LE.Selected,
@@ -3424,10 +3356,10 @@ EmbalajeEditor As screen:
                             Marchamos: txt_Marchamo1.Text & " / " & txt_Marchamo2.Text
                         }
                     );
-                
-                    Empaque_Contenedor_Finalizado.Run(gl_ListaContenedores_LE.Selected.Nomenclatura);
-                    Facturacion_Contenedor_1.Run(gl_ListaContenedores_LE.Selected.Nomenclatura);
-                    UpdateContext({locShowContenedor: false});
+                    UpdateContext({locShowContenedor: false, Capa: false});
+                    Reset(txt_ContenedorFisico);
+                    Reset(txt_Marchamo1);
+                    Reset(txt_Marchamo2);
                     Back()
                 )
             PressedFill: =RGBA(255, 255, 255, 1)
@@ -3451,30 +3383,40 @@ EmbalajeEditor As screen:
             Height: =34
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =RGBA(15, 84, 140, 1)
-            OnSelect: |-
-                =
-                UpdateContext({
-                    isEditing: false, 
-                    varRegistroSeleccionado: Blank(),
-                    txt_Destino: Blank(),
-                    txt_Destino2: Blank()
-                });
+            OnSelect: |
+                =UpdateContext(
+                    {
+                        isEditing: false,
+                        varRegistroSeleccionado: Blank(),
+                        txt_Destino: Blank(),
+                        txt_Destino2: Blank()
+                    }
+                );
                 Reset(txt_Nomenclatura_EC);
                 Reset(txt_Fecha_EC);
                 Reset(txt_Pais_EC);
                 Reset(drp_Estado_EC);
-                UpdateContext({locShowContenedor: false, Capa:false});
-                UpdateContext({ Revision: false });
-                  Clear(RevisionCalidad);
-                  Refresh(ContenedorPNS_2);
-                    Reset(gl_Contenedores_EC);
-                  UpdateContext({
-                    Disable: false,
-                    isSaving: false,
-                   Revision: false ,
-                   VerMaquinas: false
-                  });
-                Navigate(EmbalajeLista,ScreenTransition.Fade)
+                Reset(txt_ContenedorFisico);
+                Reset(txt_Marchamo1);
+                Reset(txt_Marchamo2);
+                UpdateContext(
+                    {
+                        locShowContenedor: false,
+                        Capa: false
+                    }
+                );
+                UpdateContext({Revision: false});
+                Clear(RevisionCalidad);
+                Refresh(ContenedorPNS_2);
+                Reset(gl_Contenedores_EC);
+                UpdateContext(
+                    {
+                        Disable: false,
+                        isSaving: false,
+                        Revision: false,
+                        VerMaquinas: false
+                    }
+                );
             PressedFill: =RGBA(255, 255, 255, 1)
             Size: =15
             Text: ="Cerrar"
