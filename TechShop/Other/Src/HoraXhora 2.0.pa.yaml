@@ -719,8 +719,8 @@ Screens:
                               Size: =18
                               Text: ="ScrapTotal"
                               Width: =166
-                              X: =227
-                              Y: =324
+                              X: =221
+                              Y: =320
                         - txt_CantTotal_HxH2:
                             Control: Classic/TextInput@2.3.2
                             Properties:
@@ -2462,7 +2462,48 @@ Screens:
                   Default: =Comentarios.Comentario
                   Height: =47
                   HoverFill: =RGBA(255, 184, 174, 1)
-                  Items: =Distinct(Causas,Comentario)
+                  Items: |-
+                    =With(
+                        {
+                            data: First(
+                                Filter(
+                                    Tickets,
+                                    'Estado (crfb9_estado)' <> "Abierto",
+                                    Maquina = Upper(txt_Maquina_HxH2.Text),
+                                    Fecha_Hora <= DateTime(
+                                        Year(FechaSup),
+                                        Month(FechaSup),
+                                        Day(FechaSup),
+                                        (HoraValor + 1),
+                                        0,
+                                        0
+                                    ),
+                                    IsBlank(Fecha_Final) || Fecha_Final >= DateTime(
+                                        Year(FechaSup),
+                                        Month(FechaSup),
+                                        Day(FechaSup),
+                                        HoraValor,
+                                        0,
+                                        0
+                                    )
+                                )
+                            )
+                        },
+                        If(
+                            IsBlank(data),
+                            Distinct(
+                                Causas,
+                                Comentario
+                            ),
+                            Distinct(
+                                Filter(
+                                    Causas,
+                                    Comentario = "Mantenimiento" || Comentario = "Programacion"
+                                ),
+                                Comentario
+                            )
+                        )
+                    )
                   Items.Value: =Value
                   PressedColor: =RGBA(255, 255, 255, 1)
                   PressedFill: =RGBA(132, 40, 38, 1)
